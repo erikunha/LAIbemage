@@ -32,7 +32,62 @@ deep learning → ML systems → agent engineering → MLOps → production AI.
 First vertical: **industrial visual inspection** (VisA, CC BY 4.0) — measurable value,
 public ground truth. Then logistics/inventory, document intelligence, geospatial, Physical AI.
 
+## System map (Mermaid)
+
+Surfaces and the single contract spine:
+
+```mermaid
+flowchart TB
+  subgraph surfaces["Equivalent surfaces (constitution III)"]
+    CLI["laib CLI<br/>(+ ai-image-labeling compat)"]
+    STUDIO["Studio (Next.js)<br/>visual design via uxpilot prototype"]
+    API["HTTP API (Fastify)<br/>OpenAPI from contracts"]
+    MCP["MCP server (stdio)<br/>12 tiered tools"]
+    AGENT["Agent runtime (LangGraph)<br/>investigator + approvals"]
+  end
+  subgraph core["TypeScript domain (packages/)"]
+    CONTRACTS["@master-vision/contracts<br/>Zod entities + OpenAPI"]
+    COREP["@master-vision/core<br/>pipeline + data/al/release/arena"]
+  end
+  subgraph py["Python services (uv)"]
+    VISION["vision: encoders + LanceDB<br/>SigLIP 2 / CLIP / DINOv2 (MPS)"]
+    TRAIN["training: recipes + MLflow<br/>registry + model cards"]
+  end
+  subgraph stores["Local-first stores (ADR-007)"]
+    SQLITE[("SQLite (WAL)<br/>entities, jobs, ledger")]
+    ARTIFACTS[("content-addressed artifacts<br/>assets, thumbs, embeddings")]
+    MLFLOW[("MLflow file store<br/>runs + tuples")]
+  end
+  CLI --> COREP
+  API --> COREP
+  MCP --> COREP
+  AGENT --> COREP
+  STUDIO --> API
+  COREP --> CONTRACTS
+  COREP <-->|"JSON-lines bridge"| VISION
+  COREP <-->|"JSON-lines bridge"| TRAIN
+  COREP --> SQLITE
+  COREP --> ARTIFACTS
+  TRAIN --> MLFLOW
+  VISION --> ARTIFACTS
+```
+
+The data flywheel (F2 demo slice):
+
+```mermaid
+flowchart LR
+  A["Real dataset<br/>(VisA, license registry)"] --> B["Quality audit<br/>(004)"]
+  B --> C["Embeddings + probe<br/>(005/007)"]
+  C --> D["Arena: VLM vs local<br/>calibrated (006)"]
+  D --> E["Review hard cases<br/>Studio (010)"]
+  E --> F["AL batch<br/>uncertainty x diversity (008)"]
+  F --> G["Retrain + holdout<br/>delta report (007/003)"]
+  G --> H["Release gates + cost<br/>(013)"]
+  H -. "closes the loop: better data" .-> A
+```
+
 ## Capability map (16 systems, P0 now → P2 later)
+
 
 | Domain | System | Priority | Spec |
 |---|---|---|---|

@@ -13,6 +13,16 @@
 
 ## Phase map (Master)
 
+```mermaid
+flowchart LR
+  F0["F0 Foundation<br/>001 monorepo<br/>002 contracts<br/>003 real benchmark"] --> F1["F1 Visual Data + Arena<br/>004 data engine<br/>005 embeddings<br/>006 arena"]
+  F1 --> F2["F2 Learning<br/>007 training<br/>008 flywheel<br/>(first demo)"]
+  F2 --> F3["F3 Interfaces + Agents<br/>009 API/jobs<br/>010 Studio<br/>011 MCP<br/>012 agent"]
+  F3 --> F4["F4 Production<br/>013 gates, drift,<br/>cost optimizer"]
+  F4 -. declared only .-> F5["F5 Frontier<br/>014 video / Physical AI /<br/>synthetic / doc-intel"]
+```
+
+
 | Phase | Focus | Specs | Outcome | Status |
 |---|---|---|---|---|
 | F0 | Foundation | 001 monorepo · 002 domain/contracts · 003 real benchmark | rebirth scaffold, entity store, VisA ground truth | 🔵 |

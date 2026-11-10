@@ -4,8 +4,10 @@ This file guides AI coding agents (Claude Code, GitHub Copilot, etc.) working in
 
 ## Build & test commands
 
+Workspace layout — which package owns what — lives in `docs/architecture/monorepo-map.md`.
+
 ```bash
-pnpm run build          # compile TypeScript → dist/
+pnpm run build          # turbo build: compile workspace packages → packages/*/dist
 pnpm run typecheck      # type-check without emitting
 pnpm run lint           # ESLint
 pnpm run lint:fix       # ESLint with auto-fix
@@ -21,26 +23,27 @@ pnpm run check          # lint + typecheck + coverage (full pre-PR suite)
 
 | Directory | Allowed imports | Forbidden imports |
 |---|---|---|
-| `src/utils/` | Node stdlib only | OpenAI, Sharp, fs-extra |
-| `src/analyzer/providers/*.ts` | utils/, config/, types, the single provider SDK for that file | processor/, classifier/, other provider SDKs |
-| `src/analyzer/client.ts` | utils/, config/, types, `src/analyzer/providers/` | any LLM SDK directly, processor/, classifier/ |
-| `src/analyzer/batch.ts` | utils/, config/, types, LLMClient, Sharp (resize) | LLM SDKs directly, processor/ |
-| `src/analyzer/dedup.ts` | utils/, config/, types, Sharp (dHash) | LLM SDKs directly, processor/ |
-| `src/analyzer/async-batch.ts` | utils/, config/, types, AsyncBatchClient, Sharp | LLM SDKs directly, processor/ |
-| `src/analyzer/temporal.ts` | config/, types | any LLM SDK, Sharp, I/O |
-| `src/analyzer/linker.ts` | utils/, config/, types, LLMClient | LLM SDKs directly, processor/ |
-| `src/analyzer/critique.ts` | utils/, config/, types, LLMClient | LLM SDKs directly, processor/ |
-| `src/processor/` | utils/, config/, types, Sharp | any LLM SDK, analyzer/ |
-| `src/classifier/` | config/, types | any LLM SDK, Sharp, fs-extra |
-| `src/plugin/` | utils/, types | any LLM SDK, Sharp, fs-extra, analyzer/, processor/ |
-| `src/reviewer/` | utils/, config/, types, @inquirer/* | any LLM SDK, Sharp |
-| `src/reporter/` | utils/, types, fs-extra, exceljs, drizzle-orm (dynamic) | any LLM SDK, Sharp, analyzer/ |
-| `src/fs/` | Node stdlib, cloud SDKs (per adapter) | LLM SDKs, Sharp, analyzer/ |
-| `src/sdk.ts` | All src/ modules (re-exports only) | nothing — stable re-export surface only |
-| `src/cli/` | config/, index, utils/logger | analyzer/, processor/, classifier/ |
-| `src/index.ts` | All src/ modules | external packages directly |
+| `packages/core/src/utils/` | Node stdlib only | OpenAI, Sharp, fs-extra |
+| `packages/core/src/config/` | utils/, types | any LLM SDK, Sharp, I/O |
+| `packages/core/src/analyzer/providers/*.ts` | utils/, config/, types, the single provider SDK for that file | processor/, classifier/, other provider SDKs |
+| `packages/core/src/analyzer/` (client, router, batch, async-batch, dedup, linker, critique, consensus, sessions, embeddings, suggest) | utils/, config/, types, LLMClient; Sharp only in batch.ts, dedup.ts, async-batch.ts | any LLM SDK directly, processor/, classifier/ |
+| `packages/core/src/analyzer/temporal.ts` | config/, types | any LLM SDK, Sharp, I/O |
+| `packages/core/src/processor/` | utils/, config/, types, Sharp | any LLM SDK, analyzer/ |
+| `packages/core/src/classifier/` | config/, types | any LLM SDK, Sharp, fs-extra |
+| `packages/core/src/reviewer/` | utils/, config/, types, @inquirer/* | any LLM SDK, Sharp |
+| `packages/core/src/reporter/` | utils/, types, fs-extra, exceljs, drizzle-orm + better-sqlite3 (dynamic import, optional dep) | any LLM SDK, Sharp, analyzer/ |
+| `packages/core/src/search/` | utils/, config/, types | any LLM SDK, Sharp |
+| `packages/core/src/diff/` | config/, types | any LLM SDK, Sharp, I/O |
+| `packages/core/src/plugin/` | utils/, types | any LLM SDK, Sharp, fs-extra, analyzer/, processor/ |
+| `packages/core/src/fs/` | Node stdlib, cloud SDKs (per adapter) | LLM SDKs, Sharp, analyzer/ |
+| `packages/core/src/index.ts` | all `packages/core/src/` modules | external packages directly |
+| `packages/cli/src/` | `@master-vision/core` subpaths from its exports map (`.`, `/config`, `/utils/logger`, …), commander, chalk | any LLM SDK, core internals not on the exports map, processor/analyzer implementation details |
+| `packages/sdk/src/` | `@master-vision/core` subpaths (re-exports only — semver-stable surface) | implementation logic, new runtime dependencies |
+| `packages/contracts/src/` | zod only | any import from core/, cli/, sdk/, apps/ |
+| `apps/*` | `@master-vision/sdk` (and the API service once it exists — spec 009) | `@master-vision/core` internals, LLM SDKs |
+| `services/*` | Python stdlib + declared pyproject deps (uv) | any TypeScript package import |
 
-`src/analyzer/client.ts` is a thin routing layer. It must not import any provider SDK directly — all SDK imports live in `src/analyzer/providers/<provider>.ts`.
+`packages/core/src/analyzer/client.ts` is a thin routing layer. It must not import any provider SDK directly — all SDK imports live in `packages/core/src/analyzer/providers/<provider>.ts`.
 
 ## ESM import rule
 
@@ -145,11 +148,11 @@ const result: AnalysisResult = {
 
 ## Adding a new feature checklist
 
-1. Update types in `src/types.ts` first; increment `CACHE_SCHEMA_VERSION` if cache fields change
-2. Add `readonly` CLI flag to `Config` + `RawCliOptions` in `src/config/index.ts`, wire `loadConfig()`
-3. Add to `src/cli/index.ts` (Commander) and `src/cli/help.ts`
-4. Implement logic in the correct `src/` module — respect boundaries above
-5. Add tests in `tests/` mirroring `src/`; update all Config fixtures with new fields
+1. Update types in `packages/core/src/types.ts` first; increment `CACHE_SCHEMA_VERSION` if cache fields change
+2. Add `readonly` CLI flag to `Config` + `RawCliOptions` in `packages/core/src/config/index.ts`, wire `loadConfig()`
+3. Add to `packages/cli/src/index.ts` (Commander) and `packages/cli/src/help.ts`
+4. Implement logic in the correct `packages/core/src/` module — respect boundaries above
+5. Add tests in `packages/core/tests/` mirroring `packages/core/src/`; update all Config fixtures with new fields
 6. Update `README.md` CLI reference table
 7. Run `pnpm run check` — all must pass
 

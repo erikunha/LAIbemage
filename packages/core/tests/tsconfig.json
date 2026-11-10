@@ -1,0 +1,12 @@
+{
+  "extends": "../../../tsconfig.base.json",
+  "compilerOptions": {
+    "noEmit": true,
+    "types": ["node", "vitest/globals"]
+  },
+  // Scoped deliberately: the wider test suite has pre-existing fixture drift
+  // (removed serveLogRequests, added fullDescription) and was never part of
+  // the typecheck gate. Only the type-level tests are enforced for now;
+  // extend this list as older test files are brought under typecheck.
+  "include": ["./types.test.ts", "./reporter/sqlite-missing.test.ts"]
+}

@@ -1,15 +1,16 @@
 {
   "name": "ai-image-labeling",
   "version": "0.0.1",
-  "description": "AI-powered CLI that uses LLM Vision APIs (OpenAI, Anthropic, Google) to classify, timestamp, and label images into named categories. Configurable taxonomy, temporal consensus, and a developer-friendly UX.",
+  "description": "Master Vision monorepo root (product formerly published from this package; publishing identity moves to workspace packages in the next commit).",
   "type": "module",
-  "main": "dist/sdk.js",
+  "private": true,
+  "main": "./packages/core/dist/sdk.js",
   "exports": {
-    ".": "./dist/sdk.js",
-    "./cli": "./dist/cli/index.js"
+    ".": "./packages/core/dist/sdk.js",
+    "./cli": "./packages/core/dist/cli/index.js"
   },
   "bin": {
-    "ai-image-labeling": "dist/cli/index.js"
+    "ai-image-labeling": "./packages/core/dist/cli/index.js"
   },
   "pnpm": {
     "onlyBuiltDependencies": [
@@ -25,17 +26,17 @@
     "pnpm": ">=10"
   },
   "scripts": {
-    "build": "tsc --project tsconfig.json",
-    "dev": "node --watch dist/cli/index.js",
-    "start": "node dist/cli/index.js",
+    "build": "turbo run build",
+    "dev": "node --watch packages/core/dist/cli/index.js",
+    "start": "node packages/core/dist/cli/index.js",
     "fixtures": "tsx scripts/generate-fixtures.ts",
     "pretest": "tsx scripts/generate-fixtures.ts",
     "readme:generate": "tsx scripts/gen-readme-flags.ts",
     "readme:check": "tsx scripts/gen-readme-flags.ts --check",
-    "lint": "eslint src tests",
-    "lint:fix": "eslint src tests --fix",
-    "format": "prettier --write \"src/**/*.ts\" \"tests/**/*.ts\"",
-    "typecheck": "tsc --noEmit",
+    "lint": "eslint packages/core/src packages/core/tests",
+    "lint:fix": "eslint packages/core/src packages/core/tests --fix",
+    "format": "prettier --write \"packages/core/src/**/*.ts\" \"packages/core/tests/**/*.ts\"",
+    "typecheck": "turbo run typecheck && tsc -p scripts/tsconfig.json --noEmit",
     "test": "vitest run",
     "test:watch": "vitest",
     "test:coverage": "vitest run --coverage",
@@ -61,68 +62,24 @@
   },
   "keywords": [
     "ai",
-    "openai",
-    "anthropic",
-    "google",
-    "claude",
-    "gemini",
-    "gpt-4-vision",
+    "vision",
+    "master-vision",
     "cli",
     "image-processing",
     "typescript",
-    "github-copilot",
-    "image-organizer",
     "computer-vision"
   ],
-  "files": [
-    "dist/",
-    "examples/",
-    "README.md",
-    "LICENSE"
-  ],
-  "author": "",
   "license": "MIT",
-  "dependencies": {
-    "@anthropic-ai/sdk": "0.95.1",
-    "@aws-sdk/client-bedrock-runtime": "^3.1045.0",
-    "@aws-sdk/client-s3": "^3.1045.0",
-    "@azure/storage-blob": "^12.31.0",
-    "@google-cloud/storage": "^7.19.0",
-    "@google-cloud/vertexai": "^1.12.0",
-    "@google/generative-ai": "0.24.1",
-    "@inquirer/input": "^5.0.12",
-    "@inquirer/select": "^5.1.4",
-    "chalk": "5.6.2",
-    "chokidar": "5.0.0",
-    "cli-progress": "3.12.0",
-    "commander": "14.0.3",
-    "dotenv": "17.4.2",
-    "drizzle-orm": "^0.45.2",
-    "exifr": "7.1.3",
-    "file-type": "22.0.1",
-    "fs-extra": "11.3.5",
-    "openai": "6.37.0",
-    "ora": "9.4.0",
-    "p-limit": "7.3.0",
-    "sharp": "0.34.5",
-    "zod": "4.4.3"
-  },
   "config": {
     "commitizen": {
       "path": "cz-conventional-changelog"
     }
   },
-  "optionalDependencies": {
-    "better-sqlite3": "^12.9.0"
-  },
   "devDependencies": {
     "@commitlint/cli": "21.0.0",
     "@commitlint/config-conventional": "21.0.0",
     "@eslint/js": "^10.0.1",
-    "@types/better-sqlite3": "^7.6.13",
-    "@types/cli-progress": "3.11.6",
-    "@types/fs-extra": "11.0.4",
-    "@types/node": "25.6.2",
+    "@modelcontextprotocol/sdk": "^1.32.2",
     "@typescript-eslint/eslint-plugin": "8.59.2",
     "@typescript-eslint/parser": "8.59.2",
     "@vitest/coverage-v8": "4.1.5",
@@ -132,6 +89,7 @@
     "globals": "^17.6.0",
     "lint-staged": "17.0.2",
     "prettier": "3.8.3",
+    "sharp": "0.34.5",
     "simple-git-hooks": "2.13.1",
     "tsx": "4.21.0",
     "turbo": "^2.11.10",

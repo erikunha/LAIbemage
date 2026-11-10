@@ -15,7 +15,7 @@ import { fileURLToPath } from 'node:url';
 import sharp from 'sharp';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
-const BENCHMARK_DIR = path.join(__dirname, '..', 'tests', 'fixtures', 'benchmark');
+const BENCHMARK_DIR = path.join(__dirname, '..', 'packages', 'core', 'tests', 'fixtures', 'benchmark');
 const IMAGES_DIR = path.join(BENCHMARK_DIR, 'images');
 
 // ---------------------------------------------------------------------------

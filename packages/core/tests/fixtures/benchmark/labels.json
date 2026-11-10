@@ -1,0 +1,111 @@
+{
+  "description": "Ground-truth category labels for the accuracy benchmark. Images are synthetic colour swatches — replace with real photos for meaningful accuracy metrics.",
+  "categories": [
+    "kitchen",
+    "bathroom",
+    "bedroom",
+    "living_room",
+    "common_area",
+    "exterior",
+    "payment_receipt",
+    "conversation_screenshot"
+  ],
+  "images": [
+    {
+      "file": "kitchen-1.jpg",
+      "category": "kitchen"
+    },
+    {
+      "file": "kitchen-2.jpg",
+      "category": "kitchen"
+    },
+    {
+      "file": "kitchen-3.jpg",
+      "category": "kitchen"
+    },
+    {
+      "file": "bathroom-1.jpg",
+      "category": "bathroom"
+    },
+    {
+      "file": "bathroom-2.jpg",
+      "category": "bathroom"
+    },
+    {
+      "file": "bathroom-3.jpg",
+      "category": "bathroom"
+    },
+    {
+      "file": "bedroom-1.jpg",
+      "category": "bedroom"
+    },
+    {
+      "file": "bedroom-2.jpg",
+      "category": "bedroom"
+    },
+    {
+      "file": "bedroom-3.jpg",
+      "category": "bedroom"
+    },
+    {
+      "file": "living_room-1.jpg",
+      "category": "living_room"
+    },
+    {
+      "file": "living_room-2.jpg",
+      "category": "living_room"
+    },
+    {
+      "file": "living_room-3.jpg",
+      "category": "living_room"
+    },
+    {
+      "file": "common_area-1.jpg",
+      "category": "common_area"
+    },
+    {
+      "file": "common_area-2.jpg",
+      "category": "common_area"
+    },
+    {
+      "file": "common_area-3.jpg",
+      "category": "common_area"
+    },
+    {
+      "file": "exterior-1.jpg",
+      "category": "exterior"
+    },
+    {
+      "file": "exterior-2.jpg",
+      "category": "exterior"
+    },
+    {
+      "file": "exterior-3.jpg",
+      "category": "exterior"
+    },
+    {
+      "file": "payment_receipt-1.jpg",
+      "category": "payment_receipt"
+    },
+    {
+      "file": "payment_receipt-2.jpg",
+      "category": "payment_receipt"
+    },
+    {
+      "file": "payment_receipt-3.jpg",
+      "category": "payment_receipt"
+    },
+    {
+      "file": "conversation_screenshot-1.jpg",
+      "category": "conversation_screenshot"
+    },
+    {
+      "file": "conversation_screenshot-2.jpg",
+      "category": "conversation_screenshot"
+    },
+    {
+      "file": "conversation_screenshot-3.jpg",
+      "category": "conversation_screenshot"
+    }
+  ]
+}

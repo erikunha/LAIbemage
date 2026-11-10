@@ -1,5 +1,5 @@
 {
-  "entryPoints": ["src/sdk.ts"],
+  "entryPoints": ["packages/core/src/sdk.ts"],
   "out": "docs/api",
   "name": "ai-image-labeling SDK",
   "readme": "none",

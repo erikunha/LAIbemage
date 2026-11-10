@@ -4,38 +4,38 @@ export default defineConfig({
   test: {
     globals: true,
     environment: 'node',
-    include: ['tests/**/*.test.ts'],
+    include: ['packages/*/tests/**/*.test.ts'],
     coverage: {
       provider: 'v8',
       reporter: ['text', 'lcov'],
-      include: ['src/**/*.ts'],
+      include: ['packages/core/src/**/*.ts'],
       exclude: [
         // CLI wiring and top-level orchestration — excluded per project convention
-        'src/cli/**',
-        'src/index.ts',
+        'packages/core/src/cli/**',
+        'packages/core/src/index.ts',
         // Integration adapters — these require live SDKs/network; tested via LLMClient mock
-        'src/analyzer/client.ts',
-        'src/analyzer/index.ts',
+        'packages/core/src/analyzer/client.ts',
+        'packages/core/src/analyzer/index.ts',
         // Per-provider client files split from client.ts — same SDK integration boundary
-        'src/analyzer/providers/**',
+        'packages/core/src/analyzer/providers/**',
         // Suggest pass — requires live LLM client; same integration boundary as client.ts
-        'src/analyzer/suggest.ts',
+        'packages/core/src/analyzer/suggest.ts',
         // Reporter port, factory and adapters — thin delegation wrappers over tested reporter fns
-        'src/reporter/port.ts',
-        'src/reporter/factory.ts',
-        'src/reporter/adapters/**',
+        'packages/core/src/reporter/port.ts',
+        'packages/core/src/reporter/factory.ts',
+        'packages/core/src/reporter/adapters/**',
         // Cloud/filesystem adapters — require live backends; integration test territory
-        'src/fs/**',
+        'packages/core/src/fs/**',
         // XLSX reporter — requires optional exceljs peer dep not installed in CI
-        'src/reporter/xlsx.ts',
+        'packages/core/src/reporter/xlsx.ts',
         // I/O-heavy modules — filesystem + Sharp; integration test territory
-        'src/config/index.ts',
-        'src/processor/exporter.ts',
-        'src/processor/index.ts',
+        'packages/core/src/config/index.ts',
+        'packages/core/src/processor/exporter.ts',
+        'packages/core/src/processor/index.ts',
         // Terminal UI — cannot unit test (cliProgress/TTY)
-        'src/utils/progress.ts',
+        'packages/core/src/utils/progress.ts',
         // Type declarations only — no executable lines
-        'src/types.ts',
+        'packages/core/src/types.ts',
       ],
       thresholds: {
         // Raised after fixture generator + new batch/exif tests landed.

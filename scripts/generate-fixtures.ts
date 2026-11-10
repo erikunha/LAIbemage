@@ -11,7 +11,7 @@ import { fileURLToPath } from 'node:url';
 import sharp from 'sharp';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
-const OUTPUT_DIR = path.join(__dirname, '..', 'tests', 'fixtures', 'images');
+const OUTPUT_DIR = path.join(__dirname, '..', 'packages', 'core', 'tests', 'fixtures', 'images');
 
 interface FixtureSpec {
   name: string;

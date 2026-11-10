@@ -41,3 +41,6 @@ logs/
 
 # Claude Code local overrides (machine-specific permissions)
 .claude/settings.local.json
+
+# Turbo local cache
+.turbo/

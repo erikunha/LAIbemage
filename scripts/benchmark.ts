@@ -23,11 +23,11 @@ import { execFileSync } from 'node:child_process';
 import { access, mkdir, readFile, writeFile } from 'node:fs/promises';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
-import { analyzeImages } from '../src/analyzer/index.js';
-import type { CategoryConfig, Config, LLMProvider } from '../src/config/index.js';
-import type { FileWithStats } from '../src/types.js';
-import { estimateCost } from '../src/utils/cost.js';
-import { getImageTimestamp } from '../src/utils/exif.js';
+import { analyzeImages } from '../packages/core/src/analyzer/index.js';
+import type { CategoryConfig, Config, LLMProvider } from '../packages/core/src/config/index.js';
+import type { FileWithStats } from '../packages/core/src/types.js';
+import { estimateCost } from '../packages/core/src/utils/cost.js';
+import { getImageTimestamp } from '../packages/core/src/utils/exif.js';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const ROOT = path.join(__dirname, '..');
@@ -156,6 +156,7 @@ function buildConfig(
     outputDir: imagesDir,
     categoryConfig,
     provider,
+    embed: false,
     apiKey: process.env['OPENAI_API_KEY'] ?? '',
     anthropicApiKey: process.env['ANTHROPIC_API_KEY'] ?? '',
     googleApiKey: process.env['GOOGLE_API_KEY'] ?? '',

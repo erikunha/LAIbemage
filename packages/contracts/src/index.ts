@@ -4,7 +4,7 @@ import { z } from 'zod';
  * Version of the contracts package. Bump on any breaking schema change so
  * consumers can gate on it (spec 002: domain model and contracts).
  */
-export const CONTRACTS_VERSION = '0.1.0';
+export const CONTRACTS_VERSION = '0.2.0';
 
 /**
  * Seed schema for a labeling unit that has been accepted into the system.
@@ -16,3 +16,6 @@ export const UnitSeededSchema = z.object({
 });
 
 export type UnitSeeded = z.infer<typeof UnitSeededSchema>;
+
+export { canonicalJson, fingerprintV2 } from './fingerprint.js';
+export type { FingerprintInput } from './fingerprint.js';

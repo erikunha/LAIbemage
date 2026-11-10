@@ -1,5 +1,5 @@
 import { watch as chokidarWatch, type FSWatcher } from 'chokidar';
-import { createHash } from 'node:crypto';
+import { CONTRACTS_VERSION, fingerprintV2 } from '@master-vision/contracts';
 import path from 'node:path';
 import pLimit from 'p-limit';
 import type { FileRepository } from './fs/index.js';
@@ -17,7 +17,7 @@ import { buildIndex, defaultIndexPath } from './search/index.js';
 import { searchSemantic, searchKeyword } from './search/query.js';
 import type { SearchResult } from './search/query.js';
 import { classifyAndSort } from './classifier/index.js';
-import type { CategoryConfig, Config } from './config/index.js';
+import type { Config } from './config/index.js';
 import { validateStartup } from './config/index.js';
 import {
   fireOnImageAnalysed,
@@ -74,12 +74,30 @@ function resolveEmbeddingModel(config: Config): string {
   }
 }
 
-function computeCategoriesHash(categoryConfig: CategoryConfig): string {
-  const names = categoryConfig.categories
-    .map((c) => c.name)
-    .sort()
-    .join(',');
-  return createHash('sha256').update(names).digest('hex').slice(0, 12);
+/**
+ * Bump when any prompt text changes (batch system/user templates), so cached
+ * analyses fingerprint-invalidate on prompt edits. Part of fingerprint v2.
+ */
+const PROMPT_VERSION = 'prompt-v1';
+
+/**
+ * Fingerprint v2 (spec 002 / ADR-008): hashes the full semantic config
+ * (model, prompt version, taxonomy WITH descriptions, preprocessing, data
+ * version, contracts version). Replaces the name-only categories hash where
+ * editing a category description left caches silently stale.
+ * Field name `categoriesHash` is kept for cache-schema stability; its value
+ * now carries the `fp2:` domain separator, so every v1 cache mismatches once
+ * and recomputes (the staleness warning below fires).
+ */
+export function computeAnalysisFingerprint(config: Config): string {
+  return fingerprintV2({
+    model: `${config.provider}/${config.model}`,
+    promptTemplate: PROMPT_VERSION,
+    taxonomy: config.categoryConfig.categories.map((c) => ({ ...c })),
+    preprocessing: { pipeline: 1 },
+    dataVersion: 'legacy-v2',
+    contractsVersion: CONTRACTS_VERSION,
+  });
 }
 
 // ---------------------------------------------------------------------------
@@ -311,10 +329,11 @@ export async function runBatch(
     const cache = await fileRepo.readJson<AnalysisCache>(cacheFile);
 
     // warn if categories.json has changed since the cache was produced (suppressed by --force-skip-analysis)
-    const currentHash = computeCategoriesHash(config.categoryConfig);
+    const currentHash = computeAnalysisFingerprint(config);
     if (!config.forceSkipAnalysis && cache.categoriesHash && cache.categoriesHash !== currentHash) {
       logger.warn(
-        `[warn] categories.json has changed since this cache was created.\n` +
+        `[warn] fingerprint v2: the analysis config (taxonomy incl. descriptions, model or prompt)\n` +
+          `       has changed since this cache was created (fingerprint v2 migration invalidates v1 caches once).\n` +
           `       Cached: ${cache.categoriesHash}  Current: ${currentHash}\n` +
           `       Re-run without --skip-analysis to reclassify, or pass --force-skip-analysis to suppress this warning.`,
       );
@@ -346,7 +365,7 @@ export async function runBatch(
     if (await fileRepo.exists(partialCachePath)) {
       try {
         const partial = await fileRepo.readJson<PartialAnalysisCache>(partialCachePath);
-        const currentHash = computeCategoriesHash(config.categoryConfig);
+        const currentHash = computeAnalysisFingerprint(config);
         if (partial.schemaVersion === CACHE_SCHEMA_VERSION && Array.isArray(partial.images)) {
           if (partial.categoriesHash && partial.categoriesHash !== currentHash) {
             logger.warn(' Partial cache was produced with different categories — starting fresh.');
@@ -405,7 +424,7 @@ export async function runBatch(
       const partial: PartialAnalysisCache = {
         schemaVersion: CACHE_SCHEMA_VERSION,
         startedAt: new Date(startedAt).toISOString(),
-        categoriesHash: computeCategoriesHash(config.categoryConfig),
+        categoriesHash: computeAnalysisFingerprint(config),
         images: [...alreadyAnalyzed, ...newImages],
       };
       // 1.9 — atomic write (tmp+rename) so a crash mid-write never produces a corrupt checkpoint
@@ -750,7 +769,7 @@ async function postAnalysisPipeline(
       processedDate: new Date().toISOString(),
       totalImages: processedResults.length,
       categories: sortedCategories,
-      categoriesHash: computeCategoriesHash(config.categoryConfig),
+      categoriesHash: computeAnalysisFingerprint(config),
       images: processedResults,
       ...(plugins.length > 0 ? { pluginApiVersion: PLUGIN_API_VERSION } : {}),
       ...(reviewOverrides.length > 0 ? { overrides: reviewOverrides } : {}),

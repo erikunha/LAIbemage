@@ -32,6 +32,7 @@
     "test": "vitest run --root ../.. packages/core/tests"
   },
   "dependencies": {
+    "@master-vision/contracts": "workspace:*",
     "@anthropic-ai/sdk": "0.95.1",
     "@aws-sdk/client-bedrock-runtime": "^3.1045.0",
     "@aws-sdk/client-s3": "^3.1045.0",

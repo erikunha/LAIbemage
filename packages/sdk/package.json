@@ -1,0 +1,20 @@
+{
+  "name": "@master-vision/sdk",
+  "version": "0.0.1",
+  "description": "Master Vision public SDK: stable library API re-exported from @master-vision/core (evolved from ai-image-labeling sdk.ts; publishing identity decided in a later commit).",
+  "type": "module",
+  "main": "./dist/index.js",
+  "exports": {
+    ".": "./dist/index.js"
+  },
+  "engines": {
+    "node": ">=18"
+  },
+  "scripts": {
+    "build": "tsc --project tsconfig.json",
+    "typecheck": "tsc --project tsconfig.json --noEmit"
+  },
+  "dependencies": {
+    "@master-vision/core": "workspace:*"
+  }
+}

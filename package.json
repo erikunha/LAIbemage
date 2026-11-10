@@ -4,14 +4,6 @@
   "description": "Master Vision monorepo root (product formerly published from this package; publishing identity moves to workspace packages in the next commit).",
   "type": "module",
   "private": true,
-  "main": "./packages/core/dist/sdk.js",
-  "exports": {
-    ".": "./packages/core/dist/sdk.js",
-    "./cli": "./packages/core/dist/cli/index.js"
-  },
-  "bin": {
-    "ai-image-labeling": "./packages/core/dist/cli/index.js"
-  },
   "pnpm": {
     "onlyBuiltDependencies": [
       "@google/genai",
@@ -27,19 +19,20 @@
   },
   "scripts": {
     "build": "turbo run build",
-    "dev": "node --watch packages/core/dist/cli/index.js",
-    "start": "node packages/core/dist/cli/index.js",
+    "dev": "node --watch packages/cli/dist/index.js",
+    "start": "node packages/cli/dist/index.js",
     "fixtures": "tsx scripts/generate-fixtures.ts",
     "pretest": "tsx scripts/generate-fixtures.ts",
     "readme:generate": "tsx scripts/gen-readme-flags.ts",
     "readme:check": "tsx scripts/gen-readme-flags.ts --check",
-    "lint": "eslint packages/core/src packages/core/tests",
-    "lint:fix": "eslint packages/core/src packages/core/tests --fix",
-    "format": "prettier --write \"packages/core/src/**/*.ts\" \"packages/core/tests/**/*.ts\"",
+    "lint": "eslint packages/core/src packages/core/tests packages/cli/src packages/cli/tests packages/sdk/src",
+    "lint:fix": "eslint packages/core/src packages/core/tests packages/cli/src packages/cli/tests packages/sdk/src --fix",
+    "format": "prettier --write \"packages/core/src/**/*.ts\" \"packages/core/tests/**/*.ts\" \"packages/cli/src/**/*.ts\" \"packages/cli/tests/**/*.ts\" \"packages/sdk/src/**/*.ts\"",
     "typecheck": "turbo run typecheck && tsc -p scripts/tsconfig.json --noEmit",
     "test": "vitest run",
     "test:watch": "vitest",
     "test:coverage": "vitest run --coverage",
+    "test:py": "python3 -m pytest services -q",
     "benchmark": "tsx scripts/benchmark.ts",
     "benchmark:generate": "tsx scripts/generate-benchmark-fixtures.ts",
     "benchmark:update-baseline": "tsx scripts/benchmark.ts --update-baseline",

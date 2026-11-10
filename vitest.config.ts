@@ -4,14 +4,14 @@ export default defineConfig({
   test: {
     globals: true,
     environment: 'node',
-    include: ['packages/*/tests/**/*.test.ts'],
+    include: ['packages/*/tests/**/*.test.ts', 'apps/*/tests/**/*.test.ts'],
     coverage: {
       provider: 'v8',
       reporter: ['text', 'lcov'],
       include: ['packages/core/src/**/*.ts'],
       exclude: [
-        // CLI wiring and top-level orchestration — excluded per project convention
-        'packages/core/src/cli/**',
+        // Top-level orchestration — excluded per project convention
+        // (CLI wiring lives in packages/cli, outside the coverage include)
         'packages/core/src/index.ts',
         // Integration adapters — these require live SDKs/network; tested via LLMClient mock
         'packages/core/src/analyzer/client.ts',

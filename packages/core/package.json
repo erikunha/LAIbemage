@@ -5,7 +5,22 @@
   "type": "module",
   "main": "./dist/index.js",
   "exports": {
-    ".": "./dist/index.js"
+    ".": "./dist/index.js",
+    "./analyzer/batch": "./dist/analyzer/batch.js",
+    "./analyzer/client": "./dist/analyzer/client.js",
+    "./analyzer/consensus": "./dist/analyzer/consensus.js",
+    "./analyzer/embeddings": "./dist/analyzer/embeddings.js",
+    "./analyzer/sessions": "./dist/analyzer/sessions.js",
+    "./analyzer/suggest": "./dist/analyzer/suggest.js",
+    "./classifier": "./dist/classifier/index.js",
+    "./config": "./dist/config/index.js",
+    "./diff": "./dist/diff/index.js",
+    "./fs": "./dist/fs/index.js",
+    "./reporter/sqlite-schema": "./dist/reporter/sqlite-schema.js",
+    "./search": "./dist/search/index.js",
+    "./search/query": "./dist/search/query.js",
+    "./types": "./dist/types.js",
+    "./utils/logger": "./dist/utils/logger.js"
   },
   "engines": {
     "node": ">=18"
@@ -28,7 +43,6 @@
     "chalk": "5.6.2",
     "chokidar": "5.0.0",
     "cli-progress": "3.12.0",
-    "commander": "14.0.3",
     "dotenv": "17.4.2",
     "drizzle-orm": "^0.45.2",
     "exifr": "7.1.3",

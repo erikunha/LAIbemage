@@ -1,7 +1,8 @@
 {
-  "entryPoints": ["packages/core/src/sdk.ts"],
+  "entryPoints": ["packages/sdk/src/index.ts"],
+  "tsconfig": "packages/sdk/tsconfig.json",
   "out": "docs/api",
-  "name": "ai-image-labeling SDK",
+  "name": "Master Vision SDK",
   "readme": "none",
   "excludePrivate": true,
   "excludeInternal": true,

@@ -1,0 +1,12 @@
+{
+  "name": "@master-vision/api-placeholder",
+  "version": "0.0.1",
+  "description": "Master Vision API jobs service placeholder (spec 009); real service lands in a later spec.",
+  "type": "module",
+  "private": true,
+  "scripts": {
+    "build": "node -e \"console.log('nothing to build')\"",
+    "typecheck": "tsc --noEmit -p .",
+    "test": "vitest run --root ../.."
+  }
+}

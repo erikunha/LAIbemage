@@ -4,18 +4,21 @@
   "description": "Master Vision CLI: canonical `laib` bin plus the deprecated `ai-image-labeling` compatibility bin (spec 001 US2).",
   "type": "module",
   "private": true,
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
   "bin": {
     "laib": "./dist/index.js",
     "ai-image-labeling": "./dist/compat.js"
   },
   "engines": {
-    "node": ">=18"
+    "node": ">=20"
   },
   "scripts": {
     "build": "tsc --project tsconfig.json",
     "typecheck": "tsc --project tsconfig.json --noEmit",
-    "test": "vitest run --root ../.. packages/cli",
-    "test:bins": "pnpm --filter @master-vision/cli --filter @master-vision/core run build && vitest run --root ../.. packages/cli"
+    "lint": "eslint src tests",
+    "test": "vitest run --root ../.. packages/cli --testTimeout 15000",
+    "test:bins": "pnpm --filter @master-vision/cli --filter @master-vision/core run build && vitest run --root ../.. packages/cli --testTimeout 15000"
   },
   "dependencies": {
     "@master-vision/core": "workspace:*",

@@ -2,7 +2,11 @@ import { spawnSync } from 'node:child_process';
 import { existsSync } from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
-import { describe, expect, it } from 'vitest';
+import { describe, expect, it, vi } from 'vitest';
+
+// Each test spawns up to three bin processes (~4.6s each in coverage mode);
+// the vitest 5s default would flake. 30s holds even on slow CI runners.
+vi.setConfig({ testTimeout: 30_000 });
 
 /**
  * Golden help-parity test (spec 001, task 3.2).

@@ -29,7 +29,7 @@ selected at runtime.
 - **`src/reviewer/`** — Interactive TTY review loop. TTY guard required. Returns `ReviewResult` without mutating the cache. See `reviewer.instructions.md`.
 - **`src/reporter/`** — CSV, HTML, XLSX report generation. HTML output must HTML-escape all LLM data. No LLM SDK imports. See `reporter.instructions.md`.
 - **`src/fs/`** — `FileRepository` port + 5 adapters (Node, Memory, S3, GCS, AzureBlob). All persistent file I/O should route through this interface. `createFileRepository` is the factory.
-- **`src/sdk.ts`** — Semver-stable public library API. All exports here are stable; internal module paths (`dist/analyzer/batch.js` etc.) are NOT stable.
+- **`packages/sdk/src/index.ts`** — Semver-stable public library API. All exports here are stable; internal module paths (`dist/analyzer/batch.js` etc.) are NOT stable.
 - **`src/index.ts`** — Top-level orchestration exported functions: `runBatch`, `runReorder`, `runSingle`.
 - **`scripts/`** — Developer utilities run via `tsx`. Never compiled to `dist/`. See `scripts.instructions.md`.
 

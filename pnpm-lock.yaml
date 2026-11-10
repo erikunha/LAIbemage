@@ -186,6 +186,9 @@ importers:
 
   packages/sdk:
     dependencies:
+      '@master-vision/cli':
+        specifier: workspace:*
+        version: link:../cli
       '@master-vision/core':
         specifier: workspace:*
         version: link:../core

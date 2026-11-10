@@ -5,16 +5,19 @@
   "type": "module",
   "main": "./dist/index.js",
   "exports": {
-    ".": "./dist/index.js"
+    ".": "./dist/index.js",
+    "./cli": "./dist/cli.js"
   },
   "engines": {
-    "node": ">=18"
+    "node": ">=20"
   },
   "scripts": {
     "build": "tsc --project tsconfig.json",
-    "typecheck": "tsc --project tsconfig.json --noEmit"
+    "typecheck": "tsc --project tsconfig.json --noEmit",
+    "lint": "eslint src"
   },
   "dependencies": {
+    "@master-vision/cli": "workspace:*",
     "@master-vision/core": "workspace:*"
   }
 }

@@ -45,5 +45,5 @@ High `category_changed` count after a model upgrade = review the changes; some m
 
 ## Implementation details
 
-`diffCaches()` is exported from `src/sdk.ts`. It is a pure function — no I/O, fully testable.
+`diffCaches()` is exported from `packages/sdk/src/index.ts` (`@master-vision/sdk`). It is a pure function — no I/O, fully testable.
 The CLI writes the result to stdout. JSON mode emits `{ summary, changes[] }` for scripting.

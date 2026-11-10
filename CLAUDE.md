@@ -52,7 +52,7 @@ npx vitest run tests/analyzer/batch.test.ts
 | `src/reviewer/` | Interactive TTY review loop | Requires TTY; never mutates cache |
 | `src/reporter/` | CSV, HTML, XLSX, SQLite report generation | No LLM SDK imports; HTML must escape all LLM data |
 | `src/fs/` | `FileRepository` port + 5 adapters (Node, Memory, S3, GCS, AzureBlob) | All file I/O should route through this interface; `createFileRepository` is the factory |
-| `src/sdk.ts` | Semver-stable public library API | All exports here are stable; internal paths (`dist/analyzer/batch.js` etc.) are NOT stable |
+| `packages/sdk/src/index.ts` | Semver-stable public library API | All exports here are stable; internal paths (`dist/analyzer/batch.js` etc.) are NOT stable |
 | `src/index.ts` | Top-level orchestration (`runBatch`, `runReorder`, `runSingle`) | No direct external package imports |
 
 ### Data flow

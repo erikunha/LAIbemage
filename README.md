@@ -12,6 +12,14 @@ AI-powered image classification, timestamp overlay, and sequential organization 
 > (ADR-005). The `ai-image-labeling` CLI keeps working unchanged throughout. See
 > `docs/architecture/vision-master.md`, `docs/architecture/baseline-audit.md` and
 > `ROADMAP.md`; work lands on the `feat/master-rebirth` branch.
+>
+> **Binary names:** `laib` is the canonical bin (`pnpm add -g @master-vision/cli` → `laib`).
+> The legacy `ai-image-labeling` bin keeps working through a deprecation window of two minor
+> versions — it prints one stderr deprecation line per run, silenced with `LAIB_NO_DEPRECATION=1`.
+> Removal ships as a major version bump per semver; see CHANGELOG.md.
+>
+> **Decisions:** the architecture decision records live in [`docs/adr/`](docs/adr/) (ADR-005+ cover
+> the Master evolution).
 
 ---
 

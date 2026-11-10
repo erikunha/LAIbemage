@@ -4,9 +4,13 @@
   "description": "Master Vision studio review app placeholder (spec 010); real app lands in a later spec.",
   "type": "module",
   "private": true,
+  "engines": {
+    "node": ">=20"
+  },
   "scripts": {
     "build": "node -e \"console.log('nothing to build')\"",
     "typecheck": "tsc --noEmit -p .",
-    "test": "vitest run --root ../.."
+    "lint": "eslint src tests",
+    "test": "vitest run --root ../.. apps/studio/tests"
   }
 }

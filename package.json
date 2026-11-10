@@ -4,17 +4,9 @@
   "description": "Master Vision monorepo root (product formerly published from this package; publishing identity moves to workspace packages in the next commit).",
   "type": "module",
   "private": true,
-  "pnpm": {
-    "onlyBuiltDependencies": [
-      "@google/genai",
-      "better-sqlite3",
-      "protobufjs",
-      "sharp"
-    ]
-  },
   "packageManager": "pnpm@11.0.8",
   "engines": {
-    "node": ">=18",
+    "node": ">=20",
     "pnpm": ">=10"
   },
   "scripts": {
@@ -32,6 +24,7 @@
     "test": "vitest run",
     "test:watch": "vitest",
     "test:coverage": "vitest run --coverage",
+    "check:boundaries": "node scripts/check-boundaries.mjs",
     "test:py": "python3 -m pytest services -q",
     "benchmark": "tsx scripts/benchmark.ts",
     "benchmark:generate": "tsx scripts/generate-benchmark-fixtures.ts",

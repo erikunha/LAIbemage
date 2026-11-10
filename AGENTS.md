@@ -23,10 +23,10 @@ pnpm run check          # lint + typecheck + coverage (full pre-PR suite)
 
 | Directory | Allowed imports | Forbidden imports |
 |---|---|---|
-| `packages/core/src/utils/` | Node stdlib only | OpenAI, Sharp, fs-extra |
+| `packages/core/src/utils/` | Node stdlib + chalk, cli-progress, file-type (per current imports) | OpenAI, Sharp, fs-extra |
 | `packages/core/src/config/` | utils/, types | any LLM SDK, Sharp, I/O |
 | `packages/core/src/analyzer/providers/*.ts` | utils/, config/, types, the single provider SDK for that file | processor/, classifier/, other provider SDKs |
-| `packages/core/src/analyzer/` (client, router, batch, async-batch, dedup, linker, critique, consensus, sessions, embeddings, suggest) | utils/, config/, types, LLMClient; Sharp only in batch.ts, dedup.ts, async-batch.ts | any LLM SDK directly, processor/, classifier/ |
+| `packages/core/src/analyzer/` (client, router, batch, async-batch, dedup, linker, critique, consensus, sessions, embeddings, suggest) | utils/, config/, types, LLMClient; Sharp only in batch.ts, dedup.ts, async-batch.ts; embeddings.ts: text-embedding SDKs allowed (openai, @google/generative-ai) — pre-existing, routing through providers/ is a queued task (eslint carve-out) | any other LLM SDK directly, processor/, classifier/ |
 | `packages/core/src/analyzer/temporal.ts` | config/, types | any LLM SDK, Sharp, I/O |
 | `packages/core/src/processor/` | utils/, config/, types, Sharp | any LLM SDK, analyzer/ |
 | `packages/core/src/classifier/` | config/, types | any LLM SDK, Sharp, fs-extra |
@@ -38,7 +38,7 @@ pnpm run check          # lint + typecheck + coverage (full pre-PR suite)
 | `packages/core/src/fs/` | Node stdlib, cloud SDKs (per adapter) | LLM SDKs, Sharp, analyzer/ |
 | `packages/core/src/index.ts` | all `packages/core/src/` modules | external packages directly |
 | `packages/cli/src/` | `@master-vision/core` subpaths from its exports map (`.`, `/config`, `/utils/logger`, …), commander, chalk | any LLM SDK, core internals not on the exports map, processor/analyzer implementation details |
-| `packages/sdk/src/` | `@master-vision/core` subpaths (re-exports only — semver-stable surface) | implementation logic, new runtime dependencies |
+| `packages/sdk/src/` | `@master-vision/core` subpaths (re-exports only — semver-stable surface), `@master-vision/cli` (only for the `./cli` programmatic entry; importing it executes the CLI) | implementation logic, other runtime dependencies |
 | `packages/contracts/src/` | zod only | any import from core/, cli/, sdk/, apps/ |
 | `apps/*` | `@master-vision/sdk` (and the API service once it exists — spec 009) | `@master-vision/core` internals, LLM SDKs |
 | `services/*` | Python stdlib + declared pyproject deps (uv) | any TypeScript package import |
@@ -158,8 +158,8 @@ const result: AnalysisResult = {
 
 ## Do NOT
 
-- Import any LLM SDK outside `src/analyzer/providers/*.ts`
-- Import Sharp in `src/analyzer/` except in `batch.ts`, `dedup.ts`, `async-batch.ts`
+- Import any LLM SDK outside `packages/core/src/analyzer/providers/*.ts` (enforced by eslint `no-restricted-imports`; proven by `pnpm run check:boundaries`; sole documented exception: `embeddings.ts` text-embedding SDKs)
+- Import Sharp in `packages/core/src/analyzer/` except in `batch.ts`, `dedup.ts`, `async-batch.ts`
 - Hardcode category names outside `examples/*.json` and test fixtures
 - Use `any` type without an `// eslint-disable-next-line @typescript-eslint/no-explicit-any` comment
 - Add `console.log` outside `src/utils/logger.ts` and `src/utils/progress.ts`

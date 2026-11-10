@@ -455,3 +455,9 @@ program
   });
 
 program.parseAsync(process.argv);
+
+// Exported for the `@master-vision/sdk/cli` re-export shim (library consumers
+// can inspect/extend the command surface). NOTE: importing this module still
+// executes the CLI — `parseAsync(process.argv)` above runs at import time,
+// exactly as in the pre-migration `dist/cli/index.js` bin entry.
+export { program };

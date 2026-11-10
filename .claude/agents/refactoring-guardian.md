@@ -49,7 +49,7 @@ You are the Refactoring Guardian for `ai-image-labeling`. You restructure code w
 | Pattern | Where to look | Fix |
 |---|---|---|
 | Module boundary violations | Any `import` in `src/` | Move import to correct layer |
-| Dead exports | `src/sdk.ts` and `src/types.ts` | Remove unused exports |
+| Dead exports | `packages/sdk/src/index.ts` and `packages/core/src/types.ts` | Remove unused exports |
 | Duplicated type guards | `src/analyzer/` | Extract to `src/utils/guards.ts` |
 | Long functions > 60 lines | `src/index.ts`, `src/analyzer/batch.ts` | Extract named helpers |
 

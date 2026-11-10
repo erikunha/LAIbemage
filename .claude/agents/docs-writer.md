@@ -22,7 +22,7 @@ You are the Docs Writer for `ai-image-labeling`. You update user-facing document
 
 ### Inline JSDoc (if needed)
 
-Only document public SDK exports in `src/sdk.ts`. Internal functions do not need JSDoc.
+Only document public SDK exports in `packages/sdk/src/index.ts`. Internal functions do not need JSDoc.
 
 ## Documentation rules
 

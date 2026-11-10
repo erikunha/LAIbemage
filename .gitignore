@@ -17,8 +17,6 @@ output/
 !output/.gitkeep
 !examples/
 
-# Generated test fixtures — reproducible via `npm run fixtures`
-tests/fixtures/images/
 
 # OS / editor
 .DS_Store

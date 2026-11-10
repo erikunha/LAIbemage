@@ -6,6 +6,13 @@ AI-powered image classification, timestamp overlay, and sequential organization 
 [![npm version](https://badge.fury.io/js/ai-image-labeling.svg)](https://www.npmjs.com/package/ai-image-labeling)
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
 
+> **Master evolution in progress** — this CLI is growing into **Master Vision** (repo stays `erikunha/LAIbemage`), a Visual
+> Intelligence Engineering Workbench: real-dataset benchmarks, visual embeddings and search,
+> model training/evaluation with calibration, a Studio review UI, HTTP API and an MCP server
+> (ADR-005). The `ai-image-labeling` CLI keeps working unchanged throughout. See
+> `docs/architecture/vision-master.md`, `docs/architecture/baseline-audit.md` and
+> `ROADMAP.md`; work lands on the `feat/master-rebirth` branch.
+
 ---
 
 ## What it does

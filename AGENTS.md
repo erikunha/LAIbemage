@@ -190,3 +190,20 @@ const result: AnalysisResult = {
 ### GitHub Copilot agents (`.github/agents/`)
 
 Same roster — see `.github/copilot-instructions.md` for Copilot-specific invocation.
+
+## Spec-kit workflow (Master evolution)
+
+The Master evolution (ADR-005+) is planned with spec-kit. Specs, plans, tasks and research
+live under `specs/` and `.specify/` — **never tracked in git** (ADR-010; the maintainer's
+global git ignore enforces it). The constitution binding every spec is
+`.specify/memory/constitution.md` (local only).
+
+Route a feature needing a written spec through speckit in order: **specify → clarify → plan
+→ tasks → implement → analyze**; each step reads the previous output. The tracked mirrors of
+the plan are `docs/adr/` (decisions, numbering continues at 005) and `ROADMAP.md` (phase and
+spec status). The spec index with the phase map (F0–F5 → specs 001–014) is `specs/README.md`.
+
+When implementing from a spec: honor the constitution principles (evidence over vibes,
+Prediction ≠ Annotation, full-config fingerprints, calibrated uncertainty, untrusted visual
+content, cost as a first-class metric), keep the six quality gates green, and update every
+doc that describes what changed in the same commit.

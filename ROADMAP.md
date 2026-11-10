@@ -25,7 +25,7 @@ flowchart LR
 
 | Phase | Focus | Specs | Outcome | Status |
 |---|---|---|---|---|
-| F0 | Foundation | 001 monorepo · 002 domain/contracts · 003 real benchmark | rebirth scaffold, entity store, VisA ground truth | 🔵 |
+| F0 | Foundation | 001 monorepo · 002 domain/contracts · 003 real benchmark | rebirth scaffold, entity store, VisA ground truth | 🏗 001 🟢 · 002 🏗 (fingerprint v2 landed) · 003 🔵 |
 | F1 | Visual Data + Arena | 004 data engine · 005 embeddings/search · 006 model arena | trustworthy datasets + calibrated model comparison | 🔵 |
 | F2 | Learning | 007 training · 008 active-learning flywheel | specialized models + measured data loop — **first demo** | 🔵 |
 | F3 | Interfaces + Agents | 009 API/jobs · 010 Studio · 011 MCP · 012 agent runtime | four equivalent surfaces + safe investigations | 🔵 |

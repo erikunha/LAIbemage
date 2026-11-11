@@ -47,14 +47,17 @@ pnpm run check
 
 | Command | Purpose |
 |---|---|
-| `pnpm run build` | Compile TypeScript → `dist/` |
-| `pnpm run typecheck` | Type-check `src/` without emitting |
-| `pnpm exec tsc -p scripts/tsconfig.json --noEmit` | Type-check `scripts/` without emitting |
+| `pnpm run build` | Compile TypeScript → `packages/*/dist/` |
+| `pnpm run typecheck` | Type-check the workspace packages and `scripts/` without emitting |
+| `pnpm exec tsc -p scripts/tsconfig.json --noEmit` | Type-check `scripts/` without emitting (already part of `pnpm run typecheck`) |
 | `pnpm run lint` | ESLint |
 | `pnpm run lint:fix` | ESLint with auto-fix |
 | `pnpm run format` | Prettier |
 | `pnpm test` | Vitest unit tests (fast, no coverage) |
 | `pnpm run test:coverage` | Vitest with V8 coverage report |
+| `pnpm run check:boundaries` | Proves the LLM-SDK boundary rule fires (ESLint `no-restricted-imports`) |
+| `pnpm run test:py` | pytest for the Python services in `services/` |
+| `pnpm --filter @vision-lens/cli test:bins` | Golden bin tests for `vision-lens` and the `ai-image-labeling` compat bin |
 | `pnpm run fixtures` | Regenerate test fixture images |
 | `pnpm run check` | lint + typecheck + test:coverage (the full gate) |
 
@@ -66,18 +69,20 @@ Imports between modules are strictly controlled:
 
 | Directory | Allowed imports | Forbidden |
 |---|---|---|
-| `src/utils/` | Node stdlib only | OpenAI, Sharp, fs-extra |
-| `src/analyzer/providers/*.ts` | utils/, config/, types, the single provider SDK for that file | processor/, classifier/, other provider SDKs |
-| `src/analyzer/client.ts` | utils/, config/, types, `src/analyzer/providers/` | any LLM SDK directly, processor/, classifier/ |
-| `src/analyzer/` (other files) | utils/, config/, types, LLMClient, Sharp (resize only) | processor/, classifier/, any SDK |
-| `src/processor/` | utils/, config/, types, Sharp | any LLM SDK, analyzer/ |
-| `src/classifier/` | config/, types | any LLM SDK, Sharp, fs-extra |
-| `src/cli/` | config/, index, utils/logger | analyzer/, processor/, classifier/ |
-| `src/index.ts` | All src/ modules | external packages directly |
+| `packages/core/src/utils/` | Node stdlib + chalk, cli-progress, file-type | OpenAI, Sharp, fs-extra |
+| `packages/core/src/config/` | utils/, types, zod, dotenv | any LLM SDK, Sharp |
+| `packages/core/src/analyzer/providers/*.ts` | utils/, config/, types, the single provider SDK for that file | processor/, classifier/, other provider SDKs |
+| `packages/core/src/analyzer/client.ts` | utils/, config/, types, `packages/core/src/analyzer/providers/` | any LLM SDK directly, processor/, classifier/ |
+| `packages/core/src/analyzer/` (other files) | utils/, config/, types, LLMClient, Sharp (resize only) | processor/, classifier/, any SDK |
+| `packages/core/src/analyzer/embeddings.ts` | `openai` and `@google/generative-ai` text-embedding SDKs (documented ESLint carve-out) | Anthropic, Vertex and Bedrock SDKs |
+| `packages/core/src/processor/` | utils/, config/, types, Sharp | any LLM SDK, analyzer/ |
+| `packages/core/src/classifier/` | config/, types | any LLM SDK, Sharp, fs-extra |
+| `packages/cli/src/` | `@vision-lens/core` subpaths from its exports map, commander, chalk | analyzer/, processor/, classifier/ |
+| `packages/core/src/index.ts` | All `packages/core/src/` modules | LLM SDKs, Sharp |
 
-`src/analyzer/client.ts` is a thin routing layer — it imports from `src/analyzer/providers/` but must not import any LLM SDK directly. All SDK imports are confined to the per-provider files.
+`packages/core/src/analyzer/client.ts` is a thin routing layer — it imports from `packages/core/src/analyzer/providers/` but must not import any LLM SDK directly. All SDK imports are confined to the per-provider files.
 
-Violations are caught by ESLint and the `code-reviewer` agent.
+Violations are caught by ESLint and the `code-reviewer` agent; `pnpm run check:boundaries` proves the rule fires with a deliberately violating fixture.
 
 ---
 
@@ -85,7 +90,7 @@ Violations are caught by ESLint and the `code-reviewer` agent.
 
 ### Step 1: Add the provider name to the union type
 
-In `src/types.ts`, add `'your-provider'` to the `LLMProvider` union:
+In `packages/core/src/config/index.ts`, add `'your-provider'` to the `LLMProvider` union:
 
 ```typescript
 export type LLMProvider =
@@ -102,10 +107,10 @@ export type LLMProvider =
 
 ### Step 2: Implement the adapter
 
-Create `src/analyzer/providers/your-provider.ts`. This is the **only** file that may import the provider's SDK:
+Create `packages/core/src/analyzer/providers/your-provider.ts`. This is the **only** file that may import the provider's SDK:
 
 ```typescript
-// src/analyzer/providers/your-provider.ts
+// packages/core/src/analyzer/providers/your-provider.ts
 import YourProviderSDK from 'your-provider-sdk';
 import type { Config } from '../../config/index.js';
 import type { LLMClient } from '../client.js';
@@ -124,7 +129,7 @@ export function createYourProviderClient(config: Config): LLMClient {
 
 ### Step 3: Wire the adapter into the routing layer
 
-In `src/analyzer/client.ts`, import the factory and add a branch in the `createClient` switch:
+In `packages/core/src/analyzer/client.ts`, import the factory and add a branch in the `createClient` switch:
 
 ```typescript
 import { createYourProviderClient } from './providers/your-provider.js';
@@ -136,7 +141,7 @@ case 'your-provider':
 
 ### Step 4: Add the API key config
 
-In `src/config/index.ts`:
+In `packages/core/src/config/index.ts`:
 
 - Add `readonly yourProviderApiKey: string` to the `Config` interface.
 - Read `YOUR_PROVIDER_API_KEY` from the environment in `loadConfig()` and apply CLI flag precedence.
@@ -145,17 +150,17 @@ In `src/config/index.ts`:
 
 ### Step 5: Add CLI flags
 
-In `src/cli/index.ts`:
+In `packages/cli/src/index.ts`:
 
 ```typescript
 program.option('--your-provider-api-key <key>', 'Your Provider API key');
 ```
 
-In `src/cli/help.ts`, add an entry to the provider flags table.
+In `packages/cli/src/help.ts`, add an entry to the provider flags table.
 
 ### Step 6: Add a contract test
 
-Add the provider to `tests/analyzer/client.contract.test.ts`. Contract tests are skipped unless `CI_CONTRACT=1` is set, so they do not run in normal CI.
+Add the provider to `packages/core/tests/analyzer/client.contract.test.ts`. Contract tests are skipped unless `CI_CONTRACT=1` is set, so they do not run in normal CI.
 
 ### Step 7: Update .env.example and README.md
 
@@ -192,29 +197,29 @@ vision-lens --categories examples/categories-<domain>.json --estimate
 
 ## Adding a CLI flag
 
-1. Add the `readonly` field to the `Config` interface and `RawCliOptions` in `src/config/index.ts`.
+1. Add the `readonly` field to the `Config` interface and `RawCliOptions` in `packages/core/src/config/index.ts`.
 2. Parse the env var and provide a default in `loadConfig()`.
-3. Add `program.option('--your-flag <value>', 'Description', defaultValue)` in `src/cli/index.ts`.
-4. Add an entry to the flags table in `src/cli/help.ts`.
+3. Add `program.option('--your-flag <value>', 'Description', defaultValue)` in `packages/cli/src/index.ts`.
+4. Add an entry to the flags table in `packages/cli/src/help.ts`.
 5. Update the CLI reference table in `README.md`.
-6. Add the field to all `makeConfig()` fixtures in `tests/` — the fixture pattern requires every Config field to be present.
+6. Add the field to all `makeConfig()` fixtures in `packages/core/tests/` — the fixture pattern requires every Config field to be present.
 
 ---
 
 ## Testing
 
-- All tests live in `tests/` mirroring `src/`.
+- All tests live next to the code: `packages/core/tests/`, `packages/cli/tests/`, `packages/contracts/tests/`, `apps/api/tests/` and `apps/studio/tests/`. `packages/core/tests/` mirrors `packages/core/src/`.
 - **Mock the `LLMClient` interface** — do not mock individual SDK constructors (`vi.mock('openai')` etc.).
 - **Pure functions** (classifier, overlay math, retry logic) need no mocks.
-- **Processor tests** that need real JPEG files: use `FIXTURES_DIR` from `tests/fixtures/index.ts`. Run `pnpm run fixtures` first if the directory is absent.
-- `src/cli/`, `src/index.ts`, and `src/analyzer/client.ts` are intentionally excluded from coverage (integration territory).
+- **Processor tests** that need real JPEG files: use `FIXTURES_DIR` from `packages/core/tests/fixtures/index.ts`. Run `pnpm run fixtures` first if the directory is absent.
+- Coverage is measured over `packages/core/src/` only; the excluded files (top-level orchestration, the LLM integration boundary, the reporter and fs adapters, the terminal-UI helper and the type-only file) are listed in `vitest.config.ts`.
 
 ```bash
 # Run all tests
 pnpm test
 
 # Run a single file
-pnpm exec vitest run tests/utils/exif.test.ts
+pnpm exec vitest run packages/core/tests/utils/exif.test.ts
 
 # Run with coverage
 pnpm run test:coverage
@@ -232,10 +237,11 @@ Before opening a PR, ensure all of the following pass locally:
 - [ ] `pnpm run typecheck` — zero TypeScript errors
 - [ ] `pnpm exec tsc -p scripts/tsconfig.json --noEmit` — zero TypeScript errors in scripts/
 - [ ] `pnpm run test:coverage` — all tests pass, coverage thresholds met
-- [ ] No LLM SDK imported outside `src/analyzer/providers/*.ts`
-- [ ] No `sharp` imported outside `src/processor/` and `src/analyzer/batch.ts`, `dedup.ts`, `async-batch.ts`
+- [ ] `pnpm run check:boundaries` — the LLM-SDK boundary rule still fires
+- [ ] No LLM SDK imported outside `packages/core/src/analyzer/providers/*.ts` (sole exception: `packages/core/src/analyzer/embeddings.ts`, which may import `openai` and `@google/generative-ai`)
+- [ ] No `sharp` imported outside `packages/core/src/processor/exporter.ts` and `packages/core/src/analyzer/batch.ts`, `packages/core/src/analyzer/dedup.ts`, `packages/core/src/analyzer/async-batch.ts`, `packages/core/src/analyzer/router.ts`, `packages/core/src/analyzer/suggest.ts`, `packages/core/src/analyzer/index.ts`
 - [ ] All relative imports use `.js` extension
-- [ ] No new `console.log` outside `src/utils/logger.ts` and `src/utils/progress.ts`
+- [ ] No new `console.log` outside `packages/core/src/utils/logger.ts` and `packages/core/src/utils/progress.ts`
 - [ ] No API keys hardcoded or logged
 - [ ] All `makeConfig()` fixtures include every new Config field
 

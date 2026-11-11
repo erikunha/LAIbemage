@@ -5,8 +5,8 @@
  * ## What the command does
  *
  * Reads a legacy run file (`analysis_results.json` and its historical
- * variants), maps it onto the domain model and writes it into the Master
- * Vision store. The originals are never touched: the run file and the image
+ * variants), maps it onto the domain model and writes it into the Vision
+ * Lens store. The originals are never touched: the run file and the image
  * bytes are read-only, and the only thing written is the target database.
  *
  * ## The flags

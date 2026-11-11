@@ -360,6 +360,18 @@ export async function runBenchmarkGateCommand(
     ...(modelVersion === undefined ? {} : { modelVersion }),
     metrics,
     partial,
+    // The baseline is the TRACKED artifact — the run report under
+    // `benchmarks/results/` is gitignored — so the baseline records the
+    // reproduction tuple of the run it was recorded from.
+    attribution: {
+      ...(report.tuple.snapshotId === undefined ? {} : { snapshotId: report.tuple.snapshotId }),
+      ...(report.tuple.splitFingerprint === undefined
+        ? {}
+        : { splitFingerprint: report.tuple.splitFingerprint }),
+      ...(report.tuple.configFingerprint === undefined
+        ? {}
+        : { configFingerprint: report.tuple.configFingerprint }),
+    },
     ...(options.tolerance === undefined ? {} : { tolerance: options.tolerance }),
     ...(options.baselinePath === undefined ? {} : { baselinePath: options.baselinePath }),
     ...(options.updateBaseline === undefined

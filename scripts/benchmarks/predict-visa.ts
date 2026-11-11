@@ -151,6 +151,28 @@ export interface PredictionRowOptions {
 }
 
 /**
+ * Whether a result is the analyzer's padding for a batch that FAILED.
+ *
+ * When a provider call fails for good, the analyzer pads the batch with
+ * `unknown` / confidence 0 / "unanalyzed image" and carries on — the CLI's
+ * sweep wants the other images to survive. A benchmark run wants the opposite:
+ * a batch the provider never answered is a MISSING MEASUREMENT, and writing
+ * it as an ordinary prediction would turn an outage into a score.
+ *
+ * The marker is the analyzer's own padding literal
+ * (`packages/core/src/analyzer/batch.ts`); a model that REFUSES to classify
+ * an image answers `unknown` with a real description and a real confidence,
+ * and that answer is recorded verbatim — it is a measurement.
+ */
+export function isAnalyzerFailure(result: AnalysisResult): boolean {
+  return (
+    result.category === 'unknown' &&
+    result.confidence === 0 &&
+    result.shortDescription === 'unanalyzed image'
+  );
+}
+
+/**
  * Turns the analyzer's results into the prediction rows the benchmark scores.
  *
  * The model's answer is recorded AS GIVEN — a wrong answer is a wrong
@@ -180,6 +202,13 @@ export function buildPredictionItems(options: PredictionRowOptions): PredictionI
 
   return assignments.map((assignment, index) => {
     const result = results[index] as AnalysisResult;
+    if (isAnalyzerFailure(result)) {
+      throw new Error(
+        `the provider failed for the batch that carries '${assignment.id}' — the analyzer ` +
+          'padded it with unknown. A benchmark run over an incomplete measurement is not a ' +
+          'baseline: no prediction file is written. Retry the run, or mark it partial.',
+      );
+    }
     // A category the taxonomy knows maps to its gold label key; a category it
     // does not know is recorded under its own (already normalised) name.
     const labelKey = labelKeyByName.get(result.category) ?? result.category;

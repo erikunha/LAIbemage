@@ -163,6 +163,12 @@ describe('the tracked registry', () => {
     // the multipart ETag (which carries a part count, not a content hash).
     expect(entry.sha256).toMatch(/^[0-9a-f]{64}$/);
     expect(entry.sha256).not.toBe(entry.etag);
+    // The exact digest of the dated release archive, reproducible with
+    // `pnpm exec tsx scripts/datasets/fetch-visa.ts --check`. A well-formed
+    // but wrong digest would still be a fabricated checksum.
+    expect(entry.sha256).toBe(
+      '2eb8690c803ab37de0324772964100169ec8ba1fa3f7e94291c9ca673f40f362',
+    );
     expect(entry.sha256PinnedAt).not.toBeNull();
     expect(entry.fetchedAt).not.toBeNull();
     expect(isPinned(entry)).toBe(true);

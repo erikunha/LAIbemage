@@ -482,6 +482,18 @@ export async function runBenchmark(options: RunBenchmarkOptions): Promise<Benchm
         'A partial run is never compared against a baseline by the gate.',
     );
   }
+  // An answer outside the gold vocabulary is scored as the miss it is, but it
+  // must not pass silently: a report that says "no caveats" while a tenth of
+  // the images were refused by the model would be a misleading report.
+  const unseen = metrics.unseenPredictedLabels;
+  if (unseen.length > 0) {
+    const total = unseen.reduce((sum, entry) => sum + entry.count, 0);
+    caveats.push(
+      `${total} item(s) were answered with a label outside the gold vocabulary ` +
+        `(${unseen.map((entry) => `${entry.labelKey} × ${entry.count}`).join(', ')}). ` +
+        'They are scored as misses — the model did not classify those images.',
+    );
+  }
   caveats.push(...(options.caveats ?? []));
 
   const runId = computeRunId(

@@ -311,6 +311,32 @@ describe('evaluateGate', () => {
     expect(entry?.generatedAt).toBe('2026-03-04T05:06:07.000Z');
   });
 
+  it('records the reproduction tuple in the baseline — the tracked artifact must be attributable', () => {
+    // The run report under `benchmarks/results/` is gitignored; the baseline
+    // is the TRACKED artifact, so it has to name the snapshot, the split and
+    // the config the number belongs to (ADR-008).
+    const { metrics } = buildRun(8);
+    evaluateGate({
+      suite: 'synthetic',
+      model: 'demo',
+      metrics,
+      baselinePath,
+      updateBaseline: true,
+      attribution: {
+        snapshotId: 'abc123',
+        splitFingerprint: 'split-hash',
+        configFingerprint: 'fp2:deadbeefdeadbeef',
+      },
+      now: new Date('2026-03-04T05:06:07.000Z'),
+    });
+
+    const file = readBaselineFile(baselinePath) as BaselineFile;
+    const entry = findBaselineEntry(file, 'synthetic', 'demo');
+    expect(entry?.snapshotId).toBe('abc123');
+    expect(entry?.splitFingerprint).toBe('split-hash');
+    expect(entry?.configFingerprint).toBe('fp2:deadbeefdeadbeef');
+  });
+
   it('refuses a baseline update larger than the review threshold without force', () => {
     const { metrics } = buildRun(8);
     writeBaselineFile(baselinePath, {

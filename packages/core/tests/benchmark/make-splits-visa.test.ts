@@ -184,6 +184,14 @@ describe('the upstream label vocabulary', () => {
     ).toThrow(/normal.*Anomaly|Anomaly.*normal/s);
   });
 
+  it('FAILS LOUDLY when the path names BOTH a Normal and an Anomaly directory', () => {
+    // A path that contradicts itself must not silently DISABLE the
+    // cross-check: that is exactly the case the check exists to catch.
+    expect(() =>
+      mapLabelToAnomaly('chunk of wax missing', 'Data/Images/Anomaly/Normal/000.JPG'),
+    ).toThrow(/BOTH a Normal and an Anomaly/);
+  });
+
   it('lets the label decide when the path carries no Normal/Anomaly segment', () => {
     expect(mapLabelToAnomaly('chunk of wax missing', 'flat/000.JPG')).toBe('anomalous');
     expect(mapLabelToAnomaly('normal', 'flat/000.JPG')).toBe('normal');

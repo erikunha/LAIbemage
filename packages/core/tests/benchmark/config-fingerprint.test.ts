@@ -1,3 +1,5 @@
+import path from 'node:path';
+import { fileURLToPath } from 'node:url';
 import { describe, expect, it } from 'vitest';
 import {
   computeConfigFingerprint,
@@ -39,6 +41,14 @@ function manifestWith(classes: readonly string[]): SplitManifest {
     manifestHash: 'c'.repeat(64),
   } as unknown as SplitManifest;
 }
+
+const REPO_ROOT = path.resolve(
+  path.dirname(fileURLToPath(import.meta.url)),
+  '..',
+  '..',
+  '..',
+  '..',
+);
 
 const baseInput = {
   provider: 'openai',
@@ -117,5 +127,16 @@ describe('computeConfigFingerprint', () => {
     const serialized = JSON.stringify(result.components);
     expect(serialized).not.toMatch(/\d{4}-\d{2}-\d{2}T/);
     expect(serialized).not.toContain('/Users/');
+  });
+});
+
+describe('the config fingerprint CLI', () => {
+  it('refuses to compute a fingerprint without a model version', async () => {
+    const { main } = await import(
+      '../../../../scripts/benchmarks/config-fingerprint.js'
+    );
+    await expect(
+      main(['--split', path.join(REPO_ROOT, 'benchmarks/splits/synthetic-30.gold.json')]),
+    ).rejects.toThrow(/model-version/);
   });
 });

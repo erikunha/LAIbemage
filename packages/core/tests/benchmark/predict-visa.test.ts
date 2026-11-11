@@ -16,7 +16,7 @@
  *  - that a full run writes exactly one prediction row per gold assignment.
  */
 
-import { mkdtempSync, readFileSync, rmSync, writeFileSync } from 'node:fs';
+import { existsSync, mkdtempSync, readFileSync, rmSync, writeFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
@@ -265,22 +265,47 @@ describe('buildPredictionItems', () => {
     expect(predictions[0]?.labelKey).toBe('kitchen');
   });
 
-  it('records an "unknown" answer under its own name', () => {
+  it('records a model REFUSAL ("unknown") under its own name', () => {
+    // A model that answers "unknown" WITH a description and a confidence has
+    // refused to classify the image — that is a measurement, and it is
+    // recorded as the miss it is.
     const predictions = buildPredictionItems({
       assignments,
       results: [
         {
           category: 'unknown',
-          shortDescription: 'unanalyzed image',
+          shortDescription: 'the specimen cannot be identified',
           fullDescription: '',
           elements: [],
-          confidence: 0,
+          confidence: 0.2,
           extractedText: null,
         },
       ],
       labelKeyByName,
     });
     expect(predictions[0]?.labelKey).toBe('unknown');
+  });
+
+  it('refuses a batch the analyzer PADDED after a provider failure', () => {
+    // The analyzer pads a batch it could not get answered with this exact
+    // shape. A benchmark run over an incomplete measurement is not a
+    // baseline, so the run fails loudly instead of scoring the padding.
+    expect(() =>
+      buildPredictionItems({
+        assignments,
+        results: [
+          {
+            category: 'unknown',
+            shortDescription: 'unanalyzed image',
+            fullDescription: '',
+            elements: [],
+            confidence: 0,
+            extractedText: null,
+          },
+        ],
+        labelKeyByName,
+      }),
+    ).toThrow(/provider failed/);
   });
 
   it('refuses a result count that does not match the assignments', () => {
@@ -486,8 +511,7 @@ describe('a full run against the synthetic fixture', () => {
     expect(new Set(predictions.map((row) => row.labelKey))).toEqual(new Set(['kitchen']));
   });
 
-  it('records "unknown" for a provider that fails outright — the answers are misses, not a crash', async () => {
-    const manifest = readFixtureManifest();
+  it('fails the run when the provider fails outright — an incomplete measurement is not a baseline', async () => {
     const outPath = path.join(workDir, 'predictions.json');
 
     // A provider that fails for good: the analyzer pads the batch with
@@ -499,20 +523,21 @@ describe('a full run against the synthetic fixture', () => {
       }),
     };
 
-    await runPredict({
-      splitPath: FIXTURE_MANIFEST,
-      rootDir: FIXTURE_ROOT,
-      outPath,
-      provider: 'openai',
-      model: 'gpt-4o',
-      apiKey: 'test-key',
-      maxRetries: 1,
-      client: failingClient,
-    });
+    await expect(
+      runPredict({
+        splitPath: FIXTURE_MANIFEST,
+        rootDir: FIXTURE_ROOT,
+        outPath,
+        provider: 'openai',
+        model: 'gpt-4o',
+        apiKey: 'test-key',
+        maxRetries: 1,
+        client: failingClient,
+      }),
+    ).rejects.toThrow(/provider failed/);
 
-    const predictions = JSON.parse(readFileSync(outPath, 'utf8')) as { labelKey: string }[];
-    expect(predictions.length).toBe(manifest.assignments.length);
-    expect(new Set(predictions.map((row) => row.labelKey))).toEqual(new Set(['unknown']));
+    // No prediction file: the run never produced a measurement.
+    expect(existsSync(outPath)).toBe(false);
   }, 30_000);
 
   it('does not write a prediction file when the run fails', async () => {

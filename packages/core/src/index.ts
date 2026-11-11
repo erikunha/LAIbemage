@@ -1,6 +1,6 @@
 import { watch as chokidarWatch, type FSWatcher } from 'chokidar';
 import { CONTRACTS_VERSION, fingerprintV2 } from '@vision-lens/contracts';
-import { PROMPT_TEMPLATE_VERSION } from './benchmark/config-fingerprint.js';
+import { PROMPT_TEMPLATE_VERSION } from './analyzer/prompt-version.js';
 import path from 'node:path';
 import pLimit from 'p-limit';
 import type { FileRepository } from './fs/index.js';

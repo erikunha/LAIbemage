@@ -34,20 +34,12 @@
 
 import { CONTRACTS_VERSION, fingerprintV2 } from '@vision-lens/contracts';
 import { IMAGE_JPEG_QUALITY, IMAGE_RESIZE_PX } from '../analyzer/batch.js';
+import { PROMPT_TEMPLATE_VERSION } from '../analyzer/prompt-version.js';
+
+// Re-exported so the benchmark surface carries the prompt version it hashes.
+export { PROMPT_TEMPLATE_VERSION };
 import type { SplitManifest } from './splits.js';
 import { buildTaxonomy } from './taxonomy.js';
-
-/**
- * The prompt template version of the batch analyzer.
- *
- * Bump it when the text of the analyzer's system prompt changes: the prompt
- * is part of the experiment, and a report that names the wrong prompt
- * version attributes its number to the wrong experiment.
- *
- * The analyzer's own analysis fingerprint uses the same constant — it is
- * imported from here, so the two cannot drift apart.
- */
-export const PROMPT_TEMPLATE_VERSION = 'prompt-v1';
 
 /** The default number of images per LLM call in a benchmark run. */
 export const DEFAULT_BENCHMARK_BATCH_SIZE = 20;

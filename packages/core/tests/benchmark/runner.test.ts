@@ -323,6 +323,34 @@ describe('runBenchmark', () => {
 });
 
 describe('renderMarkdownReport', () => {
+  it('CAVEATS an answer outside the gold vocabulary — a refused image is never silent', async () => {
+    const items = makeItems(6);
+    const gold = goldFrom(items);
+    const predictions: PredictionItem[] = gold.map((item, index) => ({
+      id: item.id,
+      labelKey: index === 0 ? 'unknown' : item.labelKey,
+      probability: index === 0 ? 0.2 : 0.9,
+    }));
+
+    const result = await runBenchmark({
+      suite: 'synthetic',
+      model: 'demo',
+      gold,
+      predictions,
+      tuple: TUPLE,
+      splitManifest: generateSplitManifest({
+        id: 'test.gold',
+        datasetId: 'test',
+        seed: 42,
+        items,
+      }),
+      assetHashes: new Map(),
+    });
+
+    expect(result.caveats.join(' ')).toMatch(/outside the gold vocabulary/i);
+    expect(result.caveats.join(' ')).toMatch(/unknown/);
+  });
+
   it('lists the caveats instead of hiding them', async () => {
     const report = {
       schemaVersion: 1,

@@ -75,6 +75,20 @@ export interface BaselineEntry {
   readonly perClass: Readonly<Record<string, number>>;
   readonly balancedAccuracy?: number;
   readonly ece?: number;
+  /**
+   * The code snapshot the baseline was recorded from.
+   *
+   * ADR-008: every metric artifact must resolve the snapshot, the split and
+   * the config that produced it. The baseline is the TRACKED artifact — the
+   * run report under `benchmarks/results/` is gitignored — so the baseline
+   * itself has to carry the attribution, or the number in the repository
+   * cannot be traced back to the experiment that produced it.
+   */
+  readonly snapshotId?: string;
+  /** The split fingerprint (the manifest hash) of the recorded run. */
+  readonly splitFingerprint?: string;
+  /** The config fingerprint of the recorded run. */
+  readonly configFingerprint?: string;
   /** The date the entry was recorded (ISO 8601). */
   readonly generatedAt: string;
 }
@@ -129,6 +143,18 @@ export interface GateOptions {
   readonly modelVersion?: string;
   /** The metrics of the run being gated. */
   readonly metrics: MetricsResult;
+  /**
+   * The reproduction tuple of the run being gated.
+   *
+   * It is recorded in the baseline when the baseline is written, so the
+   * tracked baseline names the snapshot, the split and the config the number
+   * belongs to.
+   */
+  readonly attribution?: {
+    readonly snapshotId?: string;
+    readonly splitFingerprint?: string;
+    readonly configFingerprint?: string;
+  };
   /** Whether the run is partial. A partial run is skipped. */
   readonly partial?: boolean;
   /** The regression tolerance. Defaults to −0.02. */
@@ -326,6 +352,15 @@ export function evaluateGate(options: GateOptions): GateResult {
       ),
       balancedAccuracy: options.metrics.balancedAccuracy,
       ece: undefined,
+      ...(options.attribution?.snapshotId === undefined
+        ? {}
+        : { snapshotId: options.attribution.snapshotId }),
+      ...(options.attribution?.splitFingerprint === undefined
+        ? {}
+        : { splitFingerprint: options.attribution.splitFingerprint }),
+      ...(options.attribution?.configFingerprint === undefined
+        ? {}
+        : { configFingerprint: options.attribution.configFingerprint }),
       generatedAt: now.toISOString(),
     };
 

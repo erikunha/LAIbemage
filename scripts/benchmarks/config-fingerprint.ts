@@ -59,7 +59,7 @@ Options:
   --split <file>          the gold split manifest (required)
   --provider <name>       the provider that served the model (default: openai)
   --model <name>          the model id (default: the provider's default model)
-  --model-version <ver>   the version (bare '2024-11-20' or 'model:gpt-4o@2024-11-20')
+  --model-version <ver>   the version (REQUIRED; bare '2024-11-20' or 'model:gpt-4o@2024-11-20')
   --batch-size <n>        images per LLM call (default: ${DEFAULT_BENCHMARK_BATCH_SIZE})
   --out <file>            also write the fingerprint and its components as JSON
 
@@ -133,10 +133,17 @@ export async function runFingerprint(options: FingerprintCliOptions): Promise<st
   const manifest = readManifest(options.splitPath);
   const provider = options.provider;
   const model = options.model ?? DEFAULT_MODEL[provider] ?? 'gpt-4o';
-  const modelVersion = formatModelVersion(
-    model,
-    options.modelVersion ?? 'unknown',
-  );
+  if (options.modelVersion === undefined || options.modelVersion.trim().length === 0) {
+    // A fingerprint computed for an UNKNOWN model version would be attached to
+    // a run of any version without complaint — exactly the defect this module
+    // exists to remove.
+    throw new Error(
+      '--model-version is required: a fingerprint that does not name the model version ' +
+        'describes no experiment. Pass the bare version (2024-11-20) or the complete ' +
+        'string (model:gpt-4o@2024-11-20).',
+    );
+  }
+  const modelVersion = formatModelVersion(model, options.modelVersion);
 
   const registry = await loadDatasetRegistry(REGISTRY_PATH);
   // `findDataset` throws when the id is unknown — the registry is the only
@@ -191,9 +198,13 @@ export async function main(argv: readonly string[]): Promise<void> {
     return;
   }
   if (values.split === undefined) {
-    process.stderr.write(USAGE);
-    process.exitCode = 1;
-    return;
+    throw new Error(`--split is required.\n\n${USAGE}`);
+  }
+  if (values['model-version'] === undefined) {
+    throw new Error(
+      '--model-version is required: a fingerprint that does not name the model version ' +
+        `describes no experiment.\n\n${USAGE}`,
+    );
   }
 
   const batchSize = values['batch-size'];

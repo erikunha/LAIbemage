@@ -81,6 +81,8 @@ Options:
   --layout <visa|flat>  dataset layout (default: visa)
   --target-images <n>   split the subset the normaliser selects for the same
                         tree (visa layout only) instead of every CSV row
+  --parts <a,b,c>       only these object classes (mirrors
+                        normalize-visa.ts --parts)
   --ratios <t,v,t>      train/val/test ratios (default: 0.6,0.2,0.2)
   --notes <file>        JSON array of {id, reason} — known-bad items
   --groups-file <file>  JSON map of relative image path -> capture-group key
@@ -182,6 +184,12 @@ export interface EnumerateSplitItemsOptions {
    * one subset. Without it, every row of every CSV is split.
    */
   readonly targetImages?: number;
+  /**
+   * The object classes to enumerate. Defaults to every class found under the
+   * root; it mirrors `normalize-visa.ts --parts`, so a part-restricted
+   * normalisation and a part-restricted manifest describe the same subset.
+   */
+  readonly parts?: readonly string[];
 }
 
 async function fileSha256(absolutePath: string): Promise<string> {
@@ -242,18 +250,31 @@ export async function resolveImageCell(
 }
 
 /**
- * The anomaly label the image's own directory claims, or `null` when the path
- * carries no `Normal`/`Anomaly` segment.
+ * What the image's own path says about it.
+ *
+ * - `none`    — the path carries no `Normal`/`Anomaly` segment, so the
+ *               directory cannot corroborate the label;
+ * - `value`   — the path names one bucket;
+ * - `conflict`— the path names BOTH buckets, which is impossible for one
+ *               image. Silently treating that as "no information" would
+ *               disable the cross-check exactly where it matters most, so it
+ *               is reported as the contradiction it is.
  */
-function anomalyFromPath(relativePath: string): AnomalyLabel | null {
+type PathAnomaly =
+  | { readonly kind: 'none' }
+  | { readonly kind: 'value'; readonly anomaly: AnomalyLabel }
+  | { readonly kind: 'conflict' };
+
+function anomalyFromPath(relativePath: string): PathAnomaly {
   let result: AnomalyLabel | null = null;
   for (const segment of relativePath.split(/[\\/]/)) {
     const lowered = segment.toLowerCase();
     if (lowered !== 'normal' && lowered !== 'anomaly') continue;
-    if (result !== null && result !== lowered) return null;
-    result = lowered === 'normal' ? 'normal' : 'anomalous';
+    const anomaly: AnomalyLabel = lowered === 'normal' ? 'normal' : 'anomalous';
+    if (result !== null && result !== anomaly) return { kind: 'conflict' };
+    result = anomaly;
   }
-  return result;
+  return result === null ? { kind: 'none' } : { kind: 'value', anomaly: result };
 }
 
 /**
@@ -289,10 +310,16 @@ export function mapLabelToAnomaly(label: string, relativePath: string): AnomalyL
   }
 
   const fromPath = anomalyFromPath(relativePath);
-  if (fromPath !== null && fromPath !== fromLabel) {
+  if (fromPath.kind === 'conflict') {
+    throw new Error(
+      `the path '${relativePath}' names BOTH a Normal and an Anomaly directory — ` +
+        `the image's own location contradicts itself (the label says ${fromLabel})`,
+    );
+  }
+  if (fromPath.kind === 'value' && fromPath.anomaly !== fromLabel) {
     throw new Error(
       `label '${trimmed}' contradicts the image directory '${relativePath}' — ` +
-        `the Normal/Anomaly directory says ${fromPath}, the label says ${fromLabel}`,
+        `the Normal/Anomaly directory says ${fromPath.anomaly}, the label says ${fromLabel}`,
     );
   }
   return fromLabel;
@@ -472,10 +499,21 @@ async function enumerateSubset(
   root: string,
   target: number,
   groupsOverride: ReadonlyMap<string, string>,
+  onlyParts?: readonly string[],
 ): Promise<EnumeratedSplitItem[]> {
-  const parts = await listPartDirectories(root);
-  if (parts.length === 0) {
+  const available = await listPartDirectories(root);
+  if (available.length === 0) {
     throw new Error(`no VisA object class directories found under '${root}'`);
+  }
+  // An explicit part list mirrors `normalize-visa.ts --parts`: the manifest
+  // then describes the SAME subset as a part-restricted normalisation.
+  const parts = onlyParts === undefined || onlyParts.length === 0 ? available : [...onlyParts].sort();
+  for (const part of parts) {
+    if (!available.includes(part)) {
+      throw new Error(
+        `the object class '${part}' is not present under '${root}' (found: ${available.join(', ')})`,
+      );
+    }
   }
 
   const partData = await collectVisaPartData(root, parts);
@@ -514,8 +552,12 @@ async function enumerateSubset(
     // defectType), and the operator is told about it.
     const emptyLabel = label !== undefined && label.trim().length === 0;
     const effectiveLabel = label ?? 'normal';
+    // The empty label cell is an anomaly without a defect type (the store
+    // keys it 'defect:unlabeled'), and the DIRECTORY still has the final
+    // word: an empty label on an image that sits in the Normal bucket is a
+    // contradiction, not an anomaly.
     const anomaly: AnomalyLabel = emptyLabel
-      ? 'anomalous'
+      ? assertDirectorySaysAnomaly(entry.image.relativePath, effectiveLabel)
       : mapLabelToAnomaly(effectiveLabel, entry.image.relativePath);
     if (emptyLabel) unlabeled.push(relative);
 
@@ -541,6 +583,31 @@ async function enumerateSubset(
 }
 
 /**
+ * The anomaly an empty label cell implies, cross-checked against the image's
+ * own directory.
+ *
+ * @throws when the directory says the image is normal — an empty label on a
+ *   normal image is a contradiction, not an anomaly.
+ */
+function assertDirectorySaysAnomaly(relativePath: string, label: string): AnomalyLabel {
+  const fromPath = anomalyFromPath(relativePath);
+  if (fromPath.kind === 'conflict') {
+    throw new Error(
+      `the path '${relativePath}' names BOTH a Normal and an Anomaly directory — ` +
+        'the image\'s own location contradicts itself',
+    );
+  }
+  if (fromPath.kind === 'value' && fromPath.anomaly !== 'anomalous') {
+    throw new Error(
+      `the empty label of '${relativePath}' contradicts the image directory — ` +
+        `the directory says ${fromPath.anomaly}, an empty label cell means an anomaly ` +
+        `(the label cell was '${label}')`,
+    );
+  }
+  return 'anomalous';
+}
+
+/**
  * Enumerates the items of a dataset root.
  *
  * @throws {Error} when an image cell is ambiguous or missing, when a label
@@ -559,7 +626,7 @@ export async function enumerateSplitItems(
           'has no object classes to subset',
       );
     }
-    return enumerateSubset(root, options.targetImages, groupsOverride);
+    return enumerateSubset(root, options.targetImages, groupsOverride, options.parts);
   }
   return enumerateEveryRow(root, options.layout, groupsOverride);
 }
@@ -578,6 +645,7 @@ async function main(): Promise<void> {
       id: { type: 'string' },
       layout: { type: 'string' },
       'target-images': { type: 'string' },
+      parts: { type: 'string' },
       ratios: { type: 'string' },
       notes: { type: 'string' },
       'groups-file': { type: 'string' },
@@ -606,6 +674,14 @@ async function main(): Promise<void> {
     }
   }
 
+  const parts =
+    values.parts === undefined
+      ? undefined
+      : values.parts
+          .split(',')
+          .map((part) => part.trim())
+          .filter((part) => part.length > 0);
+
   const ratios: SplitRatios = values.ratios
     ? (() => {
         const parts = values.ratios.split(',').map((part) => Number.parseFloat(part.trim()));
@@ -623,7 +699,13 @@ async function main(): Promise<void> {
   const notes = values.notes ? await readJson<SplitNote[]>(values.notes) : [];
 
   const root = path.resolve(values.root);
-  const items = await enumerateSplitItems({ root, layout, groupsOverride, targetImages });
+  const items = await enumerateSplitItems({
+    root,
+    layout,
+    groupsOverride,
+    targetImages,
+    ...(parts === undefined ? {} : { parts }),
+  });
 
   const manifest = generateSplitManifest({
     id: values.id ?? `${values.dataset}.gold`,

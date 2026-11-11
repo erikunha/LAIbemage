@@ -454,6 +454,36 @@ program
     }
   });
 
+// Import-run subcommand (spec 002, task 4.3)
+program
+  .command('import-run <path>')
+  .description('Import a legacy analysis_results.json run into the Master Vision store')
+  .option('--dry-run', 'Print the mapping counts without writing anything', false)
+  .option('--db <path>', 'Path of the target store database (default: the store default path)')
+  .action(async (runPath: string, opts: Record<string, string | boolean>, cmd: Command) => {
+    try {
+      // The root program ALSO defines --dry-run (for the batch run), and
+      // Commander lets the PARENT consume an option that appears after a
+      // subcommand name. The flag is therefore read from both places, so
+      // `laib import-run <path> --dry-run` is a preview whichever way the
+      // flag is written.
+      const parent = (cmd.parent?.opts() ?? {}) as Record<string, string | boolean>;
+      const dryRun = Boolean(opts['dryRun']) || Boolean(parent['dryRun']);
+
+      // Loaded lazily: better-sqlite3 is an optional native dependency and
+      // must not be loaded by the commands that do not need it.
+      const { runImportRun } = await import('./commands/import-run.js');
+      await runImportRun({
+        runPath,
+        dbPath: opts['db'] as string | undefined,
+        dryRun,
+      });
+    } catch (error) {
+      logger.error(String((error as Error).message));
+      process.exit(1);
+    }
+  });
+
 program.parseAsync(process.argv);
 
 // Exported for the `@master-vision/sdk/cli` re-export shim (library consumers

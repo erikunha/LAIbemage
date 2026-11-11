@@ -7,6 +7,7 @@ ${chalk.bold('ai-image-labeling')} — AI-powered image classification and organ
 ${chalk.bold('USAGE')}
   ai-image-labeling [OPTIONS]
   ai-image-labeling diff <before> <after> [--output-format json]
+  ai-image-labeling import-run <path> [--dry-run] [--db <path>]
   ai-image-labeling suggest-categories [OPTIONS]
   ai-image-labeling serve [OPTIONS]
   ai-image-labeling reorder
@@ -102,6 +103,21 @@ ${chalk.bold('SEARCH SUBCOMMAND')}
   Examples:
     ${chalk.cyan('ai-image-labeling search --query "kitchen with modern appliances" --top 10')}
     ${chalk.cyan('ai-image-labeling search --keyword "crack" --top 20')}
+
+${chalk.bold('IMPORT-RUN SUBCOMMAND')}
+  ai-image-labeling import-run <path> [--dry-run] [--db <path>]
+
+  Import a legacy analysis run (analysis_results.json and its historical variants) into the
+  Master Vision store: assets, samples, predictions, the human overrides, the capture
+  sessions, the taxonomy and the run itself. The originals are never modified, and
+  importing the same run twice writes nothing.
+
+  --dry-run       Print the mapping counts without writing anything
+  --db   <path>   Target store database (default: the store's default path)
+
+  Examples:
+    ${chalk.cyan('ai-image-labeling import-run ./output/analysis_results.json --dry-run')}
+    ${chalk.cyan('ai-image-labeling import-run ./output/analysis_results.json --db ./store.db')}
 
 ${chalk.bold('SUGGEST-CATEGORIES SUBCOMMAND')}
   ai-image-labeling suggest-categories [OPTIONS]

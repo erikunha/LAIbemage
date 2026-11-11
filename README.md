@@ -136,6 +136,7 @@ ai-image-labeling report                            # generate report from exist
 ai-image-labeling suggest-categories               # sample N images and propose a categories.json taxonomy
 ai-image-labeling search <query>                    # search classified images by semantic query or keyword
 ai-image-labeling diff <before.json> <after.json>  # compare two analysis_results.json files
+laib import-run <analysis_results.json>             # import a legacy run into the Master Vision store
 ```
 
 ---

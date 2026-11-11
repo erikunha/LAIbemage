@@ -62,29 +62,109 @@ jobs:
 
       # ---------------------------------------------------------------------
       # 1. The real-data gate, when a dataset is available.
+      #
+      # The suite is `visa-subset.v2`: the tracked split of that suite is
+      # `benchmarks/splits/visa-subset.v2.gold.json`, which has a real
+      # held-out partition. The historical baseline of the v1 suite
+      # (`benchmarks/baselines/visa-subset.json`) was RETIRED: it is never
+      # compared and never rewritten, so it cannot fail this job.
       # ---------------------------------------------------------------------
       - name: Real-data gate (skipped without the dataset)
         env:
           VISION_LENS_DATASETS_DIR: ${{ vars.VISION_LENS_DATASETS_DIR }}
         run: |
           set -euo pipefail
+          SUITE=visa-subset.v2
+          MODEL="${VISION_LENS_BENCHMARK_MODEL:-gpt-4o}"
+          SPLIT=benchmarks/splits/visa-subset.v2.gold.json
+          BASELINE=benchmarks/baselines/visa-subset.v2.json
+          PREDICTIONS="benchmarks/predictions/${SUITE}.${MODEL}.json"
+          RESULTS_DIR=/tmp/benchmark-results-real
           if [ -z "${VISION_LENS_DATASETS_DIR}" ] || [ ! -d "${VISION_LENS_DATASETS_DIR}" ]; then
-            echo "dataset=absent — the real-data benchmark gate is SKIPPED."
+            echo "dataset=absent: the real-data benchmark gate is SKIPPED."
             echo "No dataset is downloaded by CI (never auto-download)."
             exit 0
           fi
           echo "dataset=present at ${VISION_LENS_DATASETS_DIR}"
-          if [ ! -f benchmarks/baselines/visa-subset.json ]; then
-            echo "baseline=absent — no baseline is recorded for visa-subset."
-            echo "Record one locally (vision-lens benchmark gate --update-baseline) and commit it."
+          if [ ! -f "${SPLIT}" ]; then
+            echo "split=absent: the tracked split ${SPLIT} is not in the repository."
+            echo "The gate would compare a number against an unknown partition, so it is skipped."
             exit 0
           fi
+          if [ ! -f "${PREDICTIONS}" ]; then
+            echo "predictions=absent: no prediction set is tracked for ${SUITE}/${MODEL}."
+            echo "There is no number to gate, so the gate is skipped (never a fabricated score)."
+            exit 0
+          fi
+          if [ ! -f "${BASELINE}" ]; then
+            echo "baseline=absent: no baseline is recorded for ${SUITE}/${MODEL}."
+            echo "Record one locally (vision-lens benchmark gate --update-baseline) and commit it."
+            echo "The historical baseline benchmarks/baselines/visa-subset.json was RETIRED and is never compared nor rewritten."
+            exit 0
+          fi
+          # The model VERSION is read from the tracked baseline, because the
+          # gate looks its entry up by the (suite, model, model version)
+          # triple (findBaselineEntry in packages/core/src/benchmark/gate.ts)
+          # and takes that version from the artifact it is given
+          # (packages/cli/src/commands/benchmark.ts). A version typed here
+          # would be a guess, and a guess that does not match the recorded
+          # baseline makes the gate skip instead of compare.
+          set +e
+          MODEL_VERSION="$(node -e '
+            const fs = require("node:fs");
+            const [baselinePath, splitPath, suite, model] = process.argv.slice(1);
+            const entries = (JSON.parse(fs.readFileSync(baselinePath, "utf8")).entries ?? [])
+              .filter((entry) => entry.status !== "retired"
+                && entry.suite === suite
+                && entry.model === model
+                && typeof entry.modelVersion === "string"
+                && entry.modelVersion !== "");
+            const manifestHash = JSON.parse(fs.readFileSync(splitPath, "utf8")).manifestHash;
+            const onTrackedSplit = entries.filter((entry) => entry.splitFingerprint === manifestHash);
+            const candidates = onTrackedSplit.length > 0 ? onTrackedSplit : entries;
+            if (candidates.length === 0) process.exit(3);
+            candidates.sort((a, b) => String(b.generatedAt).localeCompare(String(a.generatedAt)));
+            process.stdout.write(candidates[0].modelVersion);
+          ' "${BASELINE}" "${SPLIT}" "${SUITE}" "${MODEL}")"
+          MODEL_VERSION_STATUS=$?
+          set -e
+          if [ "${MODEL_VERSION_STATUS}" -eq 3 ]; then
+            echo "baseline=absent: no active baseline entry for ${SUITE}/${MODEL} in ${BASELINE}."
+            echo "The gate would compare against nothing, so it is skipped (never a fabricated score)."
+            exit 0
+          fi
+          if [ "${MODEL_VERSION_STATUS}" -ne 0 ]; then
+            echo "::error::the baseline file ${BASELINE} could not be read"
+            exit 1
+          fi
+          echo "baseline model version: ${MODEL_VERSION}"
+          # Score the tracked prediction set against the tracked split, so the
+          # gate compares a run of THIS job. The artifact is written outside
+          # the repository: benchmarks/results/ is gitignored and a fresh CI
+          # checkout holds no run artifact at all.
+          rm -rf "${RESULTS_DIR}"
+          node packages/cli/dist/index.js benchmark run \
+            --suite "${SUITE}" \
+            --model-id "${MODEL}" \
+            --split "${SPLIT}" \
+            --predictions "${PREDICTIONS}" \
+            --out "${RESULTS_DIR}" \
+            --min-samples 30 \
+            --config-fingerprint ci-real-data \
+            --model-version "${MODEL_VERSION}"
+          REPORT="$(find "${RESULTS_DIR}" -name report.json -print -quit)"
+          if [ -z "${REPORT}" ]; then
+            echo "::error::the benchmark run wrote no report under ${RESULTS_DIR}"
+            exit 1
+          fi
+          echo "artifact: ${REPORT}"
           # The gate's exit code IS the verdict: a regression fails the job.
-          # The run artifact is the most recent one of the suite.
           node packages/cli/dist/index.js benchmark gate \
-            --suite visa-subset \
-            --model-id "${VISION_LENS_BENCHMARK_MODEL:-default}" \
-            --baseline benchmarks/baselines/visa-subset.json
+            --suite "${SUITE}" \
+            --model-id "${MODEL}" \
+            --split "${SPLIT}" \
+            --metrics "${REPORT}" \
+            --baseline "${BASELINE}"
 
       # ---------------------------------------------------------------------
       # 2. The fixture-scale end-to-end — always runs.
@@ -178,9 +258,10 @@ jobs:
           {
             echo "### Benchmark gate"
             if [ -n "${VISION_LENS_DATASETS_DIR}" ] && [ -d "${VISION_LENS_DATASETS_DIR}" ]; then
-              echo "- Real-data gate: RAN (a dataset is present at ${VISION_LENS_DATASETS_DIR})."
+              echo "- Real-data gate: RAN for the suite visa-subset.v2 (a dataset is present at ${VISION_LENS_DATASETS_DIR})."
+              echo "- The retired baseline of the v1 suite (benchmarks/baselines/visa-subset.json) is never compared nor rewritten."
             else
-              echo "- Real-data gate: SKIPPED — no dataset is present, and CI never downloads one."
+              echo "- Real-data gate: SKIPPED, no dataset is present, and CI never downloads one."
             fi
             echo "- Fixture-scale end-to-end: split → score → artifact → gate."
             echo "- Planted regression: the step above asserts that the gate failed AND named the regressed classes."

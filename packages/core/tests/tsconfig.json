@@ -11,10 +11,14 @@
   //
   // The store suite (spec 002) and the legacy importer are now covered: the
   // importer is new code, and new code lands under the gate.
+  //
+  // The benchmark suite (spec 003) is covered for the same reason: the metrics,
+  // calibration, split, registry, normalisation and runner/gate code is all new.
   "include": [
     "./types.test.ts",
     "./reporter/sqlite-missing.test.ts",
     "./store/**/*.test.ts",
-    "./store/helpers.ts"
+    "./store/helpers.ts",
+    "./benchmark/**/*.test.ts"
   ]
 }

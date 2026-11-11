@@ -1,0 +1,66 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Proposed JobStatus payload — not an implemented contract",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "jobId",
+    "operation",
+    "status",
+    "contractVersion",
+    "createdAt",
+    "attempt",
+    "inputFingerprint"
+  ],
+  "properties": {
+    "jobId": {
+      "type": "string",
+      "minLength": 1
+    },
+    "operation": {
+      "type": "string",
+      "minLength": 1
+    },
+    "status": {
+      "enum": [
+        "created",
+        "queued",
+        "leased",
+        "running",
+        "cancel_requested",
+        "succeeded",
+        "failed",
+        "canceled",
+        "lost",
+        "partial"
+      ]
+    },
+    "contractVersion": {
+      "type": "string"
+    },
+    "createdAt": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "attempt": {
+      "type": "integer",
+      "minimum": 0
+    },
+    "inputFingerprint": {
+      "type": "string",
+      "minLength": 1
+    },
+    "artifactRef": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "errorCode": {
+      "type": [
+        "string",
+        "null"
+      ]
+    }
+  }
+}

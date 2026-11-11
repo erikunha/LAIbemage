@@ -1,0 +1,112 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://vision-lens.example/schemas/worker-event.v1.json",
+  "title": "VisionLens Worker Event v1 (proposal)",
+  "oneOf": [
+    {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "protocol",
+        "kind",
+        "requestId",
+        "seq",
+        "status",
+        "result"
+      ],
+      "properties": {
+        "protocol": {
+          "const": "visionlens.worker.v1"
+        },
+        "kind": {
+          "const": "result"
+        },
+        "requestId": {
+          "type": "string"
+        },
+        "seq": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "status": {
+          "const": "succeeded"
+        },
+        "result": {
+          "type": "object"
+        }
+      }
+    },
+    {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "protocol",
+        "kind",
+        "requestId",
+        "seq",
+        "code",
+        "message",
+        "retryable"
+      ],
+      "properties": {
+        "protocol": {
+          "const": "visionlens.worker.v1"
+        },
+        "kind": {
+          "const": "error"
+        },
+        "requestId": {
+          "type": "string"
+        },
+        "seq": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "code": {
+          "type": "string"
+        },
+        "message": {
+          "type": "string"
+        },
+        "retryable": {
+          "type": "boolean"
+        }
+      }
+    },
+    {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "protocol",
+        "kind",
+        "requestId",
+        "seq",
+        "completed",
+        "total"
+      ],
+      "properties": {
+        "protocol": {
+          "const": "visionlens.worker.v1"
+        },
+        "kind": {
+          "const": "progress"
+        },
+        "requestId": {
+          "type": "string"
+        },
+        "seq": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "completed": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "total": {
+          "type": "integer",
+          "minimum": 0
+        }
+      }
+    }
+  ]
+}

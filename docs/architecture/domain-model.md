@@ -1,7 +1,7 @@
 # Domain Model
 
-> The 14 entities of Master Vision as versioned Zod contracts in
-> `@master-vision/contracts` (spec 002). Status: Active · Date: 2026-11-10 ·
+> The 14 entities of Vision Lens as versioned Zod contracts in
+> `@vision-lens/contracts` (spec 002). Status: Active · Date: 2026-11-10 ·
 > Contract version: `1.0.0` · Plan: `specs/002-domain-model-contracts` (local, untracked
 > per ADR-010).
 
@@ -202,7 +202,7 @@ A manifest is derived from the live schemas and committed at
 `packages/contracts/contract-manifest.json`:
 
 ```bash
-corepack pnpm --filter @master-vision/contracts run manifest:generate
+corepack pnpm --filter @vision-lens/contracts run manifest:generate
 ```
 
 `tests/version-guard.test.ts` then enforces two things:

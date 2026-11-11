@@ -3,7 +3,7 @@
   "datasets": [
     {
       "id": "visa-subset",
-      "title": "VisA (Visual Anomaly) — Master Vision benchmark subset",
+      "title": "VisA (Visual Anomaly) — Vision Lens benchmark subset",
       "usage": "benchmark",
       "license": "CC BY 4.0",
       "licenseUrl": "https://creativecommons.org/licenses/by/4.0/",

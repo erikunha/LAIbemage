@@ -5,43 +5,43 @@ Workspace layout after spec 001 (foundation monorepo): what lives where, which s
 ## Layout
 
 ```text
-ai-image-labeling/            # pnpm + turbo monorepo root (private tooling shell)
+vision-lens/                # pnpm + turbo monorepo root (private tooling shell)
 ├── packages/                 # TypeScript packages (NodeNext ESM, .js import suffixes)
-│   ├── core/                 # @master-vision/core — pipeline, providers, domain services (spec 001)
-│   ├── cli/                  # @master-vision/cli — laib + ai-image-labeling bins (spec 001)
-│   ├── sdk/                  # @master-vision/sdk — public re-export surface (spec 001)
-│   └── contracts/            # @master-vision/contracts — versioned zod schemas (specs 001-002)
+│   ├── core/                 # @vision-lens/core — pipeline, providers, domain services (spec 001)
+│   ├── cli/                  # @vision-lens/cli — vision-lens + ai-image-labeling bins (spec 001)
+│   ├── sdk/                  # @vision-lens/sdk — public re-export surface (spec 001)
+│   └── contracts/            # @vision-lens/contracts — versioned zod schemas (specs 001-002)
 ├── apps/                     # user-facing applications (TypeScript)
-│   ├── api/                  # @master-vision/api-placeholder — jobs service (spec 009)
-│   └── studio/               # @master-vision/studio-placeholder — review UI (spec 010)
+│   ├── api/                  # @vision-lens/api-placeholder — jobs service (spec 009)
+│   └── studio/               # @vision-lens/studio-placeholder — review UI (spec 010)
 └── services/                 # Python services (uv + hatchling, >=3.11, stdlib-only for now)
-    ├── vision/               # master-vision-vision — embeddings + visual search (spec 005)
-    ├── training/             # master-vision-training — training engine (spec 007)
-    └── agents/               # master-vision-agents — agent runtime (spec 012)
+    ├── vision/               # vision-lens-vision — embeddings + visual search (spec 005)
+    ├── training/             # vision-lens-training — training engine (spec 007)
+    └── agents/               # vision-lens-agents — agent runtime (spec 012)
 ```
 
 ## Diagram
 
 ```mermaid
 flowchart TD
-    ROOT["ai-image-labeling<br/>pnpm + turbo monorepo root"]
+    ROOT["vision-lens<br/>pnpm + turbo monorepo root"]
 
     subgraph PKGS["packages/ — TypeScript"]
-        CORE["@master-vision/core<br/>pipeline, providers, domain services<br/>spec 001"]
-        CLI["@master-vision/cli<br/>laib + ai-image-labeling bins<br/>spec 001"]
-        SDK["@master-vision/sdk<br/>public re-export surface<br/>spec 001"]
-        CONTRACTS["@master-vision/contracts<br/>versioned zod schemas<br/>specs 001-002"]
+        CORE["@vision-lens/core<br/>pipeline, providers, domain services<br/>spec 001"]
+        CLI["@vision-lens/cli<br/>vision-lens + ai-image-labeling bins<br/>spec 001"]
+        SDK["@vision-lens/sdk<br/>public re-export surface<br/>spec 001"]
+        CONTRACTS["@vision-lens/contracts<br/>versioned zod schemas<br/>specs 001-002"]
     end
 
     subgraph APPS["apps/ — applications"]
-        API["@master-vision/api-placeholder<br/>jobs service<br/>spec 009"]
-        STUDIO["@master-vision/studio-placeholder<br/>review UI<br/>spec 010"]
+        API["@vision-lens/api-placeholder<br/>jobs service<br/>spec 009"]
+        STUDIO["@vision-lens/studio-placeholder<br/>review UI<br/>spec 010"]
     end
 
     subgraph SVCS["services/ — Python (uv)"]
-        VISION["master-vision-vision<br/>embeddings + visual search<br/>spec 005"]
-        TRAINING["master-vision-training<br/>training engine<br/>spec 007"]
-        AGENTS["master-vision-agents<br/>agent runtime<br/>spec 012"]
+        VISION["vision-lens-vision<br/>embeddings + visual search<br/>spec 005"]
+        TRAINING["vision-lens-training<br/>training engine<br/>spec 007"]
+        AGENTS["vision-lens-agents<br/>agent runtime<br/>spec 012"]
     end
 
     ROOT --> PKGS

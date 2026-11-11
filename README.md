@@ -1,31 +1,35 @@
-# ai-image-labeling
+# Vision Lens
 
 AI-powered image classification, timestamp overlay, and sequential organization — runs entirely from the terminal.
 
-[![CI](https://github.com/erikunha/ai-image-labeling/actions/workflows/ci.yml/badge.svg)](https://github.com/erikunha/ai-image-labeling/actions/workflows/ci.yml)
-[![npm version](https://badge.fury.io/js/ai-image-labeling.svg)](https://www.npmjs.com/package/ai-image-labeling)
+[![CI](https://github.com/erikunha/LAIbemage/actions/workflows/ci.yml/badge.svg)](https://github.com/erikunha/LAIbemage/actions/workflows/ci.yml)
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
 
-> **Master evolution in progress** — this CLI is growing into **Master Vision** (repo stays `erikunha/LAIbemage`), a Visual
+> **Vision Lens evolution in progress** — this CLI is growing into **Vision Lens** (repo stays `erikunha/LAIbemage`), a Visual
 > Intelligence Engineering Workbench: real-dataset benchmarks, visual embeddings and search,
 > model training/evaluation with calibration, a Studio review UI, HTTP API and an MCP server
-> (ADR-005). The `ai-image-labeling` CLI keeps working unchanged throughout. See
-> `docs/architecture/vision-master.md`, `docs/architecture/baseline-audit.md` and
-> `ROADMAP.md`; work lands on the `feat/master-rebirth` branch.
+> (ADR-005). The legacy `ai-image-labeling` CLI keeps working unchanged throughout. See
+> `docs/architecture/vision-lens.md`, `docs/architecture/baseline-audit.md` and
+> `ROADMAP.md`; work lands on the `feat/visual-lens` branch.
 >
-> **Binary names:** `laib` is the canonical bin (`pnpm add -g @master-vision/cli` → `laib`).
+> **Binary names:** `vision-lens` is the canonical bin (`pnpm add -g @vision-lens/cli` → `vision-lens`).
 > The legacy `ai-image-labeling` bin keeps working through a deprecation window of two minor
-> versions — it prints one stderr deprecation line per run, silenced with `LAIB_NO_DEPRECATION=1`.
+> versions — it prints one stderr deprecation line per run, silenced with `VISION_LENS_NO_DEPRECATION=1`.
 > Removal ships as a major version bump per semver; see CHANGELOG.md.
 >
+> **npm packages:** the new identity publishes from the `@vision-lens` scope (`@vision-lens/cli`,
+> `@vision-lens/sdk`, …). Those workspace packages are **not published yet** — until they are,
+> install from a clone (see [Development](#development)). The `ai-image-labeling` bin is kept inside
+> the CLI package as a deprecated alias that points at `vision-lens`.
+>
 > **Decisions:** the architecture decision records live in [`docs/adr/`](docs/adr/) (ADR-005+ cover
-> the Master evolution).
+> the Vision Lens evolution).
 
 ---
 
 ## What it does
 
-Given a folder of unorganized images, `ai-image-labeling`:
+Given a folder of unorganized images, `vision-lens`:
 
 1. Reads EXIF timestamps concurrently from every file
 2. Deduplicates burst frames with perceptual hashing (dHash, Hamming distance)
@@ -60,58 +64,72 @@ What it does **not** do:
 
 ## Quick start
 
+The `@vision-lens/*` packages are **not on npm yet**, so install from a clone:
+
 ```bash
-# Install globally
-pnpm add -g ai-image-labeling
+git clone https://github.com/erikunha/LAIbemage
+cd LAIbemage
+pnpm install
+pnpm run build
 
 # Copy the environment template
 cp .env.example .env
 # Edit .env — set OPENAI_API_KEY (or the key for your chosen provider)
 
+# Run (from the repo root)
+node packages/cli/dist/index.js --input ./my-photos --output ./sorted
+```
+
+Once the packages are published, the global install becomes:
+
+```bash
+# Install globally
+pnpm add -g @vision-lens/cli
+
 # Run
-ai-image-labeling --input ./my-photos --output ./sorted
+vision-lens --input ./my-photos --output ./sorted
 ```
 
 If you prefer not to install globally:
 
 ```bash
-pnpm dlx ai-image-labeling --input ./my-photos --output ./sorted
+pnpm dlx @vision-lens/cli --input ./my-photos --output ./sorted
 ```
 
 ### Provider-specific quick starts
 
 ```bash
 # OpenAI (default)
-ai-image-labeling --api-key sk-...
+vision-lens --api-key sk-...
 
 # Anthropic Claude
-ai-image-labeling --provider anthropic --anthropic-api-key sk-ant-...
+vision-lens --provider anthropic --anthropic-api-key sk-ant-...
 
 # Google Gemini
-ai-image-labeling --provider google --google-api-key AIza...
+vision-lens --provider google --google-api-key AIza...
 
 # Ollama (local, no API key required)
-ai-image-labeling --provider ollama --ollama-url http://localhost:11434
+vision-lens --provider ollama --ollama-url http://localhost:11434
 
 # Hybrid: run Ollama locally, escalate low-confidence images to OpenAI
-ai-image-labeling --provider hybrid \
+vision-lens --provider hybrid \
   --local-model llava \
   --cloud-provider openai --api-key sk-... \
   --local-confidence-threshold 0.70
 
 # Azure OpenAI
-ai-image-labeling --provider azure \
+vision-lens --provider azure \
   --azure-endpoint https://my-resource.openai.azure.com \
   --azure-api-key <key>
 
 # AWS Bedrock
-ai-image-labeling --provider bedrock \
+vision-lens --provider bedrock \
   --bedrock-region us-east-1 \
   --bedrock-access-key-id AKIA... \
   --bedrock-secret-access-key ...
 
 # Google Vertex AI
-ai-image-labeling --provider vertex \
+vision-lens --provider vertex \
   --vertex-project my-gcp-project \
   --vertex-location us-central1
 ```
@@ -138,14 +156,14 @@ Async batch (`--async` / `--resume`) reduces API cost by ~50% for supported prov
 ## Subcommands
 
 ```
-ai-image-labeling [OPTIONS]                         # main classification run
-ai-image-labeling reorder                           # re-number output after manual edits
-ai-image-labeling single <number> <file>            # process one image with a custom sequence number
-ai-image-labeling report                            # generate report from existing analysis_results.json
-ai-image-labeling suggest-categories               # sample N images and propose a categories.json taxonomy
-ai-image-labeling search <query>                    # search classified images by semantic query or keyword
-ai-image-labeling diff <before.json> <after.json>  # compare two analysis_results.json files
-laib import-run <analysis_results.json>             # import a legacy run into the Master Vision store
+vision-lens [OPTIONS]                           # main classification run
+vision-lens reorder                             # re-number output after manual edits
+vision-lens single <number> <file>              # process one image with a custom sequence number
+vision-lens report                              # generate report from existing analysis_results.json
+vision-lens suggest-categories                  # sample N images and propose a categories.json taxonomy
+vision-lens search <query>                      # search classified images by semantic query or keyword
+vision-lens diff <before.json> <after.json>     # compare two analysis_results.json files
+vision-lens import-run <analysis_results.json>  # import a legacy run into the Vision Lens store
 ```
 
 ---
@@ -281,7 +299,7 @@ Default template: `{n}. {description} dated {date}.{ext}`
 Example with custom template:
 
 ```bash
-ai-image-labeling --filename-template '{n:4}_{category}_{date:YYYY-MM-DD}.{ext}'
+vision-lens --filename-template '{n:4}_{category}_{date:YYYY-MM-DD}.{ext}'
 # → 0001_kitchen_2026-05-09.jpeg
 ```
 
@@ -289,11 +307,11 @@ ai-image-labeling --filename-template '{n:4}_{category}_{date:YYYY-MM-DD}.{ext}'
 
 ## Custom categories
 
-`ai-image-labeling` is domain-agnostic — the classification taxonomy is entirely driven by `categories.json`. The default config is in `examples/categories.json`.
+`vision-lens` is domain-agnostic — the classification taxonomy is entirely driven by `categories.json`. The default config is in `examples/categories.json`.
 
 ```bash
 cp examples/categories-ecommerce.json my-categories.json
-ai-image-labeling --categories my-categories.json
+vision-lens --categories my-categories.json
 ```
 
 Schema:
@@ -329,10 +347,10 @@ For supported providers (`openai`, `anthropic`, `azure`), you can submit images 
 
 ```bash
 # Step 1: submit and exit (writes analysis_job.json)
-ai-image-labeling --async --input ./photos
+vision-lens --async --input ./photos
 
 # Step 2: poll until complete, then process normally
-ai-image-labeling --resume --input ./photos --output ./sorted
+vision-lens --resume --input ./photos --output ./sorted
 ```
 
 If the batch job fails, delete `analysis_job.json` and re-run without `--async`.
@@ -355,7 +373,7 @@ Results are cached to `analysis_results.json`. Re-runs with `--skip-analysis` ma
 Use `--estimate` to print a cost projection before running:
 
 ```bash
-ai-image-labeling --estimate --input ./photos
+vision-lens --estimate --input ./photos
 ```
 
 ---
@@ -403,7 +421,7 @@ Key modules:
 
 ## SDK usage
 
-`ai-image-labeling` exports a TypeScript SDK for programmatic use:
+`@vision-lens/sdk` exports a TypeScript SDK for programmatic use:
 
 ```typescript
 import {
@@ -422,7 +440,7 @@ import {
   MemoryFileRepository,
   CACHE_SCHEMA_VERSION,
   PLUGIN_API_VERSION,
-} from 'ai-image-labeling';
+} from '@vision-lens/sdk';
 
 const config = await loadConfig({ inputDir: './photos', outputDir: './sorted' });
 await runBatch(config);
@@ -460,8 +478,8 @@ docs/              Plugin API reference, architecture notes
 ## Development
 
 ```bash
-git clone https://github.com/erikunha/ai-image-labeling
-cd ai-image-labeling
+git clone https://github.com/erikunha/LAIbemage
+cd LAIbemage
 pnpm install
 cp .env.example .env  # add at least one provider API key
 

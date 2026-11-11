@@ -1,4 +1,4 @@
-# AGENTS.md — AI Agent Guidance for ai-image-labeling
+# AGENTS.md — AI Agent Guidance for Vision Lens
 
 This file guides AI coding agents (Claude Code, GitHub Copilot, etc.) working in this repository.
 
@@ -37,10 +37,10 @@ pnpm run check          # lint + typecheck + coverage (full pre-PR suite)
 | `packages/core/src/plugin/` | utils/, types | any LLM SDK, Sharp, fs-extra, analyzer/, processor/ |
 | `packages/core/src/fs/` | Node stdlib, cloud SDKs (per adapter) | LLM SDKs, Sharp, analyzer/ |
 | `packages/core/src/index.ts` | all `packages/core/src/` modules | external packages directly |
-| `packages/cli/src/` | `@master-vision/core` subpaths from its exports map (`.`, `/config`, `/utils/logger`, …), commander, chalk | any LLM SDK, core internals not on the exports map, processor/analyzer implementation details |
-| `packages/sdk/src/` | `@master-vision/core` subpaths (re-exports only — semver-stable surface), `@master-vision/cli` (only for the `./cli` programmatic entry; importing it executes the CLI) | implementation logic, other runtime dependencies |
+| `packages/cli/src/` | `@vision-lens/core` subpaths from its exports map (`.`, `/config`, `/utils/logger`, …), commander, chalk | any LLM SDK, core internals not on the exports map, processor/analyzer implementation details |
+| `packages/sdk/src/` | `@vision-lens/core` subpaths (re-exports only — semver-stable surface), `@vision-lens/cli` (only for the `./cli` programmatic entry; importing it executes the CLI) | implementation logic, other runtime dependencies |
 | `packages/contracts/src/` | zod only | any import from core/, cli/, sdk/, apps/ |
-| `apps/*` | `@master-vision/sdk` (and the API service once it exists — spec 009) | `@master-vision/core` internals, LLM SDKs |
+| `apps/*` | `@vision-lens/sdk` (and the API service once it exists — spec 009) | `@vision-lens/core` internals, LLM SDKs |
 | `services/*` | Python stdlib + declared pyproject deps (uv) | any TypeScript package import |
 
 `packages/core/src/analyzer/client.ts` is a thin routing layer. It must not import any provider SDK directly — all SDK imports live in `packages/core/src/analyzer/providers/<provider>.ts`.
@@ -194,9 +194,9 @@ const result: AnalysisResult = {
 
 Same roster — see `.github/copilot-instructions.md` for Copilot-specific invocation.
 
-## Spec-kit workflow (Master evolution)
+## Spec-kit workflow (Vision Lens evolution)
 
-The Master evolution (ADR-005+) is planned with spec-kit. Specs, plans, tasks and research
+The Vision Lens evolution (ADR-005+) is planned with spec-kit. Specs, plans, tasks and research
 live under `specs/` and `.specify/` — **never tracked in git** (ADR-010; the maintainer's
 global git ignore enforces it). The constitution binding every spec is
 `.specify/memory/constitution.md` (local only).

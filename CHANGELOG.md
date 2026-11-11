@@ -8,11 +8,11 @@ versioning adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html)
 
 ### Added
 
-- Monorepo foundation (spec 001, `feat/master-rebirth`): pnpm workspaces + Turborepo —
+- Monorepo foundation (spec 001, `feat/visual-lens`): pnpm workspaces + Turborepo —
   `packages/{core,cli,sdk,contracts}`, `apps/{api,studio}` placeholders, `services/{vision,training,agents}`
   Python skeletons; the vitest suite and root configs now run from the workspace root.
-- `laib` canonical bin in `@master-vision/cli`, with the deprecated `ai-image-labeling` compat bin.
-- `@master-vision/sdk` `./cli` programmatic entry (re-export of the CLI Commander program; importing it
+- `vision-lens` canonical bin in `@vision-lens/cli`, with the deprecated `ai-image-labeling` compat bin.
+- `@vision-lens/sdk` `./cli` programmatic entry (re-export of the CLI Commander program; importing it
   executes the CLI — same semantics as the pre-migration `./cli` export).
 - ESLint boundary enforcement: LLM provider SDKs are rejected outside
   `packages/core/src/analyzer/providers/**` (`no-restricted-imports`; documented carve-out for
@@ -22,6 +22,14 @@ versioning adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html)
 
 ### Changed
 
+- Renamed to Vision Lens: the product name is now **Vision Lens** and the npm scope is
+  `@vision-lens`, across all six packages (`cli`, `contracts`, `core`, `sdk`,
+  `api-placeholder`, `studio-placeholder`).
+- The canonical CLI bin is now `vision-lens`; the `laib` bin is removed (it was never published).
+- The environment variable prefix is now `VISION_LENS_` (`VISION_LENS_NO_DEPRECATION`,
+  `VISION_LENS_DATASETS_DIR`, `VISION_LENS_BENCHMARK_MODEL`).
+- The store home is now `VISION_LENS_HOME`, defaulting to `~/.vision-lens/store.db`.
+- The deprecated `ai-image-labeling` compat bin now points at `vision-lens`.
 - Engines requirement raised to Node >= 20 across the root and all workspace packages
   (commander 14 requires Node 20).
 - CI: least-privilege `permissions: contents: read`; CI now also runs on `feat/**` branch pushes.
@@ -30,8 +38,8 @@ versioning adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html)
 
 ### Deprecated
 
-- The `ai-image-labeling` bin: works unchanged through a deprecation window of two minor versions,
-  printing one stderr deprecation line per run (suppress with `LAIB_NO_DEPRECATION=1`); removal
+- The legacy `ai-image-labeling` bin: works unchanged through a deprecation window of two minor versions,
+  printing one stderr deprecation line per run (suppress with `VISION_LENS_NO_DEPRECATION=1`); removal
   ships as a major version bump.
 
 ### Removed

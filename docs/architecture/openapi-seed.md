@@ -1,7 +1,7 @@
 # OpenAPI Seed
 
-> The OpenAPI 3.1 seed of the Master Vision domain model, generated from the
-> `@master-vision/contracts` schemas (spec 002 task 1.5 / 6.1, FR-007, US5).
+> The OpenAPI 3.1 seed of the Vision Lens domain model, generated from the
+> `@vision-lens/contracts` schemas (spec 002 task 1.5 / 6.1, FR-007, US5).
 > Status: Active · Date: 2026-11-10 · Contract version: `1.0.0` · Plan:
 > `specs/002-domain-model-contracts` (local, untracked per ADR-010).
 
@@ -136,13 +136,13 @@ guessing.
 The build produces the artefact:
 
 ```bash
-pnpm --filter @master-vision/contracts run build   # → packages/contracts/dist/openapi.json
+pnpm --filter @vision-lens/contracts run build   # → packages/contracts/dist/openapi.json
 ```
 
 The committed snapshot is refreshed with:
 
 ```bash
-pnpm --filter @master-vision/contracts run openapi:snapshot
+pnpm --filter @vision-lens/contracts run openapi:snapshot
 ```
 
 `packages/contracts/tests/openapi.test.ts` compares the generated document with
@@ -187,10 +187,10 @@ without copying or re-deriving anything:
 
 ```ts
 // The document as a module — the generated object, no file reading.
-import { openapiDocument } from '@master-vision/contracts/openapi';
+import { openapiDocument } from '@vision-lens/contracts/openapi';
 
 // The document as JSON — the build artefact.
-import openapi from '@master-vision/contracts/openapi.json' with { type: 'json' };
+import openapi from '@vision-lens/contracts/openapi.json' with { type: 'json' };
 ```
 
 The seed is deliberately **not** re-exported from the package's main entry: the

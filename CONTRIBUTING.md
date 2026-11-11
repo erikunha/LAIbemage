@@ -1,4 +1,4 @@
-# Contributing to ai-image-labeling
+# Contributing to Vision Lens
 
 Thank you for considering a contribution. This document covers everything you need to go from zero to a passing pull request.
 
@@ -22,8 +22,8 @@ Thank you for considering a contribution. This document covers everything you ne
 
 ```bash
 # 1. Fork and clone
-git clone https://github.com/erikunha/ai-image-labeling.git
-cd ai-image-labeling
+git clone https://github.com/erikunha/LAIbemage.git
+cd LAIbemage
 
 # 2. Install dependencies (includes dev deps)
 pnpm install
@@ -185,7 +185,7 @@ Category names must be `lowercase_snake_case` — validated by Zod at startup.
 Add your file as `examples/categories-<domain>.json` and test it with:
 
 ```bash
-ai-image-labeling --categories examples/categories-<domain>.json --estimate
+vision-lens --categories examples/categories-<domain>.json --estimate
 ```
 
 ---

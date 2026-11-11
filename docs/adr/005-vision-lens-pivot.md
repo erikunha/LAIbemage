@@ -1,4 +1,4 @@
-# ADR 005 — Master pivot: Master Vision, a Visual Intelligence Engineering Workbench
+# ADR 005 — Vision Lens pivot: a Visual Intelligence Engineering Workbench
 
 | Field    | Value                   |
 | -------- | ----------------------- |
@@ -9,8 +9,8 @@
 
 ## Context
 
-The project (product name for the evolution: **Master Vision**; repository
-`erikunha/LAIbemage`, published as the `ai-image-labeling` package) is a feature-complete
+The project (product name for the evolution: **Vision Lens**; repository
+`erikunha/LAIbemage`, published as the legacy `ai-image-labeling` package) is a feature-complete
 v2.0 CLI: seven vision-LLM
 providers, hybrid local/cloud routing, consensus, temporal sessions, text embeddings with
 keyword/semantic search, a plugin system, a published SDK and 361 green tests over a
@@ -32,12 +32,12 @@ demands.
 
 ## Decision
 
-Master Vision (the Master evolution of the CLI) becomes a **Visual Intelligence Engineering
+Vision Lens (the evolution of the CLI) becomes a **Visual Intelligence Engineering
 Workbench**: a local-first platform
 combining visual data engineering, multimodal intelligence (visual embeddings first,
 classification, detection/segmentation later), training and experimentation, evaluation and
 optimization (empirical calibration, Pareto quality/cost/latency), human-in-the-loop review,
-agent-assisted investigation, and four equivalent surfaces — CLI (`laib`, with
+agent-assisted investigation, and four equivalent surfaces — CLI (`vision-lens`, with
 `ai-image-labeling` kept as a compatibility alias through a deprecation window), HTTP API,
 Studio, and an MCP server.
 

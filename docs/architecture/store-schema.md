@@ -1,10 +1,10 @@
-# The Master Vision store — schema and protocol
+# The Vision Lens store — schema and protocol
 
 **Spec:** 002 — Domain model & contracts (US2 store, US4 lineage)
 **Code:** `packages/core/src/store/**`
 **Status:** implemented (chunk 2 of spec 002)
 
-The store is the local metadata spine of Master Vision: a SQLite database
+The store is the local metadata spine of Vision Lens: a SQLite database
 holding the 14 domain entities, the repositories that write them, and the
 provenance and lineage invariants that make every record auditable. It
 replaces the "flat JSON cache" world as the source of truth; the JSON caches
@@ -17,7 +17,7 @@ operational assumptions and the read-only view.
 
 ## 1. Table map
 
-Every entity of the contracts (`@master-vision/contracts`) has exactly one
+Every entity of the contracts (`@vision-lens/contracts`) has exactly one
 table. The contracts own the SHAPE of an entity; the store adds operational
 bookkeeping columns (`created_at`, `updated_at`) and, where the auditor walk
 needs a pointer the contracts do not carry, two explicitly **store-owned link
@@ -51,7 +51,7 @@ columns** (see §5).
   generic ORM in this layer.
 - **JSON columns** hold *canonical JSON*: object keys sorted, no
   insignificant whitespace. The canonicaliser is the very same
-  `canonicalJson` from `@master-vision/contracts` that fingerprint v2 uses
+  `canonicalJson` from `@vision-lens/contracts` that fingerprint v2 uses
   (it is NOT re-implemented here), so a value written to a JSON column and
   the same value used in a fingerprint serialize identically. **Absent is
   `NULL`** — never the string `'null'`, never `''`. Arrays keep their order
@@ -546,8 +546,8 @@ wrapped: it surfaces as the driver's own `SqliteError`, whose `code`
 
 ## 8. The default path is a proposal
 
-`defaultStorePath()` follows ADR-007 (local-first): `MASTER_VISION_HOME`
-when set, otherwise `~/.master-vision`, with the database in `store.db`.
+`defaultStorePath()` follows ADR-007 (local-first): `VISION_LENS_HOME`
+when set, otherwise `~/.vision-lens`, with the database in `store.db`.
 **This default is a PROPOSAL pending maintainer confirmation** — the location
 is not yet pinned by an ADR. Every store function accepts an explicit path,
 and the test suite always uses an explicit temporary directory: the home

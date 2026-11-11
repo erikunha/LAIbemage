@@ -4,7 +4,7 @@
 > (US1, tasks 1.1–1.4) · Registry: `datasets/registry.json` · Revision: `9ef7b95`
 
 This document is the operator's guide to the benchmark ground truth: where the dataset
-comes from, under which license, how it is fetched, how it is turned into Master Vision
+comes from, under which license, how it is fetched, how it is turned into Vision Lens
 ground truth, and what CI does with it.
 
 ```mermaid
@@ -25,7 +25,7 @@ flowchart TD
     POL["subset policy<br/>all anomalies + stride-thinned normals<br/>default target 700 images"]
     STORE[("002 store (sqlite)<br/>capture_sessions · assets · samples<br/>annotations · ontology_versions")]
 
-    AVAIL["datasetAvailable()<br/>LAIB_DATASETS_DIR + .dataset-ready"]
+    AVAIL["datasetAvailable()<br/>VISION_LENS_DATASETS_DIR + .dataset-ready"]
     ABSENT["CI marker: dataset=absent<br/>benchmark skipped, not failed"]
     RUNNER["benchmark runner (spec 003)<br/>F0 scoring against the annotations"]
 
@@ -271,7 +271,7 @@ CI never fetches datasets. Two mechanisms make that explicit:
    reason and points at `--check`.
 2. **`datasetAvailable()`** (`packages/core/src/benchmark/dataset-availability.ts`)
    decides whether the ground truth is present. It resolves the datasets directory
-   from `LAIB_DATASETS_DIR` (default: `datasets/`) and requires the **`.dataset-ready`
+   from `VISION_LENS_DATASETS_DIR` (default: `datasets/`) and requires the **`.dataset-ready`
    marker**, not merely an existing directory — a half-staged subset is reported as
    absent.
 

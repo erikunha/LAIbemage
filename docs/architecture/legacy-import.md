@@ -1,11 +1,11 @@
 # Legacy run import
 
 How a legacy analysis run (`analysis_results.json` and its historical
-variants) becomes Master Vision entities.
+variants) becomes Vision Lens entities.
 
 - **Code:** `packages/core/src/store/import/` (`legacy-shape.ts` — detection
   and normalization, `legacy-run.ts` — plan and transactional write).
-- **CLI:** `laib import-run <path> [--dry-run] [--db <path>]`
+- **CLI:** `vision-lens import-run <path> [--dry-run] [--db <path>]`
   (`packages/cli/src/commands/import-run.ts`).
 - **Spec:** spec 002, US2 / tasks 4.1–4.4 and 7.2; FR-004; SC-002.
 
@@ -64,7 +64,7 @@ repository carries one).
 
 > The identity of a run is `sha256(canonicalJson(parsedRunContent))`.
 
-`canonicalJson` (from `@master-vision/contracts`) sorts object keys, so a
+`canonicalJson` (from `@vision-lens/contracts`) sorts object keys, so a
 file that was re-serialized with a different key order yields the **same** id.
 
 **`processedDate` is NOT the identity.** Two different runs can share it, and
@@ -103,10 +103,10 @@ the roots it was given.
 
 ```bash
 # preview the mapping — writes nothing at all
-laib import-run ./output/analysis_results.json --dry-run
+vision-lens import-run ./output/analysis_results.json --dry-run
 
 # import into a store
-laib import-run ./output/analysis_results.json --db ./store.db
+vision-lens import-run ./output/analysis_results.json --db ./store.db
 ```
 
 | Flag | Meaning |

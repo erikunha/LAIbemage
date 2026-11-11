@@ -33,7 +33,7 @@ flowchart TD
     CALIB["packages/core/src/benchmark/calibration.ts<br/>ECE · 10 equal-width bins"]
     RUNNER["packages/core/src/benchmark/runner.ts<br/>tuple enforcement · integrity gate<br/>JSON + Markdown artifacts"]
     GATE["packages/core/src/benchmark/gate.ts<br/>tolerance −0.02 · per-class deltas"]
-    CLI["laib benchmark run | gate | report"]
+    CLI["vision-lens benchmark run | gate | report"]
     ART["benchmarks/results/&lt;runId&gt;/<br/>report.json · report.md"]
     BASE["benchmarks/baselines/&lt;suite&gt;.json<br/>dated header"]
 
@@ -63,7 +63,7 @@ flowchart TD
 | `benchmark/gate.ts` | Baseline comparison, tolerance, per-class deltas. | I/O |
 
 Specs 006 (arena) and 007 (training) are required by their own specs to import
-`@master-vision/core/benchmark` and call these functions, so the platform has a
+`@vision-lens/core/benchmark` and call these functions, so the platform has a
 single metric path. (The legacy synthetic harness in `scripts/benchmark-legacy.ts`
 computes its own precision/recall for its own unit fixtures — it is a harness
 self-check, not a product metric, and its numbers are never a product claim.)
@@ -124,18 +124,18 @@ each other's evidence.
 ## 5. The CLI
 
 ```
-laib benchmark run   --suite <name> --model-id <name>
+vision-lens benchmark run   --suite <name> --model-id <name>
                       --config-fingerprint <hash>
                       --model-version <version>
                       [--split <file>] [--gold <file>] [--predictions <file>]
                       [--out <dir>] [--min-samples <n>] [--partial]
                       [--snapshot-id <id>] [--split-fingerprint <hash>]
 
-laib benchmark gate  --suite <name> --model-id <name>
+vision-lens benchmark gate  --suite <name> --model-id <name>
                       [--metrics <file>] [--baseline <file>] [--tolerance <n>]
                       [--update-baseline] [--force] [--partial]
 
-laib benchmark report --run <runId> [--dir <dir>]
+vision-lens benchmark report --run <runId> [--dir <dir>]
 ```
 
 `--metrics` has no fixed default path: `run` writes to
@@ -165,7 +165,7 @@ partial run) exits `0` and prints its marker.
 
 The `benchmark-gate` workflow proves two things on every push:
 
-1. **The real-data gate runs when a dataset is available** (`LAIB_DATASETS_DIR`).
+1. **The real-data gate runs when a dataset is available** (`VISION_LENS_DATASETS_DIR`).
    Without one it prints `dataset=absent` and passes. CI never downloads a
    dataset.
 2. **The fixture-scale end-to-end always runs**: the synthetic 30-image

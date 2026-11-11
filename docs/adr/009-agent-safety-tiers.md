@@ -8,7 +8,7 @@
 
 ## Context
 
-The Master platform exposes its capabilities to autonomous consumers: external agent clients
+The Vision Lens platform exposes its capabilities to autonomous consumers: external agent clients
 (Claude Code, Codex, others) through an MCP server (spec 011) and an internal investigator
 agent on LangGraph (spec 012). Vision pipelines ingest hostile-by-default content: text
 inside images, OCR output and file metadata are prompt-injection surfaces, and ingestion
@@ -27,7 +27,7 @@ binding on specs 004 (ingestion hardening), 011 (MCP tools), 012 (agent runtime)
 | analyze | run quality/cost analyses | compute budgets: max items scanned, wall-clock cap; partial results labeled partial |
 | propose | draft annotation batches / experiment configs / next steps | returns a proposal object for human approval; never applies anything |
 | gated-execute | run evaluations, arena suites | server-enforced limits: dataset scope, token/cost caps, timeout; refuses beyond |
-| approval-required | train, publish/promote, export datasets | tool returns a pending-approval request; execution only after an explicit approval token issued via `laib mcp approvals` or Studio |
+| approval-required | train, publish/promote, export datasets | tool returns a pending-approval request; execution only after an explicit approval token issued via `vision-lens mcp approvals` or Studio |
 
 Rules:
 

@@ -32,7 +32,7 @@ interface SplitManifest {
   therefore never scored — list it in the report caveats); a note whose `id`
   matches no item is **structural** (e.g. `capture-group-overflow:`).
 * `manifestHash` = sha256 (hex) over the canonical JSON (recursive key sort,
-  from `@master-vision/contracts`) of the manifest without the hash field.
+  from `@vision-lens/contracts`) of the manifest without the hash field.
 
 ## Pinned conventions
 

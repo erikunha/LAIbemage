@@ -25,7 +25,7 @@ Four evidence defects make the current system's accuracy claims untrustworthy as
 
 ## Decision
 
-**Evidence policy for the Master platform (binding on specs 002/003/006/008):**
+**Evidence policy for the Vision Lens platform (binding on specs 002/003/006/008):**
 
 1. **Real-dataset benchmark as the only accuracy source.** The regression benchmark runs on a
    VisA-derived subset (10,821-image industrial anomaly dataset, CC BY 4.0 via the AWS Open

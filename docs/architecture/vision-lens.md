@@ -1,15 +1,15 @@
-# Master Vision — Vision
+# Vision Lens — the vision evolution
 
-> Product name: **Master Vision** (repo `erikunha/LAIbemage`, formerly the
+> Product name: **Vision Lens** (repo `erikunha/LAIbemage`, formerly the
 > `ai-image-labeling` CLI). Status: Active · Date: 2026-11-10 · Decisions: ADR-005…010 ·
 > Plan: `specs/001–014` (local, untracked per ADR-010) · Progress mirror: `ROADMAP.md`
 
-## What Master Vision is becoming
+## What Vision Lens is becoming
 
 A **Visual Intelligence Engineering Workbench**: a local-first platform that turns images and
 visual datasets into specialized models, verified evaluations and operational decisions — not
 another labeling tool. Where CVAT, Label Studio and Roboflow own annotation and FiftyOne owns
-dataset analytics, Master Vision owns the **engineering layer that connects data → models →
+dataset analytics, Vision Lens owns the **engineering layer that connects data → models →
 measured outcomes**: which model wins under quality/cost/latency constraints, which images
 damage the dataset, which examples deserve human review, what a retrained model actually
 changed, and whether an agent can run that investigation safely with evidence.
@@ -39,15 +39,15 @@ Surfaces and the single contract spine:
 ```mermaid
 flowchart TB
   subgraph surfaces["Equivalent surfaces (constitution III)"]
-    CLI["laib CLI<br/>(+ ai-image-labeling compat)"]
+    CLI["vision-lens CLI<br/>(+ ai-image-labeling compat)"]
     STUDIO["Studio (Next.js)<br/>visual design via uxpilot prototype"]
     API["HTTP API (Fastify)<br/>OpenAPI from contracts"]
     MCP["MCP server (stdio)<br/>12 tiered tools"]
     AGENT["Agent runtime (LangGraph)<br/>investigator + approvals"]
   end
   subgraph core["TypeScript domain (packages/)"]
-    CONTRACTS["@master-vision/contracts<br/>Zod entities + OpenAPI"]
-    COREP["@master-vision/core<br/>pipeline + data/al/release/arena"]
+    CONTRACTS["@vision-lens/contracts<br/>Zod entities + OpenAPI"]
+    COREP["@vision-lens/core<br/>pipeline + data/al/release/arena"]
   end
   subgraph py["Python services (uv)"]
     VISION["vision: encoders + LanceDB<br/>SigLIP 2 / CLIP / DINOv2 (MPS)"]

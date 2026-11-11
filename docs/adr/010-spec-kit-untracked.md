@@ -8,7 +8,7 @@
 
 ## Context
 
-The Master plan is specified with github/spec-kit (v0.15.0, initialized 2026-07): feature
+The Vision Lens plan is specified with github/spec-kit (v0.15.0, initialized 2026-07): feature
 specs, implementation plans, task lists and research live under `specs/` and `.specify/`.
 The maintainer's machine enforces this globally: `~/.config/git/ignore` ignores `specs` and
 `.specify` in every repository, with the stated rationale that spec-kit is a personal dev
@@ -26,7 +26,7 @@ maintainer clones from. The tracked record of the same decisions is:
 
 - `docs/adr/005+` — every decision that constrains future work (the spec plans cite them);
 - `ROADMAP.md` — phase status, spec mapping, milestones (the tracked mirror of spec status);
-- `docs/architecture/vision-master.md` and `docs/architecture/baseline-audit.md` — the
+- `docs/architecture/vision-lens.md` and `docs/architecture/baseline-audit.md` — the
   distilled vision and the evidence baseline the specs operationalize.
 
 Bootstrap on a fresh clone: `specify init --here` (and `specify extension add bug` if

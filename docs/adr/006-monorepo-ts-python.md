@@ -8,7 +8,7 @@
 
 ## Context
 
-The Master pivot (ADR-005) spans two worlds with different toolchains: the existing
+The Vision Lens pivot (ADR-005) spans two worlds with different toolchains: the existing
 TypeScript pipeline (providers, reporters, fs adapters, CLI, SDK — ESM/NodeNext per
 ADR-001, 361 tests) and the ML side that only Python serves well (PyTorch with MPS,
 scikit-learn, MLflow, LanceDB, LangGraph). Splitting them into separate repositories would
@@ -28,7 +28,7 @@ and Python ML services, glued by versioned contracts:
 apps/studio          Next.js (spec 010)
 apps/api             Fastify HTTP API (spec 009)
 packages/core        existing pipeline + data/al/release domain (from src/)
-packages/cli         `laib` + `ai-image-labeling` compat bin (spec 001)
+packages/cli         `vision-lens` + `ai-image-labeling` compat bin (spec 001)
 packages/sdk         stable re-export surface (from src/sdk.ts)
 packages/contracts   Zod schemas, JSON Schemas, OpenAPI — single truth (spec 002)
 packages/mcp         MCP server (spec 011)

@@ -4,7 +4,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## What this project is
 
-`ai-image-labeling` is a TypeScript ESM CLI tool that uses LLM Vision APIs (OpenAI, Anthropic, Google, Azure OpenAI, Ollama) to classify, timestamp, and organize images. It is domain-agnostic — the category taxonomy is supplied via a `categories.json` file at runtime.
+Vision Lens is a TypeScript ESM CLI tool that uses LLM Vision APIs (OpenAI, Anthropic, Google, Azure OpenAI, Ollama) to classify, timestamp, and organize images. It is domain-agnostic — the category taxonomy is supplied via a `categories.json` file at runtime.
 
 ## Commands
 

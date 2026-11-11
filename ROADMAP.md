@@ -1,4 +1,4 @@
-# Roadmap — Master Vision (LAIbemage Master evolution)
+# Roadmap — Vision Lens
 
 > **Last updated:** November 2026  
 > **Status key:** 🟢 Shipped · 🔵 Planned · ⏸ Deferred · ❌ Removed · 🏗 Building (spec in progress)
@@ -11,7 +11,7 @@
 
 ---
 
-## Phase map (Master)
+## Phase map (Vision Lens)
 
 ```mermaid
 flowchart LR
@@ -38,7 +38,7 @@ report (quality × cost × latency) → same investigation via agent over MCP.
 
 ---
 
-## Historical record — v2.0 (ai-image-labeling CLI)
+## Historical record — v2.0 (legacy `ai-image-labeling` CLI)
 
 Feature-complete and shipped (2024-01 → 2026-08). Preserved as `packages/core`/`cli`/`sdk`
 (spec 001). Highlights: H1 cost & reliability (async batches, prompt caching, structured
@@ -50,7 +50,7 @@ split) · H8 enterprise (S3/GCS/Azure outputs, webhooks, Bedrock/Vertex, TypeDoc
 H9 semantic retrieval (text embeddings + hybrid search) · H11 workflow intelligence
 (sessions, consensus, diff).
 
-Superseded by Master decisions:
+Superseded by Vision Lens decisions:
 
 | Was | Now |
 |---|---|
@@ -75,23 +75,23 @@ Superseded by Master decisions:
 
 ---
 
-## Master phases in detail
+## Vision Lens phases in detail
 
 ### F0 — Foundation (specs 001–003)
 
-- Monorepo (pnpm + Turborepo), `laib` CLI + `ai-image-labeling` compat alias, CI fast gate,
+- Monorepo (pnpm + Turborepo), `vision-lens` CLI + `ai-image-labeling` compat alias, CI fast gate,
   AGENTS boundary table for package layout — **zero behavior change, 361 tests green
   throughout** (001).
 - Domain model + `packages/contracts` (14 entities, Zod, OpenAPI), SQLite store,
   fingerprint v2 fixing `src/index.ts:77` name-only hash (002).
 - Shipped in 002: 14 versioned Zod entities with Prediction≠Annotation enforced structurally,
   the generated OpenAPI 3.1 seed, the SQLite entity store with migrations, repositories and
-  the lineage walk, and the idempotent `laib import-run` legacy importer.
+  the lineage walk, and the idempotent `vision-lens import-run` legacy importer.
 - Real benchmark, **in progress under 003**: VisA subset (CC BY 4.0, license registry), seeded
   gold splits, metrics runner (per-class F1, ECE calibration, latency, cost), regression
   baselines. Numbers come only from the 003 artifacts (`benchmarks/results/<runId>/`,
   `benchmarks/baselines/<suite>.json`, `benchmarks/splits/*.gold.json`,
-  `datasets/registry.json`) produced by `laib benchmark run|gate|report` — none exist yet.
+  `datasets/registry.json`) produced by `vision-lens benchmark run|gate|report` — none exist yet.
 - Synthetic accuracy claims retired: the legacy colour-swatch harness (package script
   `benchmark:legacy`, formerly the default accuracy runner) stays only as a unit-test
   fixture; it is not an accuracy source (ADR-008).
@@ -154,7 +154,7 @@ Activation requires a new ADR + spec per track.
 | Medical imaging vertical | Validation/regulatory burden out of scope for now |
 | Spec-kit material in git | ADR-010 — planning stays local; ADRs + this roadmap are the tracked record |
 
-## Metrics that matter (Master additions)
+## Metrics that matter (Vision Lens additions)
 
 | Area | Metric | Target |
 |---|---|---|

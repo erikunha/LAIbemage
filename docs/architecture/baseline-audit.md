@@ -1,7 +1,7 @@
 # Baseline Audit — 2026-11-10
 
-> Evidence base for the Master rebirth (ADR-005). Static + executed analysis; no behavioral
-> claims beyond what the suite and source show. Branch: `feat/master-rebirth` (base
+> Evidence base for the Vision Lens rebirth (ADR-005). Static + executed analysis; no behavioral
+> claims beyond what the suite and source show. Branch: `feat/visual-lens` (base
 > `origin/main` @ 027d1c8).
 
 ## Product baseline
@@ -44,7 +44,7 @@ Also noted: `--active-learn` (`src/cli/index.ts:120`) already writes a low-confi
 the seed 008 grows into the real flywheel. Existing `active_learning_queue.json` and
 `analysis_history.json` concepts map to 002 entities (FeedbackEvent, ExperimentRun lineage).
 
-## Gaps vs Master vision
+## Gaps vs Vision Lens
 
 No visual embeddings/encoders (005) · no training/registry (007) · no calibration anywhere
 (006) · no data-quality engine (004) · no HTTP API/Studio/MCP (009-011) · no agents (012) ·

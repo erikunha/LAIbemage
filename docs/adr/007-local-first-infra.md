@@ -8,7 +8,7 @@
 
 ## Context
 
-The Master platform (ADR-005) runs first on one machine: a MacBook M2 (8–16 GB unified
+The Vision Lens platform (ADR-005) runs first on one machine: a MacBook M2 (8–16 GB unified
 memory) where the maintainer develops, trains and evaluates. The infrastructure must serve
 metadata, binaries, vectors, experiment tracking and training compute without external
 services, while leaving a path to a shared deployment later. Existing assets:

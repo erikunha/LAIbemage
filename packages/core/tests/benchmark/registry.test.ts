@@ -154,13 +154,18 @@ describe('the tracked registry', () => {
     expect(entry.attribution).toContain('registry.opendata.aws/visa');
   });
 
-  it('leaves the sha256 UNPINNED — no checksum is fabricated', async () => {
+  it('pins the sha256 computed from the FETCHED bytes — never a fabricated digest', async () => {
     const registry = await loadDatasetRegistry(REGISTRY_PATH);
     const entry = findDataset(registry, 'visa-subset');
-    expect(entry.sha256).toBeNull();
-    expect(entry.sha256PinnedAt).toBeNull();
-    expect(entry.fetchedAt).toBeNull();
-    expect(isPinned(entry)).toBe(false);
+    // The archive was fetched on 2026-11-11 and its digest was computed from
+    // the received bytes. The assertion is about the SHAPE and the provenance,
+    // not about one fixed digest: a sha256 is 64 hex characters, and it is not
+    // the multipart ETag (which carries a part count, not a content hash).
+    expect(entry.sha256).toMatch(/^[0-9a-f]{64}$/);
+    expect(entry.sha256).not.toBe(entry.etag);
+    expect(entry.sha256PinnedAt).not.toBeNull();
+    expect(entry.fetchedAt).not.toBeNull();
+    expect(isPinned(entry)).toBe(true);
   });
 
   it('documents MVTec AD as research-only and NOT commercial', async () => {
@@ -178,7 +183,10 @@ describe('the tracked registry', () => {
     const entry = JSON.parse(raw).datasets.find((d: { id: string }) => d.id === 'visa-subset');
     // The ETag ends in "-113" (the part count), so it cannot be an MD5.
     expect(entry.etag).toMatch(/-113$/);
-    expect(entry.sha256).toBeNull();
+    // The pinned digest is a real sha256 of the received bytes — and it is
+    // something else entirely than the ETag.
+    expect(entry.sha256).toMatch(/^[0-9a-f]{64}$/);
+    expect(entry.sha256).not.toContain('-');
   });
 });
 

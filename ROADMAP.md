@@ -25,7 +25,7 @@ flowchart LR
 
 | Phase | Focus | Specs | Outcome | Status |
 |---|---|---|---|---|
-| F0 | Foundation | 001 monorepo · 002 domain/contracts · 003 real benchmark | rebirth scaffold, entity store · VisA ground truth + runner (003, in progress) | 🏗 001 🟢 · 002 🟢 (domain contracts + entity store + legacy importer) · 003 🔵 (no accuracy numbers yet) |
+| F0 | Foundation | 001 monorepo · 002 domain/contracts · 003 real benchmark | rebirth scaffold, entity store · VisA ground truth + runner (003, shipped) | 🏗 001 🟢 · 002 🟢 (domain contracts + entity store + legacy importer) · 003 🟢 (real VisA baseline: macro F1 0.9795 / balanced accuracy 0.9700, gpt-4o over 700 gold images) |
 | F1 | Visual Data + Arena | 004 data engine · 005 embeddings/search · 006 model arena | trustworthy datasets + calibrated model comparison | 🔵 |
 | F2 | Learning | 007 training · 008 active-learning flywheel | specialized models + measured data loop — **first demo** | 🔵 |
 | F3 | Interfaces + Agents | 009 API/jobs · 010 Studio · 011 MCP · 012 agent runtime | four equivalent surfaces + safe investigations | 🔵 |
@@ -87,11 +87,20 @@ Superseded by Vision Lens decisions:
 - Shipped in 002: 14 versioned Zod entities with Prediction≠Annotation enforced structurally,
   the generated OpenAPI 3.1 seed, the SQLite entity store with migrations, repositories and
   the lineage walk, and the idempotent `vision-lens import-run` legacy importer.
-- Real benchmark, **in progress under 003**: VisA subset (CC BY 4.0, license registry), seeded
+- Real benchmark, **shipped under 003**: VisA subset (CC BY 4.0, license registry), seeded
   gold splits, metrics runner (per-class F1, ECE calibration, latency, cost), regression
-  baselines. Numbers come only from the 003 artifacts (`benchmarks/results/<runId>/`,
-  `benchmarks/baselines/<suite>.json`, `benchmarks/splits/*.gold.json`,
-  `datasets/registry.json`) produced by `vision-lens benchmark run|gate|report` — none exist yet.
+  baselines. The dataset is fetched and checksum-pinned (`datasets/registry.json`), the
+  committed gold manifest holds 700 real images (`benchmarks/splits/visa-subset.gold.json`), and
+  the first real run scored `gpt-4o` at **macro F1 0.9795** / **balanced accuracy 0.9700** over
+  all 700 of them. The tracked evidence is the gold set, the raw predictions and the baseline
+  (`benchmarks/splits/visa-subset.gold.json`, `benchmarks/predictions/visa-subset.gpt-4o.json`,
+  `benchmarks/baselines/visa-subset.json`); the run report (`benchmarks/results/<runId>/`) is a
+  local artifact that the documented command reproduces. Every number comes from the 003
+  artifacts (`benchmarks/baselines/<suite>.json`, `benchmarks/splits/*.gold.json`,
+  `datasets/registry.json`) produced by `vision-lens benchmark run|gate|report`.
+  It is a **regression baseline, not a product claim**: one model, one dataset subset, one day,
+  and the split carries no held-out set — the upstream release has no session information, so
+  all 700 items land in `train` and the benchmark scores the whole set.
 - Synthetic accuracy claims retired: the legacy colour-swatch harness (package script
   `benchmark:legacy`, formerly the default accuracy runner) stays only as a unit-test
   fixture; it is not an accuracy source (ADR-008).
@@ -159,7 +168,7 @@ Activation requires a new ADR + spec per track.
 | Area | Metric | Target |
 |---|---|---|
 | Evidence | Benchmark on real data only (VisA subset) | enforced (003) |
-| Calibration | ECE per model on gold test split | reported every arena run (006) |
+| Calibration | ECE per model on the gold split | reported every arena run (006) |
 | Reproducibility | Same config+snapshot+seed+env → val macro-F1 Δ | ≤ 0.02 (007) |
 | Flywheel | AL batch → holdout macro-F1 delta vs random batch | measured, reported per round (008) |
 | Cost | Cost per correctly-processed image (cascade vs single-model) | Pareto-reported (006/013) |

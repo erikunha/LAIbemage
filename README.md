@@ -54,11 +54,21 @@ What it does **not** do:
   fixed percentage is promised here. Real accuracy numbers come from the benchmark artifacts
   under `benchmarks/results/<runId>/` (real-data VisA ground truth, CC BY 4.0 — dataset
   license, source and checksums are recorded in `datasets/registry.json`).
-  **Status: the real dataset has not been downloaded yet and no product accuracy number exists**
-  — the whole pipeline is proven against a synthetic 30-image fixture, and the first real number
-  appears only after the VisA fetch is authorised. The `benchmark:legacy` script is a
-  **synthetic** unit-fixture harness over colour swatches; it is a plumbing regression check, not
-  an accuracy source (see [ADR-008](docs/adr/008-evidence-policy.md)).
+  **Status: the real dataset is fetched and checksum-pinned, the gold manifest is committed,
+  and the first real measurement exists.** The VisA subset was fetched on 2026-11-11 (sha256
+  pinned in `datasets/registry.json`), the committed gold manifest holds 700 real images, and
+  `gpt-4o` scored **macro F1 0.9795 / balanced accuracy 0.9700** over all 700 of them. The
+  tracked evidence is the gold set (`benchmarks/splits/visa-subset.gold.json`), the raw
+  predictions (`benchmarks/predictions/visa-subset.gpt-4o.json`) and the baseline
+  (`benchmarks/baselines/visa-subset.json`); the run report itself
+  (`benchmarks/results/<runId>/`) is a LOCAL artifact — it is gitignored, and the documented
+  `vision-lens benchmark run` reproduces it from the tracked files.
+  **That number is a baseline to regress against, not a product claim:** it is one model on one
+  dataset subset on one day, and the split it was scored on carries no held-out set — the
+  upstream release carries no session information, so all 700 items land in `train`
+  ([`docs/architecture/benchmark.md`](docs/architecture/benchmark.md)). The `benchmark:legacy`
+  script is a **synthetic** unit-fixture harness over colour swatches; it is a plumbing
+  regression check, not an accuracy source (see [ADR-008](docs/adr/008-evidence-policy.md)).
 
 ---
 

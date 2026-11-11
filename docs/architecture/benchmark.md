@@ -1,7 +1,8 @@
 # Benchmark ground truth — architecture
 
-> Status: **implemented, dataset not downloaded** · Spec: `specs/003-benchmark-ground-truth`
-> (US1–US4) · Revision: `9ef7b95` + spec-003 commits
+> Status: **implemented, dataset fetched and checksum-pinned, first real measurement recorded** ·
+> Spec: `specs/003-benchmark-ground-truth`
+> (US1–US4) · Measured at snapshot `4afc0d8`
 >
 > This document is the map of the benchmark pipeline. The operator's guide for
 > the dataset itself lives in [`docs/datasets/visa.md`](../datasets/visa.md).
@@ -24,11 +25,14 @@ Three properties matter more than the numbers themselves:
 
 ```mermaid
 flowchart TD
-    REG["datasets/registry.json<br/>source · license · version · sha256"]
+    REG["datasets/registry.json<br/>source · license · version · sha256 (pinned)"]
     FETCH["scripts/datasets/fetch-visa.ts<br/>--check · --offline · sha256 pin"]
     NORM["scripts/datasets/normalize-visa.ts<br/>→ normalizeVisaSubset"]
     STORE[("002 store (sqlite)<br/>capture_sessions · assets · samples<br/>annotations · ontology_versions")]
-    SPLIT["packages/core/src/benchmark/splits.ts<br/>seeded · stratified · hash-pinned<br/>benchmarks/splits/*.gold.json"]
+    SPLIT["scripts/benchmarks/make-splits.ts --target-images 700<br/>seeded · stratified · hash-pinned<br/>benchmarks/splits/visa-subset.gold.json"]
+    TAX["packages/core/src/benchmark/taxonomy.ts<br/>normal + defect:&lt;class&gt;<br/>the vocabulary the model is offered"]
+    FP["scripts/benchmarks/config-fingerprint.ts<br/>the config hash is COMPUTED, not typed"]
+    PRED["scripts/benchmarks/predict-visa.ts<br/>a real LLM over the gold images"]
     METRICS["packages/core/src/benchmark/metrics.ts<br/>per-class P/R/F1 · macro F1<br/>balanced accuracy · confusion"]
     CALIB["packages/core/src/benchmark/calibration.ts<br/>ECE · 10 equal-width bins"]
     RUNNER["packages/core/src/benchmark/runner.ts<br/>tuple enforcement · integrity gate<br/>JSON + Markdown artifacts"]
@@ -38,7 +42,10 @@ flowchart TD
     BASE["benchmarks/baselines/&lt;suite&gt;.json<br/>dated header"]
 
     REG --> FETCH --> NORM --> STORE --> SPLIT
-    SPLIT --> RUNNER
+    SPLIT --> TAX
+    TAX --> FP
+    SPLIT --> PRED
+    PRED --> RUNNER
     METRICS --> RUNNER
     CALIB --> RUNNER
     RUNNER --> ART
@@ -57,6 +64,8 @@ flowchart TD
 | `benchmark/normalize.ts` | VisA parts → 002-store Samples, CaptureSessions and ontology keys. | pure + I/O at the edge |
 | `benchmark/dataset-availability.ts` | `datasetAvailable()` — the `dataset=absent` marker. | pure |
 | `benchmark/splits.ts` | Seeded, stratified, hash-pinned gold split generator. | pure |
+| `benchmark/taxonomy.ts` | The vocabulary a gold split is scored in, derived from the manifest. | pure |
+| `benchmark/config-fingerprint.ts` | The config hash: manifest + model + data version + preprocessing. | pure |
 | `benchmark/metrics.ts` | Per-class P/R/F1, macro F1, balanced accuracy, confusion, latency, cost, budget. | pure |
 | `benchmark/calibration.ts` | ECE over 10 equal-width bins + reliability data. | pure |
 | `benchmark/runner.ts` | Tuple enforcement, integrity gate, artifact emission. | I/O |
@@ -87,6 +96,8 @@ docblock of the function that applies each one.
 | PRNG | mulberry32 (32-bit state, only `Math.imul` and `>>>`). `Math.random` is never used. | `splits.ts` |
 | Split quotas | Ratios × 1000 as **integer weights** (so `15 × 0.6` can never land one ULP below an integer), then largest-remainder rounding, ties in the order train > val > test. | `splits.ts` |
 | Capture grouping | A capture group is the atom of the assignment and is never split across train/val/test. A group larger than every remaining quota is still assigned wholly, and the deviation is recorded as a `capture-group-overflow:` note. | `splits.ts` |
+| Capture-group fallback | When the annotation CSV carries **no** `session` column, the capture group of an item is its **object class** (`make-splits.ts`, `enumerateSubset`). The upstream VisA release has no session column, so this is the path the real run takes. | `make-splits.ts` |
+| Benchmark vocabulary | The benchmark scores the **coarse** vocabulary: `normal` plus one `defect:<object class>` per class. `labelKeyOf()` derives it from the manifest. The store's ontology is a **different, finer** key space (`defect:<defect type>`, 18 keys) and is **not** what the benchmark scores. | `taxonomy.ts` |
 | Manifest hash | `manifestHash` = sha256 over the contracts' `canonicalJson` of the manifest **without** the hash field. | `splits.ts` |
 | Manifest timestamps | None. A timestamp would change the bytes on every run and break byte-stability. | `splits.ts` |
 | Gate tolerance | −0.02 on the macro F1. Exactly at the tolerance passes; beyond it fails. The comparison carries a `1e-9` slack so a mathematically exact −0.02 is not failed by float noise. | `gate.ts` |
@@ -191,21 +202,160 @@ artifacts instead.
 | Source | `https://amazon-visual-anomaly.s3.us-west-2.amazonaws.com/VisA_20220922.tar` |
 | Size | 1,929,840,640 bytes (≈ 1.93 GB) |
 | License | CC BY 4.0 — recorded in `datasets/registry.json` before the first byte is fetched |
-| Checksum | `sha256: null` — the object is a **multipart** upload (ETag `…-113`), so the ETag is provenance only, never a checksum. The fetch script computes the sha256 from the received bytes and pins it. |
-| Downloaded | **No** — the 1.93 GB fetch needs the maintainer's authorization. |
-| Real split manifest | `benchmarks/splits/visa-subset.gold.json` — **not created**. The committed manifest is `synthetic-30.gold.json`, named so that synthetic data can never masquerade as real ground truth. |
+| Checksum | `sha256 2eb8690c803ab37de0324772964100169ec8ba1fa3f7e94291c9ca673f40f362`, **pinned** on 2026-11-11 (`sha256PinnedAt` / `fetchedAt` = `2026-11-11T11:04:36.707Z`). The object is a **multipart** upload (ETag `…-113`), so the ETag is provenance only, never a checksum — the digest above was computed from the received bytes. |
+| Downloaded | **Yes** — 2026-11-11. Four parts (`candle`, `capsules`, `fryum`, `pcb1`), 3910 files staged. |
+| Real split manifest | `benchmarks/splits/visa-subset.gold.json` — **committed**: 700 assignments, 8 strata, `manifestHash 76dee597ea8d42bdba657f37c357cdfc4afc3d3e1de617d90ced7b77e485a0b2`. Regeneration is byte-identical. |
+| First real measurement | **macro F1 0.9795**, balanced accuracy 0.9700, ECE 0.0479 over all 700 items, no caveats. The tracked evidence is the gold set, the raw predictions (`benchmarks/predictions/visa-subset.gpt-4o.json`) and the baseline (`benchmarks/baselines/visa-subset.json`, which carries the snapshot, the split fingerprint and the config fingerprint of the run it was recorded from). The run report under `benchmarks/results/<runId>/` is **local** — it is gitignored, and the documented command reproduces it from the tracked files. |
 
-The flow is ready end to end:
+The flow, as it was actually run on 2026-11-11:
 
 ```bash
 pnpm datasets:fetch-visa        # 1.93 GB — needs the maintainer's authorization
 pnpm datasets:normalize-visa    # VisA parts → 002 store
-pnpm benchmark:splits -- --dataset visa-subset --root datasets/visa-subset --seed 42 \
-    --out benchmarks/splits/visa-subset.gold.json
-pnpm benchmark:run -- --suite visa-subset --model-id <model> \
-    --predictions <predictions.json> --config-fingerprint <hash>
-pnpm benchmark:gate -- --suite visa-subset --model-id <model>
+
+pnpm exec tsx scripts/benchmarks/make-splits.ts \
+  --dataset visa-subset --root datasets/visa-subset --seed 42 \
+  --target-images 700 \
+  --out benchmarks/splits/visa-subset.gold.json
+
+pnpm exec tsx packages/cli/src/index.ts benchmark run \
+  --suite visa-subset --model-id gpt-4o \
+  --model-version 'model:gpt-4o@2024-11-20' \
+  --config-fingerprint fp2:3883e2f9a01107f8 \
+  --split benchmarks/splits/visa-subset.gold.json \
+  --predictions benchmarks/predictions/visa-subset.gpt-4o.json \
+  --out benchmarks/results --min-samples 30
+
+pnpm benchmark:gate --suite visa-subset --model-id gpt-4o
 ```
 
-(The `--` is how pnpm forwards the extra arguments to the script; the CLI flags
-themselves are listed in §5.)
+The pnpm package scripts (`pnpm benchmark:splits`, `pnpm benchmark:run`,
+`pnpm benchmark:gate`) take their flags **directly** — no `--` separator. This
+pnpm version forwards a literal `--` to the script, and both `node:util parseArgs`
+and Commander then treat the flags after it as positional arguments, so the
+separator silently produces "required option '--suite <name>' not specified".
+The CLI flags themselves are listed in §5; the full command sequence, including
+the prediction run, is in [`docs/datasets/visa.md` §7](../datasets/visa.md).
+
+---
+
+## 8. The config fingerprint is computed, not typed
+
+`--config-fingerprint` is a required flag, but the operator does not invent its
+value. `scripts/benchmarks/config-fingerprint.ts` computes it from the inputs the
+run actually had:
+
+```bash
+pnpm exec tsx scripts/benchmarks/config-fingerprint.ts \
+  --split benchmarks/splits/visa-subset.gold.json \
+  --provider openai --model gpt-4o --model-version model:gpt-4o@2024-11-20
+# → fp2:3883e2f9a01107f8   (stdout, one line; the components go to stderr)
+```
+
+The hashed components are: the model, the prompt template, **the taxonomy derived
+from the manifest**, the preprocessing (resize 768 px, JPEG quality 80, detail
+`low`, batch size 20), the data version (`visa-subset@20220922`) and the contracts
+version.
+
+**Why not a free-text flag.** ADR-008 forbids unattributed reports. A hand-typed
+fingerprint is an attribution the operator can get wrong: the same string for two
+different taxonomies would make two different experiments look identical, and a
+stale string would attribute a run to a vocabulary it never used. Deriving it from
+the manifest, the model and the dataset version means the fingerprint cannot claim
+a vocabulary the run never saw — and the prediction run and the fingerprint script
+import the **same** `buildTaxonomy()`, so the two cannot drift apart.
+
+---
+
+## 9. The first real run, and what it does and does not say
+
+### 9.1 What was measured
+
+| | |
+|---|---|
+| Model | `gpt-4o`, version `model:gpt-4o@2024-11-20` |
+| Items scored | **700** (the whole gold manifest) · 685 correct |
+| LLM calls | **35** (20 images per call) |
+| Cost | **0.535723 USD** total · **0.000765 USD** per image |
+| Latency (per batch call) | p50 **7482.84 ms** · p95 **10159.64 ms** |
+| Run id | derived from the tuple (the report directory name) |
+
+Reproduction tuple: the snapshot of the commit the run was scored at, split
+fingerprint `76dee597ea8d42bdba657f37c357cdfc4afc3d3e1de617d90ced7b77e485a0b2`,
+model version `model:gpt-4o@2024-11-20`, config fingerprint `fp2:3883e2f9a01107f8`,
+environment node v24.22.1 / darwin / arm64. The run carried **no caveats** — the
+image bytes were verified against the manifest.
+
+| Metric | Value |
+|---|---|
+| **Macro F1** | **0.9795** |
+| **Balanced accuracy** | **0.9700** |
+| **ECE (10 bins)** | **0.0479** |
+| Accuracy | 0.9786 |
+
+| Class | Support | Precision | Recall | F1 |
+|---|---|---|---|---|
+| `defect:candle` | 100 | 1.0000 | 0.9400 | 0.9691 |
+| `defect:capsules` | 100 | 1.0000 | 1.0000 | 1.0000 |
+| `defect:fryum` | 100 | 1.0000 | 1.0000 | 1.0000 |
+| `defect:pcb1` | 100 | 1.0000 | 0.9100 | 0.9529 |
+| `normal` | 300 | 0.9524 | 1.0000 | 0.9756 |
+
+**All 15 errors are anomalies the model called `normal`** (6 candle, 9 pcb1).
+There was not a single false defect alarm.
+
+The baseline was recorded with `benchmark gate --update-baseline` into
+`benchmarks/baselines/visa-subset.json` (macro F1 0.9795, balanced accuracy 0.97,
+the per-class F1s above). A second gate run passes: *"macro F1 moved by 0.0000,
+within the tolerance of -0.0200"*.
+
+### 9.2 The vocabulary the benchmark scores
+
+The benchmark scores the **coarse** vocabulary — `normal` plus one class per object
+class:
+
+```
+normal · defect:candle · defect:capsules · defect:fryum · defect:pcb1
+```
+
+`labelKeyOf()` derives it from the manifest, and `buildTaxonomy()` turns it into
+the `categories.json` the model is offered (the normalised name `defect_candle` and
+the gold label key `defect:candle` are two spellings of one category).
+
+The **store's** ontology is a different, finer key space: `normal` plus **18**
+defect-type keys (`defect:bubble`, `defect:melt`, `defect:chunk-of-wax-missing`, …).
+Both are true. The benchmark scores the coarse one; it does **not** score the
+fine-grained defect-type vocabulary.
+
+### 9.3 The split degenerated — and the benchmark says so
+
+The upstream release carries **no session information**. Each object class therefore
+collapses into **one** capture group, and a 100-item group fits no 60/20/20 quota.
+The generator assigns such a group wholly to `train` and records a
+`capture-group-overflow:` note.
+
+The committed manifest holds **8** such notes — one per class and anomaly kind —
+and **every one of its 700 assignments is `split: "train"`**; `val` and `test` are
+empty. Consequences, stated plainly:
+
+* **This is not a 60/20/20 split.** The ratios in the manifest are the requested
+  ones; the capture-group rule overrode them.
+* **The benchmark scores all 700 gold items.** There is no held-out test set.
+* The upstream release does not carry the session data that would make one. The
+  generator does not invent it.
+
+### 9.4 The limitations — read these before quoting the number
+
+1. **The split is 100 % `train` (no held-out set)** — see §9.3. The notes in the
+   manifest record it.
+2. **One model, one dataset subset, one day.** This is a baseline to regress
+   against, not "the product's accuracy". It is not a generalisation claim.
+3. **The coarse vocabulary only** — see §9.2. The defect **type** is known to the
+   store and is not scored.
+4. **The dataset binaries are not in git.** Only the registry entry, the gold
+   manifest, the predictions and the baseline are tracked; `datasets/*/` and
+   `benchmarks/results/` are git-ignored.
+5. **An answer outside the gold vocabulary is scored as the miss it is.** A model
+   answer such as `unknown` is recorded verbatim and never mapped onto a gold
+   class. In this run `unseenPredictedLabels` was **empty** — every answer was one
+   of the five gold classes.

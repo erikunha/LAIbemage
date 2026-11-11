@@ -10,7 +10,15 @@ import type { ImageInput, LLMClient } from './client.js';
 
 const BatchEnvelopeSchema = z.object({ images: z.array(z.unknown()) });
 
-const IMAGE_RESIZE_PX = 768; // detail:low uses 512px — 768 adds no cost but improves crops
+/**
+ * The width/height the images are resized to before they leave the process.
+ * Exported because the benchmark's config fingerprint hashes it: a change in
+ * the preprocessing changes the model's input and therefore the result.
+ */
+export const IMAGE_RESIZE_PX = 768; // detail:low uses 512px — 768 adds no cost but improves crops
+
+/** The JPEG quality the batch analyzer re-encodes the images with. */
+export const IMAGE_JPEG_QUALITY = 80;
 
 export function normalizeCategory(category: string): string {
   if (!category || !category.trim()) return 'unknown';
@@ -169,7 +177,7 @@ export async function analyzeBatch(
             fit: 'inside',
             withoutEnlargement: true,
           })
-          .jpeg({ quality: 80 })
+          .jpeg({ quality: IMAGE_JPEG_QUALITY })
           .toBuffer();
         imageInputs.push({
           base64: resizedBuffer.toString('base64'),

@@ -1,5 +1,6 @@
 import { watch as chokidarWatch, type FSWatcher } from 'chokidar';
 import { CONTRACTS_VERSION, fingerprintV2 } from '@vision-lens/contracts';
+import { PROMPT_TEMPLATE_VERSION } from './benchmark/config-fingerprint.js';
 import path from 'node:path';
 import pLimit from 'p-limit';
 import type { FileRepository } from './fs/index.js';
@@ -78,7 +79,9 @@ function resolveEmbeddingModel(config: Config): string {
  * Bump when any prompt text changes (batch system/user templates), so cached
  * analyses fingerprint-invalidate on prompt edits. Part of fingerprint v2.
  */
-const PROMPT_VERSION = 'prompt-v1';
+// The prompt version is owned by the benchmark's config fingerprint, so the
+// analysis fingerprint and the benchmark fingerprint cannot drift apart.
+const PROMPT_VERSION = PROMPT_TEMPLATE_VERSION;
 
 /**
  * Fingerprint v2 (spec 002 / ADR-008): hashes the full semantic config

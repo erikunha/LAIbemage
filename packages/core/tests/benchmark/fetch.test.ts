@@ -2,7 +2,7 @@ import { createHash } from 'node:crypto';
 import { mkdirSync, mkdtempSync, readFileSync, rmSync, writeFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import path from 'node:path';
-import { describe, expect, it } from 'vitest';
+import { describe, expect, it, afterEach, beforeEach } from 'vitest';
 import {
   computeRequiredBytes,
   extractParts,
@@ -129,6 +129,42 @@ function buildTar(files: readonly { name: string; content: string | Buffer }[]):
 }
 
 describe('the fetch script', () => {
+  // The script refuses to download whenever `CI` is set — a real guard that
+  // keeps a CI runner from pulling a 1.9 GB archive. This suite exercises the
+  // stages AFTER that guard, so it must not depend on where it runs: on a
+  // developer machine `CI` is unset, on GitHub Actions it is `true`, and
+  // without this the guard fired first and four tests asserted the wrong
+  // error. The guard itself is covered by its own test below.
+  const originalCi = process.env['CI'];
+  beforeEach(() => {
+    delete process.env['CI'];
+  });
+  afterEach(() => {
+    if (originalCi === undefined) delete process.env['CI'];
+    else process.env['CI'] = originalCi;
+  });
+
+  it('REFUSES to download while CI is set, before any network call', async () => {
+    const dir = makeTempDir();
+    try {
+      const registryPath = await writeRegistry(dir, [entry()]);
+      const { runFetch } = await import('../../../../scripts/datasets/fetch-visa.js');
+      process.env['CI'] = 'true';
+      const calls: string[] = [];
+      await expect(
+        runFetch({
+          registryPath,
+          datasetsDir: dir,
+          fetcher: fakeFetcher(ARCHIVE_BYTES, calls),
+          diskSpaceProbe: async () => ({ available: 10_000_000, total: 10_000_000 }),
+        }),
+      ).rejects.toThrow(/Refusing to download while CI is set/);
+      expect(calls).toEqual([]);
+    } finally {
+      rmSync(dir, { recursive: true, force: true });
+    }
+  });
+
   it('computes the sha256 of the file on disk from the streamed bytes', async () => {
     const dir = makeTempDir();
     try {

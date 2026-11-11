@@ -19,12 +19,13 @@ evidence, and identifies exactly one next implementation pull request.
 ## 1. Provenance and method
 
 The design baseline is the package the maintainer delivered at
-`~/Downloads/VisionLens_2027_Canonical_Spec`. It was copied into the repository verbatim at
-`docs/vnext/`, which is the location its own adoption protocol names: "Introduce the canonical
-package in `docs/vnext/` initially, not as blind replacements for `README.md`, `AGENTS.md`,
-`ROADMAP.md`, or `docs/adr/006-monorepo-ts-python.md`".
+`~/Downloads/VisionLens_2027_Canonical_Spec`. It is copied into the repository at `docs/vnext/`,
+which is the location its own adoption protocol names: "Introduce the canonical package in
+`docs/vnext/` initially, not as blind replacements for `README.md`, `AGENTS.md`, `ROADMAP.md`, or
+`docs/adr/006-monorepo-ts-python.md`".
 
-The copy is unmodified, so the package's own validator still holds inside the repository:
+All 64 files of the integrated package match the manifest, verified by SHA-256 over the whole tree, and the repository holds no file under `docs/vnext/` that the package does not contain.
+The pack's own validator therefore holds inside the repository:
 
 ```
 $ python3 docs/vnext/validation/validate_pack.py
@@ -37,6 +38,29 @@ itself. The optional `jsonschema` check was skipped because the package is not i
 the validator neither proves the three proposed JSON Schemas are valid Draft 2020-12 schemas nor
 pairs the two that have an example file with those examples; `job-status.v1.schema.json` has no
 example at all. That check is listed in section 12 as unverified.
+
+### 1.1 The first integration dropped the 12 specs, and how that was found
+
+The copy was not complete when the first integration commit was made, and the validator output
+quoted above was produced against a working tree rather than against the committed tree. A
+machine-wide gitignore rule (a bare `specs` entry in the developer's global git ignore) matched
+`docs/vnext/specs/`, so the 12 `VLN-*` tickets were silently excluded from the commit while the
+files themselves stayed in the working tree, where they were readable and where the validator
+passed. The committed tree was missing all 12 of them, and the validator run against that tree
+reported `Errors: 12`, because `MANIFEST.sha256` lists every one of them.
+
+The repair is a follow-up commit that stages the 12 specs, together with a narrow negation in the
+repository's own `.gitignore`:
+
+```
+!docs/vnext/specs/
+```
+
+The negation is deliberately scoped. It re-includes the pack's directory and nothing else, so the
+spec-kit personal flow stays ignored everywhere else in the repository. The committed tree is now
+complete: all 64 package files are present, the manifest and the tree agree, and the validator
+reports `Errors: 0` against the committed tree. The branch that carries this repair also carries
+the negation, so the two changes travel together through the merge into `main`.
 
 What was read: the adoption protocol, the observed repository state, the architecture decision,
 all 28 numbered design documents, all 8 ADRs, all 12 `VLN-*` tickets, the
@@ -326,10 +350,10 @@ These are recorded, not decided. Each one is a decision only the maintainer can 
 
 ## 11. Rollback, and what this report does not claim
 
-This report is a document on a branch. Rolling it back is deleting one file and one branch;
-there is no runtime effect, no migration and no data to restore. The package is copied
-verbatim, so removing `docs/vnext/` removes it entirely and leaves the repository as it was at
-`6c3d95f`.
+This report is a document on a branch. Rolling it back is deleting this file and the `docs/vnext/`
+directory; there is no runtime effect, no migration and no data to restore. The package is copied
+byte-identically, so removing `docs/vnext/` removes it entirely and leaves the repository as it was
+at `6c3d95f`.
 
 The repository's `ROADMAP.md` is **not** updated by this report. It tracks the F0 to F5 phases of
 the spec-kit programme, and the baseline tracks R0 to R9 with its own numbering. Reconciling the

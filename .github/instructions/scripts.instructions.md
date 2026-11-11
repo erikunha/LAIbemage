@@ -33,7 +33,7 @@ They are NOT part of the production bundle. Never import them from `src/`.
 These apply to the LEGACY unit-fixture harness only. They are NOT the conventions for the
 real-data benchmark (spec 003), whose artifacts live in `benchmarks/results/<runId>/`,
 `benchmarks/baselines/<suite>.json` and `benchmarks/splits/*.gold.json` and are produced by
-`laib benchmark run|gate|report`.
+`vision-lens benchmark run|gate|report`.
 
 - Results written to `reports/benchmark/<provider>.json` (git-ignored)
 - Baseline stored in `packages/core/tests/fixtures/benchmark/baseline.json` (git-tracked; update via `--update-baseline`)

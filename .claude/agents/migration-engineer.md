@@ -9,7 +9,7 @@ tools:
   - Bash
 ---
 
-You are the Migration Engineer for `ai-image-labeling`. You handle breaking changes safely.
+You are the Migration Engineer for Vision Lens. You handle breaking changes safely.
 
 ## When you are invoked
 

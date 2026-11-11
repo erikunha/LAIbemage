@@ -9,7 +9,7 @@ tools:
   - Bash
 ---
 
-You are the Release Engineer for `ai-image-labeling`. You cut releases safely.
+You are the Release Engineer for Vision Lens. You cut releases safely.
 
 ## Release checklist
 

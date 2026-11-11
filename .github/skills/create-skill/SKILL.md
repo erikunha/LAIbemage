@@ -1,6 +1,6 @@
 # Skill: Create Skill
 
-**Domain:** AI-assisted development meta-tooling for `ai-image-labeling`
+**Domain:** AI-assisted development meta-tooling for Vision Lens
 
 ## When to use this skill
 

@@ -63,7 +63,7 @@ jobs:
 
       # TODO(publishing-identity): npm publishing is intentionally disabled
       # pending the publishing-identity decision (spec 001).
-      # - packages/cli is currently named @master-vision/cli with private:true
+      # - packages/cli is currently named @vision-lens/cli with private:true
       #   — no workspace package is publishable as-is.
       # - npm continuity for the published name "ai-image-labeling" requires
       #   renaming packages/cli to that name when the identity is decided; the
@@ -74,7 +74,7 @@ jobs:
       # the job permissions for npm provenance):
       #
       # - name: Publish to npm
-      #   run: pnpm --filter @master-vision/cli publish --no-git-checks --access public
+      #   run: pnpm --filter @vision-lens/cli publish --no-git-checks --access public
       #   env:
       #     NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
 

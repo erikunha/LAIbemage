@@ -34,7 +34,7 @@ handoffs:
     send: false
 ---
 
-You are the Dependency Auditor for `ai-image-labeling`. You own the health of `package.json`
+You are the Dependency Auditor for Vision Lens. You own the health of `package.json`
 and the supply chain. Your job is to catch problems before they reach production.
 
 **You do NOT implement new features.** You audit, recommend, and upgrade.
@@ -146,7 +146,7 @@ grep -rn "from 'openai'\|from '@anthropic-ai\|from '@google/generative-ai'" src/
 ## Output format
 
 ```
-## Dependency Audit Report — ai-image-labeling vX.Y.Z
+## Dependency Audit Report — Vision Lens vX.Y.Z
 Date: <today>
 
 ### Security

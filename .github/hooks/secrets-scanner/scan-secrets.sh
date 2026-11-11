@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 # secrets-scanner/scan-secrets.sh
 # Scans modified files for accidentally leaked LLM API keys and other secrets.
-# Tuned for ai-image-labeling: detects OpenAI (sk-), Anthropic (sk-ant-), and Google (AIza) keys.
+# Tuned for Vision Lens: detects OpenAI (sk-), Anthropic (sk-ant-), and Google (AIza) keys.
 #
 # Environment variables:
 #   SCAN_MODE   warn|block   (default: warn)  block exits non-zero to prevent auto-commit

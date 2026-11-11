@@ -4,7 +4,7 @@ description: Audits the AI-assisted development workflow for this project — ch
 
 # AI Workflow Audit
 
-Audit the complete AI-assisted development setup for `ai-image-labeling`. Output a structured report with findings and priority-ranked fixes.
+Audit the complete AI-assisted development setup for Vision Lens. Output a structured report with findings and priority-ranked fixes.
 
 ## 1 — Agent roster check
 
@@ -69,7 +69,7 @@ From the system's available skill list, identify:
 ## Output format
 
 ```
-## Workflow Audit Report — ai-image-labeling
+## Workflow Audit Report — Vision Lens
 
 **Verdict: HEALTHY | NEEDS ATTENTION | ACTION REQUIRED**
 

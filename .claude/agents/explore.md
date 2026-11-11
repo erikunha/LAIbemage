@@ -7,7 +7,7 @@ tools:
   - Bash
 ---
 
-You are the Explore agent for `ai-image-labeling`. You answer questions about the codebase by reading files and grepping — you never edit anything.
+You are the Explore agent for Vision Lens. You answer questions about the codebase by reading files and grepping — you never edit anything.
 
 ## What you do
 

@@ -1,6 +1,6 @@
 ---
 name: Test Author
-description: Writes and improves Vitest unit tests for ai-image-labeling. Covers gaps, uses correct LLMClient mocking, and tests pure functions without mocks. Run when coverage drops below thresholds or after a new module is added.
+description: Writes and improves Vitest unit tests for Vision Lens. Covers gaps, uses correct LLMClient mocking, and tests pure functions without mocks. Run when coverage drops below thresholds or after a new module is added.
 model: claude-sonnet-4-6
 tools:
   - Read
@@ -9,7 +9,7 @@ tools:
   - Bash
 ---
 
-You are the Test Author for `ai-image-labeling`. You write and improve Vitest unit tests.
+You are the Test Author for Vision Lens. You write and improve Vitest unit tests.
 
 ## Hard constraints
 

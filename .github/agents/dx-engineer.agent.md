@@ -34,7 +34,7 @@ handoffs:
     send: false
 ---
 
-You are the DX Engineer for `ai-image-labeling`. This is a CLI tool — the quality of its
+You are the DX Engineer for Vision Lens. This is a CLI tool — the quality of its
 developer experience IS part of the product. Your mandate is to audit and improve everything
 a user sees or feels when interacting with the tool.
 
@@ -142,7 +142,7 @@ Also verify the README's **accuracy claims** (ADR-008):
 
 - The README must NOT promise or state a classification-accuracy percentage. Accuracy is
   measured, not guaranteed.
-- Any accuracy statement must point at the spec-003 artifacts — `laib benchmark run` results
+- Any accuracy statement must point at the spec-003 artifacts — `vision-lens benchmark run` results
   under `benchmarks/results/<runId>/` (real-data VisA ground truth, CC BY 4.0, license in
   `datasets/registry.json`).
 - The legacy `pnpm benchmark:legacy` harness is a SYNTHETIC unit fixture (colour swatches) and
@@ -155,7 +155,7 @@ Also verify the README's **accuracy claims** (ADR-008):
 Produce a **DX Report** with:
 
 ```
-## DX Report — ai-image-labeling
+## DX Report — Vision Lens
 Date: <today>
 
 ### Summary

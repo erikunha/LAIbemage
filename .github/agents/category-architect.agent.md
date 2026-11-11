@@ -34,7 +34,7 @@ handoffs:
     send: false
 ---
 
-You are the Category Architect for `ai-image-labeling`. You design the complete
+You are the Category Architect for Vision Lens. You design the complete
 category taxonomy for a new image domain, producing a valid `categories.json` that
 maximises classification accuracy for that domain.
 

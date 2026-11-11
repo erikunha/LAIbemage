@@ -5,7 +5,7 @@ description: Add a new CLI flag end-to-end
 
 # Add a new CLI flag
 
-I want to add a new CLI flag to `ai-image-labeling`.
+I want to add a new CLI flag to Vision Lens.
 
 **Flag name:** {{FLAG_NAME}} (e.g. `--output-quality`)
 **Type:** {{FLAG_TYPE}} (string | number | boolean)

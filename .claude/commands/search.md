@@ -15,8 +15,8 @@ Set up semantic or keyword search on a classified image collection.
 ## Step 1 — Run keyword search (no setup)
 
 ```bash
-ai-image-labeling search --keyword "crack" --output ./output
-ai-image-labeling search --keyword "water damage" --output ./output --top 20
+vision-lens search --keyword "crack" --output ./output
+vision-lens search --keyword "water damage" --output ./output --top 20
 ```
 
 Keyword search scans four fields: `shortDescription`, `fullDescription`, `elements`, `extractedText`.
@@ -25,7 +25,7 @@ Ranks by number of field matches (BM25-like counting, not true BM25 yet — see 
 ## Step 2 — Generate embeddings (one-time, required for semantic search)
 
 ```bash
-ai-image-labeling --input ./photos --output ./output --skip-analysis --embed
+vision-lens --input ./photos --output ./output --skip-analysis --embed
 ```
 
 `--skip-analysis --embed` reads the existing `analysis_results.json` and generates embeddings without re-running the LLM analysis. Writes `analysis_embeddings.index.json`.
@@ -39,9 +39,9 @@ Embedding models used per provider:
 ## Step 3 — Run semantic search
 
 ```bash
-ai-image-labeling search --query "kitchen with natural lighting" --output ./output --top 10
-ai-image-labeling search --query "water stains on ceiling" --output ./output --min-score 0.5
-ai-image-labeling search --query "red couch" --output ./output --output-format json
+vision-lens search --query "kitchen with natural lighting" --output ./output --top 10
+vision-lens search --query "water stains on ceiling" --output ./output --min-score 0.5
+vision-lens search --query "red couch" --output ./output --output-format json
 ```
 
 `--min-score` (0–1, default 0.4): filter out low-similarity results.
@@ -52,7 +52,7 @@ ai-image-labeling search --query "red couch" --output ./output --output-format j
 If new images are analyzed or the provider changes:
 ```bash
 # Re-run embeddings with skip-analysis to avoid re-analyzing everything
-ai-image-labeling --input ./photos --output ./output --skip-analysis --embed
+vision-lens --input ./photos --output ./output --skip-analysis --embed
 ```
 
 **Important:** If you switch providers (e.g. openai → google), the index has incompatible dimensions.

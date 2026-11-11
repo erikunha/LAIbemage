@@ -1,6 +1,6 @@
 # Skill: Add Category
 
-**Domain:** Category taxonomy management for `ai-image-labeling`
+**Domain:** Category taxonomy management for Vision Lens
 
 ## When to use this skill
 
@@ -50,7 +50,7 @@ Show the user the diff and remind them:
 
 - The GPT prompt is built dynamically — no code changes needed
 - Re-run `pnpm test` to ensure nothing broke
-- The new category will take effect on the next `ai-image-labeling` run
+- The new category will take effect on the next Vision Lens run
 
 ## Example output (categories.json diff)
 

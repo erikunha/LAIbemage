@@ -15,15 +15,15 @@ Compare two `analysis_results.json` files to see what changed between runs.
 
 ```bash
 # Compare two saved results files
-ai-image-labeling diff ./output/before.json ./output/after.json
+vision-lens diff ./output/before.json ./output/after.json
 
 # JSON output for scripting
-ai-image-labeling diff ./output/before.json ./output/after.json --output-format json
+vision-lens diff ./output/before.json ./output/after.json --output-format json
 
 # Save a snapshot before a risky change
 cp ./output/analysis_results.json ./output/analysis_results_backup.json
-ai-image-labeling --input ./photos --output ./output --skip-analysis  # re-run with new categories
-ai-image-labeling diff ./output/analysis_results_backup.json ./output/analysis_results.json
+vision-lens --input ./photos --output ./output --skip-analysis  # re-run with new categories
+vision-lens diff ./output/analysis_results_backup.json ./output/analysis_results.json
 ```
 
 ## Output
@@ -45,5 +45,5 @@ High `category_changed` count after a model upgrade = review the changes; some m
 
 ## Implementation details
 
-`diffCaches()` is exported from `packages/sdk/src/index.ts` (`@master-vision/sdk`). It is a pure function — no I/O, fully testable.
+`diffCaches()` is exported from `packages/sdk/src/index.ts` (`@vision-lens/sdk`). It is a pure function — no I/O, fully testable.
 The CLI writes the result to stdout. JSON mode emits `{ summary, changes[] }` for scripting.

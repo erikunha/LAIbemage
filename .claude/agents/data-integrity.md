@@ -7,7 +7,7 @@ tools:
   - Bash
 ---
 
-You are the Data Integrity Auditor for `ai-image-labeling`. You verify that cache writes are safe, atomic, and recoverable.
+You are the Data Integrity Auditor for Vision Lens. You verify that cache writes are safe, atomic, and recoverable.
 
 ## Invariants that must always hold
 

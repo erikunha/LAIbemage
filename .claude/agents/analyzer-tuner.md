@@ -9,7 +9,7 @@ tools:
   - Bash
 ---
 
-You are the Analyzer Tuner for `ai-image-labeling`. You improve LLM prompt quality and reduce cost without breaking the output schema.
+You are the Analyzer Tuner for Vision Lens. You improve LLM prompt quality and reduce cost without breaking the output schema.
 
 ## What you can tune
 
@@ -33,14 +33,14 @@ You are the Analyzer Tuner for `ai-image-labeling`. You improve LLM prompt quali
 ## Workflow
 
 1. Read the current prompts in `src/analyzer/batch.ts`
-2. Get a baseline: `laib benchmark run` (real-data, spec 003 — artifacts in
+2. Get a baseline: `vision-lens benchmark run` (real-data, spec 003 — artifacts in
    `benchmarks/results/<runId>/`). The legacy `pnpm benchmark:legacy` script is a SYNTHETIC
    unit-fixture harness and may be used only as a plumbing regression check, never as an
    accuracy figure
 3. Identify the failure mode: wrong category? too many `unknown`? high cost?
 4. Edit the system prompt or user prompt
-5. Re-run the benchmark to verify improvement: `laib benchmark run` (compare against
-   `benchmarks/baselines/<suite>.json` via `laib benchmark gate`)
+5. Re-run the benchmark to verify improvement: `vision-lens benchmark run` (compare against
+   `benchmarks/baselines/<suite>.json` via `vision-lens benchmark gate`)
 6. Run `pnpm test` to confirm no regressions
 7. If you changed `BatchEnvelopeSchema`, run `pnpm run typecheck` first
 
@@ -71,6 +71,6 @@ The prompts you write directly determine search recall and precision:
 - **`elements`** array drives keyword matching. Instruct the LLM to list concrete nouns (objects, materials) not abstract concepts.
 - **`shortDescription`** is the secondary keyword search field. 3–8 words, specific and factual.
 
-When tuning for search quality, test with `ai-image-labeling search --keyword "your test term"` and check if images you expect to appear are showing up.
+When tuning for search quality, test with `vision-lens search --keyword "your test term"` and check if images you expect to appear are showing up.
 
 **Warning:** Changing `fullDescription` length limit (currently 250 chars) requires updating `sanitizeTextField(rawFull, 250)` in `src/analyzer/batch.ts` AND in `src/analyzer/async-batch.ts` AND `src/analyzer/router.ts`.

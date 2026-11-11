@@ -5,7 +5,7 @@ description: Diagnose and fix a high rate of images classified as "unknown"
 
 # Fix high unknown rate
 
-I'm getting too many images classified as `unknown` in `ai-image-labeling`.
+I'm getting too many images classified as `unknown` in Vision Lens.
 
 **Provider:** {{PROVIDER}} (openai / anthropic / google)
 **Unknown rate:** {{UNKNOWN_RATE}} (e.g. "40% of images")

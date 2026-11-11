@@ -6,7 +6,7 @@
 # Secrets Scanner Hook
 
 Scans modified files at the end of a Copilot coding agent session for accidentally leaked API
-keys and other credentials. Tuned for `ai-image-labeling`'s three LLM providers.
+keys and other credentials. Tuned for Vision Lens's three LLM providers.
 
 ## Detected patterns
 

@@ -1,6 +1,6 @@
 # Skill: Debug Classification
 
-**Domain:** Diagnosing poor LLM classification results in `ai-image-labeling`
+**Domain:** Diagnosing poor LLM classification results in Vision Lens
 
 ## When to use this skill
 
@@ -92,7 +92,7 @@ For Anthropic, confirm the SDK returns clean JSON text without additional wrappi
 Use the `single` subcommand to isolate a specific problematic image:
 
 ```bash
-npx ai-image-labeling single 42 ./input/problematic-image.jpg \
+npx @vision-lens/cli single 42 ./input/problematic-image.jpg \
   --provider openai \
   --categories ./examples/categories.json \
   --verbose
@@ -110,9 +110,9 @@ Run the same image batch with different providers to identify if the issue is
 provider-specific or prompt/category-specific:
 
 ```bash
-npx ai-image-labeling --provider openai --output output-openai/
-npx ai-image-labeling --provider anthropic --output output-anthropic/
-npx ai-image-labeling --provider google --output output-google/
+npx @vision-lens/cli --provider openai --output output-openai/
+npx @vision-lens/cli --provider anthropic --output output-anthropic/
+npx @vision-lens/cli --provider google --output output-google/
 ```
 
 Compare `output-*/analysis_results.json` for divergent classifications.

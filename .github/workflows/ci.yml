@@ -73,8 +73,8 @@ jobs:
       - name: Build (required by the golden bin tests)
         run: pnpm build
 
-      - name: Golden bin tests (laib + ai-image-labeling compat)
-        run: pnpm --filter @master-vision/cli test:bins
+      - name: Golden bin tests (vision-lens + ai-image-labeling compat)
+        run: pnpm --filter @vision-lens/cli test:bins
 
       # removed: README flags-table check (`pnpm readme:check`) — README moved to
       # curated thematic tables (2026-11); generator markers dropped; restore when

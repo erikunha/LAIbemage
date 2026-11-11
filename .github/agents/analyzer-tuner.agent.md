@@ -95,7 +95,7 @@ For real-world validation, use a small test set from `input/`:
 node dist/cli/index.js --input ./input --output ./output --dry-run --verbose --provider openai
 ```
 
-For an accuracy number, use the real-data benchmark (`laib benchmark run`; artifacts in
+For an accuracy number, use the real-data benchmark (`vision-lens benchmark run`; artifacts in
 `benchmarks/results/<runId>/`, gated against `benchmarks/baselines/<suite>.json`). The legacy
 `pnpm benchmark:legacy` script scores SYNTHETIC colour-swatch fixtures — it is a unit-fixture
 regression check and must never be quoted as product accuracy (ADR-008).

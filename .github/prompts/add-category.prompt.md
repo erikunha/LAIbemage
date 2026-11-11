@@ -5,7 +5,7 @@ description: Add a new image category to the taxonomy
 
 # Add a new image category
 
-I want to add a new image category to `ai-image-labeling`.
+I want to add a new image category to Vision Lens.
 
 **Category name:** {{CATEGORY_NAME}}
 **Description:** {{CATEGORY_DESCRIPTION}}

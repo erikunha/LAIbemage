@@ -25,7 +25,7 @@ For **concept queries** ("find photos that look like a kitchen"): guide to seman
 ### 2. Keyword search — no setup required
 
 ```bash
-ai-image-labeling search --keyword "your term" --output ./output
+vision-lens search --keyword "your term" --output ./output
 ```
 
 Fields searched: `shortDescription`, `fullDescription`, `elements`, `extractedText`.
@@ -35,10 +35,10 @@ Ranked by match count. Case-insensitive. Literal substring match only (no stemmi
 
 ```bash
 # Step 1: generate embeddings (one-time)
-ai-image-labeling --input ./photos --output ./output --skip-analysis --embed
+vision-lens --input ./photos --output ./output --skip-analysis --embed
 
 # Step 2: search
-ai-image-labeling search --query "your concept query" --output ./output
+vision-lens search --query "your concept query" --output ./output
 ```
 
 If the user is on Anthropic without an OpenAI key:

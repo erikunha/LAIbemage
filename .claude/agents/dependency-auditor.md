@@ -8,7 +8,7 @@ tools:
   - WebSearch
 ---
 
-You are the Dependency Auditor for `ai-image-labeling`. You review npm dependencies for safety and necessity.
+You are the Dependency Auditor for Vision Lens. You review npm dependencies for safety and necessity.
 
 ## When invoked
 

@@ -65,25 +65,25 @@ jobs:
       # ---------------------------------------------------------------------
       - name: Real-data gate (skipped without the dataset)
         env:
-          LAIB_DATASETS_DIR: ${{ vars.LAIB_DATASETS_DIR }}
+          VISION_LENS_DATASETS_DIR: ${{ vars.VISION_LENS_DATASETS_DIR }}
         run: |
           set -euo pipefail
-          if [ -z "${LAIB_DATASETS_DIR}" ] || [ ! -d "${LAIB_DATASETS_DIR}" ]; then
+          if [ -z "${VISION_LENS_DATASETS_DIR}" ] || [ ! -d "${VISION_LENS_DATASETS_DIR}" ]; then
             echo "dataset=absent — the real-data benchmark gate is SKIPPED."
             echo "No dataset is downloaded by CI (never auto-download)."
             exit 0
           fi
-          echo "dataset=present at ${LAIB_DATASETS_DIR}"
+          echo "dataset=present at ${VISION_LENS_DATASETS_DIR}"
           if [ ! -f benchmarks/baselines/visa-subset.json ]; then
             echo "baseline=absent — no baseline is recorded for visa-subset."
-            echo "Record one locally (laib benchmark gate --update-baseline) and commit it."
+            echo "Record one locally (vision-lens benchmark gate --update-baseline) and commit it."
             exit 0
           fi
           # The gate's exit code IS the verdict: a regression fails the job.
           # The run artifact is the most recent one of the suite.
           node packages/cli/dist/index.js benchmark gate \
             --suite visa-subset \
-            --model-id "${LAIB_BENCHMARK_MODEL:-default}" \
+            --model-id "${VISION_LENS_BENCHMARK_MODEL:-default}" \
             --baseline benchmarks/baselines/visa-subset.json
 
       # ---------------------------------------------------------------------
@@ -173,12 +173,12 @@ jobs:
       - name: Job summary
         if: always()
         env:
-          LAIB_DATASETS_DIR: ${{ vars.LAIB_DATASETS_DIR }}
+          VISION_LENS_DATASETS_DIR: ${{ vars.VISION_LENS_DATASETS_DIR }}
         run: |
           {
             echo "### Benchmark gate"
-            if [ -n "${LAIB_DATASETS_DIR}" ] && [ -d "${LAIB_DATASETS_DIR}" ]; then
-              echo "- Real-data gate: RAN (a dataset is present at ${LAIB_DATASETS_DIR})."
+            if [ -n "${VISION_LENS_DATASETS_DIR}" ] && [ -d "${VISION_LENS_DATASETS_DIR}" ]; then
+              echo "- Real-data gate: RAN (a dataset is present at ${VISION_LENS_DATASETS_DIR})."
             else
               echo "- Real-data gate: SKIPPED — no dataset is present, and CI never downloads one."
             fi

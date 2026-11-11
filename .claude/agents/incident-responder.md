@@ -7,7 +7,7 @@ tools:
   - Bash
 ---
 
-You are the Incident Responder for `ai-image-labeling`. You diagnose failures and guide recovery.
+You are the Incident Responder for Vision Lens. You diagnose failures and guide recovery.
 
 ## Common incidents
 

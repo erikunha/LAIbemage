@@ -9,7 +9,7 @@ improved or regressed, and what action to take next.
 
 | Harness | How to run it | What its numbers mean |
 | ------- | ------------- | ---------------------- |
-| **Real-data benchmark (spec 003)** | `laib benchmark run` | The only product accuracy source. Artifacts land in `benchmarks/results/<runId>/` (JSON + Markdown) and are gated against `benchmarks/baselines/<suite>.json`. |
+| **Real-data benchmark (spec 003)** | `vision-lens benchmark run` | The only product accuracy source. Artifacts land in `benchmarks/results/<runId>/` (JSON + Markdown) and are gated against `benchmarks/baselines/<suite>.json`. |
 | **Legacy synthetic harness (unit fixture)** | `npx tsx scripts/benchmark-legacy.ts` (package script `benchmark:legacy`) | A regression check over synthetic colour-swatch fixtures. It proves the harness still runs — it says nothing about product accuracy. |
 
 Per ADR-008 (`docs/adr/008-evidence-policy.md`), the real-data benchmark is the **only**
@@ -20,9 +20,9 @@ the repo must point at the spec-003 artifacts (`benchmarks/results/<runId>/`,
 ```mermaid
 flowchart LR
   A[Real dataset<br/>VisA subset, CC BY 4.0] --> B[Gold split<br/>benchmarks/splits/*.gold.json]
-  B --> C["laib benchmark run"]
+  B --> C["vision-lens benchmark run"]
   C --> D[Report artifacts<br/>benchmarks/results/runId/<br/>JSON + MD]
-  D --> E["laib benchmark gate<br/>vs baselines/suite.json"]
+  D --> E["vision-lens benchmark gate<br/>vs baselines/suite.json"]
   F[Legacy synthetic fixtures<br/>colour swatches, unit only] -. not an accuracy source .-> G["benchmark:legacy<br/>harness regression check"]
 ```
 
@@ -91,11 +91,22 @@ Legacy synthetic report (NOT an accuracy source):
 Real-data gate (spec 003) — the gate CI enforces:
 
 ```bash
-laib benchmark gate --suite <suite> --model-id <model>
+vision-lens benchmark run --suite <suite> --model-id <model> \
+  --config-fingerprint <hash> --model-version <version> \
+  [--split <file>] [--predictions <file>]
+# Produces the run artifact the gate consumes.
+# --model-id, --config-fingerprint and --model-version are REQUIRED by `run`:
+# a report without the model version or the config fingerprint is not
+# attributable, so the CLI refuses to produce one.
+
+vision-lens benchmark gate --suite <suite> --model-id <model>
 # exit 0 = PASS, exit 1 = REGRESSION (per-class deltas attached)
 # --model-id is REQUIRED: the root CLI already owns --model (the LLM model of
 # the batch run) and Commander lets the parent consume it, so the benchmark
 # subcommand uses --model-id to stay unambiguous.
+# `gate` takes NO --config-fingerprint / --model-version: it reads the model
+# version from the run artifact's reproduction tuple. Passing them is an
+# "unknown option" error.
 ```
 
 Legacy synthetic harness only (unit fixture):
@@ -154,7 +165,7 @@ For the worst-performing categories:
 Real-data baseline (spec 003) — an explicit, reviewed action with a dated header:
 
 ```bash
-laib benchmark gate --suite <suite> --model-id <model> --update-baseline
+vision-lens benchmark gate --suite <suite> --model-id <model> --update-baseline
 ```
 
 Legacy synthetic baseline (unit fixture only):

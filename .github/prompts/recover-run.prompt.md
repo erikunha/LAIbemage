@@ -1,9 +1,9 @@
 ---
 mode: ask
-description: Diagnose and recover from a failed or partial ai-image-labeling run
+description: Diagnose and recover from a failed or partial Vision Lens run
 ---
 
-You are diagnosing a failed or partial run of `ai-image-labeling`.
+You are diagnosing a failed or partial run of Vision Lens.
 
 ## Symptoms described
 

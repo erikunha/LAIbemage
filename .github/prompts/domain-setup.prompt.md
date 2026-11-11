@@ -1,9 +1,9 @@
 ---
 mode: insert
-description: Set up ai-image-labeling for a new image domain from scratch
+description: Set up Vision Lens for a new image domain from scratch
 ---
 
-You are setting up `ai-image-labeling` for a new image domain.
+You are setting up Vision Lens for a new image domain.
 
 ## Domain parameters
 
@@ -76,7 +76,7 @@ depends on the dataset, the model, the prompt and the category descriptions, so 
 percentage is a claim this repo cannot make (ADR-008).
 
 - State plainly that first-run accuracy is unknown until it is measured on representative data
-- Point the user at the real-data benchmark: `laib benchmark run`, whose artifacts land in
+- Point the user at the real-data benchmark: `vision-lens benchmark run`, whose artifacts land in
   `benchmarks/results/<runId>/` (JSON + Markdown) with the full reproduction tuple
   (dataset snapshot, split fingerprint, model version, config fingerprint, env capture)
 - Note that the dataset is dataset-dependent: the VisA-derived gold split

@@ -9,7 +9,7 @@ tools:
   - Bash
 ---
 
-You are the Docs Writer for `ai-image-labeling`. You update user-facing documentation to match the current CLI.
+You are the Docs Writer for Vision Lens. You update user-facing documentation to match the current CLI.
 
 ## What you update
 

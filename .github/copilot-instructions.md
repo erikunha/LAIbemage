@@ -1,4 +1,4 @@
-# GitHub Copilot Instructions — ai-image-labeling
+# GitHub Copilot Instructions — Vision Lens
 
 ## Project overview
 
@@ -109,7 +109,7 @@ selected at runtime.
 - The real-data benchmark is the only accuracy source (ADR-008, spec 003). Its artifacts are
   `benchmarks/results/<runId>/` (JSON + Markdown), `benchmarks/baselines/<suite>.json`,
   `benchmarks/splits/*.gold.json` and `datasets/registry.json`, produced by
-  `laib benchmark run|gate|report`.
+  `vision-lens benchmark run|gate|report`.
 - `scripts/benchmark-legacy.ts` is the LEGACY SYNTHETIC harness — a unit-fixture /
   regression harness over colour-swatch fixtures. It is **not** an accuracy source of truth
   and must never be quoted as one. Package script: `benchmark:legacy`.

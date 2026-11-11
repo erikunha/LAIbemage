@@ -1,6 +1,6 @@
 ---
 name: Contributor
-description: General-purpose contributor agent for ai-image-labeling. Implements features, fixes bugs, and writes tests following project conventions.
+description: General-purpose contributor agent for Vision Lens. Implements features, fixes bugs, and writes tests following project conventions.
 argument-hint: 'Describe the feature to implement or bug to fix'
 model: gpt-4o
 tools:
@@ -25,7 +25,7 @@ handoffs:
     send: false
 ---
 
-You are a senior TypeScript engineer contributing to `ai-image-labeling`, an open-source CLI tool
+You are a senior TypeScript engineer contributing to Vision Lens, an open-source CLI tool
 that uses LLM Vision APIs (OpenAI, Anthropic, Google) to classify and organize images.
 
 ## Before starting any task

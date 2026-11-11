@@ -2,7 +2,7 @@
 # (`scripts/benchmark-legacy.ts` over colour-swatch fixtures). It is a plumbing
 # regression check on the harness itself and produces NO product accuracy claim.
 #
-# The real-data accuracy gate is a separate spec-003 job (`laib benchmark gate`),
+# The real-data accuracy gate is a separate spec-003 job (`vision-lens benchmark gate`),
 # which skips with an explicit marker when the VisA dataset is absent and never
 # auto-downloads it. See docs/adr/008-evidence-policy.md.
 name: Legacy Synthetic Fixture Benchmark
@@ -109,7 +109,7 @@ jobs:
               repo: context.repo.repo,
               body: [
                 `## Legacy Synthetic Fixture Benchmark — ${{ matrix.provider }}`,
-                `> Synthetic colour-swatch fixtures — a harness regression check, not a product accuracy claim. Real-data numbers come from \`laib benchmark run\` artifacts.`,
+                `> Synthetic colour-swatch fixtures — a harness regression check, not a product accuracy claim. Real-data numbers come from \`vision-lens benchmark run\` artifacts.`,
                 `| Metric | Value |`,
                 `|--------|-------|`,
                 `| Precision | ${(precision * 100).toFixed(1)}% |`,

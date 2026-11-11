@@ -1,9 +1,9 @@
 ---
 mode: insert
-description: Scaffold a complete lifecycle plugin for ai-image-labeling
+description: Scaffold a complete lifecycle plugin for Vision Lens
 ---
 
-You are scaffolding an external lifecycle plugin for `ai-image-labeling`.
+You are scaffolding an external lifecycle plugin for Vision Lens.
 
 Plugin name: {{PLUGIN_NAME}}
 Hooks to implement: {{HOOKS}}

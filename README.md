@@ -63,10 +63,16 @@ What it does **not** do:
   (`benchmarks/baselines/visa-subset.json`); the run report itself
   (`benchmarks/results/<runId>/`) is a LOCAL artifact — it is gitignored, and the documented
   `vision-lens benchmark run` reproduces it from the tracked files.
-  **That number is a baseline to regress against, not a product claim:** it is one model on one
-  dataset subset on one day, and the split it was scored on carries no held-out set — the
-  upstream release carries no session information, so all 700 items land in `train`
-  ([`docs/architecture/benchmark.md`](docs/architecture/benchmark.md)). The `benchmark:legacy`
+  **That number is not a model-performance figure and must not be quoted as one.** It was
+  measured on a split whose 700 assignments were ALL in `train`: the upstream release carries
+  no session information, so each class is one capture group, and a group larger than every
+  quota cannot be divided. There was no held-out set at all. The baseline entry is therefore
+  **retired** (the reason is recorded in `benchmarks/baselines/visa-subset.json`), and the
+  tracked split is now a real 60/20/20 partition
+  (`benchmarks/splits/visa-subset.v2.gold.json`, 420 train / 140 val / 140 test, item-level
+  and stratified by class and anomaly). The first measurement against that split is still to
+  be run ([`docs/architecture/benchmark.md`](docs/architecture/benchmark.md),
+  [`docs/datasets/visa.md`](docs/datasets/visa.md)). The `benchmark:legacy`
   script is a **synthetic** unit-fixture harness over colour swatches; it is a plumbing
   regression check, not an accuracy source (see [ADR-008](docs/adr/008-evidence-policy.md)).
 
@@ -209,6 +215,7 @@ vision-lens benchmark run|gate|report           # score a suite, gate it against
 | `--provider` | `<name>` | LLM provider: `openai` \| `anthropic` \| `google` \| `azure` \| `ollama` \| `bedrock` \| `vertex` \| `hybrid` | `openai` |
 | `--api-key` | `<key>` | OpenAI API key (overrides `OPENAI_API_KEY`) | — |
 | `--anthropic-api-key` | `<key>` | Anthropic API key (overrides `ANTHROPIC_API_KEY`) | — |
+| `--anthropic-workspace-id` | `<id>` | Anthropic workspace id sent as the `anthropic-workspace-id` header; required for API keys not scoped to a workspace (overrides `ANTHROPIC_WORKSPACE_ID`) | - |
 | `--google-api-key` | `<key>` | Google AI API key (overrides `GOOGLE_API_KEY`) | — |
 | `--azure-endpoint` | `<url>` | Azure OpenAI endpoint URL — `single` / `suggest-categories` only | — |
 | `--azure-api-key` | `<key>` | Azure OpenAI API key — `single` / `suggest-categories` only | — |

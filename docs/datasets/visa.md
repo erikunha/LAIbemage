@@ -1,13 +1,16 @@
 # VisA subset — acquisition and normalisation
 
-> Status: **implemented, dataset fetched and checksum-pinned, first real measurement recorded** ·
+> Status: **implemented, dataset fetched and checksum-pinned, split replaced (VLN-007)** ·
 > Spec: `specs/003-benchmark-ground-truth`
 > (US1, tasks 1.1–1.4) · Registry: `datasets/registry.json` · Measured at snapshot `4afc0d8`
 >
 > The archive was fetched on **2026-11-11** and its sha256 is pinned. The normalised subset
-> holds 700 images, the gold manifest is committed, and `gpt-4o` scored **macro F1 0.9795** /
-> **balanced accuracy 0.9700** over all 700 of them — a baseline to regress against, not a
-> product claim (§8).
+> holds 700 images and the gold manifest is committed. The **first** measurement
+> (`gpt-4o`, macro F1 0.9795 / balanced accuracy 0.9700) was taken on a **degenerate
+> all-train split**: all 700 items were in `train`, so there was no held-out set at all,
+> and the number is **not publishable as model performance** (§8). The split has been
+> replaced by a real 60/20/20 partition (`visa-subset.v2.gold.json`, 420 train / 140 val /
+> 140 test), and the old measurement is retired with that reason recorded next to it.
 
 This document is the operator's guide to the benchmark ground truth: where the dataset
 comes from, under which license, how it is fetched, how it is turned into Vision Lens
@@ -32,12 +35,13 @@ flowchart TD
     STORE[("002 store (sqlite, local, gitignored)<br/>4 capture_sessions · 700 assets<br/>700 samples · 700 annotations<br/>ontology: normal + 18 defect keys")]
 
     SPLIT["scripts/benchmarks/make-splits.ts --target-images 700<br/>the same selection code as the normaliser<br/>benchmarks/splits/visa-subset.gold.json"]
-    DEGEN["one capture group per class<br/>8 capture-group-overflow notes<br/>all 700 items land in train"]
+    DEGEN["v1: one capture group per class<br/>8 capture-group-overflow notes<br/>all 700 items land in train<br/>FROZEN, kept as the evidence"]
+    V2["v2: --strategy stratified<br/>420 train / 140 val / 140 test<br/>item-level, not capture-group-safe<br/>benchmarks/splits/visa-subset.v2.gold.json"]
 
     PRED["scripts/benchmarks/predict-visa.ts<br/>a real LLM over the gold images"]
     RUN["vision-lens benchmark run<br/>per-class metrics · ECE · latency · cost"]
-    GATE["vision-lens benchmark gate<br/>tolerance −0.02"]
-    BASE["benchmarks/baselines/visa-subset.json<br/>the recorded baseline"]
+    GATE["vision-lens benchmark gate<br/>tolerance −0.02<br/>refuses a split that is not the tracked one"]
+    BASE["benchmarks/baselines/visa-subset.json<br/>the recorded baseline (RETIRED: see §8)"]
 
     AVAIL["datasetAvailable()<br/>VISION_LENS_DATASETS_DIR + .dataset-ready"]
     ABSENT["CI marker: dataset=absent<br/>benchmark skipped, not failed"]
@@ -55,7 +59,9 @@ flowchart TD
     POL --> STORE
     STORE --> SPLIT
     SPLIT -. "no session column upstream" .-> DEGEN
-    SPLIT --> PRED
+    SPLIT --> V2
+    DEGEN --> PRED
+    V2 --> PRED
     PRED --> RUN
     RUN --> GATE
     GATE --> BASE
@@ -394,12 +400,28 @@ pnpm tsx scripts/datasets/fetch-visa.ts --record-checksums   # pins the sha256
 pnpm tsx scripts/datasets/normalize-visa.ts --target-images 700 --db datasets/store/visa-benchmark.db
 
 # 3. Build the gold manifest over the SAME subset the normaliser selected.
+#    This is the v1 split, the one that degenerated to an all-train partition.
+#    It is FROZEN: the file is never rewritten, it is the evidence of the defect.
 pnpm exec tsx scripts/benchmarks/make-splits.ts \
   --dataset visa-subset \
   --root datasets/visa-subset \
   --seed 42 \
   --target-images 700 \
   --out benchmarks/splits/visa-subset.gold.json
+
+# 3b. Build the v2 split: the same 700 images in a real 60/20/20 partition.
+#     --strategy stratified gives up the capture-group property (the upstream
+#     release has no session column, so a class is one capture group and it is
+#     larger than every quota) and stratifies by class and anomaly instead.
+#     The manifest states in `groupBasis` that the partition is item-level.
+pnpm exec tsx scripts/benchmarks/make-splits.ts \
+  --dataset visa-subset \
+  --root datasets/visa-subset \
+  --seed 42 \
+  --target-images 700 \
+  --strategy stratified \
+  --id visa-subset.v2.gold \
+  --out benchmarks/splits/visa-subset.v2.gold.json
 
 # 4. Compute the config fingerprint — it is COMPUTED, never typed.
 pnpm exec tsx scripts/benchmarks/config-fingerprint.ts \
@@ -428,6 +450,33 @@ pnpm exec tsx packages/cli/src/index.ts benchmark gate --suite visa-subset --mod
 pnpm exec tsx packages/cli/src/index.ts benchmark gate --suite visa-subset --model-id gpt-4o --update-baseline
 ```
 
+Steps 3b to 7 are the v2 workflow, and the suite id changes with the split:
+the v2 split belongs to the suite **`visa-subset.v2`**, so the split file is
+`benchmarks/splits/visa-subset.v2.gold.json`, the predictions are
+`benchmarks/predictions/visa-subset.v2.gpt-4o.json` and the baseline is
+`benchmarks/baselines/visa-subset.v2.json`.
+
+```bash
+# 3b..7 for the v2 suite: same commands, the v2 split and the v2 suite id.
+pnpm exec tsx scripts/benchmarks/make-splits.ts \
+  --dataset visa-subset --root datasets/visa-subset --seed 42 --target-images 700 \
+  --strategy stratified --id visa-subset.v2.gold \
+  --out benchmarks/splits/visa-subset.v2.gold.json
+
+pnpm exec tsx scripts/benchmarks/predict-visa.ts \
+  --split benchmarks/splits/visa-subset.v2.gold.json \
+  --root datasets/visa-subset \
+  --out benchmarks/predictions/visa-subset.v2.gpt-4o.json \
+  --provider openai --model gpt-4o --model-version 2024-11-20
+
+pnpm exec tsx packages/cli/src/index.ts benchmark run \
+  --suite visa-subset.v2 --model-id gpt-4o \
+  --model-version 'model:gpt-4o@2024-11-20' \
+  --split benchmarks/splits/visa-subset.v2.gold.json \
+  --predictions benchmarks/predictions/visa-subset.v2.gpt-4o.json \
+  --out benchmarks/results --min-samples 30
+```
+
 **`--target-images 700` is the flag that keeps the two artefacts on the same subset.**
 The selection is shared code (`collectVisaPartData` + `selectVisaSubsetImages` in
 `packages/core/src/benchmark/normalize.ts`), so the manifest describes exactly the 700
@@ -438,7 +487,16 @@ describes.
 
 ---
 
-## 8. The measured result
+## 8. The measured result (historical, retired)
+
+> **This number is not a performance figure.** The run below was scored on the
+> **v1** split, whose 700 assignments are all in `train`: there was no held-out
+> set, so nothing was measured on unseen images. It is kept as the historical
+> record of the first real run, and the baseline entry that carries it is
+> **retired** (`status: "retired"` with the reason recorded next to it in
+> `benchmarks/baselines/visa-subset.json`). Do not quote it as the accuracy of a
+> model. The tracked split is now the v2 one (§8.5), and the first number
+> recorded against it is still to be measured.
 
 ### 8.1 What was run
 
@@ -471,9 +529,10 @@ and a clock. The tracked evidence is the gold set, the raw predictions and the b
 
 | tracked file | what it is |
 |---|---|
-| `benchmarks/splits/visa-subset.gold.json` | the 700 gold items, their sha256 and the manifest hash |
-| `benchmarks/predictions/visa-subset.gpt-4o.json` | the 700 raw model answers (id, label key, confidence, latency, cost) |
-| `benchmarks/baselines/visa-subset.json` | the metrics the gate compares against, **with the snapshot, the split fingerprint and the config fingerprint of the run it was recorded from** |
+| `benchmarks/splits/visa-subset.gold.json` | the 700 gold items, their sha256 and the manifest hash of the **v1** split (frozen) |
+| `benchmarks/predictions/visa-subset.gpt-4o.json` | the 700 raw model answers (id, label key, confidence, latency, cost) of the historical run |
+| `benchmarks/baselines/visa-subset.json` | the metrics of that run, **with the snapshot, the split fingerprint and the config fingerprint of the run it was recorded from**, and the recorded reason the entry is **retired** |
+| `benchmarks/splits/visa-subset.v2.gold.json` | the **tracked** split of the suite `visa-subset.v2`: the same 700 items in a real 420/140/140 partition |
 
 The commands in §7 reproduce the report from those files alone — on a machine without the
 dataset the runner reproduces the same numbers and records that the image bytes could not be
@@ -484,7 +543,7 @@ re-verified, because there are no bytes to hash.
 what the documented command below relies on. The `--api-key` flag exists, but a key passed
 that way is visible in the process list and in the shell history.
 
-### 8.2 The numbers
+### 8.2 The numbers of the historical run
 
 | Metric | Value |
 |---|---|
@@ -506,8 +565,12 @@ There was not a single false defect alarm.
 
 The baseline was recorded with `benchmark gate --update-baseline` into
 `benchmarks/baselines/visa-subset.json` (macro F1 0.9795, balanced accuracy 0.97, the
-per-class F1s above). A second gate run passes: *"macro F1 moved by 0.0000, within the
-tolerance of -0.0200"*.
+per-class F1s above). A second gate run passed at the time: *"macro F1 moved by
+0.0000, within the tolerance of -0.0200"*.
+
+**Today the same gate run fails**, and that is the point of VLN-007: the tracked
+split is no longer the split the number was measured against, so the gate refuses
+to compare it (see §8.4).
 
 ### 8.3 The limitations — read these before quoting the number
 
@@ -535,6 +598,60 @@ tolerance of -0.0200"*.
    In this run `unseenPredictedLabels` was **empty** — every answer was one of the
    five gold classes.
 
+### 8.4 The v2 split, and what the gate now decides
+
+`benchmarks/splits/visa-subset.v2.gold.json` is the tracked split of the suite
+`visa-subset.v2`. It holds the **same 700 images** (the same paths, the same
+sha256 digests) in a real partition:
+
+| | train | val | test | total |
+|---|---|---|---|---|
+| all items | 420 | 140 | 140 | 700 |
+| `candle` / `capsules` / `fryum` / `pcb1` (each) | 105 | 35 | 35 | 175 |
+| `anomalous` | 240 | 80 | 80 | 400 |
+| `normal` | 180 | 60 | 60 | 300 |
+
+| field | value |
+|---|---|
+| `schemaVersion` | 2 |
+| `strategy` | `stratified` |
+| `manifestHash` | `503c568463739a1522d675a474a219aecc918553315e0ec4e2800c2b10b21bb5` |
+| `partitionFingerprint` | `4ac0940380d0283a4ac52bda0884449bc8778ea2605b27c7ef2f26f666b9c963` |
+| `groupBasis.captureGroupsEnforced` | `false` |
+| `groupBasis.oversizedCaptureGroupCount` | `4` (one per class) |
+
+**What the v2 partition gives up.** The capture-group property is not enforced:
+the upstream release has no session column, so the capture group of an item is its
+object class, and a class of 175 images cannot be kept whole in three partitions
+of 420/140/140. The v2 partition is therefore **item-level**: two images of the
+same class may sit in `train` and in `test`. The manifest says so in
+`groupBasis.statement` and in a `notes[]` entry, and an item-level partition
+cannot prove acquisition-level independence. What it does give is a held-out set
+with every class and both anomaly labels in the expected proportion.
+
+**What the gate now decides.** The gate takes the split that is currently tracked
+and refuses to bless a number that was measured on another one:
+
+* the tracked split has **no held-out partition** (all 700 items in `train`): the
+  gate fails, because a number measured without held-out data measures nothing;
+* the tracked baseline was recorded against **another split** (the split is found
+  by the `splitFingerprint` of the entry, which is the manifest hash of the split
+  the run was scored against): the gate fails and names **both** splits.
+
+Against the tracked artifacts that means:
+
+| gate run | verdict |
+|---|---|
+| the historical baseline against the tracked **v2** split | **FAILS**: the baseline was recorded against `visa-subset.gold`, the tracked split is `visa-subset.v2.gold` |
+| the historical baseline against the **v1** split | **FAILS**: the v1 split has no held-out partition (all 700 items in `train`) |
+| the tracked baseline as committed (the entry is retired) | **SKIPS**: the previous baseline was retired, with the reason recorded in the baseline file |
+
+Re-running the predictions against the v2 split needs a provider key and costs
+money, so it was **not** done here. The honest state of the repository is
+therefore: the v1 measurement is retired as a historical artifact, the v2 split is
+tracked, and the suite `visa-subset.v2` has **no baseline yet** until the
+predictions are re-run against it.
+
 ---
 
 ## 9. What is verified, and what is not
@@ -547,8 +664,10 @@ tolerance of -0.0200"*.
 | The real 1.93 GB download | **RUN** — 2026-11-11, four parts, 3910 files staged |
 | The pinned sha256 | **PINNED** — `2eb8690c803ab37de0324772964100169ec8ba1fa3f7e94291c9ca673f40f362`, stamped `2026-11-11T11:04:36.707Z` |
 | The label/directory cross-check over the 3506 upstream rows | **0 contradictions** |
-| The gold manifest | **COMMITTED** — 700 assignments, `manifestHash 76dee597ea8d42bdba657f37c357cdfc4afc3d3e1de617d90ced7b77e485a0b2`, regeneration byte-identical |
-| The first real measurement | **MEASURED** — macro F1 0.9795 / balanced accuracy 0.9700 over 700 items, no caveats |
+| The gold manifest | **COMMITTED**: 700 assignments, `manifestHash 76dee597ea8d42bdba657f37c357cdfc4afc3d3e1de617d90ced7b77e485a0b2`. **Frozen**: it is the v1 split, and all 700 of its assignments are `train`. The generator now emits the v2 schema, so this artifact is reproducible only at the commit that created it (`64a72d1`); its `manifestHash` is still validated on every read. |
+| The v2 split | **COMMITTED**: `benchmarks/splits/visa-subset.v2.gold.json`, strategy `stratified`, 420 train / 140 val / 140 test, `partitionFingerprint 4ac0940380d0283a4ac52bda0884449bc8778ea2605b27c7ef2f26f666b9c963`, regeneration byte-identical, verified against the image bytes on disk |
+| The first real measurement | **MEASURED, THEN RETIRED**: macro F1 0.9795 / balanced accuracy 0.9700 over the 700 items of the **v1** split, which has no held-out set. It is **not** publishable as model performance; the baseline entry carries `status: "retired"` and the reason |
+| The first measurement on the v2 split | **NOT MEASURED YET**: it needs a provider key and costs money. Until it is run, the suite `visa-subset.v2` has no baseline and the gate skips instead of blessing the old number. When it is run, it is still a **whole-set** figure over the same 700 items: the v2 partition is locked for future selection, not applied as a filter (the held-out scorecard is `VLN-008`), so it is **not** publishable as model performance either |
 
 ## References
 

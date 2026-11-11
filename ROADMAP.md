@@ -25,7 +25,7 @@ flowchart LR
 
 | Phase | Focus | Specs | Outcome | Status |
 |---|---|---|---|---|
-| F0 | Foundation | 001 monorepo · 002 domain/contracts · 003 real benchmark | rebirth scaffold, entity store · VisA ground truth + runner (003, shipped) | 🏗 001 🟢 · 002 🟢 (domain contracts + entity store + legacy importer) · 003 🟢 (real VisA baseline: macro F1 0.9795 / balanced accuracy 0.9700, gpt-4o over 700 gold images) |
+| F0 | Foundation | 001 monorepo · 002 domain/contracts · 003 real benchmark | rebirth scaffold, entity store · VisA ground truth + runner (003, shipped) | 🏗 001 🟢 · 002 🟢 (domain contracts + entity store + legacy importer) · 003 🟢 (real VisA benchmark harness; the first measurement was taken on a degenerate all-train split and is retired, the tracked split is now a real 60/20/20 partition) |
 | F1 | Visual Data + Arena | 004 data engine · 005 embeddings/search · 006 model arena | trustworthy datasets + calibrated model comparison | 🔵 |
 | F2 | Learning | 007 training · 008 active-learning flywheel | specialized models + measured data loop — **first demo** | 🔵 |
 | F3 | Interfaces + Agents | 009 API/jobs · 010 Studio · 011 MCP · 012 agent runtime | four equivalent surfaces + safe investigations | 🔵 |
@@ -98,9 +98,15 @@ Superseded by Vision Lens decisions:
   local artifact that the documented command reproduces. Every number comes from the 003
   artifacts (`benchmarks/baselines/<suite>.json`, `benchmarks/splits/*.gold.json`,
   `datasets/registry.json`) produced by `vision-lens benchmark run|gate|report`.
-  It is a **regression baseline, not a product claim**: one model, one dataset subset, one day,
-  and the split carries no held-out set — the upstream release has no session information, so
-  all 700 items land in `train` and the benchmark scores the whole set.
+  **That first number is retired, not a product claim.** It was measured on the v1 split, whose
+  700 assignments were all in `train`: the upstream release has no session information, so each
+  class is one capture group, and a group larger than every quota cannot be divided into three
+  partitions. With no held-out set it measures nothing, so the baseline entry carries
+  `status: "retired"` and the reason. The tracked split is now the v2 one
+  (`benchmarks/splits/visa-subset.v2.gold.json`, strategy `stratified`, 420 train / 140 val /
+  140 test, item-level and stratified by class and anomaly), the suite id is `visa-subset.v2`,
+  and the benchmark gate refuses to bless a number that was measured on a split other than the
+  tracked one. The first measurement on the v2 split is still to be run.
 - Synthetic accuracy claims retired: the legacy colour-swatch harness (package script
   `benchmark:legacy`, formerly the default accuracy runner) stays only as a unit-test
   fixture; it is not an accuracy source (ADR-008).

@@ -17,6 +17,11 @@
  *      symlink. The GIT INDEX MODE decides this (`git ls-files -s`): a symlink
  *      is mode `120000`, a regular file is `100644`. The filesystem alone is
  *      not enough, because the index is what gets committed;
+ *   c2. a provider entry exists on disk but is NOT in the index. The committed
+ *      shape of an unstaged symlink is unknown, so the check fails closed
+ *      rather than let it reach another developer unstaged;
+ *   c3. the git index cannot be read at all, while there are provider entries
+ *      to check. The guard says so instead of degrading into a weaker check;
  *   d. such a symlink does not point at exactly `../../.agents/skills/<name>`;
  *   e. such a symlink does not resolve to an existing canonical skill directory;
  *   f. a canonical skill has no provider symlink in `.claude/skills/` and/or
@@ -26,13 +31,35 @@
  * Speckit skills are ignored everywhere: they are the maintainer's personal
  * spec-kit flow, globally git-ignored, and never part of the canonical set.
  *
+ * The agent ROLES work the same way. The canonical role lives in
+ * `.agents/agents/<role>.md` and carries a provider-neutral `tools:` list; the
+ * two provider adapters (`.claude/agents/<role>.md` and
+ * `.github/agents/<role>.agent.md`) are generated from it by
+ * `scripts/generate-agent-surface.ts`, because the two runtimes name their
+ * tools differently. The check fails closed, naming every problem, when:
+ *
+ *   h. a canonical role has no frontmatter carrying `name`, `description` and
+ *      `role`, or its `role` does not equal the file name;
+ *   i. a canonical role names a tool outside the neutral vocabulary
+ *      (read, write, edit, execute, search, web, agent);
+ *   j. a provider adapter is not what the generator produces;
+ *   k. a provider adapter has no canonical role behind it;
+ *   l. a canonical role has no provider adapter in one of the two provider
+ *      directories.
+ *
  * Run: `pnpm exec tsx scripts/check-agent-surface.mjs` (repo root).
  * `--root <dir>` runs the same checks against another tree (used by the test).
+ *
+ * The role checks reuse the generator, so the gate and the generator can never
+ * disagree about what an adapter looks like. That import needs a runtime that
+ * strips TypeScript types (Node 22.18+ or 24+).
  */
 import { spawnSync } from 'node:child_process';
 import { lstatSync, readFileSync, readdirSync, readlinkSync, realpathSync } from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
+
+import { collectRoles, findProblems as findRoleProblems } from './generate-agent-surface.ts';
 
 const DEFAULT_ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 
@@ -223,19 +250,31 @@ function checkIndexShape(index, failures) {
 }
 
 function checkProviderDirs(root, index, failures) {
+  let providerEntries = 0;
   for (const providerDir of PROVIDER_DIRS) {
     const providerRoot = path.join(root, providerDir);
     const names = listDirectory(providerRoot)
       .filter((name) => !isSpeckit(name))
       .sort();
 
+    providerEntries += names.length;
+
     for (const name of names) {
       const linkPath = path.join(providerRoot, name);
       const relative = `${providerDir}/${name}`;
 
       // (c) the committed shape of the entry: a symlink, never a real file.
-      const entry = index.entries.get(relative);
-      if (entry && entry.mode !== '120000') {
+      const entry = index.available ? index.entries.get(relative) : undefined;
+      if (index.available && entry === undefined) {
+        // The path is on disk but the index does not know it. The committed
+        // shape is therefore unknown, and the index is what gets committed.
+        // Failing closed here is what catches a symlink that was added and
+        // never staged: without it, the entry would reach every other
+        // developer as whatever the filesystem gave them.
+        failures.push(
+          `${relative} is not tracked in git, stage it so it is committed as a symlink`,
+        );
+      } else if (entry !== undefined && entry.mode !== '120000') {
         failures.push(
           `${relative} is tracked with git mode ${entry.mode}, expected 120000 (symlink)`,
         );
@@ -288,6 +327,15 @@ function checkProviderDirs(root, index, failures) {
       }
     }
   }
+
+  if (!index.available && providerEntries > 0) {
+    // The index is what gets committed, so a check that cannot read it cannot
+    // say anything about the committed shape of the provider entries. Failing
+    // closed keeps the guard from silently degrading into a weaker check.
+    failures.push(
+      'the git index could not be read, so the committed shape of the provider entries is unverified',
+    );
+  }
 }
 
 function readLink(linkPath) {
@@ -333,6 +381,19 @@ function checkProviderCoverage(root, skills, failures) {
   }
 }
 
+/**
+ * (h)-(l) The agent roles: the canonical role under `.agents/agents/`, its
+ * frontmatter, the neutral tool vocabulary, and the two generated provider
+ * adapters. The generator owns the rendering, so the gate only has to ask it
+ * what is wrong.
+ */
+function checkAgentRoles(root, failures) {
+  for (const problem of findRoleProblems(root)) {
+    failures.push(problem.message);
+  }
+  return collectRoles(root).roles.length;
+}
+
 function main() {
   const root = parseRoot(process.argv.slice(2));
   const failures = [];
@@ -342,6 +403,7 @@ function main() {
   checkIndexShape(index, failures);
   checkProviderDirs(root, index, failures);
   checkProviderCoverage(root, skills, failures);
+  const roles = checkAgentRoles(root, failures);
 
   if (failures.length > 0) {
     for (const failure of failures) {
@@ -352,7 +414,7 @@ function main() {
   }
 
   console.log(
-    `ok: agent surface consistent (${skills.length} canonical skills, provider symlinks verified)`,
+    `ok: agent surface consistent (${skills.length} canonical skills, ${roles} canonical roles, provider symlinks verified)`,
   );
 }
 

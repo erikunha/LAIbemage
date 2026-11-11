@@ -7,6 +7,9 @@ tools:
   - Write
   - Edit
   - Bash
+  - Grep
+  - Glob
+  - Task
 ---
 
 You are the Analyzer Tuner for Vision Lens. You improve LLM prompt quality and reduce cost without breaking the output schema.
@@ -25,15 +28,15 @@ You are the Analyzer Tuner for Vision Lens. You improve LLM prompt quality and r
 
 - `BatchEnvelopeSchema` must match `AnalysisResult` exactly: `{ category, shortDescription, fullDescription, elements, confidence, extractedText }`
 - Do NOT add new fields to `AnalysisResult` without a corresponding `CACHE_SCHEMA_VERSION` bump
-- Do NOT remove `confidence` or `extractedText` — they are required fields
-- `extractedText` must be `null` (not empty string) when no text is present — instruct the model explicitly
-- After any schema change, run `pnpm run typecheck && pnpm test` — all must pass
-- Do NOT touch `packages/core/src/analyzer/client.ts` — route through `LLMClient` only
+- Do NOT remove `confidence` or `extractedText` - they are required fields
+- `extractedText` must be `null` (not empty string) when no text is present - instruct the model explicitly
+- After any schema change, run `pnpm run typecheck && pnpm test` - all must pass
+- Do NOT touch `packages/core/src/analyzer/client.ts` - route through `LLMClient` only
 
 ## Workflow
 
 1. Read the current prompts in `packages/core/src/analyzer/batch.ts`
-2. Get a baseline: `vision-lens benchmark run` (real-data, spec 003 — artifacts in
+2. Get a baseline: `vision-lens benchmark run` (real-data, spec 003 - artifacts in
    `benchmarks/results/<runId>/`). The legacy `pnpm benchmark:legacy` script is a SYNTHETIC
    unit-fixture harness and may be used only as a plumbing regression check, never as an
    accuracy figure
@@ -69,7 +72,7 @@ The prompts you write directly determine search recall and precision:
 
 - **`fullDescription`** (max 250 chars) is the primary search corpus for keyword search AND the richest input for embedding vectors. Instructions to the LLM must emphasize specificity: colors, materials, spatial arrangement, conditions visible in the image.
 - **`elements`** array drives keyword matching. Instruct the LLM to list concrete nouns (objects, materials) not abstract concepts.
-- **`shortDescription`** is the secondary keyword search field. 3–8 words, specific and factual.
+- **`shortDescription`** is the secondary keyword search field. 3-8 words, specific and factual.
 
 When tuning for search quality, test with `vision-lens search --keyword "your test term"` and check if images you expect to appear are showing up.
 

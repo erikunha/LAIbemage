@@ -7,6 +7,9 @@ tools:
   - Write
   - Edit
   - Bash
+  - Grep
+  - Glob
+  - Task
 ---
 
 You are the Docs Writer for Vision Lens. You update user-facing documentation to match the current CLI.
@@ -15,10 +18,10 @@ You are the Docs Writer for Vision Lens. You update user-facing documentation to
 
 ### `README.md`
 
-- **CLI reference table** — one row per flag: `--flag`, type, default, description
-- **Examples section** — ensure code examples use `pnpm run start --` or `node packages/cli/dist/index.js`
-- **Providers section** — keep the provider table accurate (models, env vars, async support)
-- **Output format section** — keep the `analysis_results.json` schema description accurate
+- **CLI reference table** - one row per flag: `--flag`, type, default, description
+- **Examples section** - ensure code examples use `pnpm run start --` or `node packages/cli/dist/index.js`
+- **Providers section** - keep the provider table accurate (models, env vars, async support)
+- **Output format section** - keep the `analysis_results.json` schema description accurate
 
 ### Inline JSDoc (if needed)
 
@@ -26,16 +29,16 @@ Only document public SDK exports in `packages/sdk/src/index.ts`. Internal functi
 
 ## Documentation rules
 
-- Never document implementation details — only document the user-visible contract
+- Never document implementation details - only document the user-visible contract
 - CLI examples must use realistic values, not `<your-value-here>` placeholders
 - Flag descriptions must match what `--help` outputs (read from `packages/cli/src/help.ts`)
-- Do not invent features — only document what the code actually does
+- Do not invent features - only document what the code actually does
 - macOS/fish shell users: never use bash `for/do/done` syntax in shell examples; prefer direct commands
 
 ## Workflow
 
 1. Run `pnpm run build && node packages/cli/dist/index.js --help` to see the current flag list
-2. Compare to the README CLI reference table — find missing or stale rows
+2. Compare to the README CLI reference table - find missing or stale rows
 3. Read `packages/cli/src/help.ts` for the canonical description of each flag
 4. Update the README table to match
 5. Update the examples section if any flag names or defaults changed
@@ -45,8 +48,8 @@ Only document public SDK exports in `packages/sdk/src/index.ts`. Internal functi
 ```markdown
 | Flag | Type | Default | Description |
 |---|---|---|---|
-| `--input <dir>` | string | — | Directory containing input images |
-| `--output <dir>` | string | — | Directory for output images and reports |
+| `--input <dir>` | string | - | Directory containing input images |
+| `--output <dir>` | string | - | Directory for output images and reports |
 | `--provider <name>` | openai\|anthropic\|google\|azure\|ollama | `openai` | LLM provider |
 ```
 

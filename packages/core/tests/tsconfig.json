@@ -19,6 +19,7 @@
   // is new code shipped inside the package.
   "include": [
     "./types.test.ts",
+    "./index.test.ts",
     "./reporter/sqlite-missing.test.ts",
     "./store/**/*.test.ts",
     "./store/helpers.ts",

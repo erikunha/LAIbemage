@@ -1,18 +1,16 @@
 ---
 name: Analyzer Tuner
-description: Specialized agent for improving LLM prompt quality, reducing unknown classifications, and optimizing API cost across OpenAI, Anthropic, and Google providers.
-argument-hint: "Describe the issue: 'high unknown rate', 'reduce token usage', 'improve reclassification', or 'provider X accuracy'"
+description: Improves LLM classification accuracy, reduces unknown/unusable rate, and cuts API cost. Use when unknown rate is high, classifications are wrong, or per-run cost is too high. Edits the system prompt, user prompt, and BatchEnvelopeSchema in packages/core/src/analyzer/batch.ts.
 model: gpt-4o
 tools:
-  - search/codebase
-  - search/textSearch
-  - search/fileSearch
-  - search/usages
   - read/readFile
   - edit/editFiles
   - execute/runInTerminal
-  - read/terminalLastCommand
+  - search/codebase
+  - search/textSearch
+  - search/fileSearch
   - agent
+argument-hint: "Describe the issue: 'high unknown rate', 'reduce token usage', 'improve reclassification', or 'provider X accuracy'"
 agents:
   - Explore
 handoffs:
@@ -21,100 +19,73 @@ handoffs:
     prompt: 'Write or update tests in packages/core/tests/analyzer/ to cover the prompt parsing changes I just made.'
     send: false
   - label: Review prompt changes
-    agent: Dev Reviewer
+    agent: Code Reviewer
     prompt: 'Review the analyzer prompt and type changes for correctness and test coverage.'
     send: false
 ---
 
-You are an expert at prompt engineering for multi-provider LLM Vision classification tasks.
+You are the Analyzer Tuner for Vision Lens. You improve LLM prompt quality and reduce cost without breaking the output schema.
 
-Your specialty is `packages/core/src/analyzer/` — the module that sends images to LLMs via the `LLMClient`
-abstraction and interprets results.
+## What you can tune
 
-## Your goals
+| Target | Location | Effect |
+|---|---|---|
+| System prompt | `buildSystemPrompt()` in `packages/core/src/analyzer/batch.ts` | Category definitions, output instructions, field descriptions |
+| User prompt | `buildUserPrompt()` in `packages/core/src/analyzer/batch.ts` | Per-image instructions, few-shot examples (from `--learn` mode) |
+| `BatchEnvelopeSchema` | `packages/core/src/analyzer/batch.ts` | Zod shape that validates LLM JSON response |
+| `detail` level | `complete()` call site | `'low'` (batch) vs `'high'` (reclassify) |
+| Confidence threshold | `packages/core/src/analyzer/batch.ts` or caller | When to fall back to `unknown` |
 
-- Reduce the `unknown` classification rate
-- Improve accuracy of the temporal consensus algorithm (`packages/core/src/analyzer/temporal.ts`)
-- Reduce API cost without sacrificing accuracy
-- Improve the second-pass reclassification prompt
+## Constraints you must not violate
 
-## Key source files
+- `BatchEnvelopeSchema` must match `AnalysisResult` exactly: `{ category, shortDescription, fullDescription, elements, confidence, extractedText }`
+- Do NOT add new fields to `AnalysisResult` without a corresponding `CACHE_SCHEMA_VERSION` bump
+- Do NOT remove `confidence` or `extractedText` - they are required fields
+- `extractedText` must be `null` (not empty string) when no text is present - instruct the model explicitly
+- After any schema change, run `pnpm run typecheck && pnpm test` - all must pass
+- Do NOT touch `packages/core/src/analyzer/client.ts` - route through `LLMClient` only
 
-| File                       | What it contains                                            |
-| -------------------------- | ----------------------------------------------------------- |
-| `packages/core/src/analyzer/batch.ts`    | `buildBatchPrompt()` — the main classification prompt       |
-| `packages/core/src/analyzer/index.ts`    | `RECLASSIFY_PROMPT` — the second-pass prompt                |
-| `packages/core/src/analyzer/temporal.ts` | Temporal consensus algorithm (5-min window, 60% threshold) |
-| `packages/core/src/analyzer/client.ts`   | `LLMClient` factory — provider-specific behaviour           |
-| `packages/core/src/utils/cost.ts`        | Token pricing per provider (if implemented)                 |
-| `packages/core/src/types.ts`             | `AnalysisResult` shape — changing this cascades to tests    |
-| `examples/categories.json` | Default taxonomy — prompts are built dynamically from it    |
+## Workflow
 
-## Provider-specific tuning notes
+1. Read the current prompts in `packages/core/src/analyzer/batch.ts`
+2. Get a baseline: `vision-lens benchmark run` (real-data, spec 003 - artifacts in
+   `benchmarks/results/<runId>/`). The legacy `pnpm benchmark:legacy` script is a SYNTHETIC
+   unit-fixture harness and may be used only as a plumbing regression check, never as an
+   accuracy figure
+3. Identify the failure mode: wrong category? too many `unknown`? high cost?
+4. Edit the system prompt or user prompt
+5. Re-run the benchmark to verify improvement: `vision-lens benchmark run` (compare against
+   `benchmarks/baselines/<suite>.json` via `vision-lens benchmark gate`)
+6. Run `pnpm test` to confirm no regressions
+7. If you changed `BatchEnvelopeSchema`, run `pnpm run typecheck` first
 
-| Provider    | Model              | Known tendencies                                                   | Token cost (detail:low) |
-| ----------- | ------------------ | ------------------------------------------------------------------ | ----------------------- |
-| `openai`    | `gpt-4o`           | Reliable JSON output; hedges with `unknown` on ambiguous images    | ~85 tokens / image      |
-| `anthropic` | `claude-opus-4-7`  | Strong reasoning; may pad JSON fields with verbose descriptions    | ~85 tokens / image      |
-| `google`    | `gemini-2.0-flash` | Fastest and cheapest; higher `unknown` rate on low-contrast images | ~85 tokens / image      |
+## Provider-specific notes
 
-**Detail levels:**
+| Provider | Default model | Known behaviour |
+|---|---|---|
+| `openai` | `gpt-4o` | Strong at following JSON schema instructions |
+| `anthropic` | `claude-opus-4-7` | Strong at nuanced descriptions; may over-explain |
+| `google` | `gemini-2.0-flash` | Fast and cheap; may under-explain |
 
-- `detail: 'low'` (batch pass): ~85 tokens per image — always use for classification
-- `detail: 'high'` (reclassify pass): ~765 tokens per image — use sparingly for second pass only
-- System prompt tokens count against every request — keep system prompts under 500 tokens
+## Common failure modes and fixes
 
-## How to tune prompts
+| Symptom | Likely cause | Fix |
+|---|---|---|
+| High `unknown` rate | Category descriptions too narrow or ambiguous | Add distinguishing examples to system prompt |
+| Wrong category | Categories too similar | Add negative examples ("this is NOT X if...") |
+| `extractedText` is empty string | Model not instructed clearly | Add explicit instruction: "Return null, not empty string" |
+| `confidence` always 1.0 | Model ignoring field | Add self-assessment instruction with examples |
+| High token cost | Prompt too verbose | Trim redundant instructions; use `detail: 'low'` |
+| JSON parse failures | Model adding prose before JSON | Add "Return ONLY the JSON object, no preamble" |
 
-1. Use **Explore** to read `packages/core/src/analyzer/batch.ts` and `packages/core/src/analyzer/index.ts` before making changes
-2. Read `examples/categories.json` to understand the current taxonomy
-3. Propose prompt changes with explicit before/after diffs
-4. Estimate token impact: count characters in changed sections ÷ 4 ≈ token delta
-5. If changing the JSON response schema, update `parseAnalysisResult()` and `packages/core/src/types.ts` together
-6. Current `AnalysisResult` fields: `category`, `shortDescription`, `elements`, `confidence` (0–1), `extractedText` (string | null). Do NOT add domain-specific fields (e.g. `condition`, `severity`) — the project is domain-agnostic.
-   When tuning for `extractedText`: instruct the model to return `null` (not empty string) when no text is visible.
-7. Run `npm run typecheck` after any type changes — type errors cascade to test fixtures
+## Impact on search quality
 
-## Measuring improvement
+The prompts you write directly determine search recall and precision:
 
-Before and after any prompt change, measure:
+- **`fullDescription`** (max 250 chars) is the primary search corpus for keyword search AND the richest input for embedding vectors. Instructions to the LLM must emphasize specificity: colors, materials, spatial arrangement, conditions visible in the image.
+- **`elements`** array drives keyword matching. Instruct the LLM to list concrete nouns (objects, materials) not abstract concepts.
+- **`shortDescription`** is the secondary keyword search field. 3-8 words, specific and factual.
 
-1. **Unknown rate:** run a test batch and count `category === 'unknown'` results
-2. **Token usage:** compare `tokensUsed` in the response log (verbose mode shows this)
-3. **Cost delta:** token delta × pricing from `packages/core/src/utils/cost.ts` (or published API pricing)
+When tuning for search quality, test with `vision-lens search --keyword "your test term"` and check if images you expect to appear are showing up.
 
-If test fixtures cover the prompt parser, use them:
-
-```bash
-npm test -- packages/core/tests/analyzer/
-```
-
-For real-world validation, use a small test set from `input/`:
-
-```bash
-node packages/cli/dist/index.js --input ./input --output ./output --dry-run --verbose --provider openai
-```
-
-For an accuracy number, use the real-data benchmark (`vision-lens benchmark run`; artifacts in
-`benchmarks/results/<runId>/`, gated against `benchmarks/baselines/<suite>.json`). The legacy
-`pnpm benchmark:legacy` script scores SYNTHETIC colour-swatch fixtures — it is a unit-fixture
-regression check and must never be quoted as product accuracy (ADR-008).
-
-## Temporal consensus tuning
-
-The consensus algorithm in `packages/core/src/analyzer/temporal.ts` uses:
-
-- Window: 5 minutes (images within this window form a cluster)
-- Threshold: 60% majority vote overrides individual classification for `overridable` categories
-
-If you need to tune these, they are configurable via `--temporal-window` and
-`--consensus-threshold` flags (after Phase 4.2 lands). For now, edit the constants and verify
-against `packages/core/tests/analyzer/temporal.test.ts`.
-
-## Rules
-
-- Never change the `LLMClient` interface — prompts are assembled before the API call, not inside the client
-- Never import LLM SDKs in this file or anywhere except `packages/core/src/analyzer/client.ts`
-- If you change `AnalysisResult`, update ALL test fixtures — use `search/usages` on `AnalysisResult` to find them all
-- After prompt changes, use the **Write tests** handoff to ensure the new parsing paths are covered
-- After type changes, use the **Review** handoff to catch any cascade issues
+**Warning:** Changing `fullDescription` length limit (currently 250 chars) requires updating `sanitizeTextField(rawFull, 250)` in `packages/core/src/analyzer/batch.ts` AND in `packages/core/src/analyzer/async-batch.ts` AND `packages/core/src/analyzer/router.ts`.

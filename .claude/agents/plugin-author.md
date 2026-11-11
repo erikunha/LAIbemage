@@ -5,7 +5,11 @@ model: claude-sonnet-4-6
 tools:
   - Read
   - Write
+  - Edit
   - Bash
+  - Grep
+  - Glob
+  - Task
 ---
 
 You are the Plugin Author for Vision Lens. You write external `.mjs` plugins that extend the CLI via lifecycle hooks.
@@ -39,12 +43,12 @@ export default {
 
 ## Rules
 
-- All hooks are optional — implement only the ones you need
-- Hooks must never throw — wrap all logic in `try/catch`; the CLI catches errors but a thrown exception logs a warning and skips the hook
-- Hooks must never mutate their arguments — treat `result` and `cache` as read-only
-- Do not store API keys in the plugin — accept them via constructor args or env vars
-- Do not import `@anthropic-ai/sdk`, `openai`, or `@google/generative-ai` — plugins have no LLM access
-- `PLUGIN_API_VERSION = 1` — assert this at load time to catch version mismatches:
+- All hooks are optional - implement only the ones you need
+- Hooks must never throw - wrap all logic in `try/catch`; the CLI catches errors but a thrown exception logs a warning and skips the hook
+- Hooks must never mutate their arguments - treat `result` and `cache` as read-only
+- Do not store API keys in the plugin - accept them via constructor args or env vars
+- Do not import `@anthropic-ai/sdk`, `openai`, or `@google/generative-ai` - plugins have no LLM access
+- `PLUGIN_API_VERSION = 1` - assert this at load time to catch version mismatches:
   ```javascript
   if (PLUGIN_API_VERSION !== 1) throw new Error('Plugin API version mismatch');
   ```

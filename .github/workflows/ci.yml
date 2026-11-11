@@ -67,6 +67,13 @@ jobs:
       - name: Test with coverage (thresholds apply to packages/core)
         run: pnpm test:coverage
 
+      # The path-scoped rules have one canonical body under .agents/rules and one
+      # generated adapter per runtime. This fails when an adapter was edited by
+      # hand, when one is missing, when an adapter has no canonical rule, or
+      # when a rule's paths match no file (a silent hole).
+      - name: Agent rule adapters are up to date
+        run: pnpm agents:rules:check
+
       - name: Test Python services
         run: pnpm test:py
 

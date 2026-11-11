@@ -1,19 +1,18 @@
 ---
-applyTo: 'src/cli/**'
+applyTo: 'packages/cli/src/**'
 ---
 
-# CLI module — Copilot instructions
-
+# CLI module rules
 ## Purpose
 
 Commander.js wiring only. No business logic, no LLM calls, no image processing.
 The CLI parses flags, builds a `RawCliOptions` object, calls `loadConfig()`, then delegates to
-`runBatch`, `runReorder`, or `runSingle` from `src/index.ts`.
+`runBatch`, `runReorder`, or `runSingle` from `packages/core/src/index.ts`.
 
 ## Module boundary (BLOCK on violation)
 
 - NO imports of `sharp`, any LLM SDK, `fs-extra`, or any analyzer/processor/classifier module
-- NO business logic — move any logic that is not pure CLI wiring to `src/index.ts` or `src/config/`
+- NO business logic — move any logic that is not pure CLI wiring to `packages/core/src/index.ts` or `packages/core/src/config/`
 - Allowed imports: `config/`, `index`, `utils/logger`
 
 ## Key files
@@ -25,7 +24,7 @@ The CLI parses flags, builds a `RawCliOptions` object, calls `loadConfig()`, the
 - Boolean flags use Commander's default `false` and are cast with `Boolean(opts['flag'])`
 - Error handling: catch → `logger.error(message)` → `process.exit(1)` (validation errors)
 - Never override `process.exitCode` set by business logic (e.g., exit code 2 for partial failures)
-- Use `REORDER_SENTINEL_KEY` from `src/config/index.ts` for the `reorder` subcommand's API key
+- Use `REORDER_SENTINEL_KEY` from `packages/core/src/config/index.ts` for the `reorder` subcommand's API key
 
 ### `help.ts`
 
@@ -36,14 +35,14 @@ The CLI parses flags, builds a `RawCliOptions` object, calls `loadConfig()`, the
 
 ## Adding a new flag
 
-1. Add `.option(...)` in `src/cli/index.ts`
+1. Add `.option(...)` in `packages/cli/src/index.ts`
 2. Parse the value correctly (parseInt for numbers, Boolean for booleans, string as-is)
 3. Pass it in the `loadConfig(...)` call within the relevant action handler
-4. Add a row to the OPTIONS table in `src/cli/help.ts`
+4. Add a row to the OPTIONS table in `packages/cli/src/help.ts`
 5. Add or update an example in the EXAMPLES section if user-facing
 
 ## Do NOT
 
 - Add `console.log` outside of `printHelp()` — use `logger` from `utils/logger.js`
 - Duplicate default values here — defaults live in `loadConfig()` and the Commander `.option()` call
-- Import `runBatch` / `runReorder` / `runSingle` anywhere except `src/cli/index.ts`
+- Import `runBatch` / `runReorder` / `runSingle` anywhere except `packages/cli/src/index.ts`

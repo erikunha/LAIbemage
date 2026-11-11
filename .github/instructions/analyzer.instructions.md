@@ -1,20 +1,19 @@
 ---
-applyTo: 'src/analyzer/**'
+applyTo: 'packages/core/src/analyzer/**,packages/core/src/analyzer/*.ts'
 ---
 
-# Analyzer module — Copilot instructions
-
+# Analyzer module rules
 ## Purpose
 
 This module owns all LLM API calls via the `LLMClient` abstraction in `client.ts`.
 It may import Sharp only in `batch.ts` (resize before API call) and `dedup.ts` (perceptual hash).
 It must never import any LLM SDK directly — use `LLMClient` from `./client.js`.
-`src/analyzer/async-batch.ts` may also import Sharp (image encoding) and uses the `AsyncBatchClient`
+`packages/core/src/analyzer/async-batch.ts` may also import Sharp (image encoding) and uses the `AsyncBatchClient`
 interface from `client.ts`; it never imports any LLM SDK directly.
 
 ## LLM client architecture
 
-- `src/analyzer/providers/*.ts` are the **only** files that import LLM SDKs. Each file imports one SDK. `src/analyzer/client.ts` is a thin routing layer that imports from `./providers/` — it does NOT import any LLM SDK directly.
+- `packages/core/src/analyzer/providers/*.ts` are the **only** files that import LLM SDKs. Each file imports one SDK. `packages/core/src/analyzer/client.ts` is a thin routing layer that imports from `./providers/` — it does NOT import any LLM SDK directly.
 - All other files in this module receive an `LLMClient` instance as a parameter
 - `LLMClient` interface: `complete(prompt: string, images: ImageInput[], opts: CompleteOptions): Promise<CompleteResult>`
 - `ImageInput = { base64: string, label: string }`
@@ -66,23 +65,23 @@ Sentinel defaults for unknown/failed images:
 { category: 'unknown', shortDescription: 'unanalyzed image', fullDescription: '', elements: [], confidence: 0, extractedText: null }
 ```
 
-`CACHE_SCHEMA_VERSION = 4` — increment in `src/types.ts` whenever `AnalysisCache` fields change.
-Migration chain lives in `src/utils/migrate.ts` as `migrateCache(raw: unknown): AnalysisCache`.
+`CACHE_SCHEMA_VERSION = 1` — increment in `packages/core/src/types.ts` whenever `AnalysisCache` fields change.
+Migration chain lives in `packages/core/src/store/migrate.ts` as `migrateCache(raw: unknown): AnalysisCache`.
 
 ## Adding a new analysis pass
 
-1. Add the function in `src/analyzer/index.ts`
+1. Add the function in `packages/core/src/analyzer/index.ts`
 2. Accept `client: LLMClient` as a parameter — never create clients inside analysis functions
 3. Export if reusable
-4. Add tests in `tests/analyzer/` — mock via the `LLMClient` interface, not SDK constructors
+4. Add tests in `packages/core/tests/analyzer/` — mock via the `LLMClient` interface, not SDK constructors
 5. Keep it mockable: use `vi.fn()` on `LLMClient.complete` in tests
 
 ## Async batch
 
-`src/analyzer/async-batch.ts` handles the `--async` submit → `--resume` collect workflow:
+`packages/core/src/analyzer/async-batch.ts` handles the `--async` submit → `--resume` collect workflow:
 
 - `submitAsyncBatch(filesWithStats, config, asyncClient)` — encodes images, builds batch requests, submits to the provider's async API; returns `AsyncJobState` written to `analysis_job.json`
 - `resumeAsyncBatch(state, asyncClient)` — polls `asyncClient.checkStatus()` until complete, retrieves results, returns `AnalysisResult[]`
 - `AsyncBatchClient` interface (defined in `client.ts`): `submitBatch()`, `checkStatus()`, `retrieveResults()`
-- Call `migrateCache()` from `src/utils/migrate.ts` when reading any `AnalysisCache` from disk — never assume the schema version is current
+- Call `migrateCache()` from `packages/core/src/store/migrate.ts` when reading any `AnalysisCache` from disk — never assume the schema version is current
 - Provider support: OpenAI (Batch API) and Anthropic (Message Batches); Google/Azure/Ollama not supported

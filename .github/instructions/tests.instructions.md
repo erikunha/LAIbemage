@@ -1,20 +1,19 @@
 ---
-applyTo: 'tests/**'
+applyTo: 'packages/*/tests/**,apps/*/tests/**'
 ---
 
-# Tests — Copilot instructions
-
+# Tests rules
 ## Framework
 
-Vitest v1 with globals enabled. All tests are in `tests/` mirroring `src/` structure.
+Vitest 4 with globals enabled. All tests live under `packages/*/tests/` or `apps/*/tests/`, mirroring the `packages/*/src/` structure they cover.
 
 ## Mocking rules
 
 - **DO NOT mock LLM SDK constructors directly** (`vi.mock('openai')`, `vi.mock('@anthropic-ai/sdk')`)
-- **DO mock the `LLMClient` interface** from `src/analyzer/client.ts` — pass a mock implementation
+- **DO mock the `LLMClient` interface** from `packages/core/src/analyzer/client.ts` — pass a mock implementation
   directly to `analyzeBatch(filesWithStats, config, mockClient)` or similar
-- Pure functions in `src/classifier/` and `src/processor/overlay.ts` need NO mocks at all
-- Do NOT test `src/cli/` or `src/index.ts` — they are excluded from coverage
+- Pure functions in `packages/core/src/classifier/` and `packages/core/src/processor/overlay.ts` need NO mocks at all
+- Do NOT test `packages/cli/src/` or `packages/core/src/index.ts` — they are excluded from coverage
 - Use `vi.useFakeTimers()` only when you also call `vi.runAllTimersAsync()` or
   `vi.advanceTimersByTimeAsync()` to advance the clock — otherwise pass `delayMs: 0` to real timers
 - Reset mocks between tests: `vi.clearAllMocks()` in `beforeEach` or `afterEach`
@@ -118,7 +117,7 @@ const mockCache: AnalysisCache = {
 
 ## Test file naming
 
-`tests/[module]/[file].test.ts` — e.g. `tests/analyzer/batch.test.ts` for `src/analyzer/batch.ts`
+`tests/[module]/[file].test.ts` — e.g. `packages/core/tests/analyzer/batch.test.ts` for `packages/core/src/analyzer/batch.ts`
 
 ## What to test
 
@@ -130,7 +129,7 @@ const mockCache: AnalysisCache = {
 
 ## Testing async batch
 
-When testing `src/analyzer/async-batch.ts`:
+When testing `packages/core/src/analyzer/async-batch.ts`:
 
 - Mock `AsyncBatchClient` directly — do not mock the provider SDK
 - Construct `AsyncJobState` fixtures with all required fields:
@@ -148,7 +147,7 @@ When testing `src/analyzer/async-batch.ts`:
     fileOrder: ['a.jpg', 'b.jpg', 'c.jpg'],
   };
   ```
-- Test the `migrateCache()` chain in `src/utils/migrate.ts` by passing raw v1/v2/v3 objects and asserting v4 shape; see `tests/utils/migrate.test.ts`
+- Test the `migrateCache()` chain in `packages/core/src/store/migrate.ts` by passing raw v1/v2/v3 objects and asserting v4 shape; see `tests/utils/migrate.test.ts`
 
 ## Coverage thresholds (vitest.config.ts)
 
@@ -158,10 +157,10 @@ When testing `src/analyzer/async-batch.ts`:
 
 Excluded from coverage (intentional):
 
-- `src/cli/**` — Commander.js wiring
-- `src/index.ts` — top-level orchestration
-- `src/analyzer/client.ts` — live SDK adapter
-- `src/analyzer/index.ts` — integration orchestration
-- `src/config/index.ts` — I/O + dotenv
-- `src/processor/exporter.ts`, `src/processor/index.ts` — file I/O
-- `src/utils/progress.ts` — TTY/terminal UI
+- `packages/cli/src/**` — Commander.js wiring
+- `packages/core/src/index.ts` — top-level orchestration
+- `packages/core/src/analyzer/client.ts` — live SDK adapter
+- `packages/core/src/analyzer/index.ts` — integration orchestration
+- `packages/core/src/config/index.ts` — I/O + dotenv
+- `packages/core/src/processor/exporter.ts`, `packages/core/src/processor/index.ts` — file I/O
+- `packages/core/src/utils/progress.ts` — TTY/terminal UI

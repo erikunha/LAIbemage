@@ -2,18 +2,17 @@
 applyTo: 'scripts/**'
 ---
 
-# Scripts — Copilot instructions
-
+# Scripts rules
 ## Purpose
 
 `scripts/` contains developer-facing TypeScript utilities run with `tsx` (not compiled to `dist/`).
-They are NOT part of the production bundle. Never import them from `src/`.
+They are NOT part of the production bundle. Never import them from `packages/core/src/`.
 
 ## Existing scripts
 
 | Script                           | Purpose                                                            | pnpm alias                    |
 | -------------------------------- | ------------------------------------------------------------------ | ----------------------------- |
-| `generate-fixtures.ts`           | Creates synthetic JPEG test fixtures in `tests/fixtures/images/`   | `pnpm run fixtures`           |
+| `generate-fixtures.ts`           | Creates synthetic JPEG test fixtures in `packages/core/tests/fixtures/images/`   | `pnpm run fixtures`           |
 | `generate-benchmark-fixtures.ts` | Creates 24 labelled SYNTHETIC unit-fixture JPEGs in `packages/core/tests/fixtures/benchmark/` | `pnpm benchmark:generate` |
 | `benchmark-legacy.ts`            | Legacy SYNTHETIC unit-fixture harness — regression check only, NOT an accuracy source | `pnpm benchmark:legacy`   |
 | `gen-readme-flags.ts`            | Auto-generates the CLI flags table in `README.md`                  | `pnpm run readme:generate`    |
@@ -22,10 +21,10 @@ They are NOT part of the production bundle. Never import them from `src/`.
 
 1. **Always use `tsx`** — scripts are `.ts` files run directly; do not compile them
 2. **All relative imports must end in `.js`** (NodeNext ESM rule applies everywhere in this repo)
-3. **Read-only by default** — scripts that mutate `src/` or `tests/` must print a `[dry-run]` mode output first
+3. **Read-only by default** — scripts that mutate `packages/*/src/` or `packages/*/tests/` must print a `[dry-run]` mode output first
 4. **No `process.exit(0)` in happy path** — only `process.exit(1)` in error handlers
-5. **Import from `src/`** is allowed (scripts are tools that use the library), but only through public exports in `src/index.ts`, `src/config/index.ts`, `src/utils/`, and `src/analyzer/index.ts`
-6. **Never import from `src/cli/`** — CLI wiring is Commander-specific and not intended for script reuse
+5. **Import from `src/`** is allowed (scripts are tools that use the library), but only through public exports in `packages/core/src/index.ts`, `packages/core/src/config/index.ts`, `packages/core/src/utils/`, and `packages/core/src/analyzer/index.ts`
+6. **Never import from `packages/cli/src/`** — CLI wiring is Commander-specific and not intended for script reuse
 7. **Minimal arg parsing** — use plain `process.argv` parsing; do not add Commander or yargs as deps for scripts
 
 ## Legacy synthetic benchmark conventions (`benchmark-legacy.ts`)

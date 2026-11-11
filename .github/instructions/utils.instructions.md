@@ -1,9 +1,8 @@
 ---
-applyTo: 'src/utils/**'
+applyTo: 'packages/core/src/utils/**'
 ---
 
-# Utils module — Copilot instructions
-
+# Utils module rules
 ## Purpose
 
 Pure helpers with no side effects. Every function must be fully unit-testable without mocks.

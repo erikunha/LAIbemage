@@ -1,13 +1,12 @@
 ---
-applyTo: 'src/reviewer/**'
+applyTo: 'packages/core/src/reviewer/**'
 ---
 
-# Reviewer module — Copilot instructions
-
+# Reviewer module rules
 ## Purpose
 
-`src/reviewer/` implements the interactive TTY review loop (Phase 4.4).
-It sits **between the analysis pass and the processing pass** in `src/index.ts`.
+`packages/core/src/reviewer/` implements the interactive TTY review loop (Phase 4.4).
+It sits **between the analysis pass and the processing pass** in `packages/core/src/index.ts`.
 It has zero side-effects on the filesystem — it only mutates in-memory `AnalyzedImage` objects.
 
 ## Contract
@@ -25,7 +24,7 @@ export interface ReviewResult {
 }
 ```
 
-`ReviewOverride` is defined in `src/types.ts`:
+`ReviewOverride` is defined in `packages/core/src/types.ts`:
 
 ```typescript
 export interface ReviewOverride {
@@ -46,9 +45,9 @@ export interface ReviewOverride {
 ## Allowed imports
 
 - `@inquirer/select` and `@inquirer/input` — ONLY for TTY interaction
-- `src/types.ts` types
-- `src/config/index.ts` — Config type only
-- `src/utils/logger.ts` — for logging overrides at verbose level
+- `packages/core/src/types.ts` types
+- `packages/core/src/config/index.ts` — Config type only
+- `packages/core/src/utils/logger.ts` — for logging overrides at verbose level
 - **NEVER** import any LLM SDK, Sharp, or `fs-extra`
 
 ## Test patterns

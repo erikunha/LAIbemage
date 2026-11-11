@@ -1,9 +1,8 @@
 ---
-applyTo: 'src/classifier/**'
+applyTo: 'packages/core/src/classifier/**'
 ---
 
-# Classifier module — Copilot instructions
-
+# Classifier module rules
 ## Purpose
 
 Pure grouping, sorting, and rule evaluation. Zero I/O, zero external deps, zero side effects.

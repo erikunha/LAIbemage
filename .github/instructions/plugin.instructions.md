@@ -1,12 +1,11 @@
 ---
-applyTo: 'src/plugin/**'
+applyTo: 'packages/core/src/plugin/**'
 ---
 
-# Plugin module — Copilot instructions
-
+# Plugin module rules
 ## Purpose
 
-`src/plugin/` is the lifecycle hook dispatcher for the plugin API introduced in Phase 5.3.
+`packages/core/src/plugin/` is the lifecycle hook dispatcher for the plugin API introduced in Phase 5.3.
 It is the **only** module that loads external user-supplied `.mjs` files at runtime.
 
 ## Architecture invariants
@@ -15,9 +14,9 @@ It is the **only** module that loads external user-supplied `.mjs` files at runt
 - Failed plugin loads are **logged as warnings and skipped** — they never throw or abort the run
 - Each `fire*` function iterates all plugins, wraps each call in `try/catch`, and continues even if a hook throws
 - Plugin hooks are **fire-and-forget sequential** — they run in load order, one at a time
-- `PLUGIN_API_VERSION` from `src/types.ts` is logged at load time so plugin authors can detect mismatches
+- `PLUGIN_API_VERSION` from `packages/core/src/types.ts` is logged at load time so plugin authors can detect mismatches
 
-## The Plugin interface (from `src/types.ts`)
+## The Plugin interface (from `packages/core/src/types.ts`)
 
 ```typescript
 export interface Plugin {
@@ -32,12 +31,12 @@ All hooks are optional. A plugin may implement any subset of them.
 
 ## Adding a new lifecycle hook
 
-1. Add the optional method to the `Plugin` interface in `src/types.ts` with a JSDoc comment
-2. Add a corresponding `fire<HookName>(plugins, ...args)` function in `src/plugin/index.ts` — follow the existing pattern exactly (try/catch per plugin, warn on error, never throw)
-3. Add the call site in `src/index.ts` at the correct point in the pipeline
-4. Add tests in `tests/plugin/index.test.ts` covering: hook called, no hook skipped gracefully, hook throws → error isolated, multiple plugins → all called
-5. Increment `PLUGIN_API_VERSION` in `src/types.ts` if the interface is breaking
-6. Update `src/cli/help.ts` if the new hook changes user-facing behaviour
+1. Add the optional method to the `Plugin` interface in `packages/core/src/types.ts` with a JSDoc comment
+2. Add a corresponding `fire<HookName>(plugins, ...args)` function in `packages/core/src/plugin/index.ts` — follow the existing pattern exactly (try/catch per plugin, warn on error, never throw)
+3. Add the call site in `packages/core/src/index.ts` at the correct point in the pipeline
+4. Add tests in `packages/core/tests/plugin/index.test.ts` covering: hook called, no hook skipped gracefully, hook throws → error isolated, multiple plugins → all called
+5. Increment `PLUGIN_API_VERSION` in `packages/core/src/types.ts` if the interface is breaking
+6. Update `packages/cli/src/help.ts` if the new hook changes user-facing behaviour
 7. Update `packages/core/tests/fixtures/benchmark/labels.json` — no change needed (plugin is infrastructure)
 
 ## Security rules for this module

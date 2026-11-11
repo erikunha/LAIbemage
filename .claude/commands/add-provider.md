@@ -44,13 +44,13 @@ Import `createYourProviderClient` from `'./providers/your-provider.js'` and add 
 Add `newproviderApiKey: ''` to every `makeConfig()` fixture. TypeScript will flag missing ones.
 
 ### 6. Write integration test
-In `packages/core/tests/analyzer/client.test.ts` (or create it), add a test that:
+In `packages/core/tests/analyzer/client.contract.test.ts` (or create it), add a test that:
 - Passes a mock that returns a canned `LLMResponse`
 - Asserts the response is parsed correctly via `analyzeBatch`
 
 Do NOT `vi.mock('newprovider-sdk')` — mock the `LLMClient` interface instead.
 
-### 7. Update `CLAUDE.md` and `README.md`
+### 7. Update `AGENTS.md` and `README.md`
 Add the new provider to the provider table.
 
 ### 8. Verify

@@ -55,5 +55,5 @@ pnpm test
 pnpm run lint
 ```
 
-### 8. Update `CLAUDE.md`
+### 8. Update `AGENTS.md`
 If the flag changes observable behavior or architecture, add a note under the relevant section.

@@ -45,5 +45,5 @@ pnpm run typecheck   # must be zero errors
 pnpm test            # all tests pass, coverage above thresholds
 ```
 
-### 7. Update `CLAUDE.md`
-If `CACHE_SCHEMA_VERSION` is mentioned in `CLAUDE.md`, update the version number and description.
+### 7. Update `AGENTS.md`
+If `CACHE_SCHEMA_VERSION` is mentioned in `AGENTS.md`, update the version number and description.

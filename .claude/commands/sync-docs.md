@@ -1,81 +1,98 @@
 ---
-description: Checks CLAUDE.md against AGENTS.md for documentation drift — Config fixture fields, module boundary tables, provider lists, and architecture descriptions. Use when you suspect the two files are out of sync, after adding new Config fields, or after a provider refactor. NOT for code quality checks (use /review for that).
+description: Checks AGENTS.md against the code for documentation drift: Config fixture fields, module boundary tables, provider lists, and architecture descriptions. Use when you suspect the docs are out of sync, after adding new Config fields, or after a provider refactor. NOT for code quality checks (use /review for that).
 ---
 
-# Sync Docs — CLAUDE.md ↔ AGENTS.md Drift Check
+# Sync Docs: AGENTS.md against the code
 
-Find and fix all documentation drift between `CLAUDE.md` and `AGENTS.md`. These two files must stay in sync — AGENTS.md is the authoritative source when they differ.
+Find and fix every place where `AGENTS.md` claims something the code no longer does.
 
-## 1 — Config fixture diff
+`AGENTS.md` is the single canonical instructions file for this repository. `CLAUDE.md` and
+`.github/copilot-instructions.md` are thin runtime-specific pointers to it, so there is no
+second copy to keep in sync. The drift that matters is between the doc and the code.
 
-Extract and compare the `makeConfig()` blocks from both files.
+## 1. Config fixture against the Config type
+
+The `makeConfig()` block in `AGENTS.md` must list every REQUIRED field of the `Config`
+interface, with the same default.
 
 ```bash
-grep -A 100 "function makeConfig" CLAUDE.md | grep -E "^\s+\w+:" | sed 's/^\s*//' | sort > /tmp/claude_fields.txt
-grep -A 100 "function makeConfig" AGENTS.md | grep -E "^\s+\w+:" | sed 's/^\s*//' | sort > /tmp/agents_fields.txt
-diff /tmp/claude_fields.txt /tmp/agents_fields.txt
+node scripts/check-doc-drift.mjs
 ```
 
-For each field in AGENTS.md but missing from CLAUDE.md: add it to `CLAUDE.md` with the same default value.
-For each field in CLAUDE.md but missing from AGENTS.md: flag it for manual review (may be intentional, may be stale).
+The check compares the documented `makeConfig()` fixture against the `Config` interface in
+`packages/core/src/config/index.ts` (not in `types.ts`). It exits non-zero and names the
+fields when a REQUIRED field of the type is missing from the fixture, or when the fixture
+sets a field the type no longer declares. Optional fields are not reported as missing: the
+fixture ends with `...overrides` and legitimately omits them.
 
-## 2 — Module boundary table
+For each field it reports, add it to `makeConfig()` with the default the type or the loader
+declares, or remove it if the field is gone from the type.
 
-Extract the boundary table from both files and compare row counts and content:
+## 2. Module boundary table against the enforcement
+
+The table in `AGENTS.md` must match what the repository actually enforces.
 
 ```bash
-grep -A 200 "Module boundaries" CLAUDE.md | grep "^|" > /tmp/claude_boundaries.txt
 grep -A 200 "Module boundaries" AGENTS.md | grep "^|" > /tmp/agents_boundaries.txt
-diff /tmp/claude_boundaries.txt /tmp/agents_boundaries.txt
+grep -n "no-restricted-imports\|restricted" eslint.config.js | head -40
+node scripts/check-boundaries.mjs
 ```
 
-AGENTS.md is authoritative. Add any missing rows to CLAUDE.md. Flag contradicting rows.
+`scripts/check-boundaries.mjs` is the enforcement. A row in the table that the enforcement
+does not back is a claim the doc cannot make. A boundary the enforcement has but the table
+omits is a hole in the doc.
 
-## 3 — Provider list consistency
-
-Check that the same set of providers appears in both files:
-- `LLMProvider` union entries
-- Default model table
-- Supported providers for `--async`
+## 3. Provider list against the code
 
 ```bash
-grep -E "openai|anthropic|google|azure|ollama|bedrock|vertex" CLAUDE.md | sort -u
 grep -E "openai|anthropic|google|azure|ollama|bedrock|vertex" AGENTS.md | sort -u
+grep -n "export type LLMProvider" -A 10 packages/core/src/config/index.ts
+grep -rn "DEFAULT_MODEL" packages/core/src/config/index.ts | head
 ```
 
-## 4 — Architecture claim validation
+The provider names, the default model per provider, and the set of providers that support
+`--async` must match the code.
 
-Check CLAUDE.md for claims that contradict the actual code structure:
+## 4. Architecture claims against the code
 
 ```bash
-# Verify the client.ts / providers/ claim matches reality
-grep -n "client.ts\|providers/" CLAUDE.md
+grep -n "client.ts\|providers/" AGENTS.md
 grep -rn "^import.*from.*openai\|^import.*from.*@anthropic\|^import.*from.*@google" packages/core/src/analyzer/ --include="*.ts"
 ```
 
-Flag any claim in CLAUDE.md that contradicts what the code actually does.
+Flag any claim in `AGENTS.md` that contradicts what the code actually does.
 
-## 5 — Contributor agent alignment
+## 5. Canonical agent roles against the doc
 
-Check that `contributor.md` reflects current AGENTS.md module boundary table:
+The canonical roles live at `.agents/agents/<role>.md`; the Claude and Copilot copies are
+generated from them. Check the canonical role, never a generated copy.
 
 ```bash
-diff <(grep "^|" .claude/agents/contributor.md) <(grep "^|" AGENTS.md | head -20)
+diff <(grep "^|" .agents/agents/contributor.md | tail -n +3) <(grep "^|" AGENTS.md | tail -n +3)
+pnpm exec tsx scripts/generate-agent-surface.ts --check
 ```
+
+`tail -n +3` drops the header row and the separator row: the two tables may name their columns
+differently, so only the DATA rows are comparable. The role carries a SHORT SUMMARY of the
+boundary rules, not a copy of the canonical table, so a non-empty diff is the SIGNAL, not a
+failure: read it and judge whether every boundary the role names is still true in
+`AGENTS.md`, and whether the role omits a boundary that now matters. Fix the ROLE when the
+canonical table is right and the role is stale; fix `AGENTS.md` when the canonical table is
+the one that drifted.
 
 ## Output
 
 For each drift found, output the exact edit needed:
 
 ```
-### Fix: CLAUDE.md Config fixture missing fields
+### Fix: AGENTS.md Config fixture missing fields
 
-Add to CLAUDE.md makeConfig() after line N:
+Add to AGENTS.md makeConfig() after line N:
   azureEndpoint: '',
   azureApiKey: '',
   ...
 
-### Fix: CLAUDE.md boundary table missing row
+### Fix: AGENTS.md boundary table missing row
 
 Add to module boundary table:
 | `packages/core/src/analyzer/providers/*.ts` | ... | ... |

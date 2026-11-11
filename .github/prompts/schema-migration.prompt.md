@@ -67,5 +67,5 @@ Both must pass with zero errors before the migration is complete.
 ## Step 8 — Document
 
 Update the `Known limitations` table in `ROADMAP.md` if this migration resolves a listed
-issue (e.g. "analysis_results.json has no schema version"). Update `CLAUDE.md` if the
+issue (e.g. "analysis_results.json has no schema version"). Update `AGENTS.md` if the
 schema version or cache structure is documented there.

@@ -46,18 +46,21 @@ Run: `which semgrep 2>/dev/null && echo "ok" || echo "MISSING: semgrep"`
 
 ## 5 — Instruction doc drift
 
-Compare `CLAUDE.md` vs `AGENTS.md` for:
-- **Config fixture**: run a diff of the `makeConfig()` blocks — flag any fields in one but not the other
-- **Module boundary table**: check all rows match between both files
-- **Provider list**: verify provider entries are consistent
-- **Architecture claims**: flag any claim in CLAUDE.md that contradicts AGENTS.md
+Compare `AGENTS.md` against the code for:
+- **Config fixture**: diff the `makeConfig()` block against the `Config` interface: flag any field in one but not the other
+- **Module boundary table**: check every row matches what `scripts/check-boundaries.mjs` enforces
+- **Provider list**: verify the provider entries match the code
+- **Architecture claims**: flag any claim in AGENTS.md that contradicts the code
 
 Quick diff command:
 ```bash
-grep -A 60 "makeConfig" CLAUDE.md | grep "^\s\+\w" | sort > /tmp/claude_config.txt
-grep -A 60 "makeConfig" AGENTS.md | grep "^\s\+\w" | sort > /tmp/agents_config.txt
-diff /tmp/claude_config.txt /tmp/agents_config.txt
+node scripts/check-doc-drift.mjs
 ```
+
+The check compares the documented `makeConfig()` fixture against the `Config` interface in
+`packages/core/src/config/index.ts` (not in `types.ts`). It exits non-zero and names the
+fields when a REQUIRED field of the type is missing from the fixture, or when the fixture
+sets a field the type no longer declares.
 
 ## 6 — Global skills vs project usage
 

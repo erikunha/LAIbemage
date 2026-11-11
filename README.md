@@ -5,11 +5,11 @@ AI-powered image classification, timestamp overlay, and sequential organization 
 [![CI](https://github.com/erikunha/LAIbemage/actions/workflows/ci.yml/badge.svg)](https://github.com/erikunha/LAIbemage/actions/workflows/ci.yml)
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
 
-> **Vision Lens evolution in progress** — this CLI is growing into **Vision Lens** (repo stays `erikunha/LAIbemage`), a Visual
-> Intelligence Engineering Workbench: real-dataset benchmarks, visual embeddings and search,
-> model training/evaluation with calibration, a Studio review UI, HTTP API and an MCP server
-> (ADR-005). The legacy `ai-image-labeling` CLI keeps working unchanged throughout. See
-> `docs/architecture/vision-lens.md`, `docs/architecture/baseline-audit.md` and
+> **Vision Lens evolution in progress** — this CLI is growing into a Visual Intelligence
+> Engineering Workbench (repo stays `erikunha/LAIbemage`): real-dataset benchmarks, visual
+> embeddings and search, model training/evaluation with calibration, a Studio review UI, HTTP API
+> and an MCP server (ADR-005). The legacy `ai-image-labeling` CLI keeps working unchanged
+> throughout. See `docs/architecture/vision-lens.md`, `docs/architecture/baseline-audit.md` and
 > `ROADMAP.md`; work lands on the `feat/visual-lens` branch.
 >
 > **Binary names:** `vision-lens` is the canonical bin (`pnpm add -g @vision-lens/cli` → `vision-lens`).

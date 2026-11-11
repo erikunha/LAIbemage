@@ -460,7 +460,7 @@ function parseCsv(text: string): string[][] {
 const IMAGE_EXTENSIONS = new Set(['.jpg', '.jpeg', '.png', '.bmp', '.tif', '.tiff', '.webp']);
 
 /** One image file found on disk. */
-interface FoundImage {
+export interface FoundImage {
   /** The absolute path of the image. */
   readonly absolutePath: string;
   /**
@@ -473,13 +473,59 @@ interface FoundImage {
 }
 
 /** The ground truth collected for one object class. */
-interface PartGroundTruth {
+export interface PartGroundTruth {
   readonly part: string;
   readonly images: readonly FoundImage[];
   /** The raw label per image path (relative to the part directory). */
   readonly labels: ReadonlyMap<string, string>;
   /** The mask path per image path (relative to the part directory). */
   readonly masks: ReadonlyMap<string, string | null>;
+}
+
+/**
+ * Collects the ground truth of every requested object class.
+ *
+ * This is the shared entry point for "which images of which part carry which
+ * label": the normaliser uses it to fill the store, and the gold split
+ * generator uses it to enumerate the very same subset. Both therefore describe
+ * ONE subset — a manifest that disagreed with the store would score images the
+ * store does not have.
+ *
+ * @param visaRoot - the directory that holds the object-class directories.
+ * @param parts - the object classes to collect.
+ *
+ * @throws {Error} when a part has no annotation CSV or no images — both are
+ *   silent-data-loss conditions.
+ */
+export async function collectVisaPartData(
+  visaRoot: string,
+  parts: readonly string[],
+): Promise<PartGroundTruth[]> {
+  const partData: PartGroundTruth[] = [];
+  for (const part of parts) {
+    const partDir = path.join(visaRoot, part);
+    const csvPath = await findAnnotationCsv(partDir);
+    if (csvPath === null) {
+      throw new Error(
+        `No 'image_anno*.csv' annotation file found in '${partDir}' — the labels cannot be derived without it`,
+      );
+    }
+    const rows = parseVisaAnnotationCsv(await readFile(csvPath, 'utf8'));
+    const images = await listPartImages(partDir);
+    if (images.length === 0) {
+      throw new Error(`No images found under '${partDir}/Data/Images'`);
+    }
+
+    const labels = new Map<string, string>();
+    const masks = new Map<string, string | null>();
+    for (const row of rows) {
+      const key = relativeToPart(row.image, part);
+      labels.set(key, row.label);
+      masks.set(key, row.mask);
+    }
+    partData.push({ part, images, labels, masks });
+  }
+  return partData;
 }
 
 /**
@@ -515,33 +561,10 @@ export async function normalizeVisaSubset(options: NormalizeVisaOptions): Promis
   const target = options.targetImages ?? DEFAULT_SUBSET_TARGET_IMAGES;
 
   // --- Collect the ground truth of every part -------------------------------
-  const partData: PartGroundTruth[] = [];
-  for (const part of parts) {
-    const partDir = path.join(visaRoot, part);
-    const csvPath = await findAnnotationCsv(partDir);
-    if (csvPath === null) {
-      throw new Error(
-        `No 'image_anno*.csv' annotation file found in '${partDir}' — the labels cannot be derived without it`,
-      );
-    }
-    const rows = parseVisaAnnotationCsv(await readFile(csvPath, 'utf8'));
-    const images = await listPartImages(partDir);
-    if (images.length === 0) {
-      throw new Error(`No images found under '${partDir}/Data/Images'`);
-    }
-
-    const labels = new Map<string, string>();
-    const masks = new Map<string, string | null>();
-    for (const row of rows) {
-      const key = relativeToPart(row.image, part);
-      labels.set(key, row.label);
-      masks.set(key, row.mask);
-    }
-    partData.push({ part, images, labels, masks });
-  }
+  const partData = await collectVisaPartData(visaRoot, parts);
 
   // --- Choose the images of the subset --------------------------------------
-  const selected = selectSubsetImages(partData, target);
+  const selected = selectVisaSubsetImages(partData, target);
 
   // --- Derive the ontology keys actually observed ---------------------------
   const keysInUse = new Set<string>([NORMAL_LABEL_KEY]);
@@ -722,7 +745,7 @@ export async function normalizeVisaSubset(options: NormalizeVisaOptions): Promis
 }
 
 /** One selected image, before and after its label is resolved. */
-interface SelectedImage {
+export interface SelectedImage {
   readonly part: string;
   readonly image: FoundImage;
   /** The raw label of the image, when the CSV carries one. */
@@ -741,7 +764,7 @@ interface SelectedImage {
  * Every anomalous image is kept; the normal images of each part are thinned
  * to an even stride over their sorted order.
  */
-function selectSubsetImages(
+export function selectVisaSubsetImages(
   partData: readonly PartGroundTruth[],
   target: number,
 ): SelectedImage[] {
@@ -875,7 +898,7 @@ function buildOntologyCategories(
 }
 
 /** Lists the object class directories of an extracted VisA tree. */
-async function listPartDirectories(visaRoot: string): Promise<string[]> {
+export async function listPartDirectories(visaRoot: string): Promise<string[]> {
   const entries = await readdir(visaRoot, { withFileTypes: true });
   const parts: string[] = [];
   for (const entry of entries) {
@@ -939,7 +962,7 @@ async function findAnnotationCsv(partDir: string): Promise<string | null> {
 }
 
 /** Strips the object-class prefix from a CSV image path. */
-function relativeToPart(imagePath: string, part: string): string {
+export function relativeToPart(imagePath: string, part: string): string {
   const normalized = imagePath.split(path.sep).join('/');
   const prefix = `${part}/`;
   if (normalized.startsWith(prefix)) {

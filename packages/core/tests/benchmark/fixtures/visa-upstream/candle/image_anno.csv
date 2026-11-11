@@ -1,0 +1,6 @@
+image,label,mask
+candle/Data/Images/Normal/0000.JPG,normal,
+candle/Data/Images/Normal/0001.JPG,normal,
+candle/Data/Images/Anomaly/000.JPG,chunk of wax missing,candle/Data/Masks/Anomaly/000.png
+candle/Data/Images/Anomaly/001.JPG,"chunk of wax missing,foreign particals on candle",candle/Data/Masks/Anomaly/001.png
+candle/Data/Images/Anomaly/002.JPG,extra wax in candle,candle/Data/Masks/Anomaly/002.png

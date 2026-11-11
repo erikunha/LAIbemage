@@ -1,0 +1,305 @@
+{
+  "schemaVersion": 1,
+  "id": "synthetic-30.gold",
+  "datasetId": "synthetic-fixture",
+  "seed": 42,
+  "ratios": {
+    "train": 0.6,
+    "val": 0.2,
+    "test": 0.2
+  },
+  "strata": [
+    {
+      "class": "capsules",
+      "anomaly": "anomalous",
+      "total": 4,
+      "train": 2,
+      "val": 1,
+      "test": 1
+    },
+    {
+      "class": "capsules",
+      "anomaly": "normal",
+      "total": 6,
+      "train": 4,
+      "val": 1,
+      "test": 1
+    },
+    {
+      "class": "pcb1",
+      "anomaly": "anomalous",
+      "total": 4,
+      "train": 2,
+      "val": 1,
+      "test": 1
+    },
+    {
+      "class": "pcb1",
+      "anomaly": "normal",
+      "total": 6,
+      "train": 4,
+      "val": 1,
+      "test": 1
+    },
+    {
+      "class": "pcb2",
+      "anomaly": "anomalous",
+      "total": 4,
+      "train": 2,
+      "val": 1,
+      "test": 1
+    },
+    {
+      "class": "pcb2",
+      "anomaly": "normal",
+      "total": 6,
+      "train": 4,
+      "val": 1,
+      "test": 1
+    }
+  ],
+  "assignments": [
+    {
+      "id": "capsules/Data/Images/Anomaly/0000.JPG",
+      "class": "capsules",
+      "anomaly": "anomalous",
+      "split": "train",
+      "sha256": "4bc5452dd28daf69635b4a845f50f502a9a7fa5c038fb617fb950cf3781e315e",
+      "path": "capsules/Data/Images/Anomaly/0000.JPG"
+    },
+    {
+      "id": "capsules/Data/Images/Anomaly/0001.JPG",
+      "class": "capsules",
+      "anomaly": "anomalous",
+      "split": "train",
+      "sha256": "0da11be354934d6e07cdc9f9d362a04fd3c9485e862acd10135c780c5d782843",
+      "path": "capsules/Data/Images/Anomaly/0001.JPG"
+    },
+    {
+      "id": "capsules/Data/Images/Anomaly/0002.JPG",
+      "class": "capsules",
+      "anomaly": "anomalous",
+      "split": "val",
+      "sha256": "53cda06871966242094fed7bb6622ba6831dd160e3f3ec557cc9d3d99a3a7cfe",
+      "path": "capsules/Data/Images/Anomaly/0002.JPG"
+    },
+    {
+      "id": "capsules/Data/Images/Anomaly/0003.JPG",
+      "class": "capsules",
+      "anomaly": "anomalous",
+      "split": "test",
+      "sha256": "ed08671c1382ef0f4daf3bdfca0052d4cb4bff04b00eb5a2c686772b587ff871",
+      "path": "capsules/Data/Images/Anomaly/0003.JPG"
+    },
+    {
+      "id": "capsules/Data/Images/Normal/0000.JPG",
+      "class": "capsules",
+      "anomaly": "normal",
+      "split": "train",
+      "sha256": "745593ac04894d8c56becd0fbb185b155b0de4daadf090664133e6d2d8ad2a48",
+      "path": "capsules/Data/Images/Normal/0000.JPG"
+    },
+    {
+      "id": "capsules/Data/Images/Normal/0001.JPG",
+      "class": "capsules",
+      "anomaly": "normal",
+      "split": "train",
+      "sha256": "8976e1f2f8a11ce9f7c6cc06af236bb787d01e7302e3b9af905fb546ba8dcde4",
+      "path": "capsules/Data/Images/Normal/0001.JPG"
+    },
+    {
+      "id": "capsules/Data/Images/Normal/0002.JPG",
+      "class": "capsules",
+      "anomaly": "normal",
+      "split": "train",
+      "sha256": "dc25e7d593dbd5ee2af377507f5bed656ccace72b6458e43aad77f5e5522760c",
+      "path": "capsules/Data/Images/Normal/0002.JPG"
+    },
+    {
+      "id": "capsules/Data/Images/Normal/0003.JPG",
+      "class": "capsules",
+      "anomaly": "normal",
+      "split": "train",
+      "sha256": "1efb99bcfcbb3600a312bc951413fc442a214ea06f5612bff35409af0381ece3",
+      "path": "capsules/Data/Images/Normal/0003.JPG"
+    },
+    {
+      "id": "capsules/Data/Images/Normal/0004.JPG",
+      "class": "capsules",
+      "anomaly": "normal",
+      "split": "val",
+      "sha256": "33ac741630a5e50df5c7a0fa5c8a4a9821230c302d167e9a0d6e9f11e4c13cb9",
+      "path": "capsules/Data/Images/Normal/0004.JPG"
+    },
+    {
+      "id": "capsules/Data/Images/Normal/0005.JPG",
+      "class": "capsules",
+      "anomaly": "normal",
+      "split": "test",
+      "sha256": "ea2d571b63adaf04493a8edf02c3b34ff603a3452255f0a362083b1ef6a66684",
+      "path": "capsules/Data/Images/Normal/0005.JPG"
+    },
+    {
+      "id": "pcb1/Data/Images/Anomaly/0000.JPG",
+      "class": "pcb1",
+      "anomaly": "anomalous",
+      "split": "train",
+      "sha256": "8fe19366a074c201fcee5487e51caa1df166a71f76720af4458c323846fc244b",
+      "path": "pcb1/Data/Images/Anomaly/0000.JPG"
+    },
+    {
+      "id": "pcb1/Data/Images/Anomaly/0001.JPG",
+      "class": "pcb1",
+      "anomaly": "anomalous",
+      "split": "train",
+      "sha256": "d1eef7082619799803cf73ab09ef09bcaeeebd9b23bcc2609eb8b65f338d15bc",
+      "path": "pcb1/Data/Images/Anomaly/0001.JPG"
+    },
+    {
+      "id": "pcb1/Data/Images/Anomaly/0002.JPG",
+      "class": "pcb1",
+      "anomaly": "anomalous",
+      "split": "test",
+      "sha256": "39592e9e18cd648ddf28764b93fe739f5838dcb3ed96277a490fcc676838c6b4",
+      "path": "pcb1/Data/Images/Anomaly/0002.JPG"
+    },
+    {
+      "id": "pcb1/Data/Images/Anomaly/0003.JPG",
+      "class": "pcb1",
+      "anomaly": "anomalous",
+      "split": "val",
+      "sha256": "7482ad366736f4662dbba4f524c557a58e0a89b244bf97e43e80d3981918b522",
+      "path": "pcb1/Data/Images/Anomaly/0003.JPG"
+    },
+    {
+      "id": "pcb1/Data/Images/Normal/0000.JPG",
+      "class": "pcb1",
+      "anomaly": "normal",
+      "split": "train",
+      "sha256": "711c6395870d4f28653c591ac04281e13111b3eac51f4db7e5458739886db48f",
+      "path": "pcb1/Data/Images/Normal/0000.JPG"
+    },
+    {
+      "id": "pcb1/Data/Images/Normal/0001.JPG",
+      "class": "pcb1",
+      "anomaly": "normal",
+      "split": "train",
+      "sha256": "fd6add19679e611e39b343f028dbaa49b4177ff1d431ad31600375565ef429eb",
+      "path": "pcb1/Data/Images/Normal/0001.JPG"
+    },
+    {
+      "id": "pcb1/Data/Images/Normal/0002.JPG",
+      "class": "pcb1",
+      "anomaly": "normal",
+      "split": "train",
+      "sha256": "d7a91aeae7bf2a372245772576d000023d73623a4629b12c0839533422b76eb9",
+      "path": "pcb1/Data/Images/Normal/0002.JPG"
+    },
+    {
+      "id": "pcb1/Data/Images/Normal/0003.JPG",
+      "class": "pcb1",
+      "anomaly": "normal",
+      "split": "train",
+      "sha256": "c3baa519bdc1e3b2c24393fc7290811f17925a53de2629307d3406941dd95131",
+      "path": "pcb1/Data/Images/Normal/0003.JPG"
+    },
+    {
+      "id": "pcb1/Data/Images/Normal/0004.JPG",
+      "class": "pcb1",
+      "anomaly": "normal",
+      "split": "test",
+      "sha256": "f5c9e3f2e299fba7bbdbac7f10d740945bf716cd43be4ff2c7576979524dc6b3",
+      "path": "pcb1/Data/Images/Normal/0004.JPG"
+    },
+    {
+      "id": "pcb1/Data/Images/Normal/0005.JPG",
+      "class": "pcb1",
+      "anomaly": "normal",
+      "split": "val",
+      "sha256": "11c9e374e6cc26437cdb380477f82e54338c39bf91cb04851d7a6e00194bd9c7",
+      "path": "pcb1/Data/Images/Normal/0005.JPG"
+    },
+    {
+      "id": "pcb2/Data/Images/Anomaly/0000.JPG",
+      "class": "pcb2",
+      "anomaly": "anomalous",
+      "split": "train",
+      "sha256": "6e2b36c1dbfceef23564c11bc74628d82ab21d25cfb3200bed2052bf2a760c66",
+      "path": "pcb2/Data/Images/Anomaly/0000.JPG"
+    },
+    {
+      "id": "pcb2/Data/Images/Anomaly/0001.JPG",
+      "class": "pcb2",
+      "anomaly": "anomalous",
+      "split": "train",
+      "sha256": "51587ea43eac447a9722efa4e11a0ce819806e7b97993196dfdec515e940c428",
+      "path": "pcb2/Data/Images/Anomaly/0001.JPG"
+    },
+    {
+      "id": "pcb2/Data/Images/Anomaly/0002.JPG",
+      "class": "pcb2",
+      "anomaly": "anomalous",
+      "split": "val",
+      "sha256": "4d5e436be9f63512d7eff8f4a01e1627e60afb0b48f77372824b8bab5dafbb7a",
+      "path": "pcb2/Data/Images/Anomaly/0002.JPG"
+    },
+    {
+      "id": "pcb2/Data/Images/Anomaly/0003.JPG",
+      "class": "pcb2",
+      "anomaly": "anomalous",
+      "split": "test",
+      "sha256": "140934ecee0544f12be3f9e608a5eaded3c370b214cdcd6219be4e0ceda2d79f",
+      "path": "pcb2/Data/Images/Anomaly/0003.JPG"
+    },
+    {
+      "id": "pcb2/Data/Images/Normal/0000.JPG",
+      "class": "pcb2",
+      "anomaly": "normal",
+      "split": "train",
+      "sha256": "52727ca94bb18882278e517ef39dff9e3c3884baaf7664fa31442dc6e7fb17c4",
+      "path": "pcb2/Data/Images/Normal/0000.JPG"
+    },
+    {
+      "id": "pcb2/Data/Images/Normal/0001.JPG",
+      "class": "pcb2",
+      "anomaly": "normal",
+      "split": "train",
+      "sha256": "fc2fc64661567ed345886852239bb8b9f26136db900986c198423b1e47c039f4",
+      "path": "pcb2/Data/Images/Normal/0001.JPG"
+    },
+    {
+      "id": "pcb2/Data/Images/Normal/0002.JPG",
+      "class": "pcb2",
+      "anomaly": "normal",
+      "split": "train",
+      "sha256": "d8688130011305fd0e8aa22f232b33ededd5119efa18f15a7748806c7af8f6d1",
+      "path": "pcb2/Data/Images/Normal/0002.JPG"
+    },
+    {
+      "id": "pcb2/Data/Images/Normal/0003.JPG",
+      "class": "pcb2",
+      "anomaly": "normal",
+      "split": "train",
+      "sha256": "d9eccfc1e4141aaf4de8fad5f7322379fb6ed7773e16fc25872f06d2d9b3fc0f",
+      "path": "pcb2/Data/Images/Normal/0003.JPG"
+    },
+    {
+      "id": "pcb2/Data/Images/Normal/0004.JPG",
+      "class": "pcb2",
+      "anomaly": "normal",
+      "split": "test",
+      "sha256": "122be5435b31917d7f94e2077c6ed314fa291d4ac608fa652f6f87b470843873",
+      "path": "pcb2/Data/Images/Normal/0004.JPG"
+    },
+    {
+      "id": "pcb2/Data/Images/Normal/0005.JPG",
+      "class": "pcb2",
+      "anomaly": "normal",
+      "split": "val",
+      "sha256": "eeb4ea71f5cdb3960b089b4a2cd0b9a3358dc6504a4e5cc45d4923736bf353a5",
+      "path": "pcb2/Data/Images/Normal/0005.JPG"
+    }
+  ],
+  "notes": [],
+  "manifestHash": "af8f2379a8120e7982f571c285301daf479b17bb8f375312dfd8393a140bf0aa"
+}

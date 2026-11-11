@@ -1,0 +1,187 @@
+name: Benchmark Gate
+
+# The real-data benchmark gate (spec 003, US4).
+#
+# Two rules govern this workflow:
+#
+#   1. It NEVER downloads a dataset. The VisA subset is 1.93 GB and its
+#      license (CC BY 4.0) and checksums live in datasets/registry.json; a CI
+#      runner fetches nothing.
+#   2. It NEVER invents a number. Without a dataset the job prints an explicit
+#      `dataset=absent` marker and PASSES — a missing dataset is a skip, not
+#      a failure, and certainly not a reason to report a score.
+#
+# What this job DOES prove, on every push, without any dataset: the whole
+# pipeline works and the gate actually catches a regression. The fixture-scale
+# end-to-end (split → score → artifact → gate) runs on the synthetic 30-image
+# fixture, then the same pipeline runs again with a PLANTED REGRESSION — 10% of
+# the predictions flipped to a wrong label — and the gate MUST fail naming the
+# regressed classes.
+#
+# The regression is a CONTROLLED delta: the baseline errors and the flipped
+# items come from two independent PRNG streams, and only items that are
+# correct in the baseline are flipped. The regressed run therefore differs
+# from the baseline by exactly the flipped items.
+#
+# The assertion is on the gate's OUTPUT, not only on its exit code: a gate that
+# crashes for an unrelated reason also exits non-zero, and reading that as
+# "the regression was caught" would be a false pass.
+
+on:
+  push:
+    branches: [main, develop, 'feat/**']
+  pull_request:
+    branches: [main]
+
+permissions:
+  contents: read
+
+jobs:
+  benchmark-gate:
+    name: Benchmark gate (fixture-scale end-to-end)
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up pnpm
+        uses: pnpm/action-setup@v4
+
+      - name: Set up Node.js 24
+        uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: pnpm
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Build (the CLI runs from dist)
+        run: pnpm build
+
+      # ---------------------------------------------------------------------
+      # 1. The real-data gate, when a dataset is available.
+      # ---------------------------------------------------------------------
+      - name: Real-data gate (skipped without the dataset)
+        env:
+          LAIB_DATASETS_DIR: ${{ vars.LAIB_DATASETS_DIR }}
+        run: |
+          set -euo pipefail
+          if [ -z "${LAIB_DATASETS_DIR}" ] || [ ! -d "${LAIB_DATASETS_DIR}" ]; then
+            echo "dataset=absent — the real-data benchmark gate is SKIPPED."
+            echo "No dataset is downloaded by CI (never auto-download)."
+            exit 0
+          fi
+          echo "dataset=present at ${LAIB_DATASETS_DIR}"
+          if [ ! -f benchmarks/baselines/visa-subset.json ]; then
+            echo "baseline=absent — no baseline is recorded for visa-subset."
+            echo "Record one locally (laib benchmark gate --update-baseline) and commit it."
+            exit 0
+          fi
+          # The gate's exit code IS the verdict: a regression fails the job.
+          # The run artifact is the most recent one of the suite.
+          node packages/cli/dist/index.js benchmark gate \
+            --suite visa-subset \
+            --model-id "${LAIB_BENCHMARK_MODEL:-default}" \
+            --baseline benchmarks/baselines/visa-subset.json
+
+      # ---------------------------------------------------------------------
+      # 2. The fixture-scale end-to-end — always runs.
+      # ---------------------------------------------------------------------
+      - name: Generate the fixture dataset and the gold split
+        run: |
+          set -euo pipefail
+          pnpm exec tsx scripts/benchmarks/make-fixture-dataset.ts
+          pnpm exec tsx scripts/benchmarks/make-splits.ts \
+            --dataset synthetic-fixture \
+            --root benchmarks/fixtures/synthetic-fixture \
+            --seed 42 \
+            --id synthetic-30.gold \
+            --out benchmarks/splits/synthetic-30.gold.json
+
+      - name: Score the fixture run and record the baseline
+        run: |
+          set -euo pipefail
+          pnpm exec tsx scripts/benchmarks/make-fixture-predictions.ts \
+            --split benchmarks/splits/synthetic-30.gold.json \
+            --out /tmp/predictions.json
+          node packages/cli/dist/index.js benchmark run \
+            --suite synthetic-30 \
+            --model-id ci-demo \
+            --split benchmarks/splits/synthetic-30.gold.json \
+            --predictions /tmp/predictions.json \
+            --out /tmp/benchmark-results \
+            --min-samples 1 \
+            --config-fingerprint ci-fixture \
+            --model-version "model:ci-demo@1.0.0"
+          node packages/cli/dist/index.js benchmark gate \
+            --suite synthetic-30 \
+            --model-id ci-demo \
+            --metrics "$(find /tmp/benchmark-results -name report.json -print -quit)" \
+            --baseline /tmp/baseline.json \
+            --update-baseline
+
+      # The planted regression MUST fail the gate. If this step passes, the
+      # gate is not protecting anything and the job must fail.
+      #
+      # The assertion is on the OUTPUT, not only on the exit code: a gate that
+      # crashes for an unrelated reason also exits non-zero, and reading that
+      # as "the regression was caught" would be a false pass. The step therefore
+      # requires BOTH a non-zero exit AND the evidence — the failure message
+      # and the named regressed classes.
+      - name: Planted regression must fail the gate
+        run: |
+          set -uo pipefail
+          pnpm exec tsx scripts/benchmarks/make-fixture-predictions.ts \
+            --split benchmarks/splits/synthetic-30.gold.json \
+            --out /tmp/predictions-regressed.json \
+            --flip 0.1
+          node packages/cli/dist/index.js benchmark run \
+            --suite synthetic-30 \
+            --model-id ci-demo \
+            --split benchmarks/splits/synthetic-30.gold.json \
+            --predictions /tmp/predictions-regressed.json \
+            --out /tmp/benchmark-results-regressed \
+            --min-samples 1 \
+            --config-fingerprint ci-fixture \
+            --model-version "model:ci-demo@1.0.0"
+          REGRESSED="$(find /tmp/benchmark-results-regressed -name report.json -print -quit)"
+          set +e
+          GATE_OUTPUT="$(node packages/cli/dist/index.js benchmark gate \
+            --suite synthetic-30 \
+            --model-id ci-demo \
+            --metrics "${REGRESSED}" \
+            --baseline /tmp/baseline.json 2>&1)"
+          GATE_STATUS=$?
+          set -e
+          echo "${GATE_OUTPUT}"
+          if [ "${GATE_STATUS}" -eq 0 ]; then
+            echo "::error::the benchmark gate PASSED a planted 10% regression — the gate is not protecting anything"
+            exit 1
+          fi
+          if ! printf '%s' "${GATE_OUTPUT}" | grep -q 'gate failed'; then
+            echo "::error::the gate exited ${GATE_STATUS} without reporting a regression — it failed for another reason, so the regression was NOT proven to be caught"
+            exit 1
+          fi
+          if ! printf '%s' "${GATE_OUTPUT}" | grep -q 'Regressed classes:'; then
+            echo "::error::the gate failed but did not name the regressed classes — the report is not actionable"
+            exit 1
+          fi
+          echo "the planted regression was caught by the gate, with the regressed classes named"
+
+      - name: Job summary
+        if: always()
+        env:
+          LAIB_DATASETS_DIR: ${{ vars.LAIB_DATASETS_DIR }}
+        run: |
+          {
+            echo "### Benchmark gate"
+            if [ -n "${LAIB_DATASETS_DIR}" ] && [ -d "${LAIB_DATASETS_DIR}" ]; then
+              echo "- Real-data gate: RAN (a dataset is present at ${LAIB_DATASETS_DIR})."
+            else
+              echo "- Real-data gate: SKIPPED — no dataset is present, and CI never downloads one."
+            fi
+            echo "- Fixture-scale end-to-end: split → score → artifact → gate."
+            echo "- Planted regression: the step above asserts that the gate failed AND named the regressed classes."
+          } >> "$GITHUB_STEP_SUMMARY"

@@ -484,6 +484,124 @@ program
     }
   });
 
+// Benchmark subcommand (spec 003, US3 + US4)
+// Loaded lazily so the benchmark surface (and its heavier imports) is only
+// touched when the user actually asks for it.
+//
+// The root program disables Commander's built-in help (the legacy CLI owns its
+// help text), and Commander copies the help settings to every subcommand — so
+// the benchmark commands re-enable the help option explicitly. Without that,
+// `laib benchmark --help` would fail with "unknown option '--help'".
+const benchmark = program
+  .command('benchmark')
+  .description('Score a benchmark suite, gate it against its baseline, or read a stored report')
+  .helpOption(true)
+  .action(async (_opts: Record<string, string | boolean>, cmd: Command) => {
+    // `laib benchmark` without a subcommand prints the subcommand help.
+    cmd.outputHelp();
+  });
+
+benchmark
+  .command('run')
+  .description('Score predictions against a gold split and emit the attributed artifacts')
+  .helpOption(true)
+  .requiredOption('--suite <name>', 'The benchmark suite (e.g. synthetic-30, visa-subset)')
+  .requiredOption('--model-id <name>', 'The model that produced the predictions')
+  .option('--split <file>', 'Path of the gold split manifest')
+  .option('--gold <file>', 'Path of an explicit gold-label file (JSON array of {id, labelKey})')
+  .option('--predictions <file>', 'Path of the predictions file (JSON array of predictions)')
+  .option('--out <dir>', 'Directory the artifacts are written to', 'benchmarks/results')
+  .option('--min-samples <n>', 'Minimum gold samples per class', '30')
+  .option('--snapshot-id <id>', 'Code snapshot the run belongs to (defaults to the git HEAD)')
+  .option('--split-fingerprint <hash>', 'Split fingerprint (defaults to the manifest hash)')
+  .option('--model-version <version>', 'Model identity AND version')
+  .requiredOption('--config-fingerprint <hash>', 'Config fingerprint the run used (mandatory: a report without it is not attributed)')
+  .option('--partial', 'Mark the run as partial (e.g. a provider outage)', false)
+  .action(async (opts: Record<string, string | boolean>) => {
+    try {
+      const { runBenchmarkCommand } = await import('./commands/benchmark.js');
+      await runBenchmarkCommand({
+        suite: opts['suite'] as string,
+        model: opts['modelId'] as string,
+        ...(opts['split'] === undefined ? {} : { splitPath: opts['split'] as string }),
+        ...(opts['gold'] === undefined ? {} : { goldPath: opts['gold'] as string }),
+        ...(opts['predictions'] === undefined
+          ? {}
+          : { predictionsPath: opts['predictions'] as string }),
+        ...(opts['out'] === undefined ? {} : { outputDir: opts['out'] as string }),
+        minSamples: parseInt(opts['minSamples'] as string, 10),
+        ...(opts['snapshotId'] === undefined ? {} : { snapshotId: opts['snapshotId'] as string }),
+        ...(opts['splitFingerprint'] === undefined
+          ? {}
+          : { splitFingerprint: opts['splitFingerprint'] as string }),
+        ...(opts['modelVersion'] === undefined
+          ? {}
+          : { modelVersion: opts['modelVersion'] as string }),
+        ...(opts['configFingerprint'] === undefined
+          ? {}
+          : { configFingerprint: opts['configFingerprint'] as string }),
+        partial: Boolean(opts['partial']),
+      });
+    } catch (error) {
+      logger.error(String((error as Error).message));
+      process.exit(1);
+    }
+  });
+
+benchmark
+  .command('gate')
+  .description('Compare a benchmark run against its stored baseline')
+  .helpOption(true)
+  .requiredOption('--suite <name>', 'The benchmark suite (e.g. synthetic-30, visa-subset)')
+  .requiredOption('--model-id <name>', 'The model whose run is gated')
+  .option('--metrics <file>', 'Path of the run artifact (report.json) to gate')
+  .option('--baseline <file>', 'Path of the baseline file')
+  .option('--tolerance <n>', 'Macro F1 regression tolerance', '-0.02')
+  .option('--update-baseline', 'Rewrite the baseline with the run metrics', false)
+  .option('--force', 'Allow a baseline change larger than 0.05', false)
+  .option('--partial', 'Treat the run as partial (the gate is then skipped)', false)
+  .action(async (opts: Record<string, string | boolean>) => {
+    try {
+      const { runBenchmarkGateCommand } = await import('./commands/benchmark.js');
+      const result = await runBenchmarkGateCommand({
+        suite: opts['suite'] as string,
+        model: opts['modelId'] as string,
+        ...(opts['metrics'] === undefined ? {} : { metricsPath: opts['metrics'] as string }),
+        ...(opts['baseline'] === undefined ? {} : { baselinePath: opts['baseline'] as string }),
+        tolerance: parseFloat(opts['tolerance'] as string),
+        updateBaseline: Boolean(opts['updateBaseline']),
+        force: Boolean(opts['force']),
+        partial: Boolean(opts['partial']),
+      });
+      // A failing gate must fail the build; a skipped gate must not.
+      if (result !== undefined && !result.passed) {
+        process.exit(1);
+      }
+    } catch (error) {
+      logger.error(String((error as Error).message));
+      process.exit(1);
+    }
+  });
+
+benchmark
+  .command('report')
+  .description('Print a stored benchmark artifact')
+  .helpOption(true)
+  .requiredOption('--run <runId>', 'The run id (the artifact directory name)')
+  .option('--dir <dir>', 'Directory holding the run artifacts', 'benchmarks/results')
+  .action(async (opts: Record<string, string | boolean>) => {
+    try {
+      const { runBenchmarkReportCommand } = await import('./commands/benchmark.js');
+      await runBenchmarkReportCommand({
+        runId: opts['run'] as string,
+        ...(opts['dir'] === undefined ? {} : { dir: opts['dir'] as string }),
+      });
+    } catch (error) {
+      logger.error(String((error as Error).message));
+      process.exit(1);
+    }
+  });
+
 program.parseAsync(process.argv);
 
 // Exported for the `@master-vision/sdk/cli` re-export shim (library consumers

@@ -12,6 +12,7 @@
     "./analyzer/embeddings": "./dist/analyzer/embeddings.js",
     "./analyzer/sessions": "./dist/analyzer/sessions.js",
     "./analyzer/suggest": "./dist/analyzer/suggest.js",
+    "./benchmark": "./dist/benchmark/index.js",
     "./classifier": "./dist/classifier/index.js",
     "./config": "./dist/config/index.js",
     "./diff": "./dist/diff/index.js",

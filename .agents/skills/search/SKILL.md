@@ -1,3 +1,8 @@
+---
+name: search
+description: Use when a user wants to search their classified image collection by description or concept, set up the embedding index for the first time, or troubleshoot semantic and keyword search returning wrong or no results.
+---
+
 # Skill: Embed and Search
 
 **Domain:** Setting up and using the semantic/keyword search engine

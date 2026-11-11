@@ -1,3 +1,8 @@
+---
+name: debug-classification
+description: Use when a user reports poor LLM classification results in Vision Lens: too many images classified as unknown, images landing in the wrong category, inconsistent results between runs or providers, or temporal consensus overriding correct classifications.
+---
+
 # Skill: Debug Classification
 
 **Domain:** Diagnosing poor LLM classification results in Vision Lens

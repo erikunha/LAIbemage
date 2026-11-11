@@ -1,3 +1,8 @@
+---
+name: write-plugin
+description: Use when a developer wants to create an external lifecycle plugin file loaded via --plugin: picking the lifecycle hooks, handling secrets safely, wrapping I/O in try/catch, unit testing the hooks and running the plugin in a dry run.
+---
+
 # Skill: Write a Lifecycle Plugin
 
 ## When to use this skill

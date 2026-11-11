@@ -1,3 +1,8 @@
+---
+name: interpret-benchmark
+description: Use after running a Vision Lens benchmark to interpret the report: whether accuracy improved or regressed against the baseline, what the precision, recall, unknown rate, cost and latency numbers mean, and whether to update the baseline or file a regression bug.
+---
+
 # Skill: Interpret Benchmark Results
 
 ## When to use this skill

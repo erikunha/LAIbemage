@@ -1,3 +1,8 @@
+---
+name: add-category
+description: Use when a user wants to add a new image category to a categories.json taxonomy, configure whether that category is immune, overridable or pinned last, or understand how category settings change Vision Lens classification output.
+---
+
 # Skill: Add Category
 
 **Domain:** Category taxonomy management for Vision Lens

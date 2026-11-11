@@ -1,3 +1,8 @@
+---
+name: tune-prompt
+description: Use when a user reports a high unknown rate, confusion between two specific categories, a switch to a new image domain, or a need to add domain-specific guidance to the batch and reclassify prompts without breaking the JSON response contract.
+---
+
 # Skill: Tune LLM Batch Prompt
 
 **Domain:** Optimising `buildBatchPrompt()` and `RECLASSIFY_PROMPT` for a specific image domain

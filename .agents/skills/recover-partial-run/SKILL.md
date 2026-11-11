@@ -1,3 +1,8 @@
+---
+name: recover-partial-run
+description: Use when a Vision Lens run was interrupted by Ctrl-C, an OOM kill, a network failure or power loss, and the run must be resumed without losing already-processed images or re-paying for already-analysed images.
+---
+
 # Skill: Recover a Partial or Failed Run
 
 ## When to use this skill

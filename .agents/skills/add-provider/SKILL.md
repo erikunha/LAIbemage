@@ -1,3 +1,8 @@
+---
+name: add-provider
+description: Use when a user wants to add support for a new LLM vision provider (Mistral, Cohere, Bedrock) to Vision Lens: the SDK dependency, the provider factory, the CLI key flag, API key handling, quota error detection and the matching tests.
+---
+
 # Skill: Add LLM Provider
 
 **Domain:** Extending `src/analyzer/client.ts` with a new LLM Vision provider
@@ -136,9 +141,9 @@ Add the provider's quota error fingerprint to `isQuotaError()`:
 if (message.includes('<provider-specific error text>')) return true;
 ```
 
-### 8. Update `copilot-instructions.md` and `AGENTS.md`
+### 8. Update `AGENTS.md`
 
-- Add the new provider to the supported providers list in `.github/copilot-instructions.md`
+- Add the new provider to the supported providers list in `AGENTS.md`
 - Update the `src/analyzer/client.ts` row in `AGENTS.md` module boundary table
 
 ### 9. Test

@@ -1,3 +1,8 @@
+---
+name: async-batch
+description: Use when a user wants to submit a large image set (hundreds to thousands of images) to a provider async batch API without blocking the terminal, take advantage of provider batch pricing, or resume and collect the results of a previously submitted batch job.
+---
+
 # Skill: Async Batch Submission
 
 **Domain:** Submitting large image sets to provider async APIs and collecting results later

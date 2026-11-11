@@ -35,7 +35,7 @@ testing on pure logic, commitlint + hooks.
 |---|---|---|---|
 | D1 | Cache fingerprint hashes only category names — description/model/prompt changes leave stale caches | `src/index.ts:77-83` (`computeCategoriesHash`) | fingerprint v2 (002, ADR-008) |
 | D2 | Consensus winner = higher self-declared confidence | `src/analyzer/consensus.ts:53-54` | calibration + agreement policy (006, ADR-008) |
-| D3 | Benchmark ground truth is synthetic colour swatches | `tests/fixtures/benchmark/labels.json:2` (self-described) | VisA real benchmark (003, ADR-008) |
+| D3 | Benchmark ground truth is synthetic colour swatches | `packages/core/tests/fixtures/benchmark/labels.json:2` (self-described) | VisA real benchmark (003, ADR-008) |
 | D4 | `--learn` is few-shot prompt injection, not learning | `src/cli/index.ts:99`, ROADMAP.md:170-173 | real training (007); `--learn` stays during deprecation window |
 | D5 | Planned YOLO export writes artificial full-image boxes for classification | ROADMAP.md:378 (H12.2) | Ultralytics per-class/split directory layout (004) |
 | D6 | "No GUI / no HTTP" stance blocks the platform surfaces | ROADMAP.md:566-567 | superseded by ADR-005 |

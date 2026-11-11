@@ -38,7 +38,7 @@ All hooks are optional. A plugin may implement any subset of them.
 4. Add tests in `tests/plugin/index.test.ts` covering: hook called, no hook skipped gracefully, hook throws → error isolated, multiple plugins → all called
 5. Increment `PLUGIN_API_VERSION` in `src/types.ts` if the interface is breaking
 6. Update `src/cli/help.ts` if the new hook changes user-facing behaviour
-7. Update `tests/fixtures/benchmark/labels.json` — no change needed (plugin is infrastructure)
+7. Update `packages/core/tests/fixtures/benchmark/labels.json` — no change needed (plugin is infrastructure)
 
 ## Security rules for this module
 

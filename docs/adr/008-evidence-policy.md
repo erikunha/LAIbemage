@@ -10,7 +10,7 @@
 
 Four evidence defects make the current system's accuracy claims untrustworthy as a platform:
 
-1. **Synthetic benchmark** — `tests/fixtures/benchmark/labels.json:2` self-describes:
+1. **Synthetic benchmark** — `packages/core/tests/fixtures/benchmark/labels.json:2` self-describes:
    "Images are synthetic colour swatches — replace with real photos for meaningful accuracy
    metrics." The runner computes real metrics over meaningless ground truth.
 2. **Declared confidence treated as probability** — `src/analyzer/consensus.ts:53-54` picks

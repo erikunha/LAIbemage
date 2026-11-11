@@ -14,8 +14,8 @@ They are NOT part of the production bundle. Never import them from `src/`.
 | Script                           | Purpose                                                            | pnpm alias                    |
 | -------------------------------- | ------------------------------------------------------------------ | ----------------------------- |
 | `generate-fixtures.ts`           | Creates synthetic JPEG test fixtures in `tests/fixtures/images/`   | `pnpm run fixtures`           |
-| `generate-benchmark-fixtures.ts` | Creates 24 labelled benchmark JPEGs in `tests/fixtures/benchmark/` | `pnpm run benchmark:generate` |
-| `benchmark.ts`                   | Runs accuracy/cost/latency benchmark across LLM providers          | `pnpm run benchmark`          |
+| `generate-benchmark-fixtures.ts` | Creates 24 labelled SYNTHETIC unit-fixture JPEGs in `packages/core/tests/fixtures/benchmark/` | `pnpm benchmark:generate` |
+| `benchmark-legacy.ts`            | Legacy SYNTHETIC unit-fixture harness — regression check only, NOT an accuracy source | `pnpm benchmark:legacy`   |
 | `gen-readme-flags.ts`            | Auto-generates the CLI flags table in `README.md`                  | `pnpm run readme:generate`    |
 
 ## Rules for new scripts
@@ -28,13 +28,20 @@ They are NOT part of the production bundle. Never import them from `src/`.
 6. **Never import from `src/cli/`** — CLI wiring is Commander-specific and not intended for script reuse
 7. **Minimal arg parsing** — use plain `process.argv` parsing; do not add Commander or yargs as deps for scripts
 
-## Benchmark script conventions
+## Legacy synthetic benchmark conventions (`benchmark-legacy.ts`)
+
+These apply to the LEGACY unit-fixture harness only. They are NOT the conventions for the
+real-data benchmark (spec 003), whose artifacts live in `benchmarks/results/<runId>/`,
+`benchmarks/baselines/<suite>.json` and `benchmarks/splits/*.gold.json` and are produced by
+`laib benchmark run|gate|report`.
 
 - Results written to `reports/benchmark/<provider>.json` (git-ignored)
-- Baseline stored in `tests/fixtures/benchmark/baseline.json` (git-tracked; update via `--update-baseline`)
+- Baseline stored in `packages/core/tests/fixtures/benchmark/baseline.json` (git-tracked; update via `--update-baseline`)
 - Regression threshold: 5% on precision, recall, and unknown-rate
 - All three providers compared: `openai`, `anthropic`, `google`
 - The `--check-regression` flag must exit with code 1 if any metric regresses
+- Its numbers describe the harness over synthetic colour swatches — never quote them as a
+  product accuracy claim (ADR-008)
 
 ## Fixture generator conventions
 

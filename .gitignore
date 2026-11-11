@@ -35,6 +35,9 @@ Thumbs.db
 coverage/
 .nyc_output/
 
+# Legacy harness reports — provider outputs of the synthetic unit-fixture run.
+# They are run artifacts, never source.
+reports/
 
 # Generated API docs
 docs/api/

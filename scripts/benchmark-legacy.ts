@@ -1,7 +1,21 @@
 /**
- * Accuracy benchmark runner.
+ * LEGACY SYNTHETIC BENCHMARK — UNIT-FIXTURE / REGRESSION HARNESS ONLY.
  *
- * Runs LLM analysis against the labelled benchmark fixtures and produces:
+ * This is NOT an accuracy source of truth. The fixtures it scores against are
+ * synthetic colour swatches (`packages/core/tests/fixtures/benchmark/labels.json`
+ * self-describes them as such), so the precision/recall it prints describe the
+ * harness, not the product.
+ *
+ * Per ADR-008 (`docs/adr/008-evidence-policy.md`), a real-dataset benchmark is the
+ * only accuracy source: the synthetic fixtures remain unit-test inputs only, and
+ * all product accuracy claims come from the spec-003 artifacts:
+ *   - `benchmarks/results/<runId>/`  — JSON + Markdown metric reports
+ *   - `benchmarks/baselines/<suite>.json` — regression baselines
+ *   - `benchmarks/splits/*.gold.json` — seeded, hash-pinned gold splits
+ *   - `datasets/registry.json` — dataset source, license and checksums
+ *   - `laib benchmark run|gate|report` — the CLI that produces the above
+ *
+ * It runs LLM analysis against the labelled benchmark fixtures and produces:
  *   - Per-category precision / recall
  *   - Overall accuracy and unknown rate
  *   - Estimated API cost for 30 images (normalised from the fixture set)
@@ -12,12 +26,13 @@
  * Flags:
  *   --provider <name>       openai | anthropic | google | all  (default: all)
  *   --check-regression      Fail if any summary metric regresses >5% vs baseline
- *   --update-baseline       Write current results to tests/fixtures/benchmark/baseline.json
+ *   --update-baseline       Write current results to the legacy baseline file
+ *                           (baseline.json in the benchmark fixture dir)
  *
  * Usage:
- *   npx tsx scripts/benchmark.ts
- *   npx tsx scripts/benchmark.ts --provider openai --check-regression
- *   npx tsx scripts/benchmark.ts --provider anthropic --update-baseline
+ *   npx tsx scripts/benchmark-legacy.ts
+ *   npx tsx scripts/benchmark-legacy.ts --provider openai --check-regression
+ *   npx tsx scripts/benchmark-legacy.ts --provider anthropic --update-baseline
  */
 import { execFileSync } from 'node:child_process';
 import { access, mkdir, readFile, writeFile } from 'node:fs/promises';
@@ -31,7 +46,11 @@ import { getImageTimestamp } from '../packages/core/src/utils/exif.js';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const ROOT = path.join(__dirname, '..');
-const BENCHMARK_DIR = path.join(ROOT, 'tests', 'fixtures', 'benchmark');
+// The fixtures live under packages/core/tests/fixtures/benchmark — the same path
+// `scripts/generate-benchmark-fixtures.ts` writes to. Before the monorepo move
+// (025ea1c) this pointed at <root>/tests/fixtures/benchmark, so the harness read
+// labels from a directory that no longer existed.
+const BENCHMARK_DIR = path.join(ROOT, 'packages', 'core', 'tests', 'fixtures', 'benchmark');
 const IMAGES_DIR = path.join(BENCHMARK_DIR, 'images');
 const LABELS_PATH = path.join(BENCHMARK_DIR, 'labels.json');
 const BASELINE_PATH = path.join(BENCHMARK_DIR, 'baseline.json');

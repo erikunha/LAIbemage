@@ -41,9 +41,13 @@ and `src/index.ts` around the processing loop. Do NOT commit these — they are 
 ### Step 2 — Generate a realistic workload
 
 ```bash
-# Use the benchmark fixture generator to produce 24 images, then duplicate to target N
-npm run benchmark:generate
+# Use the SYNTHETIC benchmark fixture generator to produce 24 images, then duplicate to target N
+pnpm benchmark:generate
 ```
+
+These are synthetic unit fixtures (colour swatches), used only to give the profiler a
+repeatable workload. For accuracy questions use the real-data benchmark
+(`laib benchmark run`); never quote synthetic-fixture numbers as accuracy.
 
 For a meaningful sample, target at least 100 images at realistic JPEG sizes (2–5 MB each).
 If the user can provide real images, prefer those over synthetic fixtures.

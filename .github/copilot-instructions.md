@@ -106,10 +106,18 @@ selected at runtime.
 
 ## Benchmark
 
-- `scripts/benchmark.ts` measures precision, recall, unknown-rate, cost, and P95 latency per provider
-- Fixtures: `tests/fixtures/benchmark/` (24 synthetic images + `labels.json` + `baseline.json`)
-- Baseline is git-tracked; update with `--update-baseline` flag after intentional improvements
-- Regression threshold: 5% on any metric vs baseline → exit 1 on `--check-regression`
+- The real-data benchmark is the only accuracy source (ADR-008, spec 003). Its artifacts are
+  `benchmarks/results/<runId>/` (JSON + Markdown), `benchmarks/baselines/<suite>.json`,
+  `benchmarks/splits/*.gold.json` and `datasets/registry.json`, produced by
+  `laib benchmark run|gate|report`.
+- `scripts/benchmark-legacy.ts` is the LEGACY SYNTHETIC harness — a unit-fixture /
+  regression harness over colour-swatch fixtures. It is **not** an accuracy source of truth
+  and must never be quoted as one. Package script: `benchmark:legacy`.
+- Legacy fixtures: `packages/core/tests/fixtures/benchmark/` (24 synthetic images + `labels.json` + `baseline.json`)
+- Legacy baseline is git-tracked; update with the `--update-baseline` flag after intentional improvements
+- Legacy regression threshold: 5% on any metric vs baseline → exit 1 on `--check-regression`
+- Never state an accuracy number in code, docs or PR text unless it comes from a
+  `benchmarks/results/<runId>/` artifact
 
 ## Agent roster (`.github/agents/`)
 

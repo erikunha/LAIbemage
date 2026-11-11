@@ -2,7 +2,7 @@
  * Benchmark fixture generator.
  *
  * Creates 24 synthetic 200×200 JPEG images (8 categories × 3 variants) and
- * writes tests/fixtures/benchmark/labels.json with ground-truth category labels.
+ * writes packages/core/tests/fixtures/benchmark/labels.json with ground-truth category labels.
  *
  * Images are solid-colour JPEGs — sufficient for infrastructure testing; a real
  * accuracy benchmark requires real photos.

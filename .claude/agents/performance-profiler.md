@@ -14,12 +14,17 @@ You are the Performance Profiler for `ai-image-labeling`. You measure and diagno
 ### 1. End-to-end batch throughput
 
 ```bash
-pnpm run benchmark
+pnpm benchmark:legacy
 ```
 
-The benchmark reports: precision, recall, unknown-rate, cost, and P95 latency per provider.
-Baseline is in `tests/fixtures/benchmark/baseline.json` — compare current vs baseline.
+The legacy harness reports precision, recall, unknown-rate, cost, and P95 latency per provider.
+Baseline is in `packages/core/tests/fixtures/benchmark/baseline.json` — compare current vs baseline.
 Regression threshold: 5% on any metric → flag as WARN.
+
+Note: this harness scores SYNTHETIC colour-swatch fixtures. It is a unit-fixture regression
+check, not an accuracy source — never report its precision/recall as product accuracy
+(ADR-008). Real-data numbers come from `laib benchmark run` artifacts in
+`benchmarks/results/<runId>/`.
 
 ### 2. Per-step wall-time breakdown
 
@@ -69,6 +74,8 @@ For large batches:
 ### Benchmark results
 - Precision: X% (baseline: Y%, delta: Z%)
 - P95 latency: Xms (baseline: Yms)
+- Source: real-data run `benchmarks/results/<runId>/` (or legacy synthetic harness —
+  label which one; the synthetic harness is not an accuracy claim)
 
 ### Bottleneck identified
 - Step: <EXIF | dedup | LLM batch | temporal | process | report>

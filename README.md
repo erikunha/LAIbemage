@@ -45,7 +45,16 @@ What it does **not** do:
 - Face recognition or biometric identification
 - Video files — JPEG, PNG, WebP, and TIFF only
 - Training or fine-tuning models — it uses hosted Vision APIs as-is
-- Guarantee classification accuracy — results depend on the LLM provider and your `categories.json` descriptions
+- Guarantee classification accuracy — accuracy is **measured, not guaranteed**. Results depend
+  on the LLM provider, the model, your `categories.json` descriptions and the dataset, so no
+  fixed percentage is promised here. Real accuracy numbers come from the benchmark artifacts
+  under `benchmarks/results/<runId>/` (real-data VisA ground truth, CC BY 4.0 — dataset
+  license, source and checksums are recorded in `datasets/registry.json`).
+  **Status: the real dataset has not been downloaded yet and no product accuracy number exists**
+  — the whole pipeline is proven against a synthetic 30-image fixture, and the first real number
+  appears only after the VisA fetch is authorised. The `benchmark:legacy` script is a
+  **synthetic** unit-fixture harness over colour swatches; it is a plumbing regression check, not
+  an accuracy source (see [ADR-008](docs/adr/008-evidence-policy.md)).
 
 ---
 
@@ -441,7 +450,7 @@ src/
   index.ts         Top-level orchestration (runBatch, runReorder, runSingle)
 
 tests/             Vitest unit tests (mirrors src/ structure)
-scripts/           Fixture generation, benchmark runner
+scripts/           Fixture generation, legacy synthetic benchmark harness (unit fixture)
 examples/          Starter category configs (property, e-commerce, etc.)
 docs/              Plugin API reference, architecture notes
 ```

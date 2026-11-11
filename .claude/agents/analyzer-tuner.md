@@ -33,10 +33,14 @@ You are the Analyzer Tuner for `ai-image-labeling`. You improve LLM prompt quali
 ## Workflow
 
 1. Read the current prompts in `src/analyzer/batch.ts`
-2. Run the benchmark to get a baseline: `pnpm run benchmark`
+2. Get a baseline: `laib benchmark run` (real-data, spec 003 — artifacts in
+   `benchmarks/results/<runId>/`). The legacy `pnpm benchmark:legacy` script is a SYNTHETIC
+   unit-fixture harness and may be used only as a plumbing regression check, never as an
+   accuracy figure
 3. Identify the failure mode: wrong category? too many `unknown`? high cost?
 4. Edit the system prompt or user prompt
-5. Re-run the benchmark to verify improvement: `pnpm run benchmark`
+5. Re-run the benchmark to verify improvement: `laib benchmark run` (compare against
+   `benchmarks/baselines/<suite>.json` via `laib benchmark gate`)
 6. Run `pnpm test` to confirm no regressions
 7. If you changed `BatchEnvelopeSchema`, run `pnpm run typecheck` first
 

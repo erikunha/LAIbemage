@@ -71,8 +71,18 @@ parsed.categories.forEach(c => console.log(' -', c.name));
 
 ### 5. Accuracy expectations
 
-Provide realistic expectations for first-run accuracy given the domain complexity:
+Do NOT promise a precision figure. Accuracy is **measured, not guaranteed** — every number
+depends on the dataset, the model, the prompt and the category descriptions, so a fixed
+percentage is a claim this repo cannot make (ADR-008).
 
-- Simple domains (clear visual differences, < 6 categories): expect 85–95% precision
-- Complex domains (subtle differences, > 8 categories): expect 70–85% precision; recommend running `pnpm run benchmark`
+- State plainly that first-run accuracy is unknown until it is measured on representative data
+- Point the user at the real-data benchmark: `laib benchmark run`, whose artifacts land in
+  `benchmarks/results/<runId>/` (JSON + Markdown) with the full reproduction tuple
+  (dataset snapshot, split fingerprint, model version, config fingerprint, env capture)
+- Note that the dataset is dataset-dependent: the VisA-derived gold split
+  (`benchmarks/splits/*.gold.json`, dataset license and checksums in `datasets/registry.json`)
+  measures industrial anomaly classes, NOT the user's domain — treat it as a harness and
+  methodology reference, never as a prediction for their categories
+- The legacy `benchmark:legacy` script is a SYNTHETIC unit-fixture harness (colour swatches);
+  never cite its output as an accuracy figure
 - Recommend: run with 50 representative images first, review with `--interactive`, then tune prompts

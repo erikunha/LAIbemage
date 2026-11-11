@@ -109,7 +109,7 @@ Verify all exit paths:
 | Some images failed (partial success)   | 0 with a warning   |
 | `--dry-run`                            | 0 (always)         |
 | `--estimate`                           | 0 (always)         |
-| `--check-regression` (benchmark) fails | 1                  |
+| `--check-regression` (legacy synthetic fixture harness) fails | 1                  |
 
 ### 5. `--dry-run` behaviour
 
@@ -137,6 +137,16 @@ Read each code block in `README.md`. Verify:
 - Default values in the README match the defaults in `src/config/index.ts`
 - Provider names shown match the `provider` type in `src/types.ts`
 - No examples use `--flag=value` syntax when the README convention is `--flag value`
+
+Also verify the README's **accuracy claims** (ADR-008):
+
+- The README must NOT promise or state a classification-accuracy percentage. Accuracy is
+  measured, not guaranteed.
+- Any accuracy statement must point at the spec-003 artifacts — `laib benchmark run` results
+  under `benchmarks/results/<runId>/` (real-data VisA ground truth, CC BY 4.0, license in
+  `datasets/registry.json`).
+- The legacy `pnpm benchmark:legacy` harness is a SYNTHETIC unit fixture (colour swatches) and
+  must be described as such, never as an accuracy source.
 
 ---
 

@@ -25,7 +25,7 @@ flowchart LR
 
 | Phase | Focus | Specs | Outcome | Status |
 |---|---|---|---|---|
-| F0 | Foundation | 001 monorepo · 002 domain/contracts · 003 real benchmark | rebirth scaffold, entity store, VisA ground truth | 🏗 001 🟢 · 002 🟢 (domain contracts + entity store + legacy importer) · 003 🔵 |
+| F0 | Foundation | 001 monorepo · 002 domain/contracts · 003 real benchmark | rebirth scaffold, entity store · VisA ground truth + runner (003, in progress) | 🏗 001 🟢 · 002 🟢 (domain contracts + entity store + legacy importer) · 003 🔵 (no accuracy numbers yet) |
 | F1 | Visual Data + Arena | 004 data engine · 005 embeddings/search · 006 model arena | trustworthy datasets + calibrated model comparison | 🔵 |
 | F2 | Learning | 007 training · 008 active-learning flywheel | specialized models + measured data loop — **first demo** | 🔵 |
 | F3 | Interfaces + Agents | 009 API/jobs · 010 Studio · 011 MCP · 012 agent runtime | four equivalent surfaces + safe investigations | 🔵 |
@@ -87,8 +87,14 @@ Superseded by Master decisions:
 - Shipped in 002: 14 versioned Zod entities with Prediction≠Annotation enforced structurally,
   the generated OpenAPI 3.1 seed, the SQLite entity store with migrations, repositories and
   the lineage walk, and the idempotent `laib import-run` legacy importer.
-- Real benchmark: VisA subset (CC BY 4.0, license registry), seeded gold splits, metrics
-  runner (per-class F1, ECE calibration, latency, cost), regression baselines (003).
+- Real benchmark, **in progress under 003**: VisA subset (CC BY 4.0, license registry), seeded
+  gold splits, metrics runner (per-class F1, ECE calibration, latency, cost), regression
+  baselines. Numbers come only from the 003 artifacts (`benchmarks/results/<runId>/`,
+  `benchmarks/baselines/<suite>.json`, `benchmarks/splits/*.gold.json`,
+  `datasets/registry.json`) produced by `laib benchmark run|gate|report` — none exist yet.
+- Synthetic accuracy claims retired: the legacy colour-swatch harness (package script
+  `benchmark:legacy`, formerly the default accuracy runner) stays only as a unit-test
+  fixture; it is not an accuracy source (ADR-008).
 
 ### F1 — Visual Data + Arena (004–006)
 

@@ -75,7 +75,7 @@ Use this skill when a user wants to:
 
 Every SKILL.md in this project must:
 
-- Reference actual file paths from `src/`, not generic placeholders
+- Reference actual file paths from `packages/core/src/`, not generic placeholders
 - Include at least one concrete example (diff, code snippet, or output)
 - Be executable by a coding agent without additional context (self-contained)
 - Not duplicate logic already in `AGENTS.md`: link to it instead

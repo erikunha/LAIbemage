@@ -42,7 +42,7 @@ Edit the user's target `categories.json` (default: `examples/categories.json`):
 
 ### 4. Verify no test fixtures need updating
 
-Search `tests/` for hardcoded category arrays. If found, add the new category there too.
+Search `packages/core/tests/` for hardcoded category arrays. If found, add the new category there too.
 Ensure all `Config` fixtures include `concurrency: 1` and all `AnalysisResult` fixtures include
 `confidence: 0` and `extractedText: null`.
 

@@ -30,7 +30,7 @@ Ask the user:
 
 ### 2. Check the prompt quality
 
-Read `src/analyzer/batch.ts` → `buildBatchPrompt()`:
+Read `packages/core/src/analyzer/batch.ts` → `buildBatchPrompt()`:
 
 - Are category descriptions clear and non-overlapping?
 - Is the JSON schema in the prompt well-defined?
@@ -51,17 +51,17 @@ similar categories. Example:
 
 ### 3. Check the detail level
 
-In `src/analyzer/batch.ts`, batch calls use `detail: 'low'` (768px). For fine-grained details
+In `packages/core/src/analyzer/batch.ts`, batch calls use `detail: 'low'` (768px). For fine-grained details
 (small text, subtle damage), this may be insufficient.
 
-In `src/analyzer/index.ts`, reclassification uses `detail: 'high'` (1024px).
+In `packages/core/src/analyzer/index.ts`, reclassification uses `detail: 'high'` (1024px).
 
 **Fix:** If images require detail to classify (e.g. subtle mold, small print), reduce batch size
 and consider using `detail: 'high'` for the first pass (higher cost but better accuracy).
 
 ### 4. Check temporal consensus settings
 
-Read `src/analyzer/temporal.ts`:
+Read `packages/core/src/analyzer/temporal.ts`:
 
 - Cluster window: 5 minutes — too short? (photos taken over hours will not cluster)
 - Override threshold: 60% — too aggressive?
@@ -80,7 +80,7 @@ Check `examples/categories.json`:
 
 ### 5. Check provider-specific JSON parsing
 
-In `src/analyzer/client.ts`, Google Gemini responses may include markdown fences
+In `packages/core/src/analyzer/client.ts`, Google Gemini responses may include markdown fences
 (` ```json ``` `). The `extractJson()` helper strips these.
 
 **Fix:** If using Google, confirm `extractJson()` is stripping the fences correctly:
@@ -125,18 +125,18 @@ Compare `output-*/analysis_results.json` for divergent classifications.
 ### 8. Review the reclassification pass
 
 The second pass (reclassification) targets `unknown` images with `detail: 'high'`.
-Read `RECLASSIFY_PROMPT` in `src/analyzer/index.ts`.
+Read `RECLASSIFY_PROMPT` in `packages/core/src/analyzer/index.ts`.
 
 **Fix:** Add more discriminating language to `RECLASSIFY_PROMPT` for the categories that are
 being misclassified. Use the single-image test (step 6) to verify improvements.
 
 ## Diagnostic checklist summary
 
-| Check                             | File                       | Common fix            |
-| --------------------------------- | -------------------------- | --------------------- |
-| Category descriptions vague       | `examples/categories.json` | Rewrite descriptions  |
-| Overlapping categories            | `examples/categories.json` | Merge or clarify      |
-| Batch prompt too generic          | `src/analyzer/batch.ts`    | Add exclusion hints   |
-| Temporal consensus too aggressive | `src/analyzer/temporal.ts` | Add to `immune`       |
-| JSON parse errors (Google)        | `src/analyzer/client.ts`   | Check `extractJson()` |
-| Reclassify prompt weak            | `src/analyzer/index.ts`    | Strengthen prompt     |
+| Check                             | File                                     | Common fix            |
+| --------------------------------- | ---------------------------------------- | --------------------- |
+| Category descriptions vague       | `examples/categories.json`               | Rewrite descriptions  |
+| Overlapping categories            | `examples/categories.json`               | Merge or clarify      |
+| Batch prompt too generic          | `packages/core/src/analyzer/batch.ts`    | Add exclusion hints   |
+| Temporal consensus too aggressive | `packages/core/src/analyzer/temporal.ts` | Add to `immune`       |
+| JSON parse errors (Google)        | `packages/core/src/analyzer/client.ts`   | Check `extractJson()` |
+| Reclassify prompt weak            | `packages/core/src/analyzer/index.ts`    | Strengthen prompt     |

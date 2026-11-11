@@ -20,8 +20,8 @@ Use this skill when a user reports:
 
 ### 1. Read the current prompts
 
-Read `src/analyzer/batch.ts` → `buildBatchPrompt()` and
-`src/analyzer/index.ts` → `RECLASSIFY_PROMPT`.
+Read `packages/core/src/analyzer/batch.ts` → `buildBatchPrompt()` and
+`packages/core/src/analyzer/index.ts` → `RECLASSIFY_PROMPT`.
 
 Note the exact JSON response schema the prompts require:
 
@@ -34,7 +34,7 @@ Note the exact JSON response schema the prompts require:
 ```
 
 **Never change this schema** without a corresponding change to `parseAnalysisResult()` and `BatchEnvelopeSchema`.
-If prompt changes affect the Zod envelope shape, also bump `CACHE_SCHEMA_VERSION` in `src/types.ts` and add
+If prompt changes affect the Zod envelope shape, also bump `CACHE_SCHEMA_VERSION` in `packages/core/src/types.ts` and add
 a migration step in `packages/core/src/store/migrate.ts`.
 
 ### 2. Diagnose the specific confusion
@@ -61,7 +61,7 @@ Add an `examples` array to the category in `categories.json`:
 { "name": "bedroom", "description": "...", "examples": ["bed frame visible", "wardrobe"] }
 ```
 
-Update `buildCategoriesBlock()` in `src/analyzer/batch.ts` to include examples in the prompt
+Update `buildCategoriesBlock()` in `packages/core/src/analyzer/batch.ts` to include examples in the prompt
 output when present. The change must be backward-compatible (examples are optional).
 
 ### 5. Add domain-specific context to the batch prompt (last resort)
@@ -94,7 +94,7 @@ After any prompt change, run the contract test suite to verify the LLM still ret
 a valid `{ images: [...] }` envelope:
 
 ```bash
-CI_CONTRACT=1 npx vitest run tests/analyzer/client.contract.test.ts
+CI_CONTRACT=1 pnpm exec vitest run packages/core/tests/analyzer/client.contract.test.ts
 ```
 
 If you changed `buildBatchPrompt()` in a way that affects the expected response count,

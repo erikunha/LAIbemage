@@ -25,7 +25,7 @@ and after the entire run completes.
 Read the current interface definition:
 
 ```
-src/types.ts  →  search for "interface Plugin"
+packages/core/src/types.ts  →  search for "interface Plugin"
 ```
 
 Key facts:
@@ -133,8 +133,8 @@ Look for:
 
 ### Step 8 — Write unit tests
 
-Tests live in `tests/plugin/` (for the dispatcher) but plugin-specific logic should be
-tested in `tests/plugins/my-plugin.test.ts`.
+Tests live in `packages/core/tests/plugin/` (for the dispatcher) but plugin-specific logic should be
+tested in `packages/core/tests/plugin/`.
 
 Since `.mjs` files cannot be vi.mocked at import time, test the hook functions directly:
 

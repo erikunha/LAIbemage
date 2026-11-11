@@ -68,7 +68,7 @@ Tell the user:
 ## Technical context (for implementation questions)
 
 - Embedding vectors stored in `analysis_embeddings.index.json` as JSON float64 arrays
-- Cosine similarity via `cosineSimilarity()` in `src/search/index.ts`
-- `generateEmbeddings()` in `src/analyzer/embeddings.ts` handles provider routing
-- `searchSemantic()` and `searchKeyword()` in `src/search/query.ts`
+- Cosine similarity via `cosineSimilarity()` in `packages/core/src/search/index.ts`
+- `generateEmbeddings()` in `packages/core/src/analyzer/embeddings.ts` handles provider routing
+- `searchSemantic()` and `searchKeyword()` in `packages/core/src/search/query.ts`
 - `buildEmbeddingText()` builds: `"category: shortDescription. Elements: el1, el2. fullDescription"`

@@ -5,7 +5,7 @@ description: Use when a user wants to add support for a new LLM vision provider 
 
 # Skill: Add LLM Provider
 
-**Domain:** Extending `src/analyzer/client.ts` with a new LLM Vision provider
+**Domain:** Extending `packages/core/src/analyzer/client.ts` with a new LLM Vision provider
 
 ## When to use this skill
 
@@ -35,9 +35,9 @@ pnpm add <sdk-package>
 
 Add it to `package.json` under `dependencies` (not `devDependencies`).
 
-### 3. Update `src/types.ts` / `src/config/index.ts`
+### 3. Update `packages/core/src/types.ts` / `packages/core/src/config/index.ts`
 
-In `src/config/index.ts`:
+In `packages/core/src/config/index.ts`:
 
 ```typescript
 // Add the provider to the union type
@@ -69,7 +69,7 @@ if (config.provider === '<newprovider>' && !config.newProviderApiKey) {
 }
 ```
 
-### 4. Create `src/analyzer/providers/newprovider.ts`
+### 4. Create `packages/core/src/analyzer/providers/newprovider.ts`
 
 Create a new provider file following the existing pattern. This is the ONLY file that may import the new provider's SDK:
 
@@ -109,7 +109,7 @@ function createNewProviderClient(config: Config): LLMClient {
 }
 ```
 
-Then wire it into `src/analyzer/client.ts` by importing `createNewProviderClient` from `'./providers/newprovider.js'` and adding the new case to `createLLMClient()`:
+Then wire it into `packages/core/src/analyzer/client.ts` by importing `createNewProviderClient` from `'./providers/newprovider.js'` and adding the new case to `createLLMClient()`:
 
 ```typescript
 case '<newprovider>':
@@ -118,13 +118,13 @@ case '<newprovider>':
 
 ### 5. Update the CLI wiring
 
-In `src/cli/index.ts`, add the key flag:
+In `packages/cli/src/index.ts`, add the key flag:
 
 ```typescript
 .option('--new-provider-api-key <key>', 'API key for New Provider (or NEWPROVIDER_API_KEY env var)')
 ```
 
-In `src/cli/help.ts`, add the provider to the PROVIDERS section.
+In `packages/cli/src/help.ts`, add the provider to the PROVIDERS section.
 
 ### 6. Update `.env.example`
 
@@ -132,7 +132,7 @@ In `src/cli/help.ts`, add the provider to the PROVIDERS section.
 NEWPROVIDER_API_KEY=your_key_here
 ```
 
-### 7. Add quota error detection in `src/utils/retry.ts`
+### 7. Add quota error detection in `packages/core/src/utils/retry.ts`
 
 Add the provider's quota error fingerprint to `isQuotaError()`:
 
@@ -144,20 +144,20 @@ if (message.includes('<provider-specific error text>')) return true;
 ### 8. Update `AGENTS.md`
 
 - Add the new provider to the supported providers list in `AGENTS.md`
-- Update the `src/analyzer/client.ts` row in `AGENTS.md` module boundary table
+- Update the `packages/core/src/analyzer/client.ts` row in `AGENTS.md` module boundary table
 
 ### 9. Test
 
-- Add a unit test in `tests/analyzer/batch.test.ts` asserting the new provider's client is called
+- Add a unit test in `packages/core/tests/analyzer/batch.test.ts` asserting the new provider's client is called
 - Run `pnpm run typecheck && pnpm test && pnpm run lint`
 
 ## Example output (diff summary)
 
 ```
-src/config/index.ts        +15 lines  (new provider type, key, validation)
-src/analyzer/client.ts     +30 lines  (new factory + case in createLLMClient)
-src/cli/index.ts           +2 lines   (new CLI flag)
-src/cli/help.ts            +3 lines   (PROVIDERS section entry)
-src/utils/retry.ts         +2 lines   (quota error detection)
-.env.example               +1 line
+packages/core/src/config/index.ts      +15 lines  (new provider type, key, validation)
+packages/core/src/analyzer/client.ts   +30 lines  (new factory + case in createLLMClient)
+packages/cli/src/index.ts              +2 lines   (new CLI flag)
+packages/cli/src/help.ts               +3 lines   (PROVIDERS section entry)
+packages/core/src/utils/retry.ts       +2 lines   (quota error detection)
+.env.example                          +1 line
 ```

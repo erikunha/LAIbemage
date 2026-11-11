@@ -5,18 +5,18 @@
 | Status   | Accepted                |
 | Date     | 2026-11-10              |
 | Deciders | @erikunha |
-| Supersedes | `ROADMAP.md` "What we are not building" rows "GUI / web interface" and "HTTP server / REST API" (2026-05 roadmap, ROADMAP.md:566-567) |
+| Supersedes | `ROADMAP.md` "Historical record — v2.0" → the superseded row `"No GUI / no HTTP server" (ROADMAP 2026-05: "What we are not building")` (ROADMAP.md:57); the live exclusion list is "What we are not building (current)" (ROADMAP.md:147-155), which no longer carries the GUI / HTTP-server exclusions |
 
 ## Context
 
 The project (product name for the evolution: **Vision Lens**; repository
-`erikunha/LAIbemage`, published as the legacy `ai-image-labeling` package) is a feature-complete
-v2.0 CLI: seven vision-LLM
-providers, hybrid local/cloud routing, consensus, temporal sessions, text embeddings with
-keyword/semantic search, a plugin system, a published SDK and 361 green tests over a
-ports-and-adapters architecture. The 2026-05 roadmap closed with an explicit exclusion list:
-no GUI ("Not the audience") and no HTTP server ("A CLI tool that runs as a batch process has
-no need for a persistent HTTP server", ROADMAP.md:567).
+`erikunha/LAIbemage`, whose CLI bin was named `ai-image-labeling` before the rename) is a
+feature-complete v2.0 CLI: seven vision-LLM providers, hybrid local/cloud routing, consensus,
+temporal sessions, text embeddings with keyword/semantic search, a plugin system, a TypeScript
+SDK and 361 green tests over a ports-and-adapters architecture. The 2026-05 roadmap closed with an
+explicit exclusion list: no GUI and no HTTP server — both recorded as superseded by this ADR in the
+roadmap's "Historical record — v2.0" table (ROADMAP.md:57), and both absent from the current
+"What we are not building (current)" list (ROADMAP.md:147-155).
 
 The maintainer's 2026-11 strategy review redefined the goal: the project must demonstrate
 Applied AI Engineer, ML Engineer and Staff/Principal Software Engineering competence as one
@@ -38,7 +38,7 @@ combining visual data engineering, multimodal intelligence (visual embeddings fi
 classification, detection/segmentation later), training and experimentation, evaluation and
 optimization (empirical calibration, Pareto quality/cost/latency), human-in-the-loop review,
 agent-assisted investigation, and four equivalent surfaces — CLI (`vision-lens`, with
-`ai-image-labeling` kept as a compatibility alias through a deprecation window), HTTP API,
+`ai-image-labeling` kept as a compatibility alias inside the CLI package), HTTP API,
 Studio, and an MCP server.
 
 Delivery is phased (F0–F5), each phase ending in a demonstrable end-to-end slice:
@@ -78,8 +78,9 @@ schema — domain meaning belongs to the versioned ontology (spec 002).
   as `packages/core` — the pivot preserves the strongest prior investment instead of rewriting it.
 - Review, calibration and cost loops finally have UI and API surfaces, closing the data
   flywheel the CLI alone could only half-run.
-- CLI compatibility (`ai-image-labeling` bin) keeps every existing user and script working
-  through a documented deprecation window (spec 001).
+- CLI compatibility (`ai-image-labeling` bin, kept inside the CLI package as a compatibility
+  alias) keeps source installs and scripts working through a documented deprecation window
+  (spec 001).
 
 **Negative:**
 

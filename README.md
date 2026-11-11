@@ -13,9 +13,9 @@ AI-powered image classification, timestamp overlay, and sequential organization 
 > `ROADMAP.md`; work lands on the `feat/visual-lens` branch.
 >
 > **Binary names:** `vision-lens` is the canonical bin (`pnpm add -g @vision-lens/cli` → `vision-lens`).
-> The legacy `ai-image-labeling` bin keeps working through a deprecation window of two minor
-> versions — it prints one stderr deprecation line per run, silenced with `VISION_LENS_NO_DEPRECATION=1`.
-> Removal ships as a major version bump per semver; see CHANGELOG.md.
+> The legacy `ai-image-labeling` bin is kept inside the CLI package as a compatibility alias that
+> points at `vision-lens` — it prints one stderr deprecation line per run, silenced with
+> `VISION_LENS_NO_DEPRECATION=1`. See CHANGELOG.md.
 >
 > **npm packages:** the new identity publishes from the `@vision-lens` scope (`@vision-lens/cli`,
 > `@vision-lens/sdk`, …). Those workspace packages are **not published yet** — until they are,
@@ -39,7 +39,7 @@ Given a folder of unorganized images, `vision-lens`:
 6. Runs an optional self-critique pass to reclassify low-confidence results
 7. Optionally runs a cross-image linking pass to identify related image pairs
 8. Stamps a red timestamp (DD/MM/YYYY HH:MM) in the bottom-center of each photo
-9. Renames and exports as `NNN. Description dated DD-MM-YYYY.jpeg`
+9. Renames and exports as `NNN. Photo of <category> dated DD-MM-YYYY.jpeg`
 10. Writes `analysis_results.json` atomically so re-runs with `--skip-analysis` are free
 11. Generates HTML / CSV / XLSX / SQLite reports on request
 12. POSTs results to a webhook and/or uploads to cloud storage if configured
@@ -69,6 +69,7 @@ The `@vision-lens/*` packages are **not on npm yet**, so install from a clone:
 ```bash
 git clone https://github.com/erikunha/LAIbemage
 cd LAIbemage
+git checkout feat/visual-lens   # the monorepo layout lives on this branch, not on main
 pnpm install
 pnpm run build
 
@@ -77,8 +78,11 @@ cp .env.example .env
 # Edit .env — set OPENAI_API_KEY (or the key for your chosen provider)
 
 # Run (from the repo root)
-node packages/cli/dist/index.js --input ./my-photos --output ./sorted
+node packages/cli/dist/index.js --categories examples/categories.json --input ./my-photos --output ./sorted
 ```
+
+`--categories` is explicit because the built-in default taxonomy path is not resolvable from a
+monorepo checkout — a known bug, tracked separately.
 
 Once the packages are published, the global install becomes:
 
@@ -90,11 +94,14 @@ pnpm add -g @vision-lens/cli
 vision-lens --input ./my-photos --output ./sorted
 ```
 
-If you prefer not to install globally:
+And, once published, the same without installing:
 
 ```bash
 pnpm dlx @vision-lens/cli --input ./my-photos --output ./sorted
 ```
+
+Both forms need the `@vision-lens/*` packages on the npm registry first — until then, install from
+a clone as shown above.
 
 ### Provider-specific quick starts
 
@@ -108,19 +115,11 @@ vision-lens --provider anthropic --anthropic-api-key sk-ant-...
 # Google Gemini
 vision-lens --provider google --google-api-key AIza...
 
-# Ollama (local, no API key required)
-vision-lens --provider ollama --ollama-url http://localhost:11434
-
 # Hybrid: run Ollama locally, escalate low-confidence images to OpenAI
 vision-lens --provider hybrid \
   --local-model llava \
   --cloud-provider openai --api-key sk-... \
   --local-confidence-threshold 0.70
-
-# Azure OpenAI
-vision-lens --provider azure \
-  --azure-endpoint https://my-resource.openai.azure.com \
-  --azure-api-key <key>
 
 # AWS Bedrock
 vision-lens --provider bedrock \
@@ -134,6 +133,19 @@ vision-lens --provider vertex \
   --vertex-location us-central1
 ```
 
+Ollama and Azure accept their endpoint flags only on the `single` and `suggest-categories`
+subcommands, so use those when you need a custom URL or endpoint:
+
+```bash
+# Ollama (local, no API key required)
+vision-lens single 1 ./photo.jpg --provider ollama --ollama-url http://localhost:11434
+
+# Azure OpenAI
+vision-lens single 1 ./photo.jpg --provider azure \
+  --azure-endpoint https://my-resource.openai.azure.com \
+  --azure-api-key <key>
+```
+
 ---
 
 ## Provider feature matrix
@@ -143,7 +155,7 @@ vision-lens --provider vertex \
 | `openai` | Yes | `text-embedding-3-small` | Default provider |
 | `anthropic` | Yes | Falls back to OpenAI embeddings if `OPENAI_API_KEY` is set | |
 | `google` | No | `text-embedding-004` | |
-| `azure` | Yes | `text-embedding-3-small` via Azure endpoint | Requires `--azure-endpoint` |
+| `azure` | Yes | `text-embedding-3-small` via Azure endpoint | Requires an Azure endpoint (`AZURE_OPENAI_ENDPOINT`; `--azure-endpoint` on `single` / `suggest-categories`) |
 | `ollama` | No | `nomic-embed-text` | Runs fully locally |
 | `bedrock` | No | Falls back to OpenAI embeddings if key is set | AWS credentials required |
 | `vertex` | No | `text-embedding-004` | GCP project required |
@@ -161,9 +173,10 @@ vision-lens reorder                             # re-number output after manual 
 vision-lens single <number> <file>              # process one image with a custom sequence number
 vision-lens report                              # generate report from existing analysis_results.json
 vision-lens suggest-categories                  # sample N images and propose a categories.json taxonomy
-vision-lens search <query>                      # search classified images by semantic query or keyword
+vision-lens search --query <text>               # search classified images by semantic query or keyword
 vision-lens diff <before.json> <after.json>     # compare two analysis_results.json files
 vision-lens import-run <analysis_results.json>  # import a legacy run into the Vision Lens store
+vision-lens benchmark run|gate|report           # score a suite, gate it against a baseline, report an artifact
 ```
 
 ---
@@ -176,7 +189,7 @@ vision-lens import-run <analysis_results.json>  # import a legacy run into the V
 |---|---|---|---|
 | `-i, --input` | `<dir>` | Input directory with source images | `./input` |
 | `-o, --output` | `<dir>` | Output directory for processed files | `./output` |
-| `--categories` | `<file>` | Path to custom categories.json | `examples/categories.json` |
+| `--categories` | `<file>` | Path to custom categories.json | `examples/categories.json` (pass it explicitly — see [Quick start](#quick-start)) |
 | `--dry-run` | | Analyze without writing output files | `false` |
 | `--skip-analysis` | | Skip LLM analysis, use cached `analysis_results.json` | `false` |
 | `--force-skip-analysis` | | Skip analysis even if `categories.json` changed since last run | `false` |
@@ -190,15 +203,20 @@ vision-lens import-run <analysis_results.json>  # import a legacy run into the V
 | `--api-key` | `<key>` | OpenAI API key (overrides `OPENAI_API_KEY`) | — |
 | `--anthropic-api-key` | `<key>` | Anthropic API key (overrides `ANTHROPIC_API_KEY`) | — |
 | `--google-api-key` | `<key>` | Google AI API key (overrides `GOOGLE_API_KEY`) | — |
-| `--azure-endpoint` | `<url>` | Azure OpenAI endpoint URL | — |
-| `--azure-api-key` | `<key>` | Azure OpenAI API key | — |
-| `--ollama-url` | `<url>` | Ollama server URL | `http://localhost:11434` |
+| `--azure-endpoint` | `<url>` | Azure OpenAI endpoint URL — `single` / `suggest-categories` only | — |
+| `--azure-api-key` | `<key>` | Azure OpenAI API key — `single` / `suggest-categories` only | — |
+| `--ollama-url` | `<url>` | Ollama server URL — `single` / `suggest-categories` only | `http://localhost:11434` |
 | `--bedrock-region` | `<region>` | AWS region for Bedrock | `us-east-1` |
 | `--bedrock-access-key-id` | `<key>` | AWS access key ID for Bedrock | — |
 | `--bedrock-secret-access-key` | `<key>` | AWS secret access key for Bedrock | — |
 | `--vertex-project` | `<id>` | Google Cloud project ID for Vertex AI | — |
 | `--vertex-location` | `<location>` | Vertex AI region | `us-central1` |
 | `--model` | `<model>` | Model name (defaults: `gpt-4o` / `claude-opus-4-7` / `gemini-2.0-flash`) | — |
+
+`--azure-endpoint`, `--azure-api-key` and `--ollama-url` are **not** accepted by the root
+`vision-lens` command — they exist only on the `single` and `suggest-categories` subcommands. On a
+full run, configure Azure and Ollama through the `AZURE_OPENAI_ENDPOINT`, `AZURE_OPENAI_API_KEY` and
+`OLLAMA_URL` environment variables instead.
 
 ### Hybrid routing
 
@@ -225,7 +243,7 @@ vision-lens import-run <analysis_results.json>  # import a legacy run into the V
 | `--concurrency` | `<n>` | Concurrent API batch calls in-flight | `3` |
 | `--temporal-window` | `<minutes>` | Cluster window for temporal consensus voting | `5` |
 | `--consensus-threshold` | `<n>` | Majority ratio required for temporal override (0.5–1.0) | `0.6` |
-| `--dedupe-threshold` | `<n>` | Hamming distance threshold for burst dedup (0 = off, max 64) | `0` |
+| `--dedupe-threshold` | `<n>` | Hamming distance threshold for burst dedup — burst dedup is ON by default at Hamming distance ≤ 8; `0` turns it off (max 64) | `8` |
 | `--session-gap` | `<minutes>` | Split images into sessions at timestamp gaps larger than N minutes | — |
 | `--self-critique` | | Run a second LLM pass to reclassify suspicious results | `false` |
 | `--link` | | Run cross-image linking pass to identify related pairs | `false` |
@@ -244,7 +262,7 @@ vision-lens import-run <analysis_results.json>  # import a legacy run into the V
 | Flag | Argument | Description | Default |
 |---|---|---|---|
 | `--output-format` | `<fmt>` | Output format: `pretty` \| `json` \| `none` \| `csv` \| `xlsx` \| `sqlite` | `pretty` |
-| `--filename-template` | `<pattern>` | Output filename template — see [Filename template tokens](#filename-template-tokens) | `{n}. {description} dated {date}.{ext}` |
+| `--filename-template` | `<pattern>` | Output filename template — see [Filename template tokens](#filename-template-tokens) | `{n}. Photo of {category} dated {date}` |
 | `--output-bucket` | `<uri>` | Upload output to cloud storage: `s3://bucket/prefix`, `gs://bucket/prefix`, `azblob://container/prefix` | — |
 
 ### Integrations
@@ -287,19 +305,20 @@ The `--filename-template` flag accepts a pattern string. All tokens are replaced
 | `{n}` | 3-digit padded sequence number | `001`, `042` |
 | `{n:4}` | N-digit padded sequence number | `0001`, `0042` |
 | `{category}` | Normalized category name | `kitchen` |
-| `{description}` | Short description from LLM | `Clean kitchen with modern appliances` |
+| `{description}` | Short description from the LLM, slugified | `clean-kitchen-with-modern-appliances` |
 | `{date}` | Date as DD-MM-YYYY | `09-05-2026` |
 | `{date:FORMAT}` | Custom date format using tokens: `YYYY` `YY` `MM` `DD` `M` `D` | `2026-05-09` |
 | `{datetime}` | Date and time as DD-MM-YYYY_HH-MM | `09-05-2026_14-30` |
 | `{datetime:FORMAT}` | Custom datetime format using tokens: `YYYY` `YY` `MM` `DD` `HH` `mm` `ss` `M` `D` `H` `m` `s` | `2026-05-09T14-30-00` |
-| `{ext}` | File extension | `jpeg` |
 
-Default template: `{n}. {description} dated {date}.{ext}`
+The `.jpeg` extension is always appended — there is no `{ext}` token.
+
+Default template: `{n}. Photo of {category} dated {date}`
 
 Example with custom template:
 
 ```bash
-vision-lens --filename-template '{n:4}_{category}_{date:YYYY-MM-DD}.{ext}'
+vision-lens --filename-template '{n:4}_{category}_{date:YYYY-MM-DD}'
 # → 0001_kitchen_2026-05-09.jpeg
 ```
 
@@ -307,7 +326,7 @@ vision-lens --filename-template '{n:4}_{category}_{date:YYYY-MM-DD}.{ext}'
 
 ## Custom categories
 
-`vision-lens` is domain-agnostic — the classification taxonomy is entirely driven by `categories.json`. The default config is in `examples/categories.json`.
+`vision-lens` is domain-agnostic — the classification taxonomy is entirely driven by `categories.json`. A starter config lives in `examples/categories.json`; pass it explicitly with `--categories` (see [Quick start](#quick-start)).
 
 ```bash
 cp examples/categories-ecommerce.json my-categories.json
@@ -384,7 +403,7 @@ vision-lens --estimate --input ./photos
 CLI flags
   └─ Config (Zod-validated)
        └─ EXIF timestamps (p-limit 32 concurrent) → FileWithStats[]
-            └─ Perceptual hash dedup (dHash, if --dedupe-threshold > 0)
+            └─ Perceptual hash dedup (dHash, on by default — --dedupe-threshold, 0 disables)
                  └─ LLM Vision batch analysis → AnalysisResult[]
                  │    (or: --async → analysis_job.json → exit)
                  │    (or: --resume → poll → collect results)
@@ -406,16 +425,23 @@ Key modules:
 
 | Module | Role |
 |---|---|
-| `src/cli/` | Commander.js flag parsing only — no business logic |
-| `src/config/` | Single source of truth: CLI flags > env vars > `.env` > defaults |
-| `src/analyzer/` | LLM Vision calls, temporal consensus, dedup, async batch, self-critique, linking |
-| `src/analyzer/providers/` | One file per LLM provider — the only files that import provider SDKs |
-| `src/processor/` | Sharp: image resize, timestamp overlay, JPEG export |
-| `src/classifier/` | Pure, synchronous: category grouping, sorting, rules — no I/O |
-| `src/reviewer/` | Interactive TTY review loop |
-| `src/reporter/` | HTML, CSV, XLSX, SQLite report writers |
-| `src/plugin/` | Lifecycle hook dispatcher |
-| `src/utils/` | Logger, retry with backoff, progress bar, EXIF reader, cost calculator |
+| `packages/cli/src/index.ts` | Commander.js entry point and help text — the `vision-lens` bin and every subcommand |
+| `packages/core/src/config/` | Single source of truth: CLI flags > env vars > `.env` > defaults |
+| `packages/core/src/analyzer/` | LLM Vision calls, temporal consensus, dedup, async batch, self-critique, linking |
+| `packages/core/src/analyzer/providers/` | One file per LLM provider — the only files that import provider SDKs |
+| `packages/core/src/processor/` | Sharp: image resize, timestamp overlay, JPEG export |
+| `packages/core/src/classifier/` | Pure, synchronous: category grouping, sorting, rules — no I/O |
+| `packages/core/src/reviewer/` | Interactive TTY review loop |
+| `packages/core/src/reporter/` | HTML, CSV, XLSX, SQLite report writers |
+| `packages/core/src/plugin/` | Lifecycle hook dispatcher |
+| `packages/core/src/search/` | Semantic and keyword search over an analysed run |
+| `packages/core/src/benchmark/` | Benchmark runner, metrics, calibration and the release gate |
+| `packages/core/src/store/` | SQLite entity store, migrations and repositories |
+| `packages/core/src/utils/` | Logger, retry with backoff, progress bar, EXIF reader, cost calculator |
+| `packages/contracts/src/` | Zod domain entities, enums and the generated OpenAPI seed |
+| `packages/sdk/src/index.ts` | Public SDK exports (`@vision-lens/sdk`) |
+| `apps/api/`, `apps/studio/` | HTTP API and Studio surfaces (placeholders) |
+| `services/vision/`, `services/training/`, `services/agents/` | Python services: encoders + LanceDB, training recipes + MLflow, agent runtime |
 
 ---
 
@@ -453,25 +479,30 @@ await runBatch(config);
 ## Project structure
 
 ```
-src/
-  cli/             Commander.js entry point and help text
-  analyzer/        LLM Vision analysis, temporal consensus, dedup, async batch
-    providers/     One file per LLM provider (the only files that import LLM SDKs)
-  processor/       Sharp image processing: overlay + JPEG export
-  classifier/      Category grouping, sorting, and rules (pure, no I/O)
-  config/          Config loading and Zod schema validation
-  plugin/          Plugin loader and lifecycle hook dispatcher
-  reviewer/        Interactive review loop (--interactive)
-  reporter/        HTML, CSV, XLSX, SQLite report generation
-  utils/           Logger, retry, progress bar, EXIF reader, cost calculator
-  sdk.ts           Public SDK exports
-  index.ts         Top-level orchestration (runBatch, runReorder, runSingle)
-
-tests/             Vitest unit tests (mirrors src/ structure)
-scripts/           Fixture generation, legacy synthetic benchmark harness (unit fixture)
-examples/          Starter category configs (property, e-commerce, etc.)
-docs/              Plugin API reference, architecture notes
+packages/
+  core/             Domain logic: config, analyzer, processor, classifier, reviewer,
+                    reporter, plugin, search, benchmark, store, fs
+  cli/              Commander.js CLI — the `vision-lens` bin plus the deprecated
+                    `ai-image-labeling` compatibility bin
+  sdk/              Public TypeScript SDK (@vision-lens/sdk)
+  contracts/        Zod domain entities and the OpenAPI seed
+apps/
+  api/              HTTP API surface (placeholder)
+  studio/           Studio review surface (placeholder)
+services/
+  vision/           Python skeleton: encoders + LanceDB
+  training/         Python skeleton: training recipes + MLflow
+  agents/           Python skeleton: agent runtime
+benchmarks/         Benchmark fixtures and gold splits
+datasets/           Dataset registry (license, source, checksums)
+docs/               Architecture notes, ADRs, plugin API reference
+examples/           Starter category configs (property, e-commerce, etc.)
+scripts/            Fixture generation, benchmark harnesses, dataset tooling
+specs/              Local-only spec-kit specs (untracked, per ADR-010)
 ```
+
+Tests live next to the code they cover — `packages/*/tests/` and `apps/*/tests/`. There is no
+root-level `src/` or `tests/` tree.
 
 ---
 
@@ -480,6 +511,7 @@ docs/              Plugin API reference, architecture notes
 ```bash
 git clone https://github.com/erikunha/LAIbemage
 cd LAIbemage
+git checkout feat/visual-lens   # the monorepo layout lives on this branch, not on main
 pnpm install
 cp .env.example .env  # add at least one provider API key
 

@@ -25,7 +25,7 @@ versioning adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html)
 - Renamed to Vision Lens: the product name is now **Vision Lens** and the npm scope is
   `@vision-lens`, across all six packages (`cli`, `contracts`, `core`, `sdk`,
   `api-placeholder`, `studio-placeholder`).
-- The canonical CLI bin is now `vision-lens`; the `laib` bin is removed (it was never published).
+- The canonical CLI bin is now `vision-lens`; the previous short-form bin is removed (it was never published).
 - The environment variable prefix is now `VISION_LENS_` (`VISION_LENS_NO_DEPRECATION`,
   `VISION_LENS_DATASETS_DIR`, `VISION_LENS_BENCHMARK_MODEL`).
 - The store home is now `VISION_LENS_HOME`, defaulting to `~/.vision-lens/store.db`.
@@ -42,9 +42,11 @@ versioning adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html)
 
 ### Deprecated
 
-- The legacy `ai-image-labeling` bin: works unchanged through a deprecation window of two minor versions,
-  printing one stderr deprecation line per run (suppress with `VISION_LENS_NO_DEPRECATION=1`); removal
-  ships as a major version bump.
+- The legacy `ai-image-labeling` bin: kept **inside the (unpublished) CLI package** as a
+  compatibility alias that points at `vision-lens`, printing one stderr deprecation line per run
+  (suppress with `VISION_LENS_NO_DEPRECATION=1`). The package was never published to npm, so the
+  alias only affects source installs and local checkouts — there is no published deprecation window
+  to count down.
 
 ### Removed
 

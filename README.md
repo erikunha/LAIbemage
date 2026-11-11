@@ -78,11 +78,8 @@ cp .env.example .env
 # Edit .env — set OPENAI_API_KEY (or the key for your chosen provider)
 
 # Run (from the repo root)
-node packages/cli/dist/index.js --categories examples/categories.json --input ./my-photos --output ./sorted
+node packages/cli/dist/index.js --input ./my-photos --output ./sorted
 ```
-
-`--categories` is explicit because the built-in default taxonomy path is not resolvable from a
-monorepo checkout — a known bug, tracked separately.
 
 Once the packages are published, the global install becomes:
 
@@ -189,7 +186,7 @@ vision-lens benchmark run|gate|report           # score a suite, gate it against
 |---|---|---|---|
 | `-i, --input` | `<dir>` | Input directory with source images | `./input` |
 | `-o, --output` | `<dir>` | Output directory for processed files | `./output` |
-| `--categories` | `<file>` | Path to custom categories.json | `examples/categories.json` (pass it explicitly — see [Quick start](#quick-start)) |
+| `--categories` | `<file>` | Path to custom categories.json | Built-in default taxonomy (bundled in `@vision-lens/core`) |
 | `--dry-run` | | Analyze without writing output files | `false` |
 | `--skip-analysis` | | Skip LLM analysis, use cached `analysis_results.json` | `false` |
 | `--force-skip-analysis` | | Skip analysis even if `categories.json` changed since last run | `false` |
@@ -326,7 +323,7 @@ vision-lens --filename-template '{n:4}_{category}_{date:YYYY-MM-DD}'
 
 ## Custom categories
 
-`vision-lens` is domain-agnostic — the classification taxonomy is entirely driven by `categories.json`. A starter config lives in `examples/categories.json`; pass it explicitly with `--categories` (see [Quick start](#quick-start)).
+`vision-lens` is domain-agnostic — the classification taxonomy is entirely driven by `categories.json`. A starter config lives in `examples/categories.json` and ships as the built-in default; pass `--categories` to point at your own taxonomy.
 
 ```bash
 cp examples/categories-ecommerce.json my-categories.json

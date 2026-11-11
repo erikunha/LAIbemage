@@ -14,11 +14,15 @@
   //
   // The benchmark suite (spec 003) is covered for the same reason: the metrics,
   // calibration, split, registry, normalisation and runner/gate code is all new.
+  //
+  // The packaged default-taxonomy suite is covered because the copy it guards
+  // is new code shipped inside the package.
   "include": [
     "./types.test.ts",
     "./reporter/sqlite-missing.test.ts",
     "./store/**/*.test.ts",
     "./store/helpers.ts",
-    "./benchmark/**/*.test.ts"
+    "./benchmark/**/*.test.ts",
+    "./config/**/*.test.ts"
   ]
 }

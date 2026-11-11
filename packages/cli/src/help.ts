@@ -9,7 +9,9 @@ ${chalk.bold('USAGE')}
   vision-lens diff <before> <after> [--output-format json]
   vision-lens import-run <path> [--dry-run] [--db <path>]
   vision-lens suggest-categories [OPTIONS]
-  vision-lens serve [OPTIONS]
+  vision-lens search [--query <text> | --keyword <text>]
+  vision-lens report [--output <dir>] [--out <file>]
+  vision-lens benchmark run|gate|report [OPTIONS]
   vision-lens reorder
   vision-lens single <number> <file>
 

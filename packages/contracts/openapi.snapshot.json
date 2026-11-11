@@ -1,0 +1,3612 @@
+{
+  "openapi": "3.1.0",
+  "jsonSchemaDialect": "https://json-schema.org/draft/2020-12/schema",
+  "info": {
+    "title": "Master Vision",
+    "version": "1.0.0",
+    "description": "Master Vision — Visual Intelligence Engineering Workbench. Generated from @master-vision/contracts, the single source of truth for the domain model and the operations of the platform (constitution III, contracts-first). The entity schemas are served unchanged by the API service of spec 009."
+  },
+  "paths": {
+    "/assets": {
+      "get": {
+        "operationId": "spec002SkeletonListAssets",
+        "summary": "List assets",
+        "description": "SKELETON — the list operation of the entity CRUD surface. The HTTP API service is spec 009; this document only declares the shape.",
+        "tags": [
+          "Asset"
+        ],
+        "parameters": [
+          {
+            "name": "limit",
+            "in": "query",
+            "required": false,
+            "description": "Maximum number of items to return.",
+            "schema": {
+              "type": "integer",
+              "minimum": 1
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "The list of assets.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/Asset"
+                  }
+                }
+              }
+            }
+          },
+          "default": {
+            "description": "Error response — the error contract is defined by spec 009."
+          }
+        }
+      },
+      "post": {
+        "operationId": "spec002SkeletonCreateAsset",
+        "summary": "Create a asset",
+        "description": "SKELETON — the create operation of the entity CRUD surface. The HTTP API service is spec 009; this document only declares the shape.",
+        "tags": [
+          "Asset"
+        ],
+        "requestBody": {
+          "required": true,
+          "description": "The asset to create.",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/Asset"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "The created asset.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Asset"
+                }
+              }
+            }
+          },
+          "default": {
+            "description": "Error response — the error contract is defined by spec 009."
+          }
+        }
+      }
+    },
+    "/assets/{id}": {
+      "get": {
+        "operationId": "spec002SkeletonGetAsset",
+        "summary": "Get a asset",
+        "description": "SKELETON — the read operation of the entity CRUD surface. The HTTP API service is spec 009; this document only declares the shape.",
+        "tags": [
+          "Asset"
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "description": "Identifier of the asset.",
+            "schema": {
+              "$ref": "#/components/schemas/EntityId"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "The asset.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Asset"
+                }
+              }
+            }
+          },
+          "default": {
+            "description": "Error response — the error contract is defined by spec 009."
+          }
+        }
+      },
+      "put": {
+        "operationId": "spec002SkeletonUpdateAsset",
+        "summary": "Update a asset",
+        "description": "SKELETON — the replace operation of the entity CRUD surface. The HTTP API service is spec 009; this document only declares the shape.",
+        "tags": [
+          "Asset"
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "description": "Identifier of the asset.",
+            "schema": {
+              "$ref": "#/components/schemas/EntityId"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "description": "The new content of the asset.",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/Asset"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "The updated asset.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Asset"
+                }
+              }
+            }
+          },
+          "default": {
+            "description": "Error response — the error contract is defined by spec 009."
+          }
+        }
+      },
+      "delete": {
+        "operationId": "spec002SkeletonDeleteAsset",
+        "summary": "Delete a asset",
+        "description": "SKELETON — the delete operation of the entity CRUD surface. The HTTP API service is spec 009; this document only declares the shape.",
+        "tags": [
+          "Asset"
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "description": "Identifier of the asset.",
+            "schema": {
+              "$ref": "#/components/schemas/EntityId"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "The asset was deleted."
+          },
+          "default": {
+            "description": "Error response — the error contract is defined by spec 009."
+          }
+        }
+      }
+    },
+    "/capture-sessions": {
+      "get": {
+        "operationId": "spec002SkeletonListCaptureSessions",
+        "summary": "List capture-sessions",
+        "description": "SKELETON — the list operation of the entity CRUD surface. The HTTP API service is spec 009; this document only declares the shape.",
+        "tags": [
+          "CaptureSession"
+        ],
+        "parameters": [
+          {
+            "name": "limit",
+            "in": "query",
+            "required": false,
+            "description": "Maximum number of items to return.",
+            "schema": {
+              "type": "integer",
+              "minimum": 1
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "The list of capture-sessions.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/CaptureSession"
+                  }
+                }
+              }
+            }
+          },
+          "default": {
+            "description": "Error response — the error contract is defined by spec 009."
+          }
+        }
+      },
+      "post": {
+        "operationId": "spec002SkeletonCreateCaptureSession",
+        "summary": "Create a capture-session",
+        "description": "SKELETON — the create operation of the entity CRUD surface. The HTTP API service is spec 009; this document only declares the shape.",
+        "tags": [
+          "CaptureSession"
+        ],
+        "requestBody": {
+          "required": true,
+          "description": "The capture-session to create.",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CaptureSession"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "The created capture-session.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CaptureSession"
+                }
+              }
+            }
+          },
+          "default": {
+            "description": "Error response — the error contract is defined by spec 009."
+          }
+        }
+      }
+    },
+    "/capture-sessions/{id}": {
+      "get": {
+        "operationId": "spec002SkeletonGetCaptureSession",
+        "summary": "Get a capture-session",
+        "description": "SKELETON — the read operation of the entity CRUD surface. The HTTP API service is spec 009; this document only declares the shape.",
+        "tags": [
+          "CaptureSession"
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "description": "Identifier of the capture-session.",
+            "schema": {
+              "$ref": "#/components/schemas/EntityId"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "The capture-session.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CaptureSession"
+                }
+              }
+            }
+          },
+          "default": {
+            "description": "Error response — the error contract is defined by spec 009."
+          }
+        }
+      },
+      "put": {
+        "operationId": "spec002SkeletonUpdateCaptureSession",
+        "summary": "Update a capture-session",
+        "description": "SKELETON — the replace operation of the entity CRUD surface. The HTTP API service is spec 009; this document only declares the shape.",
+        "tags": [
+          "CaptureSession"
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "description": "Identifier of the capture-session.",
+            "schema": {
+              "$ref": "#/components/schemas/EntityId"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "description": "The new content of the capture-session.",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CaptureSession"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "The updated capture-session.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CaptureSession"
+                }
+              }
+            }
+          },
+          "default": {
+            "description": "Error response — the error contract is defined by spec 009."
+          }
+        }
+      },
+      "delete": {
+        "operationId": "spec002SkeletonDeleteCaptureSession",
+        "summary": "Delete a capture-session",
+        "description": "SKELETON — the delete operation of the entity CRUD surface. The HTTP API service is spec 009; this document only declares the shape.",
+        "tags": [
+          "CaptureSession"
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "description": "Identifier of the capture-session.",
+            "schema": {
+              "$ref": "#/components/schemas/EntityId"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "The capture-session was deleted."
+          },
+          "default": {
+            "description": "Error response — the error contract is defined by spec 009."
+          }
+        }
+      }
+    },
+    "/samples": {
+      "get": {
+        "operationId": "spec002SkeletonListSamples",
+        "summary": "List samples",
+        "description": "SKELETON — the list operation of the entity CRUD surface. The HTTP API service is spec 009; this document only declares the shape.",
+        "tags": [
+          "Sample"
+        ],
+        "parameters": [
+          {
+            "name": "limit",
+            "in": "query",
+            "required": false,
+            "description": "Maximum number of items to return.",
+            "schema": {
+              "type": "integer",
+              "minimum": 1
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "The list of samples.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/Sample"
+                  }
+                }
+              }
+            }
+          },
+          "default": {
+            "description": "Error response — the error contract is defined by spec 009."
+          }
+        }
+      },
+      "post": {
+        "operationId": "spec002SkeletonCreateSample",
+        "summary": "Create a sample",
+        "description": "SKELETON — the create operation of the entity CRUD surface. The HTTP API service is spec 009; this document only declares the shape.",
+        "tags": [
+          "Sample"
+        ],
+        "requestBody": {
+          "required": true,
+          "description": "The sample to create.",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/Sample"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "The created sample.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Sample"
+                }
+              }
+            }
+          },
+          "default": {
+            "description": "Error response — the error contract is defined by spec 009."
+          }
+        }
+      }
+    },
+    "/samples/{id}": {
+      "get": {
+        "operationId": "spec002SkeletonGetSample",
+        "summary": "Get a sample",
+        "description": "SKELETON — the read operation of the entity CRUD surface. The HTTP API service is spec 009; this document only declares the shape.",
+        "tags": [
+          "Sample"
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "description": "Identifier of the sample.",
+            "schema": {
+              "$ref": "#/components/schemas/EntityId"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "The sample.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Sample"
+                }
+              }
+            }
+          },
+          "default": {
+            "description": "Error response — the error contract is defined by spec 009."
+          }
+        }
+      },
+      "put": {
+        "operationId": "spec002SkeletonUpdateSample",
+        "summary": "Update a sample",
+        "description": "SKELETON — the replace operation of the entity CRUD surface. The HTTP API service is spec 009; this document only declares the shape.",
+        "tags": [
+          "Sample"
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "description": "Identifier of the sample.",
+            "schema": {
+              "$ref": "#/components/schemas/EntityId"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "description": "The new content of the sample.",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/Sample"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "The updated sample.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Sample"
+                }
+              }
+            }
+          },
+          "default": {
+            "description": "Error response — the error contract is defined by spec 009."
+          }
+        }
+      },
+      "delete": {
+        "operationId": "spec002SkeletonDeleteSample",
+        "summary": "Delete a sample",
+        "description": "SKELETON — the delete operation of the entity CRUD surface. The HTTP API service is spec 009; this document only declares the shape.",
+        "tags": [
+          "Sample"
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "description": "Identifier of the sample.",
+            "schema": {
+              "$ref": "#/components/schemas/EntityId"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "The sample was deleted."
+          },
+          "default": {
+            "description": "Error response — the error contract is defined by spec 009."
+          }
+        }
+      }
+    },
+    "/ontology-versions": {
+      "get": {
+        "operationId": "spec002SkeletonListOntologyVersions",
+        "summary": "List ontology-versions",
+        "description": "SKELETON — the list operation of the entity CRUD surface. The HTTP API service is spec 009; this document only declares the shape.",
+        "tags": [
+          "OntologyVersion"
+        ],
+        "parameters": [
+          {
+            "name": "limit",
+            "in": "query",
+            "required": false,
+            "description": "Maximum number of items to return.",
+            "schema": {
+              "type": "integer",
+              "minimum": 1
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "The list of ontology-versions.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/OntologyVersion"
+                  }
+                }
+              }
+            }
+          },
+          "default": {
+            "description": "Error response — the error contract is defined by spec 009."
+          }
+        }
+      },
+      "post": {
+        "operationId": "spec002SkeletonCreateOntologyVersion",
+        "summary": "Create a ontology-version",
+        "description": "SKELETON — the create operation of the entity CRUD surface. The HTTP API service is spec 009; this document only declares the shape.",
+        "tags": [
+          "OntologyVersion"
+        ],
+        "requestBody": {
+          "required": true,
+          "description": "The ontology-version to create.",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/OntologyVersion"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "The created ontology-version.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/OntologyVersion"
+                }
+              }
+            }
+          },
+          "default": {
+            "description": "Error response — the error contract is defined by spec 009."
+          }
+        }
+      }
+    },
+    "/ontology-versions/{id}": {
+      "get": {
+        "operationId": "spec002SkeletonGetOntologyVersion",
+        "summary": "Get a ontology-version",
+        "description": "SKELETON — the read operation of the entity CRUD surface. The HTTP API service is spec 009; this document only declares the shape.",
+        "tags": [
+          "OntologyVersion"
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "description": "Identifier of the ontology-version.",
+            "schema": {
+              "$ref": "#/components/schemas/EntityId"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "The ontology-version.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/OntologyVersion"
+                }
+              }
+            }
+          },
+          "default": {
+            "description": "Error response — the error contract is defined by spec 009."
+          }
+        }
+      },
+      "put": {
+        "operationId": "spec002SkeletonUpdateOntologyVersion",
+        "summary": "Update a ontology-version",
+        "description": "SKELETON — the replace operation of the entity CRUD surface. The HTTP API service is spec 009; this document only declares the shape.",
+        "tags": [
+          "OntologyVersion"
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "description": "Identifier of the ontology-version.",
+            "schema": {
+              "$ref": "#/components/schemas/EntityId"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "description": "The new content of the ontology-version.",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/OntologyVersion"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "The updated ontology-version.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/OntologyVersion"
+                }
+              }
+            }
+          },
+          "default": {
+            "description": "Error response — the error contract is defined by spec 009."
+          }
+        }
+      },
+      "delete": {
+        "operationId": "spec002SkeletonDeleteOntologyVersion",
+        "summary": "Delete a ontology-version",
+        "description": "SKELETON — the delete operation of the entity CRUD surface. The HTTP API service is spec 009; this document only declares the shape.",
+        "tags": [
+          "OntologyVersion"
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "description": "Identifier of the ontology-version.",
+            "schema": {
+              "$ref": "#/components/schemas/EntityId"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "The ontology-version was deleted."
+          },
+          "default": {
+            "description": "Error response — the error contract is defined by spec 009."
+          }
+        }
+      }
+    },
+    "/annotations": {
+      "get": {
+        "operationId": "spec002SkeletonListAnnotations",
+        "summary": "List annotations",
+        "description": "SKELETON — the list operation of the entity CRUD surface. The HTTP API service is spec 009; this document only declares the shape.",
+        "tags": [
+          "Annotation"
+        ],
+        "parameters": [
+          {
+            "name": "limit",
+            "in": "query",
+            "required": false,
+            "description": "Maximum number of items to return.",
+            "schema": {
+              "type": "integer",
+              "minimum": 1
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "The list of annotations.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/Annotation"
+                  }
+                }
+              }
+            }
+          },
+          "default": {
+            "description": "Error response — the error contract is defined by spec 009."
+          }
+        }
+      },
+      "post": {
+        "operationId": "spec002SkeletonCreateAnnotation",
+        "summary": "Create a annotation",
+        "description": "SKELETON — the create operation of the entity CRUD surface. The HTTP API service is spec 009; this document only declares the shape.",
+        "tags": [
+          "Annotation"
+        ],
+        "requestBody": {
+          "required": true,
+          "description": "The annotation to create.",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/Annotation"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "The created annotation.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Annotation"
+                }
+              }
+            }
+          },
+          "default": {
+            "description": "Error response — the error contract is defined by spec 009."
+          }
+        }
+      }
+    },
+    "/annotations/{id}": {
+      "get": {
+        "operationId": "spec002SkeletonGetAnnotation",
+        "summary": "Get a annotation",
+        "description": "SKELETON — the read operation of the entity CRUD surface. The HTTP API service is spec 009; this document only declares the shape.",
+        "tags": [
+          "Annotation"
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "description": "Identifier of the annotation.",
+            "schema": {
+              "$ref": "#/components/schemas/EntityId"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "The annotation.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Annotation"
+                }
+              }
+            }
+          },
+          "default": {
+            "description": "Error response — the error contract is defined by spec 009."
+          }
+        }
+      },
+      "put": {
+        "operationId": "spec002SkeletonUpdateAnnotation",
+        "summary": "Update a annotation",
+        "description": "SKELETON — the replace operation of the entity CRUD surface. The HTTP API service is spec 009; this document only declares the shape.",
+        "tags": [
+          "Annotation"
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "description": "Identifier of the annotation.",
+            "schema": {
+              "$ref": "#/components/schemas/EntityId"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "description": "The new content of the annotation.",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/Annotation"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "The updated annotation.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Annotation"
+                }
+              }
+            }
+          },
+          "default": {
+            "description": "Error response — the error contract is defined by spec 009."
+          }
+        }
+      },
+      "delete": {
+        "operationId": "spec002SkeletonDeleteAnnotation",
+        "summary": "Delete a annotation",
+        "description": "SKELETON — the delete operation of the entity CRUD surface. The HTTP API service is spec 009; this document only declares the shape.",
+        "tags": [
+          "Annotation"
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "description": "Identifier of the annotation.",
+            "schema": {
+              "$ref": "#/components/schemas/EntityId"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "The annotation was deleted."
+          },
+          "default": {
+            "description": "Error response — the error contract is defined by spec 009."
+          }
+        }
+      }
+    },
+    "/predictions": {
+      "get": {
+        "operationId": "spec002SkeletonListPredictions",
+        "summary": "List predictions",
+        "description": "SKELETON — the list operation of the entity CRUD surface. The HTTP API service is spec 009; this document only declares the shape.",
+        "tags": [
+          "Prediction"
+        ],
+        "parameters": [
+          {
+            "name": "limit",
+            "in": "query",
+            "required": false,
+            "description": "Maximum number of items to return.",
+            "schema": {
+              "type": "integer",
+              "minimum": 1
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "The list of predictions.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/Prediction"
+                  }
+                }
+              }
+            }
+          },
+          "default": {
+            "description": "Error response — the error contract is defined by spec 009."
+          }
+        }
+      },
+      "post": {
+        "operationId": "spec002SkeletonCreatePrediction",
+        "summary": "Create a prediction",
+        "description": "SKELETON — the create operation of the entity CRUD surface. The HTTP API service is spec 009; this document only declares the shape.",
+        "tags": [
+          "Prediction"
+        ],
+        "requestBody": {
+          "required": true,
+          "description": "The prediction to create.",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/Prediction"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "The created prediction.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Prediction"
+                }
+              }
+            }
+          },
+          "default": {
+            "description": "Error response — the error contract is defined by spec 009."
+          }
+        }
+      }
+    },
+    "/predictions/{id}": {
+      "get": {
+        "operationId": "spec002SkeletonGetPrediction",
+        "summary": "Get a prediction",
+        "description": "SKELETON — the read operation of the entity CRUD surface. The HTTP API service is spec 009; this document only declares the shape.",
+        "tags": [
+          "Prediction"
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "description": "Identifier of the prediction.",
+            "schema": {
+              "$ref": "#/components/schemas/EntityId"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "The prediction.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Prediction"
+                }
+              }
+            }
+          },
+          "default": {
+            "description": "Error response — the error contract is defined by spec 009."
+          }
+        }
+      },
+      "put": {
+        "operationId": "spec002SkeletonUpdatePrediction",
+        "summary": "Update a prediction",
+        "description": "SKELETON — the replace operation of the entity CRUD surface. The HTTP API service is spec 009; this document only declares the shape.",
+        "tags": [
+          "Prediction"
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "description": "Identifier of the prediction.",
+            "schema": {
+              "$ref": "#/components/schemas/EntityId"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "description": "The new content of the prediction.",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/Prediction"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "The updated prediction.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Prediction"
+                }
+              }
+            }
+          },
+          "default": {
+            "description": "Error response — the error contract is defined by spec 009."
+          }
+        }
+      },
+      "delete": {
+        "operationId": "spec002SkeletonDeletePrediction",
+        "summary": "Delete a prediction",
+        "description": "SKELETON — the delete operation of the entity CRUD surface. The HTTP API service is spec 009; this document only declares the shape.",
+        "tags": [
+          "Prediction"
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "description": "Identifier of the prediction.",
+            "schema": {
+              "$ref": "#/components/schemas/EntityId"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "The prediction was deleted."
+          },
+          "default": {
+            "description": "Error response — the error contract is defined by spec 009."
+          }
+        }
+      }
+    },
+    "/dataset-snapshots": {
+      "get": {
+        "operationId": "spec002SkeletonListDatasetSnapshots",
+        "summary": "List dataset-snapshots",
+        "description": "SKELETON — the list operation of the entity CRUD surface. The HTTP API service is spec 009; this document only declares the shape.",
+        "tags": [
+          "DatasetSnapshot"
+        ],
+        "parameters": [
+          {
+            "name": "limit",
+            "in": "query",
+            "required": false,
+            "description": "Maximum number of items to return.",
+            "schema": {
+              "type": "integer",
+              "minimum": 1
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "The list of dataset-snapshots.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/DatasetSnapshot"
+                  }
+                }
+              }
+            }
+          },
+          "default": {
+            "description": "Error response — the error contract is defined by spec 009."
+          }
+        }
+      },
+      "post": {
+        "operationId": "spec002SkeletonCreateDatasetSnapshot",
+        "summary": "Create a dataset-snapshot",
+        "description": "SKELETON — the create operation of the entity CRUD surface. The HTTP API service is spec 009; this document only declares the shape.",
+        "tags": [
+          "DatasetSnapshot"
+        ],
+        "requestBody": {
+          "required": true,
+          "description": "The dataset-snapshot to create.",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/DatasetSnapshot"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "The created dataset-snapshot.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DatasetSnapshot"
+                }
+              }
+            }
+          },
+          "default": {
+            "description": "Error response — the error contract is defined by spec 009."
+          }
+        }
+      }
+    },
+    "/dataset-snapshots/{id}": {
+      "get": {
+        "operationId": "spec002SkeletonGetDatasetSnapshot",
+        "summary": "Get a dataset-snapshot",
+        "description": "SKELETON — the read operation of the entity CRUD surface. The HTTP API service is spec 009; this document only declares the shape.",
+        "tags": [
+          "DatasetSnapshot"
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "description": "Identifier of the dataset-snapshot.",
+            "schema": {
+              "$ref": "#/components/schemas/EntityId"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "The dataset-snapshot.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DatasetSnapshot"
+                }
+              }
+            }
+          },
+          "default": {
+            "description": "Error response — the error contract is defined by spec 009."
+          }
+        }
+      },
+      "put": {
+        "operationId": "spec002SkeletonUpdateDatasetSnapshot",
+        "summary": "Update a dataset-snapshot",
+        "description": "SKELETON — the replace operation of the entity CRUD surface. The HTTP API service is spec 009; this document only declares the shape.",
+        "tags": [
+          "DatasetSnapshot"
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "description": "Identifier of the dataset-snapshot.",
+            "schema": {
+              "$ref": "#/components/schemas/EntityId"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "description": "The new content of the dataset-snapshot.",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/DatasetSnapshot"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "The updated dataset-snapshot.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DatasetSnapshot"
+                }
+              }
+            }
+          },
+          "default": {
+            "description": "Error response — the error contract is defined by spec 009."
+          }
+        }
+      },
+      "delete": {
+        "operationId": "spec002SkeletonDeleteDatasetSnapshot",
+        "summary": "Delete a dataset-snapshot",
+        "description": "SKELETON — the delete operation of the entity CRUD surface. The HTTP API service is spec 009; this document only declares the shape.",
+        "tags": [
+          "DatasetSnapshot"
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "description": "Identifier of the dataset-snapshot.",
+            "schema": {
+              "$ref": "#/components/schemas/EntityId"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "The dataset-snapshot was deleted."
+          },
+          "default": {
+            "description": "Error response — the error contract is defined by spec 009."
+          }
+        }
+      }
+    },
+    "/experiment-runs": {
+      "get": {
+        "operationId": "spec002SkeletonListExperimentRuns",
+        "summary": "List experiment-runs",
+        "description": "SKELETON — the list operation of the entity CRUD surface. The HTTP API service is spec 009; this document only declares the shape.",
+        "tags": [
+          "ExperimentRun"
+        ],
+        "parameters": [
+          {
+            "name": "limit",
+            "in": "query",
+            "required": false,
+            "description": "Maximum number of items to return.",
+            "schema": {
+              "type": "integer",
+              "minimum": 1
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "The list of experiment-runs.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/ExperimentRun"
+                  }
+                }
+              }
+            }
+          },
+          "default": {
+            "description": "Error response — the error contract is defined by spec 009."
+          }
+        }
+      },
+      "post": {
+        "operationId": "spec002SkeletonCreateExperimentRun",
+        "summary": "Create a experiment-run",
+        "description": "SKELETON — the create operation of the entity CRUD surface. The HTTP API service is spec 009; this document only declares the shape.",
+        "tags": [
+          "ExperimentRun"
+        ],
+        "requestBody": {
+          "required": true,
+          "description": "The experiment-run to create.",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ExperimentRun"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "The created experiment-run.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ExperimentRun"
+                }
+              }
+            }
+          },
+          "default": {
+            "description": "Error response — the error contract is defined by spec 009."
+          }
+        }
+      }
+    },
+    "/experiment-runs/{id}": {
+      "get": {
+        "operationId": "spec002SkeletonGetExperimentRun",
+        "summary": "Get a experiment-run",
+        "description": "SKELETON — the read operation of the entity CRUD surface. The HTTP API service is spec 009; this document only declares the shape.",
+        "tags": [
+          "ExperimentRun"
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "description": "Identifier of the experiment-run.",
+            "schema": {
+              "$ref": "#/components/schemas/EntityId"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "The experiment-run.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ExperimentRun"
+                }
+              }
+            }
+          },
+          "default": {
+            "description": "Error response — the error contract is defined by spec 009."
+          }
+        }
+      },
+      "put": {
+        "operationId": "spec002SkeletonUpdateExperimentRun",
+        "summary": "Update a experiment-run",
+        "description": "SKELETON — the replace operation of the entity CRUD surface. The HTTP API service is spec 009; this document only declares the shape.",
+        "tags": [
+          "ExperimentRun"
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "description": "Identifier of the experiment-run.",
+            "schema": {
+              "$ref": "#/components/schemas/EntityId"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "description": "The new content of the experiment-run.",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ExperimentRun"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "The updated experiment-run.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ExperimentRun"
+                }
+              }
+            }
+          },
+          "default": {
+            "description": "Error response — the error contract is defined by spec 009."
+          }
+        }
+      },
+      "delete": {
+        "operationId": "spec002SkeletonDeleteExperimentRun",
+        "summary": "Delete a experiment-run",
+        "description": "SKELETON — the delete operation of the entity CRUD surface. The HTTP API service is spec 009; this document only declares the shape.",
+        "tags": [
+          "ExperimentRun"
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "description": "Identifier of the experiment-run.",
+            "schema": {
+              "$ref": "#/components/schemas/EntityId"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "The experiment-run was deleted."
+          },
+          "default": {
+            "description": "Error response — the error contract is defined by spec 009."
+          }
+        }
+      }
+    },
+    "/model-versions": {
+      "get": {
+        "operationId": "spec002SkeletonListModelVersions",
+        "summary": "List model-versions",
+        "description": "SKELETON — the list operation of the entity CRUD surface. The HTTP API service is spec 009; this document only declares the shape.",
+        "tags": [
+          "ModelVersion"
+        ],
+        "parameters": [
+          {
+            "name": "limit",
+            "in": "query",
+            "required": false,
+            "description": "Maximum number of items to return.",
+            "schema": {
+              "type": "integer",
+              "minimum": 1
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "The list of model-versions.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/ModelVersion"
+                  }
+                }
+              }
+            }
+          },
+          "default": {
+            "description": "Error response — the error contract is defined by spec 009."
+          }
+        }
+      },
+      "post": {
+        "operationId": "spec002SkeletonCreateModelVersion",
+        "summary": "Create a model-version",
+        "description": "SKELETON — the create operation of the entity CRUD surface. The HTTP API service is spec 009; this document only declares the shape.",
+        "tags": [
+          "ModelVersion"
+        ],
+        "requestBody": {
+          "required": true,
+          "description": "The model-version to create.",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ModelVersion"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "The created model-version.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ModelVersion"
+                }
+              }
+            }
+          },
+          "default": {
+            "description": "Error response — the error contract is defined by spec 009."
+          }
+        }
+      }
+    },
+    "/model-versions/{id}": {
+      "get": {
+        "operationId": "spec002SkeletonGetModelVersion",
+        "summary": "Get a model-version",
+        "description": "SKELETON — the read operation of the entity CRUD surface. The HTTP API service is spec 009; this document only declares the shape.",
+        "tags": [
+          "ModelVersion"
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "description": "Identifier of the model-version.",
+            "schema": {
+              "$ref": "#/components/schemas/EntityId"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "The model-version.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ModelVersion"
+                }
+              }
+            }
+          },
+          "default": {
+            "description": "Error response — the error contract is defined by spec 009."
+          }
+        }
+      },
+      "put": {
+        "operationId": "spec002SkeletonUpdateModelVersion",
+        "summary": "Update a model-version",
+        "description": "SKELETON — the replace operation of the entity CRUD surface. The HTTP API service is spec 009; this document only declares the shape.",
+        "tags": [
+          "ModelVersion"
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "description": "Identifier of the model-version.",
+            "schema": {
+              "$ref": "#/components/schemas/EntityId"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "description": "The new content of the model-version.",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ModelVersion"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "The updated model-version.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ModelVersion"
+                }
+              }
+            }
+          },
+          "default": {
+            "description": "Error response — the error contract is defined by spec 009."
+          }
+        }
+      },
+      "delete": {
+        "operationId": "spec002SkeletonDeleteModelVersion",
+        "summary": "Delete a model-version",
+        "description": "SKELETON — the delete operation of the entity CRUD surface. The HTTP API service is spec 009; this document only declares the shape.",
+        "tags": [
+          "ModelVersion"
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "description": "Identifier of the model-version.",
+            "schema": {
+              "$ref": "#/components/schemas/EntityId"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "The model-version was deleted."
+          },
+          "default": {
+            "description": "Error response — the error contract is defined by spec 009."
+          }
+        }
+      }
+    },
+    "/evaluation-runs": {
+      "get": {
+        "operationId": "spec002SkeletonListEvaluationRuns",
+        "summary": "List evaluation-runs",
+        "description": "SKELETON — the list operation of the entity CRUD surface. The HTTP API service is spec 009; this document only declares the shape.",
+        "tags": [
+          "EvaluationRun"
+        ],
+        "parameters": [
+          {
+            "name": "limit",
+            "in": "query",
+            "required": false,
+            "description": "Maximum number of items to return.",
+            "schema": {
+              "type": "integer",
+              "minimum": 1
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "The list of evaluation-runs.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/EvaluationRun"
+                  }
+                }
+              }
+            }
+          },
+          "default": {
+            "description": "Error response — the error contract is defined by spec 009."
+          }
+        }
+      },
+      "post": {
+        "operationId": "spec002SkeletonCreateEvaluationRun",
+        "summary": "Create a evaluation-run",
+        "description": "SKELETON — the create operation of the entity CRUD surface. The HTTP API service is spec 009; this document only declares the shape.",
+        "tags": [
+          "EvaluationRun"
+        ],
+        "requestBody": {
+          "required": true,
+          "description": "The evaluation-run to create.",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/EvaluationRun"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "The created evaluation-run.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/EvaluationRun"
+                }
+              }
+            }
+          },
+          "default": {
+            "description": "Error response — the error contract is defined by spec 009."
+          }
+        }
+      }
+    },
+    "/evaluation-runs/{id}": {
+      "get": {
+        "operationId": "spec002SkeletonGetEvaluationRun",
+        "summary": "Get a evaluation-run",
+        "description": "SKELETON — the read operation of the entity CRUD surface. The HTTP API service is spec 009; this document only declares the shape.",
+        "tags": [
+          "EvaluationRun"
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "description": "Identifier of the evaluation-run.",
+            "schema": {
+              "$ref": "#/components/schemas/EntityId"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "The evaluation-run.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/EvaluationRun"
+                }
+              }
+            }
+          },
+          "default": {
+            "description": "Error response — the error contract is defined by spec 009."
+          }
+        }
+      },
+      "put": {
+        "operationId": "spec002SkeletonUpdateEvaluationRun",
+        "summary": "Update a evaluation-run",
+        "description": "SKELETON — the replace operation of the entity CRUD surface. The HTTP API service is spec 009; this document only declares the shape.",
+        "tags": [
+          "EvaluationRun"
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "description": "Identifier of the evaluation-run.",
+            "schema": {
+              "$ref": "#/components/schemas/EntityId"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "description": "The new content of the evaluation-run.",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/EvaluationRun"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "The updated evaluation-run.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/EvaluationRun"
+                }
+              }
+            }
+          },
+          "default": {
+            "description": "Error response — the error contract is defined by spec 009."
+          }
+        }
+      },
+      "delete": {
+        "operationId": "spec002SkeletonDeleteEvaluationRun",
+        "summary": "Delete a evaluation-run",
+        "description": "SKELETON — the delete operation of the entity CRUD surface. The HTTP API service is spec 009; this document only declares the shape.",
+        "tags": [
+          "EvaluationRun"
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "description": "Identifier of the evaluation-run.",
+            "schema": {
+              "$ref": "#/components/schemas/EntityId"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "The evaluation-run was deleted."
+          },
+          "default": {
+            "description": "Error response — the error contract is defined by spec 009."
+          }
+        }
+      }
+    },
+    "/deployments": {
+      "get": {
+        "operationId": "spec002SkeletonListDeployments",
+        "summary": "List deployments",
+        "description": "SKELETON — the list operation of the entity CRUD surface. The HTTP API service is spec 009; this document only declares the shape.",
+        "tags": [
+          "Deployment"
+        ],
+        "parameters": [
+          {
+            "name": "limit",
+            "in": "query",
+            "required": false,
+            "description": "Maximum number of items to return.",
+            "schema": {
+              "type": "integer",
+              "minimum": 1
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "The list of deployments.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/Deployment"
+                  }
+                }
+              }
+            }
+          },
+          "default": {
+            "description": "Error response — the error contract is defined by spec 009."
+          }
+        }
+      },
+      "post": {
+        "operationId": "spec002SkeletonCreateDeployment",
+        "summary": "Create a deployment",
+        "description": "SKELETON — the create operation of the entity CRUD surface. The HTTP API service is spec 009; this document only declares the shape.",
+        "tags": [
+          "Deployment"
+        ],
+        "requestBody": {
+          "required": true,
+          "description": "The deployment to create.",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/Deployment"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "The created deployment.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Deployment"
+                }
+              }
+            }
+          },
+          "default": {
+            "description": "Error response — the error contract is defined by spec 009."
+          }
+        }
+      }
+    },
+    "/deployments/{id}": {
+      "get": {
+        "operationId": "spec002SkeletonGetDeployment",
+        "summary": "Get a deployment",
+        "description": "SKELETON — the read operation of the entity CRUD surface. The HTTP API service is spec 009; this document only declares the shape.",
+        "tags": [
+          "Deployment"
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "description": "Identifier of the deployment.",
+            "schema": {
+              "$ref": "#/components/schemas/EntityId"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "The deployment.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Deployment"
+                }
+              }
+            }
+          },
+          "default": {
+            "description": "Error response — the error contract is defined by spec 009."
+          }
+        }
+      },
+      "put": {
+        "operationId": "spec002SkeletonUpdateDeployment",
+        "summary": "Update a deployment",
+        "description": "SKELETON — the replace operation of the entity CRUD surface. The HTTP API service is spec 009; this document only declares the shape.",
+        "tags": [
+          "Deployment"
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "description": "Identifier of the deployment.",
+            "schema": {
+              "$ref": "#/components/schemas/EntityId"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "description": "The new content of the deployment.",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/Deployment"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "The updated deployment.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Deployment"
+                }
+              }
+            }
+          },
+          "default": {
+            "description": "Error response — the error contract is defined by spec 009."
+          }
+        }
+      },
+      "delete": {
+        "operationId": "spec002SkeletonDeleteDeployment",
+        "summary": "Delete a deployment",
+        "description": "SKELETON — the delete operation of the entity CRUD surface. The HTTP API service is spec 009; this document only declares the shape.",
+        "tags": [
+          "Deployment"
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "description": "Identifier of the deployment.",
+            "schema": {
+              "$ref": "#/components/schemas/EntityId"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "The deployment was deleted."
+          },
+          "default": {
+            "description": "Error response — the error contract is defined by spec 009."
+          }
+        }
+      }
+    },
+    "/feedback-events": {
+      "get": {
+        "operationId": "spec002SkeletonListFeedbackEvents",
+        "summary": "List feedback-events",
+        "description": "SKELETON — the list operation of the entity CRUD surface. The HTTP API service is spec 009; this document only declares the shape.",
+        "tags": [
+          "FeedbackEvent"
+        ],
+        "parameters": [
+          {
+            "name": "limit",
+            "in": "query",
+            "required": false,
+            "description": "Maximum number of items to return.",
+            "schema": {
+              "type": "integer",
+              "minimum": 1
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "The list of feedback-events.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/FeedbackEvent"
+                  }
+                }
+              }
+            }
+          },
+          "default": {
+            "description": "Error response — the error contract is defined by spec 009."
+          }
+        }
+      },
+      "post": {
+        "operationId": "spec002SkeletonCreateFeedbackEvent",
+        "summary": "Create a feedback-event",
+        "description": "SKELETON — the create operation of the entity CRUD surface. The HTTP API service is spec 009; this document only declares the shape.",
+        "tags": [
+          "FeedbackEvent"
+        ],
+        "requestBody": {
+          "required": true,
+          "description": "The feedback-event to create.",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/FeedbackEvent"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "The created feedback-event.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/FeedbackEvent"
+                }
+              }
+            }
+          },
+          "default": {
+            "description": "Error response — the error contract is defined by spec 009."
+          }
+        }
+      }
+    },
+    "/feedback-events/{id}": {
+      "get": {
+        "operationId": "spec002SkeletonGetFeedbackEvent",
+        "summary": "Get a feedback-event",
+        "description": "SKELETON — the read operation of the entity CRUD surface. The HTTP API service is spec 009; this document only declares the shape.",
+        "tags": [
+          "FeedbackEvent"
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "description": "Identifier of the feedback-event.",
+            "schema": {
+              "$ref": "#/components/schemas/EntityId"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "The feedback-event.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/FeedbackEvent"
+                }
+              }
+            }
+          },
+          "default": {
+            "description": "Error response — the error contract is defined by spec 009."
+          }
+        }
+      },
+      "put": {
+        "operationId": "spec002SkeletonUpdateFeedbackEvent",
+        "summary": "Update a feedback-event",
+        "description": "SKELETON — the replace operation of the entity CRUD surface. The HTTP API service is spec 009; this document only declares the shape.",
+        "tags": [
+          "FeedbackEvent"
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "description": "Identifier of the feedback-event.",
+            "schema": {
+              "$ref": "#/components/schemas/EntityId"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "description": "The new content of the feedback-event.",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/FeedbackEvent"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "The updated feedback-event.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/FeedbackEvent"
+                }
+              }
+            }
+          },
+          "default": {
+            "description": "Error response — the error contract is defined by spec 009."
+          }
+        }
+      },
+      "delete": {
+        "operationId": "spec002SkeletonDeleteFeedbackEvent",
+        "summary": "Delete a feedback-event",
+        "description": "SKELETON — the delete operation of the entity CRUD surface. The HTTP API service is spec 009; this document only declares the shape.",
+        "tags": [
+          "FeedbackEvent"
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "description": "Identifier of the feedback-event.",
+            "schema": {
+              "$ref": "#/components/schemas/EntityId"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "The feedback-event was deleted."
+          },
+          "default": {
+            "description": "Error response — the error contract is defined by spec 009."
+          }
+        }
+      }
+    },
+    "/agent-runs": {
+      "get": {
+        "operationId": "spec002SkeletonListAgentRuns",
+        "summary": "List agent-runs",
+        "description": "SKELETON — the list operation of the entity CRUD surface. The HTTP API service is spec 009; this document only declares the shape.",
+        "tags": [
+          "AgentRun"
+        ],
+        "parameters": [
+          {
+            "name": "limit",
+            "in": "query",
+            "required": false,
+            "description": "Maximum number of items to return.",
+            "schema": {
+              "type": "integer",
+              "minimum": 1
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "The list of agent-runs.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/AgentRun"
+                  }
+                }
+              }
+            }
+          },
+          "default": {
+            "description": "Error response — the error contract is defined by spec 009."
+          }
+        }
+      },
+      "post": {
+        "operationId": "spec002SkeletonCreateAgentRun",
+        "summary": "Create a agent-run",
+        "description": "SKELETON — the create operation of the entity CRUD surface. The HTTP API service is spec 009; this document only declares the shape.",
+        "tags": [
+          "AgentRun"
+        ],
+        "requestBody": {
+          "required": true,
+          "description": "The agent-run to create.",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AgentRun"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "The created agent-run.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AgentRun"
+                }
+              }
+            }
+          },
+          "default": {
+            "description": "Error response — the error contract is defined by spec 009."
+          }
+        }
+      }
+    },
+    "/agent-runs/{id}": {
+      "get": {
+        "operationId": "spec002SkeletonGetAgentRun",
+        "summary": "Get a agent-run",
+        "description": "SKELETON — the read operation of the entity CRUD surface. The HTTP API service is spec 009; this document only declares the shape.",
+        "tags": [
+          "AgentRun"
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "description": "Identifier of the agent-run.",
+            "schema": {
+              "$ref": "#/components/schemas/EntityId"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "The agent-run.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AgentRun"
+                }
+              }
+            }
+          },
+          "default": {
+            "description": "Error response — the error contract is defined by spec 009."
+          }
+        }
+      },
+      "put": {
+        "operationId": "spec002SkeletonUpdateAgentRun",
+        "summary": "Update a agent-run",
+        "description": "SKELETON — the replace operation of the entity CRUD surface. The HTTP API service is spec 009; this document only declares the shape.",
+        "tags": [
+          "AgentRun"
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "description": "Identifier of the agent-run.",
+            "schema": {
+              "$ref": "#/components/schemas/EntityId"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "description": "The new content of the agent-run.",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AgentRun"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "The updated agent-run.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AgentRun"
+                }
+              }
+            }
+          },
+          "default": {
+            "description": "Error response — the error contract is defined by spec 009."
+          }
+        }
+      },
+      "delete": {
+        "operationId": "spec002SkeletonDeleteAgentRun",
+        "summary": "Delete a agent-run",
+        "description": "SKELETON — the delete operation of the entity CRUD surface. The HTTP API service is spec 009; this document only declares the shape.",
+        "tags": [
+          "AgentRun"
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "description": "Identifier of the agent-run.",
+            "schema": {
+              "$ref": "#/components/schemas/EntityId"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "The agent-run was deleted."
+          },
+          "default": {
+            "description": "Error response — the error contract is defined by spec 009."
+          }
+        }
+      }
+    },
+    "/derived-artifacts": {
+      "get": {
+        "operationId": "spec002SkeletonListDerivedArtifacts",
+        "summary": "List derived-artifacts",
+        "description": "SKELETON — the list operation of the entity CRUD surface. The HTTP API service is spec 009; this document only declares the shape.",
+        "tags": [
+          "DerivedArtifact"
+        ],
+        "parameters": [
+          {
+            "name": "limit",
+            "in": "query",
+            "required": false,
+            "description": "Maximum number of items to return.",
+            "schema": {
+              "type": "integer",
+              "minimum": 1
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "The list of derived-artifacts.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/DerivedArtifact"
+                  }
+                }
+              }
+            }
+          },
+          "default": {
+            "description": "Error response — the error contract is defined by spec 009."
+          }
+        }
+      },
+      "post": {
+        "operationId": "spec002SkeletonCreateDerivedArtifact",
+        "summary": "Create a derived-artifact",
+        "description": "SKELETON — the create operation of the entity CRUD surface. The HTTP API service is spec 009; this document only declares the shape.",
+        "tags": [
+          "DerivedArtifact"
+        ],
+        "requestBody": {
+          "required": true,
+          "description": "The derived-artifact to create.",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/DerivedArtifact"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "The created derived-artifact.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DerivedArtifact"
+                }
+              }
+            }
+          },
+          "default": {
+            "description": "Error response — the error contract is defined by spec 009."
+          }
+        }
+      }
+    },
+    "/derived-artifacts/{id}": {
+      "get": {
+        "operationId": "spec002SkeletonGetDerivedArtifact",
+        "summary": "Get a derived-artifact",
+        "description": "SKELETON — the read operation of the entity CRUD surface. The HTTP API service is spec 009; this document only declares the shape.",
+        "tags": [
+          "DerivedArtifact"
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "description": "Identifier of the derived-artifact.",
+            "schema": {
+              "$ref": "#/components/schemas/EntityId"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "The derived-artifact.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DerivedArtifact"
+                }
+              }
+            }
+          },
+          "default": {
+            "description": "Error response — the error contract is defined by spec 009."
+          }
+        }
+      },
+      "put": {
+        "operationId": "spec002SkeletonUpdateDerivedArtifact",
+        "summary": "Update a derived-artifact",
+        "description": "SKELETON — the replace operation of the entity CRUD surface. The HTTP API service is spec 009; this document only declares the shape.",
+        "tags": [
+          "DerivedArtifact"
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "description": "Identifier of the derived-artifact.",
+            "schema": {
+              "$ref": "#/components/schemas/EntityId"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "description": "The new content of the derived-artifact.",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/DerivedArtifact"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "The updated derived-artifact.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DerivedArtifact"
+                }
+              }
+            }
+          },
+          "default": {
+            "description": "Error response — the error contract is defined by spec 009."
+          }
+        }
+      },
+      "delete": {
+        "operationId": "spec002SkeletonDeleteDerivedArtifact",
+        "summary": "Delete a derived-artifact",
+        "description": "SKELETON — the delete operation of the entity CRUD surface. The HTTP API service is spec 009; this document only declares the shape.",
+        "tags": [
+          "DerivedArtifact"
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "description": "Identifier of the derived-artifact.",
+            "schema": {
+              "$ref": "#/components/schemas/EntityId"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "The derived-artifact was deleted."
+          },
+          "default": {
+            "description": "Error response — the error contract is defined by spec 009."
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "EntityId": {
+        "title": "EntityId",
+        "description": "Identity of an entity: a UUIDv7 (time-ordered, index-friendly).",
+        "type": "string",
+        "format": "uuid",
+        "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-7[0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12})$"
+      },
+      "Timestamp": {
+        "title": "Timestamp",
+        "description": "Point in time an event was recorded, with an explicit UTC offset.",
+        "type": "string",
+        "format": "date-time",
+        "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d(?::[0-5]\\d(?:\\.\\d+)?)?(?:Z|([+-](?:[01]\\d|2[0-3]):[0-5]\\d)))$"
+      },
+      "Sha256": {
+        "title": "Sha256",
+        "description": "Content hash of a file or of a hashed payload: 64 lowercase hex characters.",
+        "type": "string",
+        "pattern": "^[0-9a-f]{64}$"
+      },
+      "Region": {
+        "title": "Region",
+        "description": "Axis-aligned bounding box in the pixel space of the source asset.",
+        "type": "object",
+        "properties": {
+          "x": {
+            "type": "integer",
+            "minimum": 0
+          },
+          "y": {
+            "type": "integer",
+            "minimum": 0
+          },
+          "width": {
+            "type": "integer",
+            "exclusiveMinimum": 0
+          },
+          "height": {
+            "type": "integer",
+            "exclusiveMinimum": 0
+          }
+        },
+        "required": [
+          "x",
+          "y",
+          "width",
+          "height"
+        ],
+        "additionalProperties": false
+      },
+      "JsonValue": {
+        "title": "JsonValue",
+        "description": "An arbitrary JSON value: a string, number, boolean, null, array or object.",
+        "anyOf": [
+          {
+            "type": "string"
+          },
+          {
+            "type": "number"
+          },
+          {
+            "type": "boolean"
+          },
+          {
+            "type": "null"
+          },
+          {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/JsonValue"
+            }
+          },
+          {
+            "type": "object",
+            "additionalProperties": {
+              "$ref": "#/components/schemas/JsonValue"
+            },
+            "propertyNames": {
+              "type": "string"
+            }
+          }
+        ]
+      },
+      "HumanActor": {
+        "title": "HumanActor",
+        "description": "A human produced this record.",
+        "type": "object",
+        "properties": {
+          "kind": {
+            "type": "string",
+            "const": "human"
+          },
+          "ref": {
+            "type": "string",
+            "minLength": 1
+          },
+          "displayName": {
+            "type": "string",
+            "minLength": 1
+          }
+        },
+        "required": [
+          "kind",
+          "ref"
+        ],
+        "additionalProperties": false
+      },
+      "ModelActor": {
+        "title": "ModelActor",
+        "description": "A model produced this record.",
+        "type": "object",
+        "properties": {
+          "kind": {
+            "type": "string",
+            "const": "model"
+          },
+          "ref": {
+            "type": "string",
+            "pattern": "^model:[^@\\s]+(@[^@\\s]+)?$"
+          },
+          "version": {
+            "type": "string",
+            "minLength": 1
+          }
+        },
+        "required": [
+          "kind",
+          "ref",
+          "version"
+        ],
+        "additionalProperties": false
+      },
+      "AgentActor": {
+        "title": "AgentActor",
+        "description": "An agent produced this record.",
+        "type": "object",
+        "properties": {
+          "kind": {
+            "type": "string",
+            "const": "agent"
+          },
+          "ref": {
+            "type": "string",
+            "minLength": 1
+          },
+          "agentRunId": {
+            "$ref": "#/components/schemas/EntityId"
+          }
+        },
+        "required": [
+          "kind",
+          "ref"
+        ],
+        "additionalProperties": false
+      },
+      "Actor": {
+        "title": "Actor",
+        "description": "Any producer of a record: a human, a model or an agent.",
+        "oneOf": [
+          {
+            "$ref": "#/components/schemas/HumanActor"
+          },
+          {
+            "$ref": "#/components/schemas/ModelActor"
+          },
+          {
+            "$ref": "#/components/schemas/AgentActor"
+          }
+        ],
+        "discriminator": {
+          "propertyName": "kind",
+          "mapping": {
+            "human": "#/components/schemas/HumanActor",
+            "model": "#/components/schemas/ModelActor",
+            "agent": "#/components/schemas/AgentActor"
+          }
+        }
+      },
+      "AnnotationActor": {
+        "title": "AnnotationActor",
+        "description": "The producers allowed to author an Annotation: a human or an agent.",
+        "oneOf": [
+          {
+            "$ref": "#/components/schemas/HumanActor"
+          },
+          {
+            "$ref": "#/components/schemas/AgentActor"
+          }
+        ],
+        "discriminator": {
+          "propertyName": "kind",
+          "mapping": {
+            "human": "#/components/schemas/HumanActor",
+            "agent": "#/components/schemas/AgentActor"
+          }
+        }
+      },
+      "PredictionActor": {
+        "title": "PredictionActor",
+        "description": "The only producer allowed to author a Prediction: a model.",
+        "oneOf": [
+          {
+            "$ref": "#/components/schemas/ModelActor"
+          }
+        ],
+        "discriminator": {
+          "propertyName": "kind",
+          "mapping": {
+            "model": "#/components/schemas/ModelActor"
+          }
+        }
+      },
+      "ActorKind": {
+        "title": "ActorKind",
+        "description": "Who produced a record: a person, a model, or an agent.",
+        "type": "string",
+        "enum": [
+          "human",
+          "model",
+          "agent"
+        ]
+      },
+      "Surface": {
+        "title": "Surface",
+        "description": "Tool surface a record was produced through (CLI / Studio / API / MCP / agent).",
+        "type": "string",
+        "enum": [
+          "cli",
+          "studio",
+          "api",
+          "mcp",
+          "agent"
+        ]
+      },
+      "JobState": {
+        "title": "JobState",
+        "description": "Lifecycle state of any long-running job (experiment, evaluation, agent run).",
+        "type": "string",
+        "enum": [
+          "queued",
+          "running",
+          "succeeded",
+          "failed",
+          "cancelled",
+          "abstained"
+        ]
+      },
+      "SplitKind": {
+        "title": "SplitKind",
+        "description": "Dataset split a sample belongs to; `unassigned` means \"not yet split\".",
+        "type": "string",
+        "enum": [
+          "train",
+          "val",
+          "test",
+          "holdout",
+          "unassigned"
+        ]
+      },
+      "RegistryState": {
+        "title": "RegistryState",
+        "description": "Publication state of a model version in the registry.",
+        "type": "string",
+        "enum": [
+          "draft",
+          "candidate",
+          "registered",
+          "deprecated",
+          "legacy"
+        ]
+      },
+      "AgentToolTier": {
+        "title": "AgentToolTier",
+        "description": "Permission tier of an agent tool call (constitution VI).",
+        "type": "string",
+        "enum": [
+          "read",
+          "analyze",
+          "propose",
+          "gated-execute",
+          "approval-required"
+        ]
+      },
+      "RunKind": {
+        "title": "RunKind",
+        "description": "Kind of work an `ExperimentRun` records (classify/train/eval/arena/al/agent).",
+        "type": "string",
+        "enum": [
+          "classify",
+          "train",
+          "eval",
+          "arena",
+          "al",
+          "agent"
+        ]
+      },
+      "FeedbackKind": {
+        "title": "FeedbackKind",
+        "description": "Kind of feedback captured for a sample (correction / flag / production signal).",
+        "type": "string",
+        "enum": [
+          "correction",
+          "flag",
+          "production"
+        ]
+      },
+      "Asset": {
+        "title": "Asset",
+        "description": "An original, immutable media file.",
+        "type": "object",
+        "properties": {
+          "id": {
+            "$ref": "#/components/schemas/EntityId"
+          },
+          "sha256": {
+            "$ref": "#/components/schemas/Sha256"
+          },
+          "kind": {
+            "type": "string",
+            "enum": [
+              "image",
+              "video",
+              "audio",
+              "other"
+            ]
+          },
+          "bytes": {
+            "type": "integer",
+            "minimum": 0
+          },
+          "width": {
+            "type": "integer",
+            "minimum": 0
+          },
+          "height": {
+            "type": "integer",
+            "minimum": 0
+          },
+          "exifSanitizedJson": {
+            "$ref": "#/components/schemas/JsonValue"
+          },
+          "captureSessionId": {
+            "$ref": "#/components/schemas/EntityId"
+          },
+          "unhashed": {
+            "type": "boolean"
+          },
+          "path": {
+            "type": "string",
+            "minLength": 1
+          },
+          "createdAt": {
+            "$ref": "#/components/schemas/Timestamp"
+          }
+        },
+        "required": [
+          "id",
+          "kind",
+          "unhashed",
+          "createdAt"
+        ],
+        "additionalProperties": false
+      },
+      "CaptureSession": {
+        "title": "CaptureSession",
+        "description": "A capture session: one device/camera producing a stream of frames.",
+        "type": "object",
+        "properties": {
+          "id": {
+            "$ref": "#/components/schemas/EntityId"
+          },
+          "startedAt": {
+            "$ref": "#/components/schemas/Timestamp"
+          },
+          "endedAt": {
+            "$ref": "#/components/schemas/Timestamp"
+          },
+          "source": {
+            "type": "string",
+            "minLength": 1
+          },
+          "contextJson": {
+            "$ref": "#/components/schemas/JsonValue"
+          }
+        },
+        "required": [
+          "id",
+          "startedAt",
+          "source"
+        ],
+        "additionalProperties": false
+      },
+      "Sample": {
+        "title": "Sample",
+        "description": "A labelled unit of observation: one asset, optionally one region of it.",
+        "type": "object",
+        "properties": {
+          "id": {
+            "$ref": "#/components/schemas/EntityId"
+          },
+          "assetId": {
+            "$ref": "#/components/schemas/EntityId"
+          },
+          "region": {
+            "$ref": "#/components/schemas/Region"
+          },
+          "split": {
+            "$ref": "#/components/schemas/SplitKind"
+          },
+          "snapshotIds": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/EntityId"
+            },
+            "default": []
+          },
+          "sourceCaptureFrame": {
+            "type": "string",
+            "minLength": 1
+          },
+          "createdAt": {
+            "$ref": "#/components/schemas/Timestamp"
+          }
+        },
+        "required": [
+          "id",
+          "assetId",
+          "createdAt"
+        ],
+        "additionalProperties": false
+      },
+      "OntologyVersion": {
+        "title": "OntologyVersion",
+        "description": "An immutable version of the label taxonomy.",
+        "type": "object",
+        "properties": {
+          "id": {
+            "$ref": "#/components/schemas/EntityId"
+          },
+          "version": {
+            "type": "string",
+            "minLength": 1
+          },
+          "categories": {
+            "type": "array",
+            "items": {
+              "description": "One category of a taxonomy.",
+              "type": "object",
+              "properties": {
+                "key": {
+                  "type": "string",
+                  "minLength": 1
+                },
+                "name": {
+                  "type": "string",
+                  "minLength": 1
+                },
+                "description": {
+                  "type": "string"
+                }
+              },
+              "required": [
+                "key",
+                "name",
+                "description"
+              ],
+              "additionalProperties": false
+            }
+          },
+          "fingerprint": {
+            "description": "A full-config fingerprint: `fp2:<16 hex characters>`.",
+            "type": "string",
+            "pattern": "^fp2:[0-9a-f]{16}$"
+          },
+          "parentId": {
+            "$ref": "#/components/schemas/EntityId"
+          },
+          "createdAt": {
+            "$ref": "#/components/schemas/Timestamp"
+          }
+        },
+        "required": [
+          "id",
+          "version",
+          "categories",
+          "fingerprint",
+          "createdAt"
+        ],
+        "additionalProperties": false
+      },
+      "Annotation": {
+        "title": "Annotation",
+        "description": "A human- (or agent-) authored ground-truth label.",
+        "type": "object",
+        "properties": {
+          "id": {
+            "$ref": "#/components/schemas/EntityId"
+          },
+          "sampleId": {
+            "$ref": "#/components/schemas/EntityId"
+          },
+          "ontologyVersionId": {
+            "$ref": "#/components/schemas/EntityId"
+          },
+          "labelKey": {
+            "type": "string",
+            "minLength": 1
+          },
+          "geometry": {
+            "$ref": "#/components/schemas/Region"
+          },
+          "actor": {
+            "$ref": "#/components/schemas/AnnotationActor"
+          },
+          "surface": {
+            "$ref": "#/components/schemas/Surface"
+          },
+          "sessionId": {
+            "type": "string",
+            "minLength": 1
+          },
+          "createdAt": {
+            "$ref": "#/components/schemas/Timestamp"
+          },
+          "supersededBy": {
+            "$ref": "#/components/schemas/EntityId"
+          }
+        },
+        "required": [
+          "id",
+          "sampleId",
+          "ontologyVersionId",
+          "labelKey",
+          "actor",
+          "surface",
+          "createdAt"
+        ],
+        "additionalProperties": false
+      },
+      "Prediction": {
+        "title": "Prediction",
+        "description": "A model-produced label.",
+        "type": "object",
+        "properties": {
+          "id": {
+            "$ref": "#/components/schemas/EntityId"
+          },
+          "sampleId": {
+            "$ref": "#/components/schemas/EntityId"
+          },
+          "modelVersionId": {
+            "$ref": "#/components/schemas/EntityId"
+          },
+          "labelKey": {
+            "type": "string",
+            "minLength": 1
+          },
+          "probabilityRaw": {
+            "type": "number",
+            "minimum": 0,
+            "maximum": 1
+          },
+          "probabilityCalibrated": {
+            "type": "number",
+            "minimum": 0,
+            "maximum": 1
+          },
+          "latencyMs": {
+            "type": "number",
+            "minimum": 0
+          },
+          "costMicroUsd": {
+            "type": "number",
+            "minimum": 0
+          },
+          "agreementJson": {
+            "$ref": "#/components/schemas/JsonValue"
+          },
+          "actor": {
+            "$ref": "#/components/schemas/PredictionActor"
+          },
+          "surface": {
+            "$ref": "#/components/schemas/Surface"
+          },
+          "sessionId": {
+            "type": "string",
+            "minLength": 1
+          },
+          "createdAt": {
+            "$ref": "#/components/schemas/Timestamp"
+          }
+        },
+        "required": [
+          "id",
+          "sampleId",
+          "modelVersionId",
+          "labelKey",
+          "probabilityRaw",
+          "actor",
+          "surface",
+          "createdAt"
+        ],
+        "additionalProperties": false
+      },
+      "DatasetSnapshot": {
+        "title": "DatasetSnapshot",
+        "description": "An immutable, content-addressed view of a dataset.",
+        "type": "object",
+        "properties": {
+          "id": {
+            "$ref": "#/components/schemas/EntityId"
+          },
+          "manifestHash": {
+            "$ref": "#/components/schemas/Sha256"
+          },
+          "splitAssignments": {
+            "$ref": "#/components/schemas/Sha256"
+          },
+          "ontologyVersionId": {
+            "$ref": "#/components/schemas/EntityId"
+          },
+          "parentSnapshotId": {
+            "$ref": "#/components/schemas/EntityId"
+          },
+          "createdAt": {
+            "$ref": "#/components/schemas/Timestamp"
+          },
+          "lineageJson": {
+            "$ref": "#/components/schemas/JsonValue"
+          }
+        },
+        "required": [
+          "id",
+          "manifestHash",
+          "splitAssignments",
+          "ontologyVersionId",
+          "createdAt"
+        ],
+        "additionalProperties": false
+      },
+      "ExperimentRun": {
+        "title": "ExperimentRun",
+        "description": "One run of the pipeline (classify / train / eval / arena / al / agent).",
+        "type": "object",
+        "properties": {
+          "id": {
+            "$ref": "#/components/schemas/EntityId"
+          },
+          "kind": {
+            "$ref": "#/components/schemas/RunKind"
+          },
+          "inputSnapshotId": {
+            "$ref": "#/components/schemas/EntityId"
+          },
+          "configFingerprint": {
+            "description": "A full-config fingerprint: `fp2:<16 hex characters>`.",
+            "type": "string",
+            "pattern": "^fp2:[0-9a-f]{16}$"
+          },
+          "status": {
+            "$ref": "#/components/schemas/JobState"
+          },
+          "metricsSummaryJson": {
+            "$ref": "#/components/schemas/JsonValue"
+          },
+          "startedAt": {
+            "$ref": "#/components/schemas/Timestamp"
+          },
+          "endedAt": {
+            "$ref": "#/components/schemas/Timestamp"
+          }
+        },
+        "required": [
+          "id",
+          "kind",
+          "configFingerprint",
+          "status",
+          "startedAt"
+        ],
+        "additionalProperties": false
+      },
+      "ModelVersion": {
+        "title": "ModelVersion",
+        "description": "A versioned model in the registry.",
+        "type": "object",
+        "properties": {
+          "id": {
+            "$ref": "#/components/schemas/EntityId"
+          },
+          "name": {
+            "type": "string",
+            "minLength": 1
+          },
+          "version": {
+            "type": "string",
+            "minLength": 1
+          },
+          "registryState": {
+            "$ref": "#/components/schemas/RegistryState"
+          },
+          "recipe": {
+            "$ref": "#/components/schemas/JsonValue"
+          },
+          "artifactPath": {
+            "type": "string",
+            "minLength": 1
+          },
+          "calibrationRef": {
+            "type": "string",
+            "minLength": 1
+          },
+          "modelCardPath": {
+            "type": "string",
+            "minLength": 1
+          },
+          "createdAt": {
+            "$ref": "#/components/schemas/Timestamp"
+          }
+        },
+        "required": [
+          "id",
+          "name",
+          "version",
+          "registryState",
+          "createdAt"
+        ],
+        "additionalProperties": false
+      },
+      "EvaluationRun": {
+        "title": "EvaluationRun",
+        "description": "The measured evaluation of one experiment under a named protocol.",
+        "type": "object",
+        "properties": {
+          "id": {
+            "$ref": "#/components/schemas/EntityId"
+          },
+          "experimentRunId": {
+            "$ref": "#/components/schemas/EntityId"
+          },
+          "protocol": {
+            "type": "string",
+            "minLength": 1
+          },
+          "resultsJson": {
+            "$ref": "#/components/schemas/JsonValue"
+          },
+          "reportPath": {
+            "type": "string",
+            "minLength": 1
+          },
+          "createdAt": {
+            "$ref": "#/components/schemas/Timestamp"
+          }
+        },
+        "required": [
+          "id",
+          "experimentRunId",
+          "protocol",
+          "resultsJson",
+          "createdAt"
+        ],
+        "additionalProperties": false
+      },
+      "Deployment": {
+        "title": "Deployment",
+        "description": "A model version made available on a target.",
+        "type": "object",
+        "properties": {
+          "id": {
+            "$ref": "#/components/schemas/EntityId"
+          },
+          "modelVersionId": {
+            "$ref": "#/components/schemas/EntityId"
+          },
+          "target": {
+            "type": "string",
+            "minLength": 1
+          },
+          "configJson": {
+            "$ref": "#/components/schemas/JsonValue"
+          },
+          "active": {
+            "type": "boolean"
+          },
+          "promotedAt": {
+            "$ref": "#/components/schemas/Timestamp"
+          },
+          "pinnedFromId": {
+            "$ref": "#/components/schemas/EntityId"
+          },
+          "createdAt": {
+            "$ref": "#/components/schemas/Timestamp"
+          }
+        },
+        "required": [
+          "id",
+          "modelVersionId",
+          "target",
+          "configJson",
+          "active",
+          "createdAt"
+        ],
+        "additionalProperties": false
+      },
+      "FeedbackEvent": {
+        "title": "FeedbackEvent",
+        "description": "A signal captured about a sample: a human correction, a flag, or a production observation.",
+        "type": "object",
+        "properties": {
+          "id": {
+            "$ref": "#/components/schemas/EntityId"
+          },
+          "sampleId": {
+            "$ref": "#/components/schemas/EntityId"
+          },
+          "kind": {
+            "$ref": "#/components/schemas/FeedbackKind"
+          },
+          "payloadJson": {
+            "$ref": "#/components/schemas/JsonValue"
+          },
+          "createdAt": {
+            "$ref": "#/components/schemas/Timestamp"
+          }
+        },
+        "required": [
+          "id",
+          "sampleId",
+          "kind",
+          "payloadJson",
+          "createdAt"
+        ],
+        "additionalProperties": false
+      },
+      "AgentRun": {
+        "title": "AgentRun",
+        "description": "One agent investigation: a goal, a budget, the tool calls it made, the approvals it needed and the report it produced.",
+        "type": "object",
+        "properties": {
+          "id": {
+            "$ref": "#/components/schemas/EntityId"
+          },
+          "goal": {
+            "type": "string",
+            "minLength": 1
+          },
+          "status": {
+            "$ref": "#/components/schemas/JobState"
+          },
+          "budgetJson": {
+            "$ref": "#/components/schemas/JsonValue"
+          },
+          "toolCalls": {
+            "type": "array",
+            "items": {
+              "description": "One tool invocation performed by an agent.",
+              "type": "object",
+              "properties": {
+                "tool": {
+                  "type": "string",
+                  "minLength": 1
+                },
+                "tier": {
+                  "$ref": "#/components/schemas/AgentToolTier"
+                },
+                "at": {
+                  "$ref": "#/components/schemas/Timestamp"
+                },
+                "args": {
+                  "$ref": "#/components/schemas/JsonValue"
+                },
+                "ok": {
+                  "type": "boolean"
+                }
+              },
+              "required": [
+                "tool",
+                "tier",
+                "at"
+              ],
+              "additionalProperties": false
+            }
+          },
+          "approvals": {
+            "type": "array",
+            "items": {
+              "description": "A human decision about a gated action.",
+              "type": "object",
+              "properties": {
+                "tool": {
+                  "type": "string",
+                  "minLength": 1
+                },
+                "tier": {
+                  "$ref": "#/components/schemas/AgentToolTier"
+                },
+                "decision": {
+                  "type": "string",
+                  "enum": [
+                    "approved",
+                    "denied"
+                  ]
+                },
+                "decidedBy": {
+                  "type": "string",
+                  "minLength": 1
+                },
+                "at": {
+                  "$ref": "#/components/schemas/Timestamp"
+                }
+              },
+              "required": [
+                "tool",
+                "tier",
+                "decision",
+                "decidedBy",
+                "at"
+              ],
+              "additionalProperties": false
+            }
+          },
+          "reportPath": {
+            "type": "string",
+            "minLength": 1
+          },
+          "createdAt": {
+            "$ref": "#/components/schemas/Timestamp"
+          }
+        },
+        "required": [
+          "id",
+          "goal",
+          "status",
+          "budgetJson",
+          "toolCalls",
+          "approvals",
+          "createdAt"
+        ],
+        "additionalProperties": false
+      },
+      "DerivedArtifact": {
+        "title": "DerivedArtifact",
+        "description": "An artifact derived from original assets (thumbnail, embedding, report, mask, crop).",
+        "type": "object",
+        "properties": {
+          "id": {
+            "$ref": "#/components/schemas/EntityId"
+          },
+          "kind": {
+            "type": "string",
+            "enum": [
+              "thumbnail",
+              "embedding",
+              "report",
+              "mask",
+              "crop"
+            ]
+          },
+          "sourceAssetIds": {
+            "type": "array",
+            "minItems": 1,
+            "items": {
+              "$ref": "#/components/schemas/EntityId"
+            }
+          },
+          "sourceSnapshotId": {
+            "$ref": "#/components/schemas/EntityId"
+          },
+          "transform": {
+            "type": "string",
+            "minLength": 1
+          },
+          "transformFingerprint": {
+            "description": "A full-config fingerprint: `fp2:<16 hex characters>`.",
+            "type": "string",
+            "pattern": "^fp2:[0-9a-f]{16}$"
+          },
+          "createdAt": {
+            "$ref": "#/components/schemas/Timestamp"
+          }
+        },
+        "required": [
+          "id",
+          "kind",
+          "sourceAssetIds",
+          "transform",
+          "transformFingerprint",
+          "createdAt"
+        ],
+        "additionalProperties": false
+      }
+    }
+  },
+  "tags": [
+    {
+      "name": "Asset",
+      "description": "Asset — an entity of the Master Vision domain model."
+    },
+    {
+      "name": "CaptureSession",
+      "description": "CaptureSession — an entity of the Master Vision domain model."
+    },
+    {
+      "name": "Sample",
+      "description": "Sample — an entity of the Master Vision domain model."
+    },
+    {
+      "name": "OntologyVersion",
+      "description": "OntologyVersion — an entity of the Master Vision domain model."
+    },
+    {
+      "name": "Annotation",
+      "description": "Annotation — an entity of the Master Vision domain model."
+    },
+    {
+      "name": "Prediction",
+      "description": "Prediction — an entity of the Master Vision domain model."
+    },
+    {
+      "name": "DatasetSnapshot",
+      "description": "DatasetSnapshot — an entity of the Master Vision domain model."
+    },
+    {
+      "name": "ExperimentRun",
+      "description": "ExperimentRun — an entity of the Master Vision domain model."
+    },
+    {
+      "name": "ModelVersion",
+      "description": "ModelVersion — an entity of the Master Vision domain model."
+    },
+    {
+      "name": "EvaluationRun",
+      "description": "EvaluationRun — an entity of the Master Vision domain model."
+    },
+    {
+      "name": "Deployment",
+      "description": "Deployment — an entity of the Master Vision domain model."
+    },
+    {
+      "name": "FeedbackEvent",
+      "description": "FeedbackEvent — an entity of the Master Vision domain model."
+    },
+    {
+      "name": "AgentRun",
+      "description": "AgentRun — an entity of the Master Vision domain model."
+    },
+    {
+      "name": "DerivedArtifact",
+      "description": "DerivedArtifact — an entity of the Master Vision domain model."
+    }
+  ]
+}

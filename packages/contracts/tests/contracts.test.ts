@@ -17,7 +17,7 @@ describe('@master-vision/contracts', () => {
 
   it('rejects an invalid UnitSeeded payload', () => {
     expect(() =>
-      UnitSeededSchema.parse({ id: 'not-a-uuid', createdAt: 'not-a-timestamp' })
+      UnitSeededSchema.parse({ id: 'not-a-uuid', createdAt: 'not-a-timestamp' }),
     ).toThrow();
   });
 });

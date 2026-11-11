@@ -1,25 +1,34 @@
 {
   "name": "@master-vision/contracts",
-  "version": "0.2.0",
+  "version": "1.0.0",
   "description": "Master Vision shared contracts: versioned zod schemas and inferred types shared across packages and services.",
   "type": "module",
   "main": "./dist/index.js",
   "exports": {
-    ".": "./dist/index.js"
+    ".": "./dist/index.js",
+    "./openapi": "./dist/openapi.js",
+    "./openapi.json": "./dist/openapi.json"
   },
   "engines": {
     "node": ">=20"
   },
   "scripts": {
-    "build": "tsc --project tsconfig.json",
+    "build": "tsc --project tsconfig.json && tsx scripts/generate-openapi.ts",
     "typecheck": "tsc --project tsconfig.json --noEmit",
-    "lint": "eslint src tests",
-    "test": "vitest run --root ../.. packages/contracts/tests"
+    "lint": "eslint src tests scripts",
+    "test": "vitest run --root ../.. packages/contracts/tests",
+    "manifest:generate": "tsx scripts/generate-manifest.ts",
+    "openapi:generate": "tsx scripts/generate-openapi.ts",
+    "openapi:snapshot": "tsx scripts/generate-openapi.ts --snapshot"
   },
   "dependencies": {
     "zod": "^4.4.3"
   },
   "devDependencies": {
-    "@types/node": "25.6.2"
+    "@apidevtools/openapi-schemas": "^2.1.0",
+    "@types/node": "25.6.2",
+    "ajv": "^8.18.0",
+    "ajv-formats": "^3.0.1",
+    "fast-check": "^4.10.2"
   }
 }

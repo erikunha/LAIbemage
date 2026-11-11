@@ -18,7 +18,7 @@ import { buildIndex, defaultIndexPath } from './search/index.js';
 import { searchSemantic, searchKeyword } from './search/query.js';
 import type { SearchResult } from './search/query.js';
 import { classifyAndSort } from './classifier/index.js';
-import type { Config } from './config/index.js';
+import type { Config, LLMProvider } from './config/index.js';
 import { validateStartup } from './config/index.js';
 import {
   fireOnImageAnalysed,
@@ -47,7 +47,7 @@ import type {
 import { CACHE_SCHEMA_VERSION, PLUGIN_API_VERSION } from './types.js';
 import { diffCaches } from './diff/index.js';
 export type { DiffSummary } from './diff/index.js';
-import { printCostEstimate } from './utils/cost.js';
+import { computeCostUsd, printCostEstimate } from './utils/cost.js';
 import { getImageTimestamp } from './utils/exif.js';
 import { logger } from './utils/logger.js';
 import { validateImageMimeType } from './utils/mime.js';
@@ -57,6 +57,7 @@ import {
   stopProgress,
   updateProgress,
 } from './utils/progress.js';
+import { attemptsFor } from './utils/retry.js';
 
 const IMAGE_REGEX = /\.(jpe?g|png|webp|tiff?|avif)$/i;
 const CACHE_FILE_NAME = 'analysis_results.json';
@@ -316,6 +317,10 @@ export async function runBatch(
   let totalTokensUsed = 0;
   let totalInputTokens = 0;
   let totalOutputTokens = 0;
+  // Cost of the run, priced with the rate of the provider that served each
+  // batch. A consensus run is served by two providers, so one rate would
+  // misprice it.
+  let estimatedCostUsd = 0;
   let duplicatesSkipped = 0;
   let apiCalls = 0;
   let overrideCount = 0;
@@ -466,7 +471,9 @@ export async function runBatch(
 
     const totalBatches = Math.ceil(uniqueFiles.length / config.batchSize);
     if (uniqueFiles.length > 0) {
-      startProgress(filesWithStats.length, totalBatches);
+      // The provider prices the running cost; the analyzer records the same
+      // value with setCostProvider once it starts.
+      startProgress(filesWithStats.length, totalBatches, config.provider);
     }
 
     try {
@@ -476,8 +483,8 @@ export async function runBatch(
       let analysisFn: typeof analyzeImages;
       if (config.consensusProviders && config.consensusProviders.length >= 2) {
         logger.info(`\n Running consensus analysis (${config.consensusProviders.join(' + ')})...`);
-        analysisFn = async (files, cfg) => {
-          const result = await runConsensus(files, cfg, [...config.consensusProviders!]);
+        analysisFn = async (files, cfg, onProgress) => {
+          const result = await runConsensus(files, cfg, [...config.consensusProviders!], onProgress);
           for (const f of result.lowConsensusFiles) consensusLowFiles.add(f);
           return { images: result.images, overrideCount: 0 };
         };
@@ -488,11 +495,27 @@ export async function runBatch(
       const { images: newlyAnalyzed, overrideCount: tc } = await analysisFn(
         uniqueFiles,
         config,
-        (processed, batch, tokensUsed, inputTokens, outputTokens) => {
+        (
+          processed: number,
+          batch: number,
+          tokensUsed: number,
+          inputTokens: number,
+          outputTokens: number,
+          provider?: LLMProvider,
+        ) => {
           totalTokensUsed += tokensUsed;
           totalInputTokens += inputTokens;
           totalOutputTokens += outputTokens;
-          updateProgress(alreadyAnalyzed.length + processed, batch, tokensUsed);
+          // The cost needs the input and output split, not the combined total.
+          const priced = provider ?? config.provider;
+          estimatedCostUsd += computeCostUsd(priced, inputTokens, outputTokens);
+          updateProgress(
+            alreadyAnalyzed.length + processed,
+            batch,
+            inputTokens,
+            outputTokens,
+            priced,
+          );
         },
         flushPartialCache,
         feedbackNote,
@@ -602,6 +625,7 @@ export async function runBatch(
       totalTokensUsed,
       totalInputTokens,
       totalOutputTokens,
+      estimatedCostUsd,
       partialFailures,
       reviewOverrides,
       reviewSkipped,
@@ -654,6 +678,12 @@ interface PostAnalysisStats {
   readonly totalTokensUsed: number;
   readonly totalInputTokens: number;
   readonly totalOutputTokens: number;
+  /**
+   * Cost of the run in USD, priced with the rate of the provider that served
+   * each batch. A consensus run is served by two providers, so one rate would
+   * misprice it.
+   */
+  readonly estimatedCostUsd?: number;
   readonly partialFailures: number;
   readonly reviewOverrides: ReviewOverride[];
   readonly reviewSkipped: string[];
@@ -685,6 +715,7 @@ async function postAnalysisPipeline(
     totalTokensUsed,
     totalInputTokens,
     totalOutputTokens,
+    estimatedCostUsd,
     partialFailures,
     reviewOverrides,
     reviewSkipped,
@@ -700,7 +731,8 @@ async function postAnalysisPipeline(
       processedResults,
       linkerClient,
       config.linkWindowDays,
-      config.maxRetries,
+      // linkImages counts attempts, config.maxRetries counts retries.
+      attemptsFor(config.maxRetries),
       config.retryDelayMs,
     );
     processedResults = processedResults.map((r) => {
@@ -826,6 +858,10 @@ async function postAnalysisPipeline(
     tokensUsed: totalTokensUsed,
     inputTokens: totalInputTokens,
     outputTokens: totalOutputTokens,
+    // Price the summary with the provider that served the run.
+    provider: config.provider,
+    // A run served by several providers is priced while it runs.
+    estimatedCostUsd,
     durationMs: Date.now() - startedAt,
     avgConfidence,
     lowConfidenceCount: lowConfidenceCount > 0 ? lowConfidenceCount : undefined,

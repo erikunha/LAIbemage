@@ -1,5 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import {
+  computeCostUsd,
   estimateCost,
   formatCostRow,
   OUTPUT_TOKENS_PER_IMAGE,
@@ -106,5 +107,25 @@ describe('formatCostRow', () => {
     const est = estimateCost(1000, 20, 'openai');
     const row = formatCostRow(est);
     expect(row).toMatch(/\$\d+\.\d{4}/);
+  });
+});
+
+describe('computeCostUsd', () => {
+  it('prices input and output tokens separately for the provider', () => {
+    // 5,012 in / 633 out on Anthropic: 5012*15/1e6 + 633*75/1e6
+    expect(computeCostUsd('anthropic', 5012, 633)).toBeCloseTo(0.122655, 6);
+  });
+
+  it('differs per provider', () => {
+    expect(computeCostUsd('openai', 1_000_000, 1_000_000)).toBeCloseTo(12.5, 6);
+    expect(computeCostUsd('google', 1_000_000, 1_000_000)).toBeCloseTo(0.375, 6);
+  });
+
+  it('is zero for local providers', () => {
+    expect(computeCostUsd('ollama', 5000, 500)).toBe(0);
+  });
+
+  it('is zero when no tokens were consumed', () => {
+    expect(computeCostUsd('anthropic', 0, 0)).toBe(0);
   });
 });

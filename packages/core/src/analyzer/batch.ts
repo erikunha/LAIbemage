@@ -4,7 +4,7 @@ import { z } from 'zod';
 import type { CategoryConfig, Config } from '../config/index.js';
 import type { AnalysisResult, FileWithStats } from '../types.js';
 import { logger } from '../utils/logger.js';
-import { sleep, withRetry } from '../utils/retry.js';
+import { attemptsFor, sleep, withRetry } from '../utils/retry.js';
 import { sanitizeTextField } from '../utils/sanitize.js';
 import type { ImageInput, LLMClient } from './client.js';
 
@@ -136,13 +136,8 @@ export async function analyzeBatch(
   onBatchComplete?: (processedCount: number, results: AnalysisResult[]) => Promise<void>,
   feedbackNote = '',
 ): Promise<AnalysisResult[]> {
-  const {
-    batchSize,
-    maxRetries: maxAttempts,
-    retryDelayMs,
-    delayBetweenCallsMs,
-    concurrency,
-  } = config;
+  const { batchSize, maxRetries, retryDelayMs, delayBetweenCallsMs, concurrency } = config;
+  const maxAttempts = attemptsFor(maxRetries);
   const totalBatches = Math.ceil(filesWithStats.length / batchSize);
   const systemPrompt = buildSystemPrompt(config, feedbackNote);
 

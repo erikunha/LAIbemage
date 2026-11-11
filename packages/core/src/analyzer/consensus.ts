@@ -8,6 +8,20 @@ export interface ConsensusResult {
   readonly lowConsensusFiles: Set<string>;
 }
 
+/**
+ * Progress callback of a consensus run. The provider that served the batch is
+ * passed along, so a run served by two providers is priced with the rate of
+ * each provider instead of a single one.
+ */
+export type ConsensusProgress = (
+  processed: number,
+  batch: number,
+  tokensUsed: number,
+  inputTokens: number,
+  outputTokens: number,
+  provider?: LLMProvider,
+) => void;
+
 const VALID_PROVIDERS = new Set<string>([
   'openai',
   'anthropic',
@@ -17,6 +31,16 @@ const VALID_PROVIDERS = new Set<string>([
   'bedrock',
   'vertex',
 ]);
+
+/** Wrap a progress callback so every event carries the provider that served it. */
+function withProviderOf(
+  provider: LLMProvider,
+  onProgress?: ConsensusProgress,
+): ConsensusProgress {
+  return (processed, batch, tokensUsed, inputTokens, outputTokens) => {
+    onProgress?.(processed, batch, tokensUsed, inputTokens, outputTokens, provider);
+  };
+}
 
 /**
  * Runs two independent LLM analysis passes (one per provider in `providers`)
@@ -28,10 +52,11 @@ export async function runConsensus(
   files: FileWithStats[],
   config: Config,
   providers: string[],
+  onProgress?: ConsensusProgress,
 ): Promise<ConsensusResult> {
   const valid = providers.filter((p) => VALID_PROVIDERS.has(p));
   if (valid.length < 2) {
-    const { images } = await analyzeImages(files, config);
+    const { images } = await analyzeImages(files, config, withProviderOf(config.provider, onProgress));
     return { images, lowConsensusFiles: new Set() };
   }
 
@@ -39,9 +64,15 @@ export async function runConsensus(
   const config1: Config = { ...config, provider: p1 as LLMProvider };
   const config2: Config = { ...config, provider: p2 as LLMProvider };
 
+  // Each pass reports with its own provider, so the caller can price it.
+  const withProvider = (provider: LLMProvider): ConsensusProgress =>
+    (processed, batch, tokensUsed, inputTokens, outputTokens) => {
+      onProgress?.(processed, batch, tokensUsed, inputTokens, outputTokens, provider);
+    };
+
   const [{ images: r1 }, { images: r2 }] = await Promise.all([
-    analyzeImages(files, config1),
-    analyzeImages(files, config2),
+    analyzeImages(files, config1, withProvider(p1 as LLMProvider)),
+    analyzeImages(files, config2, withProvider(p2 as LLMProvider)),
   ]);
 
   const lowConsensusFiles = new Set<string>();

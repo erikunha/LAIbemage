@@ -1,5 +1,5 @@
 import { describe, expect, it, vi } from 'vitest';
-import { sleep, withRetry } from '../../src/utils/retry.js';
+import { attemptsFor, extractStatusCode, sleep, withRetry } from '../../src/utils/retry.js';
 
 // All retry tests use delayMs: 0 and real timers so sleep(0) resolves immediately.
 describe('withRetry', () => {
@@ -85,6 +85,36 @@ describe('withRetry', () => {
   });
 });
 
+describe('withRetry non-recoverable client errors', () => {
+  it.each([400, 401, 403, 404, 422])('throws immediately on status %i', async (status) => {
+    const err = Object.assign(new Error(`HTTP ${status}`), { status });
+    const fn = vi.fn().mockRejectedValue(err);
+    await expect(withRetry(fn, { maxAttempts: 3, delayMs: 0 })).rejects.toBe(err);
+    expect(fn).toHaveBeenCalledTimes(1);
+  });
+
+  it.each([408, 409, 429, 500, 503])('still retries status %i', async (status) => {
+    const err = Object.assign(new Error(`HTTP ${status}`), { status });
+    const fn = vi.fn().mockRejectedValueOnce(err).mockResolvedValue('ok');
+    await expect(withRetry(fn, { maxAttempts: 3, delayMs: 0 })).resolves.toBe('ok');
+    expect(fn).toHaveBeenCalledTimes(2);
+  });
+});
+
+describe('withRetry attempt floor', () => {
+  it('performs one attempt when maxAttempts is 0 (--max-retries 0)', async () => {
+    const fn = vi.fn().mockResolvedValue('ok');
+    await expect(withRetry(fn, { maxAttempts: 0, delayMs: 0 })).resolves.toBe('ok');
+    expect(fn).toHaveBeenCalledTimes(1);
+  });
+
+  it('surfaces the original error after the single attempt when maxAttempts is 0', async () => {
+    const fn = vi.fn().mockRejectedValue(new Error('boom'));
+    await expect(withRetry(fn, { maxAttempts: 0, delayMs: 0 })).rejects.toThrow('boom');
+    expect(fn).toHaveBeenCalledTimes(1);
+  });
+});
+
 describe('sleep', () => {
   it('resolves after the given duration', async () => {
     vi.useFakeTimers();
@@ -92,5 +122,85 @@ describe('sleep', () => {
     vi.advanceTimersByTime(500);
     await expect(promise).resolves.toBeUndefined();
     vi.useRealTimers();
+  });
+});
+
+describe('attemptsFor', () => {
+  it('counts the first try plus each retry', () => {
+    expect(attemptsFor(0)).toBe(1);
+    expect(attemptsFor(3)).toBe(4);
+  });
+
+  it('treats negative retries as none', () => {
+    expect(attemptsFor(-2)).toBe(1);
+  });
+});
+
+describe('extractStatusCode', () => {
+  it('reads the top-level status used by OpenAI, Google and Anthropic', () => {
+    expect(extractStatusCode(Object.assign(new Error('boom'), { status: 429 }))).toBe(429);
+  });
+
+  it('reads the AWS SDK metadata status used by Bedrock', () => {
+    const err = Object.assign(new Error('access denied'), {
+      $metadata: { httpStatusCode: 403 },
+    });
+    expect(extractStatusCode(err)).toBe(403);
+  });
+
+  it('reads the nested cause code used by Vertex', () => {
+    const err = Object.assign(new Error('permission denied'), {
+      cause: { code: 403, status: 'PERMISSION_DENIED' },
+    });
+    expect(extractStatusCode(err)).toBe(403);
+  });
+
+  it('ignores non-numeric status strings instead of producing NaN', () => {
+    const err = Object.assign(new Error('permission denied'), {
+      cause: { status: 'PERMISSION_DENIED' },
+    });
+    expect(extractStatusCode(err)).toBeUndefined();
+  });
+
+  it('returns undefined for an error without a status', () => {
+    expect(extractStatusCode(new Error('boom'))).toBeUndefined();
+  });
+});
+
+describe('withRetry provider status extraction', () => {
+  it('throws immediately on a Bedrock 403 carried in the AWS metadata', async () => {
+    const err = Object.assign(new Error('Access denied'), { $metadata: { httpStatusCode: 403 } });
+    const fn = vi.fn().mockRejectedValue(err);
+
+    await expect(withRetry(fn, { maxAttempts: 3, delayMs: 0 })).rejects.toBe(err);
+    expect(fn).toHaveBeenCalledTimes(1);
+  });
+
+  it('throws immediately on a Vertex 404 carried in the nested cause', async () => {
+    const err = Object.assign(new Error('model not found'), {
+      cause: { code: 404, status: 'NOT_FOUND' },
+    });
+    const fn = vi.fn().mockRejectedValue(err);
+
+    await expect(withRetry(fn, { maxAttempts: 3, delayMs: 0 })).rejects.toBe(err);
+    expect(fn).toHaveBeenCalledTimes(1);
+  });
+
+  it('retries a Bedrock 500 carried in the AWS metadata', async () => {
+    const err = Object.assign(new Error('server error'), { $metadata: { httpStatusCode: 500 } });
+    const fn = vi.fn().mockRejectedValueOnce(err).mockResolvedValue('ok');
+
+    await expect(withRetry(fn, { maxAttempts: 3, delayMs: 0 })).resolves.toBe('ok');
+    expect(fn).toHaveBeenCalledTimes(2);
+  });
+
+  it('retries a Vertex 429 rate limit instead of reporting a quota problem', async () => {
+    const err = Object.assign(new Error('Quota exceeded for quota metric'), {
+      cause: { code: 429, status: 'RESOURCE_EXHAUSTED' },
+    });
+    const fn = vi.fn().mockRejectedValueOnce(err).mockResolvedValue('ok');
+
+    await expect(withRetry(fn, { maxAttempts: 3, delayMs: 0 })).resolves.toBe('ok');
+    expect(fn).toHaveBeenCalledTimes(2);
   });
 });

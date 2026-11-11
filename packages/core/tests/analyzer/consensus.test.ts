@@ -1,5 +1,5 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
-import { runConsensus } from '../../src/analyzer/consensus.js';
+import { runConsensus, type ConsensusProgress } from '../../src/analyzer/consensus.js';
 import type { Config } from '../../src/config/index.js';
 import type { AnalyzedImage, FileWithStats } from '../../src/types.js';
 
@@ -154,5 +154,36 @@ describe('runConsensus', () => {
     await runConsensus(files, makeConfig(), ['openai', 'notaprovider']);
     // 'notaprovider' is filtered — only 1 valid → falls back to single call
     expect(mockAnalyzeImages).toHaveBeenCalledTimes(1);
+  });
+
+  it('reports progress of both passes with the provider that served them', async () => {
+    const files = [makeFile('a.jpg')];
+    mockAnalyzeImages.mockResolvedValue({ images: [], overrideCount: 0 });
+    const onProgress = vi.fn();
+
+    await runConsensus(files, makeConfig(), ['openai', 'anthropic'], onProgress);
+
+    expect(mockAnalyzeImages).toHaveBeenCalledTimes(2);
+    const firstPass = mockAnalyzeImages.mock.calls[0]![2] as ConsensusProgress;
+    const secondPass = mockAnalyzeImages.mock.calls[1]![2] as ConsensusProgress;
+
+    firstPass(1, 1, 100, 60, 40);
+    secondPass(1, 1, 200, 120, 80);
+
+    expect(onProgress).toHaveBeenNthCalledWith(1, 1, 1, 100, 60, 40, 'openai');
+    expect(onProgress).toHaveBeenNthCalledWith(2, 1, 1, 200, 120, 80, 'anthropic');
+  });
+
+  it('reports progress of a single provider run', async () => {
+    const files = [makeFile('a.jpg')];
+    mockAnalyzeImages.mockResolvedValue({ images: [], overrideCount: 0 });
+    const onProgress = vi.fn();
+
+    await runConsensus(files, makeConfig(), ['openai'], onProgress);
+
+    const progress = mockAnalyzeImages.mock.calls[0]![2] as ConsensusProgress;
+    progress(1, 1, 100, 60, 40);
+
+    expect(onProgress).toHaveBeenCalledWith(1, 1, 100, 60, 40, 'openai');
   });
 });

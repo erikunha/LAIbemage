@@ -29,6 +29,10 @@ program
   )
   .option('--api-key <key>', 'OpenAI API key (overrides OPENAI_API_KEY env var)')
   .option('--anthropic-api-key <key>', 'Anthropic API key (overrides ANTHROPIC_API_KEY env var)')
+  .option(
+    '--anthropic-workspace-id <id>',
+    'Anthropic workspace id (overrides ANTHROPIC_WORKSPACE_ID env var)',
+  )
   .option('--google-api-key <key>', 'Google AI API key (overrides GOOGLE_API_KEY env var)')
   .option('--model <model>', 'Model name (defaults: gpt-4o / claude-opus-4-7 / gemini-2.0-flash)')
   .option('--bedrock-region <region>', 'AWS region for Bedrock provider (default: us-east-1)')
@@ -162,6 +166,7 @@ program
         provider: opts['provider'] as string | undefined,
         apiKey: opts['apiKey'] as string | undefined,
         anthropicApiKey: opts['anthropicApiKey'] as string | undefined,
+        anthropicWorkspaceId: opts['anthropicWorkspaceId'] as string | undefined,
         googleApiKey: opts['googleApiKey'] as string | undefined,
         azureEndpoint: opts['azureEndpoint'] as string | undefined,
         azureApiKey: opts['azureApiKey'] as string | undefined,
@@ -248,7 +253,7 @@ program
         verbose: false,
         quiet: Boolean(opts['quiet']),
         batchSize: 20,
-        maxRetries: 3,
+        maxRetries: 2,
       });
       await runReorder(config);
     } catch (error) {
@@ -269,6 +274,10 @@ program
   )
   .option('--api-key <key>', 'OpenAI API key (overrides OPENAI_API_KEY env var)')
   .option('--anthropic-api-key <key>', 'Anthropic API key (overrides ANTHROPIC_API_KEY env var)')
+  .option(
+    '--anthropic-workspace-id <id>',
+    'Anthropic workspace id (overrides ANTHROPIC_WORKSPACE_ID env var)',
+  )
   .option('--google-api-key <key>', 'Google AI API key (overrides GOOGLE_API_KEY env var)')
   .option('--azure-endpoint <url>', 'Azure OpenAI endpoint URL (requires --provider azure)')
   .option('--azure-api-key <key>', 'Azure OpenAI API key (overrides AZURE_OPENAI_API_KEY env var)')
@@ -289,13 +298,14 @@ program
         provider: opts['provider'] as string | undefined,
         apiKey: opts['apiKey'] as string | undefined,
         anthropicApiKey: opts['anthropicApiKey'] as string | undefined,
+        anthropicWorkspaceId: opts['anthropicWorkspaceId'] as string | undefined,
         googleApiKey: opts['googleApiKey'] as string | undefined,
         azureEndpoint: opts['azureEndpoint'] as string | undefined,
         azureApiKey: opts['azureApiKey'] as string | undefined,
         ollamaUrl: opts['ollamaUrl'] as string | undefined,
         model: opts['model'] as string | undefined,
         batchSize: 1,
-        maxRetries: 3,
+        maxRetries: 2,
         dryRun: false,
         skipAnalysis: false,
         categoriesFile: opts['categories'] as string | undefined,
@@ -347,6 +357,10 @@ program
   )
   .option('--api-key <key>', 'OpenAI API key (overrides OPENAI_API_KEY env var)')
   .option('--anthropic-api-key <key>', 'Anthropic API key (overrides ANTHROPIC_API_KEY env var)')
+  .option(
+    '--anthropic-workspace-id <id>',
+    'Anthropic workspace id (overrides ANTHROPIC_WORKSPACE_ID env var)',
+  )
   .option('--google-api-key <key>', 'Google AI API key (overrides GOOGLE_API_KEY env var)')
   .option('--azure-endpoint <url>', 'Azure OpenAI endpoint URL')
   .option('--azure-api-key <key>', 'Azure OpenAI API key')
@@ -363,13 +377,14 @@ program
         provider: opts['provider'] as string | undefined,
         apiKey: opts['apiKey'] as string | undefined,
         anthropicApiKey: opts['anthropicApiKey'] as string | undefined,
+        anthropicWorkspaceId: opts['anthropicWorkspaceId'] as string | undefined,
         googleApiKey: opts['googleApiKey'] as string | undefined,
         azureEndpoint: opts['azureEndpoint'] as string | undefined,
         azureApiKey: opts['azureApiKey'] as string | undefined,
         ollamaUrl: opts['ollamaUrl'] as string | undefined,
         model: opts['model'] as string | undefined,
         batchSize: 20,
-        maxRetries: 3,
+        maxRetries: 2,
         dryRun: false,
         skipAnalysis: true, // no real analysis run
         outputFormat: 'none',
@@ -399,6 +414,10 @@ program
   .option('--provider <name>', 'LLM provider (required for --query semantic search)', 'openai')
   .option('--api-key <key>', 'OpenAI API key (overrides OPENAI_API_KEY)')
   .option('--anthropic-api-key <key>', 'Anthropic API key (overrides ANTHROPIC_API_KEY)')
+  .option(
+    '--anthropic-workspace-id <id>',
+    'Anthropic workspace id (overrides ANTHROPIC_WORKSPACE_ID env var)',
+  )
   .option('--google-api-key <key>', 'Google AI API key (overrides GOOGLE_API_KEY)')
   .option('-v, --verbose', 'Verbose output', false)
   .option('-q, --quiet', 'Quiet output', false)
@@ -411,9 +430,10 @@ program
         provider: opts['provider'] as string | undefined,
         apiKey: opts['apiKey'] as string | undefined,
         anthropicApiKey: opts['anthropicApiKey'] as string | undefined,
+        anthropicWorkspaceId: opts['anthropicWorkspaceId'] as string | undefined,
         googleApiKey: opts['googleApiKey'] as string | undefined,
         batchSize: 1,
-        maxRetries: 1,
+        maxRetries: 0,
         dryRun: false,
         skipAnalysis: true,
         outputFormat: 'none',
@@ -556,6 +576,7 @@ benchmark
   .requiredOption('--model-id <name>', 'The model whose run is gated')
   .option('--metrics <file>', 'Path of the run artifact (report.json) to gate')
   .option('--baseline <file>', 'Path of the baseline file')
+  .option('--split <file>', 'Path of the gold split manifest that is currently tracked for the suite')
   .option('--tolerance <n>', 'Macro F1 regression tolerance', '-0.02')
   .option('--update-baseline', 'Rewrite the baseline with the run metrics', false)
   .option('--force', 'Allow a baseline change larger than 0.05', false)
@@ -568,6 +589,7 @@ benchmark
         model: opts['modelId'] as string,
         ...(opts['metrics'] === undefined ? {} : { metricsPath: opts['metrics'] as string }),
         ...(opts['baseline'] === undefined ? {} : { baselinePath: opts['baseline'] as string }),
+        ...(opts['split'] === undefined ? {} : { splitPath: opts['split'] as string }),
         tolerance: parseFloat(opts['tolerance'] as string),
         updateBaseline: Boolean(opts['updateBaseline']),
         force: Boolean(opts['force']),

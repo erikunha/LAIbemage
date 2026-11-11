@@ -4,7 +4,8 @@ import { z } from 'zod';
 import type { Config } from '../config/index.js';
 import type { AnalysisResult, AnalyzedImage, FileWithStats } from '../types.js';
 import { logger } from '../utils/logger.js';
-import { sleep, withRetry } from '../utils/retry.js';
+import { setCostProvider } from '../utils/progress.js';
+import { attemptsFor, sleep, withRetry } from '../utils/retry.js';
 import { sanitizeTextField } from '../utils/sanitize.js';
 import { analyzeBatch, normalizeCategory } from './batch.js';
 import { createLLMClient, type LLMClient } from './client.js';
@@ -71,7 +72,7 @@ async function reclassifyUnknowns(
             { maxTokens: 500, detail: 'high' },
           ),
         {
-          maxAttempts: config.maxRetries,
+          maxAttempts: attemptsFor(config.maxRetries),
           delayMs: config.retryDelayMs,
           label: `reclassify:${img.file}`,
         },
@@ -137,6 +138,9 @@ export async function analyzeImages(
   onBatchComplete?: (processedCount: number, results: AnalysisResult[]) => Promise<void>,
   feedbackNote = '',
 ): Promise<{ images: AnalyzedImage[]; overrideCount: number }> {
+  // The provider that serves the run prices the progress bar and the summary.
+  setCostProvider(config.provider);
+
   // First pass: batch analysis (hybrid uses two-tier local + cloud)
   const llmClient = createLLMClient(config);
   const batchResults =
@@ -193,7 +197,7 @@ export async function analyzeImages(
     analyzedImages = await runSelfCritique(
       analyzedImages,
       llmClient,
-      config.maxRetries,
+      attemptsFor(config.maxRetries),
       config.retryDelayMs,
     );
   }

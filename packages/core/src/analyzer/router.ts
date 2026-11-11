@@ -3,7 +3,7 @@ import { z } from 'zod';
 import type { Config } from '../config/index.js';
 import type { AnalysisResult, FileWithStats } from '../types.js';
 import { logger } from '../utils/logger.js';
-import { withRetry } from '../utils/retry.js';
+import { attemptsFor, withRetry } from '../utils/retry.js';
 import { sanitizeTextField } from '../utils/sanitize.js';
 import { analyzeBatch, buildSystemPrompt, normalizeCategory } from './batch.js';
 import { createCloudClientForHybrid, type LLMClient } from './client.js';
@@ -132,7 +132,7 @@ export async function runHybridBatch(
             { maxTokens: 500, detail: 'high', systemPrompt },
           ),
         {
-          maxAttempts: config.maxRetries,
+          maxAttempts: attemptsFor(config.maxRetries),
           delayMs: config.retryDelayMs,
           label: `hybrid:${file.file}`,
         },

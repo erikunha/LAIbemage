@@ -4,7 +4,7 @@ import sharp from 'sharp';
 import { z } from 'zod';
 import type { CategoryConfig, Config } from '../config/index.js';
 import { logger } from '../utils/logger.js';
-import { withRetry } from '../utils/retry.js';
+import { attemptsFor, withRetry } from '../utils/retry.js';
 import type { LLMClient } from './client.js';
 
 const IMAGE_REGEX = /\.(jpe?g|png|webp|tiff?|avif)$/i;
@@ -105,7 +105,11 @@ export async function suggestCategories(
         detail: 'low',
         systemPrompt: SUGGEST_SYSTEM_PROMPT,
       }),
-    { maxAttempts: config.maxRetries, delayMs: config.retryDelayMs, label: 'suggest-categories' },
+    {
+      maxAttempts: attemptsFor(config.maxRetries),
+      delayMs: config.retryDelayMs,
+      label: 'suggest-categories',
+    },
   );
 
   let parsed: unknown;

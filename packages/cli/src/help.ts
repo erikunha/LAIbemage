@@ -21,6 +21,7 @@ ${chalk.bold('OPTIONS')}
   --provider              <name>    openai | anthropic | google | azure | ollama | bedrock | vertex  (default: openai)
   --api-key               <key>     OpenAI API key (overrides OPENAI_API_KEY)
   --anthropic-api-key     <key>     Anthropic API key (overrides ANTHROPIC_API_KEY)
+  --anthropic-workspace-id <id>     Anthropic workspace ID (overrides ANTHROPIC_WORKSPACE_ID)
   --google-api-key        <key>     Google AI API key (overrides GOOGLE_API_KEY)
   --azure-endpoint        <url>     Azure OpenAI endpoint (requires --provider azure)
   --azure-api-key         <key>     Azure OpenAI API key (overrides AZURE_OPENAI_API_KEY)

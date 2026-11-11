@@ -97,6 +97,8 @@ export interface Config {
   readonly apiKey: string;
   /** Anthropic API key — used when provider is 'anthropic'. */
   readonly anthropicApiKey: string;
+  /** Anthropic workspace id, sent as the anthropic-workspace-id header for keys not scoped to a workspace. */
+  readonly anthropicWorkspaceId?: string;
   /** Google AI API key — used when provider is 'google'. */
   readonly googleApiKey: string;
   /** Azure OpenAI endpoint URL — required when provider is 'azure'. Example: https://my-resource.openai.azure.com/ */
@@ -107,6 +109,10 @@ export interface Config {
   readonly ollamaUrl?: string;
   readonly model: string;
   readonly batchSize: number;
+  /**
+   * Number of retries after the first attempt, not the number of attempts:
+   * 0 means a single attempt, 3 means up to 4 attempts (see `attemptsFor`).
+   */
   readonly maxRetries: number;
   readonly retryDelayMs: number;
   readonly delayBetweenCallsMs: number;
@@ -230,6 +236,7 @@ export interface RawCliOptions {
   provider?: string;
   apiKey?: string;
   anthropicApiKey?: string;
+  anthropicWorkspaceId?: string;
   googleApiKey?: string;
   azureEndpoint?: string;
   azureApiKey?: string;
@@ -298,6 +305,18 @@ export const REORDER_SENTINEL_KEY = 'reorder-no-key-needed';
  */
 export const DEFAULT_FILENAME_TEMPLATE = '{n}. Photo of {category} dated {date}';
 
+/** Default number of retries when the configured value is not a usable number. */
+export const DEFAULT_MAX_RETRIES = 3;
+
+/**
+ * Retry count from user input: a negative value becomes 0 (no retries),
+ * a value that is not a finite number falls back to the default of 3.
+ */
+export function parseRetryCount(value: number): number {
+  if (typeof value !== 'number' || !Number.isFinite(value)) return DEFAULT_MAX_RETRIES;
+  return Math.max(0, value);
+}
+
 export async function loadConfig(cliOptions: RawCliOptions): Promise<Config> {
   dotenv.config();
 
@@ -311,6 +330,8 @@ export async function loadConfig(cliOptions: RawCliOptions): Promise<Config> {
 
   const apiKey = cliOptions.apiKey ?? process.env['OPENAI_API_KEY'] ?? '';
   const anthropicApiKey = cliOptions.anthropicApiKey ?? process.env['ANTHROPIC_API_KEY'] ?? '';
+  const anthropicWorkspaceId =
+    cliOptions.anthropicWorkspaceId ?? process.env['ANTHROPIC_WORKSPACE_ID'] ?? '';
   const googleApiKey = cliOptions.googleApiKey ?? process.env['GOOGLE_API_KEY'] ?? '';
   const azureApiKey = cliOptions.azureApiKey ?? process.env['AZURE_OPENAI_API_KEY'] ?? '';
   const azureEndpoint = cliOptions.azureEndpoint ?? process.env['AZURE_OPENAI_ENDPOINT'] ?? '';
@@ -444,13 +465,16 @@ export async function loadConfig(cliOptions: RawCliOptions): Promise<Config> {
     provider,
     apiKey,
     anthropicApiKey,
+    anthropicWorkspaceId: anthropicWorkspaceId || undefined,
     googleApiKey,
     azureEndpoint: azureEndpoint || undefined,
     azureApiKey: azureApiKey || undefined,
     ollamaUrl: ollamaUrl || 'http://localhost:11434',
     model: cliOptions.model ?? process.env['MODEL'] ?? process.env['OPENAI_MODEL'] ?? defaultModel,
     batchSize: cliOptions.batchSize ?? parseInt(process.env['BATCH_SIZE'] ?? '20', 10),
-    maxRetries: cliOptions.maxRetries ?? parseInt(process.env['MAX_RETRIES'] ?? '3', 10),
+    maxRetries: parseRetryCount(
+      cliOptions.maxRetries ?? parseInt(process.env['MAX_RETRIES'] ?? '3', 10),
+    ),
     retryDelayMs: 10_000,
     delayBetweenCallsMs: 1_500,
     dryRun: cliOptions.dryRun ?? false,

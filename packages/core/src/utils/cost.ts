@@ -69,10 +69,36 @@ export const PROVIDER_PRICING: Record<LLMProvider, ProviderPricing> = {
   },
 };
 
+/**
+ * True when the published rates of a provider cannot price a run.
+ *
+ * A hybrid run mixes a free local tier with a paid cloud tier, so a single
+ * rate would report a misleading number. The progress bar and the run summary
+ * share this predicate and both show "n/a" instead of a wrong price.
+ */
+export function hasUnknownRate(provider: LLMProvider): boolean {
+  return provider === 'hybrid';
+}
+
+/**
+ * Cost in USD of the given token counts at the provider's published rates.
+ * Local-only providers (ollama, hybrid) price at zero.
+ */
+export function computeCostUsd(
+  provider: LLMProvider,
+  inputTokens: number,
+  outputTokens: number,
+): number {
+  const pricing = PROVIDER_PRICING[provider];
+  return (
+    (inputTokens / 1_000_000) * pricing.inputPerMillion +
+    (outputTokens / 1_000_000) * pricing.outputPerMillion
+  );
+}
+
 // ---------------------------------------------------------------------------
 // Token estimates per image (detail levels)
 // ---------------------------------------------------------------------------
-
 /**
  * Approximate input tokens consumed per image in a batch call.
  *  - detail:low  uses a fixed 85-token tile (OpenAI spec; Anthropic/Google are similar)

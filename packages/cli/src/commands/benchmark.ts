@@ -55,7 +55,10 @@ export interface BenchmarkRunOptions {
   readonly minSamples?: number;
   /** The code snapshot the run belongs to. Defaults to the current git HEAD. */
   readonly snapshotId?: string;
-  /** The split fingerprint. Defaults to the manifest hash. */
+  /**
+   * The split fingerprint of the run: the MANIFEST HASH of the split file the
+   * run is scored against. Defaults to the manifest hash of `--split`.
+   */
   readonly splitFingerprint?: string;
   /** The model identity AND version. */
   readonly modelVersion?: string;
@@ -75,6 +78,13 @@ export interface BenchmarkGateOptions {
   readonly metricsPath?: string;
   /** Path of the baseline file. */
   readonly baselinePath?: string;
+  /**
+   * Path of the split manifest that is currently tracked for the suite.
+   *
+   * Defaults to `benchmarks/splits/<suite>.gold.json`: the suite id names
+   * the split the suite is tracked against.
+   */
+  readonly splitPath?: string;
   /** The regression tolerance. Defaults to −0.02. */
   readonly tolerance?: number;
   /** Rewrite the baseline file with the run's metrics. */
@@ -94,6 +104,19 @@ export interface BenchmarkReportOptions {
 
 /** The marker printed whenever the dataset (or split) is not available. */
 export const DATASET_ABSENT_MARKER = 'dataset=absent';
+
+/**
+ * The split manifest that is currently tracked for a suite.
+ *
+ * The suite id names the split it is tracked against, so the default is
+ * `benchmarks/splits/<suite>.gold.json`. The `run` command scores against
+ * that manifest and the `gate` command must be told the SAME one: a number is
+ * only comparable with a baseline when both were measured on the same
+ * partition.
+ */
+export function trackedSplitPath(suite: string, splitPath?: string): string {
+  return splitPath ?? path.join('benchmarks', 'splits', `${suite}.gold.json`);
+}
 
 function readJsonFile<T>(filePath: string): T {
   return JSON.parse(readFileSync(filePath, 'utf8')) as T;
@@ -202,7 +225,7 @@ function computeAssetHashes(
  *   skipped because the dataset is absent.
  */
 export async function runBenchmarkCommand(options: BenchmarkRunOptions): Promise<boolean> {
-  const splitPath = options.splitPath ?? path.join('benchmarks', 'splits', `${options.suite}.gold.json`);
+  const splitPath = trackedSplitPath(options.suite, options.splitPath);
 
   if (!existsSync(splitPath)) {
     logger.warn(`${DATASET_ABSENT_MARKER} — no split manifest at ${splitPath}.`);
@@ -212,9 +235,10 @@ export async function runBenchmarkCommand(options: BenchmarkRunOptions): Promise
 
   const manifest = readJsonFile<SplitManifest>(splitPath);
 
-  // The split fingerprint IS the manifest hash. A caller may restate it, but
-  // it may not contradict it: an artifact fingerprinted with an unrelated
-  // value would be attributed to a split it was not scored against.
+  // The split fingerprint IS the manifest hash: it names the split FILE the
+  // run is scored against. A caller may restate it, but it may not contradict
+  // it: an artifact fingerprinted with an unrelated value would be attributed
+  // to a split it was not scored against.
   if (
     options.splitFingerprint !== undefined &&
     options.splitFingerprint !== manifest.manifestHash
@@ -354,6 +378,14 @@ export async function runBenchmarkGateCommand(
   // outage) must be skipped by the gate, never compared and never failed.
   const partial = options.partial === true || report.partial === true;
 
+  // The split that is currently tracked for the suite. The gate needs it to
+  // refuse a number that does not belong to the tracked split: without it the
+  // comparison would bless a run measured on a partition the platform no
+  // longer tracks. When the split file is absent the check stays inert, so a
+  // missing dataset remains a skip and never a failure.
+  const splitPath = trackedSplitPath(options.suite, options.splitPath);
+  const splitExists = existsSync(splitPath);
+
   const result = evaluateGate({
     suite: options.suite,
     model: options.model,
@@ -378,6 +410,11 @@ export async function runBenchmarkGateCommand(
       ? {}
       : { updateBaseline: options.updateBaseline }),
     ...(options.force === undefined ? {} : { force: options.force }),
+    // The split identity check is only meaningful when the tracked split is
+    // actually on disk, so it is passed only then.
+    ...(splitExists
+      ? { currentSplitPath: splitPath, splitsDir: path.dirname(splitPath) }
+      : {}),
   });
 
   if (result.skipped) {

@@ -45,6 +45,35 @@
  *                    That split then exceeds its nominal quota; the
  *                    deviation shows up in `strata[]` and is recorded as a
  *                    `notes[]` entry prefixed `capture-group-overflow:`.
+ * Strategies ....... two strategies, named in the manifest, the CLI flag and
+ *                    this module:
+ *                    - `grouped` (the default): capture groups are the atom
+ *                      of the assignment, as described above. This is the
+ *                      behaviour of every split generated before VLN-007.
+ *                    - `stratified`: the capture-group property is NOT
+ *                      enforced. The partition is ITEM-LEVEL and stratified:
+ *                      within every stratum (class x anomaly) the items are
+ *                      shuffled with the stratum PRNG and dealt to the three
+ *                      splits in the stratum's own quota, so each split
+ *                      carries every class and both anomaly labels in the
+ *                      expected proportion.
+ *                      The manifest says so, in `groupBasis` and in a
+ *                      `notes[]` entry: a reader must never mistake an
+ *                      item-level partition for a group-safe one.
+ *                      This strategy exists because a group that is larger
+ *                      than every quota CANNOT be kept whole in three
+ *                      partitions — the upstream VisA release carries no
+ *                      session column, so the capture group of an item is
+ *                      its object class, and the `grouped` strategy then
+ *                      degenerates to an all-train split (VLN-007).
+ * Partition hash ..  `partitionFingerprint` = sha256 over the canonical JSON
+ *                    of the sorted `id -> split` pairs. It identifies the
+ *                    PARTITION (which item sits in which split) independently
+ *                    of the manifest's other content. It is NOT the identity
+ *                    of the split FILE: that is `manifestHash` (see below).
+ *                    The benchmark gate compares FILE identities, so the
+ *                    reproduction tuple and the baseline entries carry the
+ *                    `manifestHash` under the name `splitFingerprint`.
  * Notes channel ... `notes[]` carries two kinds of record:
  *                      - a note whose `id` matches an item id marks that item
  *                        as KNOWN-BAD: it is excluded from the assignments
@@ -59,6 +88,10 @@
  *                    canonical JSON is the contracts' own serialiser — never
  *                    re-implemented here — so this hash agrees with every
  *                    other fingerprint in the platform.
+ *                    It is the identity of the split FILE: the reproduction
+ *                    tuple and the baseline entries carry it under the name
+ *                    `splitFingerprint`, because it names the file a number
+ *                    was measured against.
  * No timestamps ... the manifest carries NO generation timestamp: a
  *                    timestamp would change the bytes on every run and break
  *                    SC-001 byte-stability. Record the generation date in a
@@ -76,10 +109,43 @@ import { readFile } from 'node:fs/promises';
 import path from 'node:path';
 import { canonicalJson } from '@vision-lens/contracts';
 
-/** Schema version of the split manifest. Bump on any breaking field change. */
-export const SPLIT_MANIFEST_SCHEMA_VERSION = 1;
+/**
+ * Schema version of the split manifest. Bump on any breaking field change.
+ *
+ * Version 2 adds `strategy`, `partitionFingerprint` and `groupBasis`. A version 1
+ * manifest (the frozen `visa-subset.gold.json`, which is the EVIDENCE of the
+ * degenerate all-train split and is never rewritten) stays valid: the hash
+ * payload drops the fields a manifest does not carry, so its recorded
+ * `manifestHash` still verifies.
+ */
+export const SPLIT_MANIFEST_SCHEMA_VERSION = 2;
+
+/** The schema version of the first (pre-strategy) manifest format. */
+export const LEGACY_SPLIT_MANIFEST_SCHEMA_VERSION = 1;
 
 export type SplitName = 'train' | 'val' | 'test';
+
+/**
+ * The two strategies the engine can produce.
+ *
+ * - `grouped`  the capture group is the atom of the assignment (the legacy
+ *              behaviour, unchanged);
+ * - `stratified` the partition is ITEM-LEVEL: the capture groups are not
+ *              enforced, and the split is stratified by class and anomaly
+ *              instead.
+ */
+export type SplitStrategy = 'grouped' | 'stratified';
+
+/** Every supported strategy, in the order the CLI lists them. */
+export const SPLIT_STRATEGIES: readonly SplitStrategy[] = ['grouped', 'stratified'];
+
+/**
+ * The strategy a generator uses when the caller names none.
+ *
+ * `grouped` — the behaviour every pre-VLN-007 split was produced with. A
+ * caller that names no strategy gets exactly the legacy partition.
+ */
+export const DEFAULT_SPLIT_STRATEGY: SplitStrategy = 'grouped';
 
 export type AnomalyLabel = 'normal' | 'anomalous';
 
@@ -100,6 +166,14 @@ export const CAPTURE_GROUP_OVERFLOW_REASON_PREFIX = 'capture-group-overflow:';
 
 /** Reason prefix used when a caller documents a known-bad gold label. */
 export const KNOWN_BAD_REASON_PREFIX = 'known-bad:';
+
+/**
+ * The id of the note that states what the item-level partition is.
+ *
+ * It is not an item id, so the note is a structural record (the notes channel
+ * treats a note whose id matches an item id as a known-bad item).
+ */
+export const STRATEGY_NOTE_ID = 'strategy:item-level';
 
 /** One image to be split. */
 export interface SplitItem {
@@ -143,8 +217,31 @@ export interface SplitNote {
   reason: string;
 }
 
+/**
+ * What the partition is (and is not) with respect to the capture groups.
+ *
+ * The field exists so that a reader of a manifest can never mistake an
+ * item-level partition for a capture-group-safe one: the upstream VisA release
+ * carries no session column, so the capture group of an item IS its object
+ * class, and a class that is larger than every quota cannot be kept whole in
+ * three partitions (VLN-007).
+ */
+export interface SplitGroupBasis {
+  /** Whether the capture-group property was enforced by the partition. */
+  readonly captureGroupsEnforced: boolean;
+  /**
+   * The number of DISTINCT capture groups that were too large to be kept
+   * whole inside at least one stratum. A group that spans two strata (the
+   * same class, both anomaly kinds) is counted once.
+   */
+  readonly oversizedCaptureGroupCount: number;
+  /** The plain-language statement of what the partition is. */
+  readonly statement: string;
+}
+
 export interface SplitManifest {
-  schemaVersion: 1;
+  /** 1 = the pre-strategy format; 2 = the format that names the strategy. */
+  schemaVersion: 1 | 2;
   id: string;
   datasetId: string;
   seed: number;
@@ -152,6 +249,20 @@ export interface SplitManifest {
   strata: SplitStratum[];
   assignments: SplitAssignment[];
   notes: SplitNote[];
+  /** The strategy that produced the partition (schemaVersion 2 and later). */
+  strategy?: SplitStrategy;
+  /**
+   * The fingerprint of the PARTITION (which item sits in which split),
+   * independently of the rest of the manifest (schemaVersion 2 and later).
+   *
+   * It is NOT the identity of the split file: that is `manifestHash`. The
+   * name is deliberately different from the `splitFingerprint` of the
+   * reproduction tuple and of a baseline entry, which carries the
+   * `manifestHash` because it names the FILE a number was measured against.
+   */
+  partitionFingerprint?: string;
+  /** What the partition is with respect to the capture groups (schemaVersion 2 and later). */
+  groupBasis?: SplitGroupBasis;
   manifestHash: string;
 }
 
@@ -182,6 +293,11 @@ export interface GenerateSplitOptions {
   notes?: readonly SplitNote[];
   /** Train/val/test ratios. Defaults to 60/20/20. */
   ratios?: SplitRatios;
+  /**
+   * The strategy that produces the partition. Defaults to `grouped`, the
+   * behaviour every pre-VLN-007 split was produced with.
+   */
+  strategy?: SplitStrategy;
   /** Optional near-duplicate grouping provider (stub hook). */
   nearDuplicateGroups?: NearDuplicateGroupProvider;
 }
@@ -485,11 +601,60 @@ function placeGroups(
   return { splitByItemId, overflows };
 }
 
+/**
+ * Deal the items of one stratum to the three splits. This is the ITEM-LEVEL
+ * strategy.
+ *
+ * The items are shuffled with the stratum PRNG and then dealt out in the
+ * fixed split order: the first `capacities.train` items go to `train`, the
+ * next `capacities.val` to `val` and the rest to `test`. Every item therefore
+ * lands in the stratum's own quota, so the partition carries every class and
+ * both anomaly labels in the expected proportion.
+ *
+ * The capture groups are NOT consulted: this is the strategy that exists
+ * precisely because a group larger than every quota cannot be kept whole.
+ */
+function placeItems(
+  items: readonly SplitItem[],
+  capacities: Record<SplitName, number>,
+  rand: () => number,
+): StratumPlacement {
+  const splitByItemId = new Map<string, SplitName>();
+  const ordered = shuffle(items, rand);
+
+  let cursor = 0;
+  for (const split of SPLIT_NAMES) {
+    for (let index = 0; index < capacities[split]; index += 1) {
+      const item = ordered[cursor];
+      cursor += 1;
+      if (item === undefined) break;
+      splitByItemId.set(item.id, split);
+    }
+  }
+  // Defensive: a quota that does not cover every item leaves the remainder
+  // unassigned: it goes to the last split, so no item is ever dropped.
+  for (; cursor < ordered.length; cursor += 1) {
+    const item = ordered[cursor];
+    if (item === undefined) break;
+    splitByItemId.set(item.id, 'test');
+  }
+
+  return { splitByItemId, overflows: [] };
+}
+
 /* ------------------------------------------------------------------ *
  * Manifest
  * ------------------------------------------------------------------ */
 
-/** The manifest without its hash field — the exact input of the hash. */
+/**
+ * The manifest without its hash field — the exact input of the hash.
+ *
+ * The fields a manifest does not carry are OMITTED from the payload (not
+ * written as `undefined`): a version 1 manifest, the frozen
+ * `visa-subset.gold.json`, which is the evidence of the degenerate all-train
+ * split and is never rewritten, must keep verifying against the
+ * `manifestHash` it was recorded with.
+ */
 export function manifestWithoutHash(manifest: SplitManifest): SplitManifestWithoutHash {
   return {
     schemaVersion: manifest.schemaVersion,
@@ -500,6 +665,11 @@ export function manifestWithoutHash(manifest: SplitManifest): SplitManifestWitho
     strata: manifest.strata,
     assignments: manifest.assignments,
     notes: manifest.notes,
+    ...(manifest.strategy === undefined ? {} : { strategy: manifest.strategy }),
+    ...(manifest.partitionFingerprint === undefined
+      ? {}
+      : { partitionFingerprint: manifest.partitionFingerprint }),
+    ...(manifest.groupBasis === undefined ? {} : { groupBasis: manifest.groupBasis }),
   };
 }
 
@@ -517,8 +687,36 @@ export function computeManifestHash(manifest: SplitManifest | SplitManifestWitho
     strata: manifest.strata,
     assignments: manifest.assignments,
     notes: manifest.notes,
+    ...(manifest.strategy === undefined ? {} : { strategy: manifest.strategy }),
+    ...(manifest.partitionFingerprint === undefined
+      ? {}
+      : { partitionFingerprint: manifest.partitionFingerprint }),
+    ...(manifest.groupBasis === undefined ? {} : { groupBasis: manifest.groupBasis }),
   };
   return sha256Hex(canonicalJson(payload));
+}
+
+/**
+ * The fingerprint of the PARTITION: sha256 (hex) over the canonical JSON of
+ * the sorted `id -> split` pairs.
+ *
+ * WHY a second fingerprint: the `manifestHash` covers the WHOLE manifest
+ * (the seed, the ratios, the notes, the ids of the images). The partition
+ * fingerprint covers the PARTITION alone (which item sits in which split),
+ * so two manifests that describe the same partition but differ in their
+ * bookkeeping still compare equal.
+ *
+ * The pairs are sorted by item id (UTF-16 code-unit order, the same sort key
+ * as everywhere else in this module), so the fingerprint does not depend on
+ * the order of the assignments.
+ */
+export function computePartitionFingerprint(
+  assignments: readonly SplitAssignment[],
+): string {
+  const pairs = assignments
+    .map((assignment) => [assignment.id, assignment.split] as const)
+    .sort((left, right) => compareIds(left[0], right[0]));
+  return sha256Hex(canonicalJson(pairs));
 }
 
 /** Byte-stable serialisation of the manifest (2-space JSON + trailing newline). */
@@ -532,9 +730,16 @@ export function serializeSplitManifest(manifest: SplitManifest): string {
  * Deterministic: the same seed and the same items always produce the same
  * manifest, byte for byte (SC-001), regardless of the order in which the
  * items are supplied.
+ *
+ * The strategy decides what the ATOM of the assignment is: the capture group
+ * (`grouped`, the default) or the single item (`stratified`). The manifest
+ * always records which one was used, the fingerprint of the partition and the
+ * group basis, the statement of what the partition is (and is not) with
+ * respect to the capture groups.
  */
 export function generateSplitManifest(options: GenerateSplitOptions): SplitManifest {
   const ratios = options.ratios ?? DEFAULT_SPLIT_RATIOS;
+  const strategy = options.strategy ?? DEFAULT_SPLIT_STRATEGY;
   const callerNotes = options.notes ? options.notes.slice() : [];
 
   // 1. Sort first — the sort key is the item id, so input order is irrelevant.
@@ -560,33 +765,51 @@ export function generateSplitManifest(options: GenerateSplitOptions): SplitManif
     (a, b) => compareIds(a.class, b.class) || compareIds(a.anomaly, b.anomaly),
   );
 
-  // 4. Place the capture groups of every stratum.
+  // 4. Place the items of every stratum, with the atom of the strategy.
   const splitByItemId = new Map<string, SplitName>();
   const overflowNotes: SplitNote[] = [];
   const strataRows: SplitStratum[] = [];
+  // The capture groups that were too large to be kept whole in their stratum.
+  const oversizedGroups = new Set<string>();
 
   for (const stratum of strata) {
     const items = stratum.items.slice().sort((a, b) => compareIds(a.id, b.id));
-    const groups = buildGroups(items, options.nearDuplicateGroups);
     const capacities = computeSplitCapacities(items.length, ratios);
     const rand = mulberry32(stratumSeed(options.seed, stratum.class, stratum.anomaly));
-    const placement = placeGroups(groups, capacities, rand);
 
-    for (const [itemId, split] of placement.splitByItemId) splitByItemId.set(itemId, split);
+    // The capture groups of the stratum: always computed, because the group
+    // basis of the manifest reports them. The near-duplicate hook is applied
+    // to the PLACEMENT of the grouped strategy only: the item-level strategy
+    // does not keep groups together at all.
+    const captureGroups = buildGroups(items, undefined);
+    const largestQuota = Math.max(capacities.train, capacities.val, capacities.test);
+    for (const group of captureGroups) {
+      if (group.items.length > largestQuota) oversizedGroups.add(group.key);
+    }
 
-    for (const overflow of placement.overflows) {
-      overflowNotes.push({
-        id: `capture-group:${stratum.class}/${stratum.anomaly}/${overflow.group.key}`,
-        reason:
-          `${CAPTURE_GROUP_OVERFLOW_REASON_PREFIX}${overflow.group.items.length} capture-grouped ` +
-          `items could not fit the remaining quota of any split; assigned wholly to '${overflow.split}' ` +
-          `(remaining quota before assignment: ${overflow.remainingBefore}).`,
-      });
+    if (strategy === 'stratified') {
+      const placement = placeItems(items, capacities, rand);
+      for (const [itemId, split] of placement.splitByItemId) splitByItemId.set(itemId, split);
+    } else {
+      const groups = buildGroups(items, options.nearDuplicateGroups);
+      const placement = placeGroups(groups, capacities, rand);
+
+      for (const [itemId, split] of placement.splitByItemId) splitByItemId.set(itemId, split);
+
+      for (const overflow of placement.overflows) {
+        overflowNotes.push({
+          id: `capture-group:${stratum.class}/${stratum.anomaly}/${overflow.group.key}`,
+          reason:
+            `${CAPTURE_GROUP_OVERFLOW_REASON_PREFIX}${overflow.group.items.length} capture-grouped ` +
+            `items could not fit the remaining quota of any split; assigned wholly to '${overflow.split}' ` +
+            `(remaining quota before assignment: ${overflow.remainingBefore}).`,
+        });
+      }
     }
 
     const counts: Record<SplitName, number> = { train: 0, val: 0, test: 0 };
     for (const item of items) {
-      const split = placement.splitByItemId.get(item.id);
+      const split = splitByItemId.get(item.id);
       if (split) counts[split] += 1;
     }
     strataRows.push({
@@ -617,8 +840,45 @@ export function generateSplitManifest(options: GenerateSplitOptions): SplitManif
     })
     .sort((a, b) => compareIds(a.id, b.id));
 
-  // 6. Notes — caller notes plus the structural overflow notes, sorted by id.
-  const notes = [...callerNotes, ...overflowNotes].sort((a, b) => compareIds(a.id, b.id));
+  // 6. Notes: the caller notes, the structural overflow notes and the strategy
+  //    note, sorted by id.
+  const strategyNotes: SplitNote[] =
+    strategy === 'stratified'
+      ? [
+          {
+            id: STRATEGY_NOTE_ID,
+            reason:
+              'item-level partition: the capture-group property is NOT enforced, so the items of ' +
+              'one capture group may sit in different splits. The partition is stratified by ' +
+              `class and anomaly instead; ${oversizedGroups.size} capture group(s) were too large ` +
+              'to be kept whole.',
+          },
+        ]
+      : [];
+  const notes = [...callerNotes, ...overflowNotes, ...strategyNotes].sort((a, b) =>
+    compareIds(a.id, b.id),
+  );
+
+  // 7. The group basis: what the partition is (and is not) with respect to
+  //    the capture groups.
+  const groupBasis: SplitGroupBasis =
+    strategy === 'stratified'
+      ? {
+          captureGroupsEnforced: false,
+          oversizedCaptureGroupCount: oversizedGroups.size,
+          statement:
+            'This partition is ITEM-LEVEL: the capture-group property is NOT enforced, so the ' +
+            'items of one capture group may sit in different splits. It is stratified by class ' +
+            'and anomaly instead, and it cannot prove acquisition-level independence.',
+        }
+      : {
+          captureGroupsEnforced: true,
+          oversizedCaptureGroupCount: oversizedGroups.size,
+          statement:
+            'Capture groups are the atom of the assignment: inside a stratum (class x anomaly) ' +
+            'the items of a capture group are never separated. A group larger than every quota ' +
+            'is assigned wholly and recorded as a capture-group-overflow note.',
+        };
 
   const manifest: SplitManifestWithoutHash = {
     schemaVersion: SPLIT_MANIFEST_SCHEMA_VERSION,
@@ -629,6 +889,9 @@ export function generateSplitManifest(options: GenerateSplitOptions): SplitManif
     strata: strataRows,
     assignments,
     notes,
+    strategy,
+    partitionFingerprint: computePartitionFingerprint(assignments),
+    groupBasis,
   };
 
   return { ...manifest, manifestHash: computeManifestHash(manifest) };

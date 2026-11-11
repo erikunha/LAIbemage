@@ -99,6 +99,9 @@ describe('split manifest — byte-stability', () => {
       'strata',
       'assignments',
       'notes',
+      'strategy',
+      'partitionFingerprint',
+      'groupBasis',
       'manifestHash',
     ]);
     expect(JSON.stringify(manifest)).not.toMatch(/generatedAt|timestamp|createdAt/i);

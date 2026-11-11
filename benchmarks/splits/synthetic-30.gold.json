@@ -1,5 +1,5 @@
 {
-  "schemaVersion": 1,
+  "schemaVersion": 2,
   "id": "synthetic-30.gold",
   "datasetId": "synthetic-fixture",
   "seed": 42,
@@ -301,5 +301,12 @@
     }
   ],
   "notes": [],
-  "manifestHash": "af8f2379a8120e7982f571c285301daf479b17bb8f375312dfd8393a140bf0aa"
+  "strategy": "grouped",
+  "partitionFingerprint": "b3b259e629b83412bf23d4f520cf772cda4eac46e1c09d52c6584ee8bcf3892b",
+  "groupBasis": {
+    "captureGroupsEnforced": true,
+    "oversizedCaptureGroupCount": 0,
+    "statement": "Capture groups are the atom of the assignment: inside a stratum (class x anomaly) the items of a capture group are never separated. A group larger than every quota is assigned wholly and recorded as a capture-group-overflow note."
+  },
+  "manifestHash": "fe46a2a299d6cb55ad8c8bcfe62cc5bf49def803c98128eff8badc45f835f03c"
 }

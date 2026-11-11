@@ -6,15 +6,17 @@
  * tolerance passes, a hair beyond it fails, and a partial run never fails.
  */
 
-import { existsSync, mkdtempSync, readFileSync, rmSync } from 'node:fs';
+import { existsSync, copyFileSync, mkdirSync, mkdtempSync, readFileSync, rmSync, writeFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import path from 'node:path';
+import { fileURLToPath } from 'node:url';
 import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 import {
   BASELINE_REVIEW_THRESHOLD,
   DEFAULT_GATE_TOLERANCE,
   evaluateGate,
   findBaselineEntry,
+  findRetiredBaselineEntry,
   readBaselineFile,
   writeBaselineFile,
   type BaselineEntry,
@@ -26,6 +28,8 @@ import {
   type MetricsResult,
   type PredictionItem,
 } from '../../src/benchmark/metrics.js';
+
+const REPO_ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..', '..', '..', '..');
 
 /**
  * A gold set of `size` items over two classes.
@@ -64,6 +68,36 @@ function baselineEntry(macroF1: number, perClass: Record<string, number>): Basel
     ece: 0,
     generatedAt: '2026-01-01T00:00:00.000Z',
   };
+}
+
+/**
+ * A split manifest the gate can read: the manifest hash (the identity of the
+ * file) and the partition each assignment sits in.
+ */
+function writeSplitFile(file: string, manifestHash: string): string {
+  mkdirSync(path.dirname(file), { recursive: true });
+  writeFileSync(
+    file,
+    `${JSON.stringify(
+      {
+        schemaVersion: 2,
+        id: path.basename(file, '.json'),
+        datasetId: 'test-dataset',
+        strategy: 'stratified',
+        manifestHash,
+        partitionFingerprint: manifestHash,
+        assignments: [
+          { id: 'a', split: 'train' },
+          { id: 'b', split: 'val' },
+          { id: 'c', split: 'test' },
+        ],
+      },
+      null,
+      2,
+    )}\n`,
+    'utf8',
+  );
+  return file;
 }
 
 describe('evaluateGate', () => {
@@ -484,5 +518,410 @@ describe('the baseline is keyed by (suite, model, model version)', () => {
     const entry = findBaselineEntry(file, 'synthetic', 'demo', 'model:demo@3.0.0');
     expect(entry).toBeDefined();
     expect(entry?.modelVersion).toBe('model:demo@3.0.0');
+  });
+});
+
+/* ------------------------------------------------------------------ *
+ * The run itself must belong to the tracked split
+ * ------------------------------------------------------------------ */
+
+describe('the run under evaluation must be measured against the tracked split', () => {
+  let dir: string;
+  let baselinePath: string;
+  let splitsDir: string;
+
+  beforeEach(() => {
+    dir = mkdtempSync(path.join(tmpdir(), 'vision-lens-gate-run-split-'));
+    baselinePath = path.join(dir, 'synthetic.json');
+    splitsDir = path.join(dir, 'splits');
+    writeSplitFile(path.join(splitsDir, 'tracked.gold.json'), 'hash-tracked');
+    writeSplitFile(path.join(splitsDir, 'old.gold.json'), 'hash-old');
+  });
+
+  afterEach(() => {
+    rmSync(dir, { recursive: true, force: true });
+  });
+
+  /** A baseline that WAS recorded against the tracked split. */
+  function baselineOnTrackedSplit(): void {
+    writeBaselineFile(baselinePath, {
+      schemaVersion: 1,
+      generatedAt: '2026-01-01T00:00:00.000Z',
+      entries: [
+        {
+          suite: 'synthetic',
+          model: 'demo',
+          macroF1: 0.8,
+          perClass: { alpha: 0.8, beta: 0.8 },
+          splitFingerprint: 'hash-tracked',
+          generatedAt: '2026-01-01T00:00:00.000Z',
+        },
+      ],
+    });
+  }
+
+  it('fails when the run was measured against ANOTHER split', () => {
+    const { metrics } = buildRun(8);
+    // The baseline is on the tracked split, so the ONLY thing that can refuse
+    // this run is the run's own fingerprint.
+    baselineOnTrackedSplit();
+
+    const result = evaluateGate({
+      suite: 'synthetic',
+      model: 'demo',
+      metrics,
+      baselinePath,
+      currentSplitPath: path.join(splitsDir, 'tracked.gold.json'),
+      splitsDir,
+      attribution: { splitFingerprint: 'hash-old' },
+    });
+
+    expect(result.passed).toBe(false);
+    expect(result.skipped).toBe(false);
+    // The message names BOTH fingerprints and BOTH split ids.
+    expect(result.reason).toContain('hash-old');
+    expect(result.reason).toContain('hash-tracked');
+    expect(result.reason).toContain('old.gold');
+    expect(result.reason).toContain('tracked.gold');
+    // The macro F1 was NOT compared.
+    expect(result.macroF1Delta).toBe(0);
+    expect(result.deltas).toEqual([]);
+    expect(result.regressedClasses).toEqual([]);
+  });
+
+  it('fails when the run cannot be attributed to a split at all', () => {
+    const { metrics } = buildRun(8);
+    baselineOnTrackedSplit();
+
+    const result = evaluateGate({
+      suite: 'synthetic',
+      model: 'demo',
+      metrics,
+      baselinePath,
+      currentSplitPath: path.join(splitsDir, 'tracked.gold.json'),
+      splitsDir,
+    });
+
+    expect(result.passed).toBe(false);
+    expect(result.skipped).toBe(false);
+    expect(result.reason).toMatch(/cannot be attributed/i);
+    expect(result.macroF1Delta).toBe(0);
+    expect(result.deltas).toEqual([]);
+  });
+
+  it('refuses to RECORD a baseline from a run measured against another split', () => {
+    const { metrics } = buildRun(8);
+    baselineOnTrackedSplit();
+
+    const result = evaluateGate({
+      suite: 'synthetic',
+      model: 'demo',
+      metrics,
+      baselinePath,
+      currentSplitPath: path.join(splitsDir, 'tracked.gold.json'),
+      splitsDir,
+      updateBaseline: true,
+      attribution: { splitFingerprint: 'hash-old' },
+    });
+
+    expect(result.passed).toBe(false);
+    expect(result.updated).toBeUndefined();
+    // Nothing was written: the retirement evidence is not replaced by a
+    // number measured on the wrong partition.
+    const file = readBaselineFile(baselinePath) as BaselineFile;
+    expect(file.entries).toHaveLength(1);
+  });
+
+  it('compares when the run WAS measured against the tracked split', () => {
+    const { metrics } = buildRun(8);
+    baselineOnTrackedSplit();
+
+    const result = evaluateGate({
+      suite: 'synthetic',
+      model: 'demo',
+      metrics,
+      baselinePath,
+      currentSplitPath: path.join(splitsDir, 'tracked.gold.json'),
+      splitsDir,
+      attribution: { splitFingerprint: 'hash-tracked' },
+    });
+
+    expect(result.passed).toBe(true);
+    expect(result.skipped).toBe(false);
+  });
+});
+
+/* ------------------------------------------------------------------ *
+ * A baseline that cannot be attributed to a split
+ * ------------------------------------------------------------------ */
+
+describe('a baseline that cannot be attributed to the tracked split', () => {
+  let dir: string;
+  let baselinePath: string;
+  let splitsDir: string;
+
+  beforeEach(() => {
+    dir = mkdtempSync(path.join(tmpdir(), 'vision-lens-gate-baseline-split-'));
+    baselinePath = path.join(dir, 'synthetic.json');
+    splitsDir = path.join(dir, 'splits');
+    writeSplitFile(path.join(splitsDir, 'tracked.gold.json'), 'hash-tracked');
+  });
+
+  afterEach(() => {
+    rmSync(dir, { recursive: true, force: true });
+  });
+
+  it('fails when the tracked baseline carries NO split fingerprint', () => {
+    const { metrics } = buildRun(8);
+    // The baseline is perfect, so only the missing attribution can refuse it.
+    writeBaselineFile(baselinePath, {
+      schemaVersion: 1,
+      generatedAt: '2026-01-01T00:00:00.000Z',
+      entries: [
+        {
+          suite: 'synthetic',
+          model: 'demo',
+          macroF1: 1,
+          perClass: { alpha: 1, beta: 1 },
+          generatedAt: '2026-01-01T00:00:00.000Z',
+        },
+      ],
+    });
+
+    const result = evaluateGate({
+      suite: 'synthetic',
+      model: 'demo',
+      metrics,
+      baselinePath,
+      currentSplitPath: path.join(splitsDir, 'tracked.gold.json'),
+      splitsDir,
+      attribution: { splitFingerprint: 'hash-tracked' },
+    });
+
+    expect(result.passed).toBe(false);
+    expect(result.skipped).toBe(false);
+    expect(result.reason).toMatch(/no split fingerprint/i);
+    // The macro F1 was NOT compared.
+    expect(result.macroF1Delta).toBe(0);
+    expect(result.deltas).toEqual([]);
+  });
+
+  it('fails when the tracked baseline was measured against a split that is not tracked', () => {
+    const { metrics } = buildRun(8);
+    writeBaselineFile(baselinePath, {
+      schemaVersion: 1,
+      generatedAt: '2026-01-01T00:00:00.000Z',
+      entries: [
+        {
+          suite: 'synthetic',
+          model: 'demo',
+          macroF1: 1,
+          perClass: { alpha: 1, beta: 1 },
+          splitFingerprint: 'hash-nowhere',
+          generatedAt: '2026-01-01T00:00:00.000Z',
+        },
+      ],
+    });
+
+    const result = evaluateGate({
+      suite: 'synthetic',
+      model: 'demo',
+      metrics,
+      baselinePath,
+      currentSplitPath: path.join(splitsDir, 'tracked.gold.json'),
+      splitsDir,
+      attribution: { splitFingerprint: 'hash-tracked' },
+    });
+
+    expect(result.passed).toBe(false);
+    expect(result.reason).toMatch(/not among the tracked splits/i);
+    expect(result.macroF1Delta).toBe(0);
+  });
+});
+
+/* ------------------------------------------------------------------ *
+ * The retirement of a baseline
+ * ------------------------------------------------------------------ */
+
+describe('a retired baseline is evidence, never a comparison', () => {
+  let dir: string;
+  let baselinePath: string;
+
+  beforeEach(() => {
+    dir = mkdtempSync(path.join(tmpdir(), 'vision-lens-gate-retired-'));
+    baselinePath = path.join(dir, 'synthetic.json');
+  });
+
+  afterEach(() => {
+    rmSync(dir, { recursive: true, force: true });
+  });
+
+  const RETIRED_REASON =
+    'measured on the degenerate all-train split: with zero held-out images the number is not a performance figure';
+
+  function retiredEntry(): BaselineEntry {
+    return {
+      suite: 'synthetic',
+      model: 'demo',
+      macroF1: 0.99,
+      perClass: { alpha: 0.99, beta: 0.99 },
+      status: 'retired',
+      retiredReason: RETIRED_REASON,
+      generatedAt: '2026-01-01T00:00:00.000Z',
+    };
+  }
+
+  it('skips a retired entry and quotes the recorded reason', () => {
+    const { metrics } = buildRun(8);
+    writeBaselineFile(baselinePath, {
+      schemaVersion: 1,
+      generatedAt: '2026-01-01T00:00:00.000Z',
+      entries: [retiredEntry()],
+    });
+
+    const result = evaluateGate({
+      suite: 'synthetic',
+      model: 'demo',
+      metrics,
+      baselinePath,
+    });
+
+    // A retired number is skipped, never compared and never failed.
+    expect(result.skipped).toBe(true);
+    expect(result.passed).toBe(true);
+    expect(result.reason).toContain(RETIRED_REASON);
+  });
+
+  it('never removes or overwrites a retired entry when a new baseline is written', () => {
+    const { metrics } = buildRun(8);
+    writeBaselineFile(baselinePath, {
+      schemaVersion: 1,
+      generatedAt: '2026-01-01T00:00:00.000Z',
+      entries: [retiredEntry()],
+    });
+
+    const result = evaluateGate({
+      suite: 'synthetic',
+      model: 'demo',
+      metrics,
+      baselinePath,
+      updateBaseline: true,
+      now: new Date('2026-03-04T05:06:07.000Z'),
+    });
+
+    expect(result.updated).toBe(true);
+
+    const file = readBaselineFile(baselinePath) as BaselineFile;
+    // The retired entry SURVIVES, with its status and its reason.
+    const retired = findRetiredBaselineEntry(file, 'synthetic', 'demo');
+    expect(retired).toBeDefined();
+    expect(retired?.status).toBe('retired');
+    expect(retired?.retiredReason).toBe(RETIRED_REASON);
+    // And the new ACTIVE entry is added alongside it.
+    expect(file.entries).toHaveLength(2);
+    const active = findBaselineEntry(file, 'synthetic', 'demo');
+    expect(active).toBeDefined();
+    expect(active?.macroF1).toBe(metrics.macroF1);
+    expect(active?.status).not.toBe('retired');
+  });
+
+  it('finds the ACTIVE entry when a retired one exists for the same key', () => {
+    const file: BaselineFile = {
+      schemaVersion: 1,
+      generatedAt: '2026-01-01T00:00:00.000Z',
+      entries: [
+        retiredEntry(),
+        {
+          suite: 'synthetic',
+          model: 'demo',
+          macroF1: 0.42,
+          perClass: { alpha: 0.42, beta: 0.42 },
+          generatedAt: '2026-03-04T05:06:07.000Z',
+        },
+      ],
+    };
+
+    expect(findBaselineEntry(file, 'synthetic', 'demo')?.macroF1).toBe(0.42);
+    expect(findRetiredBaselineEntry(file, 'synthetic', 'demo')?.macroF1).toBe(0.99);
+  });
+});
+
+/* ------------------------------------------------------------------ *
+ * The real VisA retirement, end to end
+ * ------------------------------------------------------------------ */
+
+describe('the retired VisA baseline survives a new baseline for the same key', () => {
+  let dir: string;
+
+  beforeEach(() => {
+    dir = mkdtempSync(path.join(tmpdir(), 'vision-lens-gate-visa-retired-'));
+  });
+
+  afterEach(() => {
+    rmSync(dir, { recursive: true, force: true });
+  });
+
+  it('keeps the retired entry intact and adds an active entry', () => {
+    const repositoryBaseline = path.join(REPO_ROOT, 'benchmarks', 'baselines', 'visa-subset.json');
+    const trackedSplit = path.join(
+      REPO_ROOT,
+      'benchmarks',
+      'splits',
+      'visa-subset.v2.gold.json',
+    );
+    const copy = path.join(dir, 'visa-subset.json');
+    copyFileSync(repositoryBaseline, copy);
+
+    const before = readBaselineFile(copy) as BaselineFile;
+    const retiredBefore = findRetiredBaselineEntry(
+      before,
+      'visa-subset',
+      'gpt-4o',
+      'model:gpt-4o@2024-11-20',
+    );
+    expect(retiredBefore).toBeDefined();
+    expect(retiredBefore?.status).toBe('retired');
+    expect(retiredBefore?.retiredReason).toBeTruthy();
+
+    const manifest = JSON.parse(readFileSync(trackedSplit, 'utf8')) as { manifestHash: string };
+    const { metrics } = buildRun(8);
+
+    const result = evaluateGate({
+      suite: 'visa-subset',
+      model: 'gpt-4o',
+      modelVersion: 'model:gpt-4o@2024-11-20',
+      metrics,
+      baselinePath: copy,
+      currentSplitPath: trackedSplit,
+      splitsDir: path.dirname(trackedSplit),
+      updateBaseline: true,
+      attribution: { splitFingerprint: manifest.manifestHash },
+      now: new Date('2026-03-04T05:06:07.000Z'),
+    });
+
+    expect(result.updated).toBe(true);
+
+    const after = readBaselineFile(copy) as BaselineFile;
+    // The retired entry is untouched: same status, same reason.
+    const retiredAfter = findRetiredBaselineEntry(
+      after,
+      'visa-subset',
+      'gpt-4o',
+      'model:gpt-4o@2024-11-20',
+    );
+    expect(retiredAfter).toBeDefined();
+    expect(retiredAfter?.status).toBe('retired');
+    expect(retiredAfter?.retiredReason).toBe(retiredBefore?.retiredReason);
+    // The new ACTIVE entry is there, next to the retired one.
+    expect(after.entries.length).toBe(before.entries.length + 1);
+    const active = findBaselineEntry(
+      after,
+      'visa-subset',
+      'gpt-4o',
+      'model:gpt-4o@2024-11-20',
+    );
+    expect(active).toBeDefined();
+    expect(active?.status).not.toBe('retired');
+    expect(active?.splitFingerprint).toBe(manifest.manifestHash);
   });
 });

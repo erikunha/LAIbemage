@@ -18,6 +18,8 @@
       "snapshotId": "e7ddab9957703bc573700ef4ae2c056f7e97d426",
       "splitFingerprint": "76dee597ea8d42bdba657f37c357cdfc4afc3d3e1de617d90ced7b77e485a0b2",
       "configFingerprint": "fp2:3883e2f9a01107f8",
+      "status": "retired",
+      "retiredReason": "Retired by VLN-007. The measurement is real and is kept as a historical artifact, but it was measured on benchmarks/splits/visa-subset.gold.json, whose 700 assignments are ALL in train: the upstream VisA release carries no session column, so the capture group of an item is its object class, and a group larger than every quota cannot be divided into three partitions. With zero held-out images the number is not a performance figure and must not be published as one. The tracked split is now benchmarks/splits/visa-subset.v2.gold.json (suite visa-subset.v2, strategy stratified); re-run the predictions against it and record a new baseline.",
       "generatedAt": "2026-11-11T13:54:01.169Z"
     }
   ]

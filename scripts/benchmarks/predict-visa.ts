@@ -269,7 +269,7 @@ export interface PredictOptions {
   readonly batchSize?: number;
   /** The number of concurrent LLM calls. Defaults to 1. */
   readonly concurrency?: number;
-  /** The number of attempts per batch. */
+  /** The number of retries per batch. The analyzer adds one attempt on top. */
   readonly maxRetries?: number;
   /** The pause between two LLM calls. Defaults to the analyzer's own default. */
   readonly delayBetweenCallsMs?: number;

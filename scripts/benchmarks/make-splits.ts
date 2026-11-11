@@ -11,6 +11,25 @@
  *     --target-images 700 \
  *     --out benchmarks/splits/visa-subset.gold.json
  *
+ * Strategies
+ *   --strategy grouped     the capture group is the atom of the assignment:
+ *                          the items of one capture group are never separated
+ *                          inside a stratum. A group larger than every quota
+ *                          is assigned wholly and recorded as a
+ *                          `capture-group-overflow:` note. This is the
+ *                          default and the behaviour of every split generated
+ *                          before VLN-007.
+ *   --strategy stratified  the partition is ITEM-LEVEL: the capture-group
+ *                          property is NOT enforced, the items are dealt to
+ *                          the three splits inside every stratum (class x
+ *                          anomaly) in that stratum's own quota. Use it when
+ *                          the capture groups are larger than the quotas
+ *                          (the upstream VisA release carries no session
+ *                          column, so the capture group of an item IS its
+ *                          object class); the manifest then records in
+ *                          `groupBasis` that the partition is not
+ *                          capture-group-safe.
+ *
  * Layouts
  *   visa (default) — one directory per class (VisA part) under --root, each
  *                    holding an `image_anno.csv`.
@@ -61,12 +80,15 @@ import {
   selectVisaSubsetImages,
 } from '../../packages/core/src/benchmark/normalize.js';
 import {
+  DEFAULT_SPLIT_STRATEGY,
+  SPLIT_STRATEGIES,
   generateSplitManifest,
   serializeSplitManifest,
   type AnomalyLabel,
   type SplitItem,
   type SplitNote,
   type SplitRatios,
+  type SplitStrategy,
 } from '../../packages/core/src/benchmark/splits.js';
 
 const USAGE = `Usage:
@@ -84,6 +106,7 @@ Options:
   --parts <a,b,c>       only these object classes (mirrors
                         normalize-visa.ts --parts)
   --ratios <t,v,t>      train/val/test ratios (default: 0.6,0.2,0.2)
+  --strategy <name>     split strategy: grouped (default) or stratified
   --notes <file>        JSON array of {id, reason} — known-bad items
   --groups-file <file>  JSON map of relative image path -> capture-group key
   --meta                also write <out>.meta.json (generation date sidecar)
@@ -635,6 +658,11 @@ async function readJson<T>(file: string): Promise<T> {
   return JSON.parse(await readFile(file, 'utf8')) as T;
 }
 
+/** Whether a name is one of the supported split strategies. */
+function isSplitStrategy(value: string): value is SplitStrategy {
+  return (SPLIT_STRATEGIES as readonly string[]).includes(value);
+}
+
 async function main(): Promise<void> {
   const { values } = parseArgs({
     options: {
@@ -647,6 +675,7 @@ async function main(): Promise<void> {
       'target-images': { type: 'string' },
       parts: { type: 'string' },
       ratios: { type: 'string' },
+      strategy: { type: 'string' },
       notes: { type: 'string' },
       'groups-file': { type: 'string' },
       meta: { type: 'boolean', default: false },
@@ -696,6 +725,16 @@ async function main(): Promise<void> {
     ? new Map(Object.entries(await readJson<Record<string, string>>(values['groups-file'])))
     : new Map<string, string>();
 
+  // The strategy decides what the atom of the assignment is. An unknown name
+  // is a loud error: it names the supported values and exits non-zero.
+  const strategyName = values.strategy ?? DEFAULT_SPLIT_STRATEGY;
+  if (!isSplitStrategy(strategyName)) {
+    throw new Error(
+      `--strategy must be one of ${SPLIT_STRATEGIES.join(', ')} (got '${strategyName}')`,
+    );
+  }
+  const strategy: SplitStrategy = strategyName;
+
   const notes = values.notes ? await readJson<SplitNote[]>(values.notes) : [];
 
   const root = path.resolve(values.root);
@@ -714,6 +753,7 @@ async function main(): Promise<void> {
     items,
     notes,
     ratios,
+    strategy,
   });
 
   const outPath = path.resolve(values.out);
@@ -727,7 +767,9 @@ async function main(): Promise<void> {
       manifestId: manifest.id,
       datasetId: manifest.datasetId,
       seed: manifest.seed,
+      strategy: manifest.strategy,
       manifestHash: manifest.manifestHash,
+      partitionFingerprint: manifest.partitionFingerprint,
       note: 'Sidecar only — the manifest itself carries no timestamp (SC-001 byte-stability).',
     };
     await writeFile(`${outPath}.meta.json`, `${JSON.stringify(sidecar, null, 2)}\n`, 'utf8');
@@ -737,12 +779,14 @@ async function main(): Promise<void> {
   console.log(
     `[make-splits] manifest id: ${manifest.id} (dataset ${manifest.datasetId}, seed ${seed})`,
   );
+  console.log(`[make-splits] strategy: ${manifest.strategy}`);
   if (targetImages !== undefined) {
     console.log(
       `[make-splits] subset: the ${targetImages} images the normaliser selects for this tree`,
     );
   }
   console.log(`[make-splits] manifestHash: ${manifest.manifestHash}`);
+  console.log(`[make-splits] partitionFingerprint: ${manifest.partitionFingerprint}`);
   for (const stratum of manifest.strata) {
     console.log(
       `[make-splits]   ${stratum.class}/${stratum.anomaly}: total ${stratum.total} ` +

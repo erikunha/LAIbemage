@@ -43,7 +43,13 @@ function runBin(args: string[]): BinResult {
 }
 
 /** A minimal report artifact the gate can read. */
-function writeReport(dir: string, macroF1: number, perClass: Record<string, number>, partial = false): string {
+function writeReport(
+  dir: string,
+  macroF1: number,
+  perClass: Record<string, number>,
+  partial = false,
+  splitFingerprint = 'def',
+): string {
   const reportPath = path.join(dir, 'report.json');
   writeFileSync(
     reportPath,
@@ -57,7 +63,7 @@ function writeReport(dir: string, macroF1: number, perClass: Record<string, numb
         partial,
         tuple: {
           snapshotId: 'abc',
-          splitFingerprint: 'def',
+          splitFingerprint,
           modelVersion: 'model:demo@1',
           configFingerprint: 'ghi',
           env: {},
@@ -101,6 +107,147 @@ function writeReport(dir: string, macroF1: number, perClass: Record<string, numb
     'utf8',
   );
   return reportPath;
+}
+
+/**
+ * A report artifact whose reproduction tuple carries NO split fingerprint:
+ * the run cannot be attributed to any split.
+ */
+function writeReportWithoutSplitFingerprint(
+  dir: string,
+  macroF1: number,
+  perClass: Record<string, number>,
+): string {
+  const reportPath = path.join(dir, 'report.json');
+  writeFileSync(
+    reportPath,
+    `${JSON.stringify(
+      {
+        schemaVersion: 1,
+        runId: 'test-run',
+        suite: 'synthetic',
+        model: 'demo',
+        generatedAt: '2026-01-01T00:00:00.000Z',
+        partial: false,
+        tuple: {
+          snapshotId: 'abc',
+          modelVersion: 'model:demo@1',
+          configFingerprint: 'ghi',
+          env: {},
+        },
+        metrics: {
+          itemsScored: 10,
+          correct: 8,
+          accuracy: 0.8,
+          perClass: Object.entries(perClass).map(([labelKey, f1]) => ({
+            labelKey,
+            support: 5,
+            predicted: 5,
+            truePositives: 4,
+            falsePositives: 1,
+            falseNegatives: 1,
+            precision: 0.8,
+            recall: 0.8,
+            f1,
+          })),
+          macroF1,
+          balancedAccuracy: macroF1,
+          confusion: { labels: [], rows: {} },
+          unseenPredictedLabels: [],
+          excludedClasses: [],
+          caveats: [],
+          latency: { count: 10, p50Ms: 100, p95Ms: 200 },
+          cost: {
+            totalCostUsd: 0.01,
+            costPerImageUsd: 0.001,
+            amortizedCostPerScoredImageUsd: 0.001,
+            itemsWithCost: 10,
+            itemsWithoutCost: 0,
+          },
+        },
+        calibration: { itemsScored: 10, itemsWithoutProbability: 0, ece: 0.1, bins: [] },
+        caveats: [],
+      },
+      null,
+      2,
+    )}\n`,
+    'utf8',
+  );
+  return reportPath;
+}
+
+/**
+ * A split manifest the gate can read.
+ *
+ * The two identifiers are DISTINCT and the fixture keeps them apart: the
+ * manifest hash is the identity of the split FILE (the value the
+ * reproduction tuple and the baseline entries carry), the partition
+ * fingerprint is the identity of the PARTITION alone.
+ */
+function writeSplitManifest(
+  file: string,
+  manifestHash: string,
+  partitionFingerprint: string,
+): string {
+  mkdirSync(path.dirname(file), { recursive: true });
+  writeFileSync(
+    file,
+    `${JSON.stringify(
+      {
+        schemaVersion: 2,
+        id: path.basename(file, '.json'),
+        datasetId: 'test-dataset',
+        strategy: 'stratified',
+        manifestHash,
+        partitionFingerprint,
+        assignments: [
+          { id: 'a', split: 'train' },
+          { id: 'b', split: 'val' },
+          { id: 'c', split: 'test' },
+        ],
+      },
+      null,
+      2,
+    )}\n`,
+    'utf8',
+  );
+  return file;
+}
+
+/**
+ * A baseline whose recorded split fingerprint is `splitFingerprint`.
+ *
+ * The fingerprint is the manifest hash of the split file the baseline was
+ * measured against. When the caller supplies none, the baseline carries NO
+ * fingerprint at all: it cannot be attributed to a split, so the gate must
+ * refuse to compare it.
+ */
+function writeBaseline(dir: string, splitFingerprint?: string): string {
+  const baselinePath = path.join(dir, 'baseline.json');
+  writeFileSync(
+    baselinePath,
+    `${JSON.stringify(
+      {
+        schemaVersion: 1,
+        generatedAt: '2026-01-01T00:00:00.000Z',
+        entries: [
+          {
+            suite: 'synthetic',
+            model: 'demo',
+            modelVersion: 'model:demo@1',
+            macroF1: 0.5,
+            perClass: { alpha: 0.5, beta: 0.5 },
+            ...(splitFingerprint === undefined ? {} : { splitFingerprint }),
+            generatedAt: '2026-01-01T00:00:00.000Z',
+          },
+        ],
+      },
+      null,
+      2,
+    )}\n`,
+    'utf8',
+  );
+  return baselinePath;
 }
 
 describe.skipIf(!BINS_BUILT)('vision-lens benchmark (requires built dist)', () => {
@@ -364,6 +511,220 @@ describe.skipIf(!BINS_BUILT)('vision-lens benchmark (requires built dist)', () =
       expect(result.status).toBe(0);
       expect(output).toContain('gate=skipped');
       expect(output).not.toContain('gate failed');
+    } finally {
+      rmSync(dir, { recursive: true, force: true });
+    }
+  });
+
+  it('refuses to bless a run measured on a split that is NOT the tracked one', () => {
+    const dir = mkdtempSync(path.join(tmpdir(), 'vision-lens-cli-gate-split-'));
+    try {
+      const splitsDir = path.join(dir, 'splits');
+      // The tracked split is the one the suite is measured against NOW; the
+      // recorded one is the split the tracked baseline was measured against.
+      const trackedSplit = writeSplitManifest(
+        path.join(splitsDir, 'tracked.gold.json'),
+        'hash-current',
+        'partition-current',
+      );
+      writeSplitManifest(
+        path.join(splitsDir, 'recorded.gold.json'),
+        'hash-recorded',
+        'partition-recorded',
+      );
+      const baselinePath = writeBaseline(dir, 'hash-recorded');
+      // The macro F1 did NOT regress, so only the split identity can refuse
+      // this run. The RUN itself was measured against the recorded split.
+      const reportPath = writeReport(
+        dir,
+        0.5,
+        { alpha: 0.5, beta: 0.5 },
+        false,
+        'hash-recorded',
+      );
+
+      const result = runBin([
+        'benchmark',
+        'gate',
+        '--suite',
+        'synthetic',
+        '--model-id',
+        'demo',
+        '--metrics',
+        reportPath,
+        '--baseline',
+        baselinePath,
+        '--split',
+        trackedSplit,
+      ]);
+
+      const output = `${result.stdout}${result.stderr}`;
+      expect(result.status).toBe(1);
+      expect(output).toContain('gate failed');
+      // The message must name BOTH splits: the one the baseline was recorded
+      // against and the one that is tracked now.
+      expect(output).toContain('recorded.gold');
+      expect(output).toContain('tracked.gold');
+    } finally {
+      rmSync(dir, { recursive: true, force: true });
+    }
+  });
+
+  it('refuses to bless a run whose baseline cannot be attributed to a split', () => {
+    const dir = mkdtempSync(path.join(tmpdir(), 'vision-lens-cli-gate-baseline-split-'));
+    try {
+      const splitsDir = path.join(dir, 'splits');
+      const trackedSplit = writeSplitManifest(
+        path.join(splitsDir, 'tracked.gold.json'),
+        'hash-current',
+        'partition-current',
+      );
+      // The baseline carries NO split fingerprint: it cannot be attributed to
+      // the tracked split, so it must not bless the run.
+      const baselinePath = writeBaseline(dir);
+      const reportPath = writeReport(
+        dir,
+        0.5,
+        { alpha: 0.5, beta: 0.5 },
+        false,
+        'hash-current',
+      );
+
+      const result = runBin([
+        'benchmark',
+        'gate',
+        '--suite',
+        'synthetic',
+        '--model-id',
+        'demo',
+        '--metrics',
+        reportPath,
+        '--baseline',
+        baselinePath,
+        '--split',
+        trackedSplit,
+      ]);
+
+      const output = `${result.stdout}${result.stderr}`;
+      expect(result.status).toBe(1);
+      expect(output).toContain('gate failed');
+      expect(output).toMatch(/no split fingerprint/i);
+      expect(output).not.toContain('gate passed');
+    } finally {
+      rmSync(dir, { recursive: true, force: true });
+    }
+  });
+
+  it('refuses to bless a run that cannot be attributed to a split at all', () => {
+    const dir = mkdtempSync(path.join(tmpdir(), 'vision-lens-cli-gate-run-split-'));
+    try {
+      const splitsDir = path.join(dir, 'splits');
+      const trackedSplit = writeSplitManifest(
+        path.join(splitsDir, 'tracked.gold.json'),
+        'hash-current',
+        'partition-current',
+      );
+      const baselinePath = writeBaseline(dir, 'hash-current');
+      // The artifact carries no split fingerprint: the run cannot be shown to
+      // have been measured against the tracked split.
+      const reportPath = writeReportWithoutSplitFingerprint(dir, 0.5, {
+        alpha: 0.5,
+        beta: 0.5,
+      });
+
+      const result = runBin([
+        'benchmark',
+        'gate',
+        '--suite',
+        'synthetic',
+        '--model-id',
+        'demo',
+        '--metrics',
+        reportPath,
+        '--baseline',
+        baselinePath,
+        '--split',
+        trackedSplit,
+      ]);
+
+      const output = `${result.stdout}${result.stderr}`;
+      expect(result.status).toBe(1);
+      expect(output).toContain('gate failed');
+      expect(output).toMatch(/cannot be attributed/i);
+      expect(output).not.toContain('gate passed');
+    } finally {
+      rmSync(dir, { recursive: true, force: true });
+    }
+  });
+
+  it('passes when the tracked split IS the split the baseline was measured against', () => {
+    const dir = mkdtempSync(path.join(tmpdir(), 'vision-lens-cli-gate-split-match-'));
+    try {
+      const splitsDir = path.join(dir, 'splits');
+      const trackedSplit = writeSplitManifest(
+        path.join(splitsDir, 'tracked.gold.json'),
+        'hash-current',
+        'partition-current',
+      );
+      const baselinePath = writeBaseline(dir, 'hash-current');
+      // The RUN was measured against the tracked split too.
+      const reportPath = writeReport(
+        dir,
+        0.5,
+        { alpha: 0.5, beta: 0.5 },
+        false,
+        'hash-current',
+      );
+
+      const result = runBin([
+        'benchmark',
+        'gate',
+        '--suite',
+        'synthetic',
+        '--model-id',
+        'demo',
+        '--metrics',
+        reportPath,
+        '--baseline',
+        baselinePath,
+        '--split',
+        trackedSplit,
+      ]);
+
+      const output = `${result.stdout}${result.stderr}`;
+      expect(result.status).toBe(0);
+      expect(output).toContain('gate passed');
+    } finally {
+      rmSync(dir, { recursive: true, force: true });
+    }
+  });
+
+  it('keeps the gate working when the tracked split is ABSENT', () => {
+    const dir = mkdtempSync(path.join(tmpdir(), 'vision-lens-cli-gate-split-absent-'));
+    try {
+      // A missing split is a skip of the split check, never a crash and never
+      // a failure of the comparison.
+      const baselinePath = writeBaseline(dir, 'hash-recorded');
+      const reportPath = writeReport(dir, 0.5, { alpha: 0.5, beta: 0.5 });
+
+      const result = runBin([
+        'benchmark',
+        'gate',
+        '--suite',
+        'synthetic',
+        '--model-id',
+        'demo',
+        '--metrics',
+        reportPath,
+        '--baseline',
+        baselinePath,
+        '--split',
+        path.join(dir, 'no-such-split.gold.json'),
+      ]);
+
+      const output = `${result.stdout}${result.stderr}`;
+      expect(result.status).toBe(0);
+      expect(output).toContain('gate passed');
     } finally {
       rmSync(dir, { recursive: true, force: true });
     }

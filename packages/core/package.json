@@ -19,6 +19,7 @@
     "./reporter/sqlite-schema": "./dist/reporter/sqlite-schema.js",
     "./search": "./dist/search/index.js",
     "./search/query": "./dist/search/query.js",
+    "./store": "./dist/store/index.js",
     "./types": "./dist/types.js",
     "./utils/logger": "./dist/utils/logger.js"
   },
@@ -26,7 +27,7 @@
     "node": ">=20"
   },
   "scripts": {
-    "build": "tsc --project tsconfig.json",
+    "build": "tsc --project tsconfig.json && node -e \"require('node:fs').cpSync('src/store/migrations','dist/store/migrations',{recursive:true})\"",
     "typecheck": "tsc --project tsconfig.json --noEmit && tsc --project tests/tsconfig.json --noEmit",
     "lint": "eslint src tests",
     "test": "vitest run --root ../.. packages/core/tests"

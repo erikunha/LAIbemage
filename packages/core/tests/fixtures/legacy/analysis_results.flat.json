@@ -1,0 +1,75 @@
+{
+  "processedDate": "2026-01-04T10:00:00.000Z",
+  "totalImages": 4,
+  "categories": ["kitchen", "living_room", "bathroom"],
+  "images": [
+    {
+      "originalFile": "SYNTHETIC-001.jpg",
+      "outputFile": "001. Synthetic photo dated 01-01-2026.jpeg",
+      "category": "kitchen",
+      "number": 1,
+      "shortDescription": "synthetic kitchen with a sink",
+      "elements": ["sink", "tiles"],
+      "condition": "peeling paint",
+      "timestamp": 1766292071829
+    },
+    {
+      "originalFile": "SYNTHETIC-002.jpg",
+      "outputFile": "002. Synthetic photo dated 02-01-2026.jpeg",
+      "category": "living_room",
+      "number": 2,
+      "shortDescription": "synthetic living room with a sofa",
+      "elements": ["sofa"],
+      "condition": "good",
+      "timestamp": 1753510199165.367
+    },
+    {
+      "originalFile": "SYNTHETIC-003.jpg",
+      "outputFile": "003. Synthetic photo dated 03-01-2026.jpeg",
+      "category": "kitchen",
+      "number": 3,
+      "shortDescription": "synthetic kitchen with an oven",
+      "elements": ["oven", "sink", "shelf"],
+      "condition": "damaged",
+      "timestamp": 1766292079378,
+      "sessionId": 1
+    },
+    {
+      "originalFile": "SYNTHETIC-004.jpg",
+      "outputFile": "004. Synthetic photo dated 04-01-2026.jpeg",
+      "category": "bathroom",
+      "number": 4,
+      "shortDescription": "synthetic bathroom with a bathtub",
+      "elements": ["bathtub"],
+      "condition": "transaction recorded",
+      "timestamp": 1766292081000,
+      "sessionId": 2
+    }
+  ],
+  "overrides": [
+    {
+      "file": "SYNTHETIC-003.jpg",
+      "originalCategory": "kitchen",
+      "overriddenCategory": "living_room"
+    },
+    {
+      "file": "SYNTHETIC-404.jpg",
+      "originalCategory": "bathroom",
+      "overriddenCategory": "kitchen"
+    }
+  ],
+  "sessions": [
+    {
+      "sessionId": 1,
+      "startMs": 1766292000000,
+      "endMs": 1766292100000,
+      "imageNumbers": [1, 2, 3]
+    },
+    {
+      "sessionId": 2,
+      "startMs": 1766293000000,
+      "endMs": 1766293100000,
+      "imageNumbers": [4]
+    }
+  ]
+}

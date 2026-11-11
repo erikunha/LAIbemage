@@ -1,0 +1,33 @@
+{
+  "schemaVersion": 1,
+  "startedAt": "2026-01-04T09:00:00.000Z",
+  "categoriesHash": "synthetic000000",
+  "images": [
+    {
+      "file": "SYNTHETIC-101.jpg",
+      "fullPath": "/legacy/input/SYNTHETIC-101.jpg",
+      "createdAt": 1766292071829,
+      "exifSource": "ctime",
+      "analysis": {
+        "category": "kitchen",
+        "shortDescription": "synthetic partial record with a confidence",
+        "fullDescription": "",
+        "elements": ["sink"],
+        "confidence": 0.42,
+        "extractedText": null
+      }
+    },
+    {
+      "file": "SYNTHETIC-102.jpg",
+      "fullPath": "/legacy/input/SYNTHETIC-102.jpg",
+      "createdAt": 1766292075239,
+      "exifSource": "ctime",
+      "analysis": {
+        "category": "bathroom",
+        "shortDescription": "synthetic partial record without extracted text",
+        "elements": ["bathtub", "mirror"],
+        "confidence": 0.9
+      }
+    }
+  ]
+}

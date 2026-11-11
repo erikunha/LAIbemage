@@ -8,5 +8,13 @@
   // (removed serveLogRequests, added fullDescription) and was never part of
   // the typecheck gate. Only the type-level tests are enforced for now;
   // extend this list as older test files are brought under typecheck.
-  "include": ["./types.test.ts", "./reporter/sqlite-missing.test.ts"]
+  //
+  // The store suite (spec 002) and the legacy importer are now covered: the
+  // importer is new code, and new code lands under the gate.
+  "include": [
+    "./types.test.ts",
+    "./reporter/sqlite-missing.test.ts",
+    "./store/**/*.test.ts",
+    "./store/helpers.ts"
+  ]
 }

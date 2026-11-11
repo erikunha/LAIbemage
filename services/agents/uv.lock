@@ -6,6 +6,6 @@ requires-python = ">=3.11"
 exclude-newer = "2026-10-17T00:00:00Z"
 
 [[package]]
-name = "master-vision-agents"
+name = "vision-lens-agents"
 version = "0.1.0"
 source = { editable = "." }

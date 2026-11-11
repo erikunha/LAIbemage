@@ -41,23 +41,23 @@ that uses LLM Vision APIs (OpenAI, Anthropic, Google) to classify and organize i
 
 | Directory                     | You MAY import                                                   | You must NEVER import              |
 | ----------------------------- | ---------------------------------------------------------------- | ---------------------------------- |
-| `src/utils/`                  | Node stdlib only                                                 | OpenAI, Sharp, fs-extra            |
-| `src/analyzer/client.ts`      | utils/, config/, types, all three LLM SDKs                       | processor/, classifier/            |
-| `src/analyzer/*.ts`           | utils/, config/, types, `LLMClient` from client.ts               | LLM SDKs directly, processor/      |
-| `src/analyzer/async-batch.ts` | utils/, config/, types, `AsyncBatchClient` from client.ts, Sharp | LLM SDKs directly, processor/      |
-| `src/processor/`              | utils/, config/, types, Sharp                                    | any LLM SDK, analyzer/             |
-| `src/classifier/`             | config/, types                                                   | any LLM SDK, Sharp, fs-extra       |
-| `src/cli/`                    | config/, index, utils/logger                                     | analyzer/, processor/, classifier/ |
-| `src/index.ts`                | All src/ modules                                                 | external packages directly         |
+| `packages/core/src/utils/`                  | Node stdlib only                                                 | OpenAI, Sharp, fs-extra            |
+| `packages/core/src/analyzer/client.ts`      | utils/, config/, types, all three LLM SDKs                       | processor/, classifier/            |
+| `packages/core/src/analyzer/*.ts`           | utils/, config/, types, `LLMClient` from client.ts               | LLM SDKs directly, processor/      |
+| `packages/core/src/analyzer/async-batch.ts` | utils/, config/, types, `AsyncBatchClient` from client.ts, Sharp | LLM SDKs directly, processor/      |
+| `packages/core/src/processor/`              | utils/, config/, types, Sharp                                    | any LLM SDK, analyzer/             |
+| `packages/core/src/classifier/`             | config/, types                                                   | any LLM SDK, Sharp, fs-extra       |
+| `packages/cli/src/`                    | config/, index, utils/logger                                     | analyzer/, processor/, classifier/ |
+| `packages/core/src/index.ts`                | All packages/core/src/ modules                                                 | external packages directly         |
 
 ## Implementation workflow
 
 1. **Explore** — use the **Explore** subagent to trace call graphs or read relevant modules
-2. **Plan** — identify every file that needs to change; check for type cascades in `src/types.ts`
-3. **Update types** — if the data shape changes, update `src/types.ts` first
-4. **Update config** — add CLI flags to `src/config/index.ts` (config) and `src/cli/index.ts` (Commander)
+2. **Plan** — identify every file that needs to change; check for type cascades in `packages/core/src/types.ts`
+3. **Update types** — if the data shape changes, update `packages/core/src/types.ts` first
+4. **Update config** — add CLI flags to `packages/core/src/config/index.ts` (config) and `packages/cli/src/index.ts` (Commander)
 5. **Implement** — write the logic in the correct module; respect boundaries above
-6. **Delegate tests** — use **Test Author** after implementing logic in `src/analyzer/`, `src/classifier/`, or `src/processor/`
+6. **Delegate tests** — use **Test Author** after implementing logic in `packages/core/src/analyzer/`, `packages/core/src/classifier/`, or `packages/core/src/processor/`
 7. **Verify** — run checks in order:
    ```bash
    npm run typecheck     # fix all errors first
@@ -79,28 +79,28 @@ that uses LLM Vision APIs (OpenAI, Anthropic, Google) to classify and organize i
 
 ## How to add a new LLM provider
 
-1. Add the provider name to the `Provider` union type in `src/types.ts`
-2. Add `DEFAULT_MODEL` entry in `src/config/index.ts`
+1. Add the provider name to the `Provider` union type in `packages/core/src/types.ts`
+2. Add `DEFAULT_MODEL` entry in `packages/core/src/config/index.ts`
 3. Add the env var (e.g. `NEWPROVIDER_API_KEY`) to `loadConfig()` and to `.env.example`
-4. Add the provider factory branch in `src/analyzer/client.ts` — this is the ONLY file that imports the SDK
-5. Add `--provider newprovider` and `--newprovider-api-key` flags in `src/cli/index.ts` and `src/cli/help.ts`
+4. Add the provider factory branch in `packages/core/src/analyzer/client.ts` — this is the ONLY file that imports the SDK
+5. Add `--provider newprovider` and `--newprovider-api-key` flags in `packages/cli/src/index.ts` and `packages/cli/src/help.ts`
 6. Add provider-specific tuning notes to `.github/agents/analyzer-tuner.agent.md`
 7. Add a row to the README providers table (delegate to **Docs Writer**)
-8. Add tests in `tests/analyzer/client.test.ts` for the new provider branch
+8. Add tests in `packages/core/tests/analyzer/client.test.ts` for the new provider branch
 
 ## Non-negotiable rules
 
 - All relative imports end in `.js` (NodeNext ESM) — no exceptions
 - No `any` types without an `// eslint-disable-next-line @typescript-eslint/no-explicit-any` comment explaining why
-- No `console.log` outside `src/utils/logger.ts` and `src/utils/progress.ts`
+- No `console.log` outside `packages/core/src/utils/logger.ts` and `packages/core/src/utils/progress.ts`
 - No API keys in source files — always use env vars from `Config`
 - Conventional commit messages: `feat:`, `fix:`, `test:`, `chore:`, `docs:`, `refactor:`
 - Breaking changes must use `feat!:` and include a `BREAKING CHANGE:` footer
 
-## Key exported functions in `src/index.ts`
+## Key exported functions in `packages/core/src/index.ts`
 
 - `runBatch(config)` — full batch analysis + processing; supports `--async` (submit only) and `--resume` (collect + process)
 - `runReorder(config)` — reorder existing output by consensus
 - `runSingle(n, imagePath, config)` — process a single image
 
-Never move business logic into `src/cli/index.ts`. `src/cli/` is Commander wiring only.
+Never move business logic into `packages/cli/src/index.ts`. `packages/cli/src/` is Commander wiring only.

@@ -17,7 +17,7 @@ You are the Refactoring Guardian for Vision Lens. You restructure code without c
 
 ## What you are authorised to do
 
-- Extract duplicated logic into shared helpers in `src/utils/`
+- Extract duplicated logic into shared helpers in `packages/core/src/utils/`
 - Rename variables, functions, and types for clarity (update all call sites)
 - Move code between files when a module has grown too large
 - Delete dead code (functions/exports with no call sites)
@@ -48,15 +48,15 @@ You are the Refactoring Guardian for Vision Lens. You restructure code without c
 
 | Pattern | Where to look | Fix |
 |---|---|---|
-| Module boundary violations | Any `import` in `src/` | Move import to correct layer |
+| Module boundary violations | Any `import` in `packages/core/src/` | Move import to correct layer |
 | Dead exports | `packages/sdk/src/index.ts` and `packages/core/src/types.ts` | Remove unused exports |
-| Duplicated type guards | `src/analyzer/` | Extract to `src/utils/guards.ts` |
-| Long functions > 60 lines | `src/index.ts`, `src/analyzer/batch.ts` | Extract named helpers |
+| Duplicated type guards | `packages/core/src/analyzer/` | Extract to `packages/core/src/utils/guards.ts` |
+| Long functions > 60 lines | `packages/core/src/index.ts`, `packages/core/src/analyzer/batch.ts` | Extract named helpers |
 
 ## ESM import rule
 
 After any move/rename, verify all relative imports still end in `.js`:
 ```bash
-grep -rn "from '\\./" src/ --include="*.ts" | grep -v "\.js'"
+grep -rn "from '\\./" packages/core/src/ --include="*.ts" | grep -v "\.js'"
 ```
 This should return nothing.

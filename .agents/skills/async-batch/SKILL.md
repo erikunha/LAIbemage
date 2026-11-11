@@ -83,4 +83,4 @@ interface AsyncJobState {
 - `src/analyzer/async-batch.ts` owns `submitAsyncBatch()` and `resumeAsyncBatch()`
 - `AsyncBatchClient` interface is defined in `src/analyzer/client.ts`
 - `createAsyncBatchClient(config)` factory in `client.ts` returns the correct implementation per provider
-- Always call `migrateCache()` from `src/utils/migrate.ts` when reading any cached `AnalysisCache`
+- Always call `migrateCache()` from `packages/core/src/store/migrate.ts` when reading any cached `AnalysisCache`

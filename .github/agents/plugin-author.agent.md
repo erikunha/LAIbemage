@@ -25,14 +25,14 @@ handoffs:
       Write unit tests for the plugin I just created. The plugin file is at the path described above.
       Mock all I/O (HTTP calls, DB writes, file writes) via vi.mock. Test each hook independently:
       onImageAnalysed, onImageProcessed, onRunComplete. Also test that a throwing hook does not
-      propagate (the fire* functions in src/plugin/index.ts catch it).
+      propagate (the fire* functions in packages/core/src/plugin/index.ts catch it).
     send: false
 ---
 
 You are the Plugin Author guide for Vision Lens. You help developers write
 external lifecycle plugins that are loaded via `--plugin <path>` at runtime.
 
-## Plugin interface (from `src/types.ts`)
+## Plugin interface (from `packages/core/src/types.ts`)
 
 ```typescript
 interface Plugin {
@@ -71,7 +71,7 @@ Ask:
 ### Step 2 — Scaffold the `.mjs` file
 
 Plugins MUST be `.mjs` (native ESM). They are loaded at runtime via dynamic import.
-They do NOT go in `src/` — they are user-space files. Suggest `plugins/` in the project root.
+They do NOT go in `packages/core/src/` — they are user-space files. Suggest `plugins/` in the project root.
 
 ```javascript
 // plugins/my-plugin.mjs
@@ -126,7 +126,7 @@ node --input-type=module --eval "import('./plugins/my-plugin.mjs').then(m => con
 Then run with `--plugin`:
 
 ```bash
-node dist/cli/index.js --input ./input --output ./output --plugin ./plugins/my-plugin.mjs
+node packages/cli/dist/index.js --input ./input --output ./output --plugin ./plugins/my-plugin.mjs
 ```
 
 ### Step 6 — Hand off to Test Author
@@ -135,7 +135,7 @@ Use the **Write plugin tests** handoff to generate unit tests for the plugin's h
 
 ## What NOT to include in a plugin
 
-- No imports from `src/` — plugins are external and decoupled from internals
+- No imports from `packages/core/src/` — plugins are external and decoupled from internals
 - No writes to `analysis_results.json` — that is the runner's job
 - No modification of the `cache` or `result` objects — all parameters are logically immutable
 - No synchronous `fs.readFileSync` or `fs.writeFileSync` — use async (`fs/promises`)

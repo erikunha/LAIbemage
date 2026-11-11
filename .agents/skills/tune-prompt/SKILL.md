@@ -35,7 +35,7 @@ Note the exact JSON response schema the prompts require:
 
 **Never change this schema** without a corresponding change to `parseAnalysisResult()` and `BatchEnvelopeSchema`.
 If prompt changes affect the Zod envelope shape, also bump `CACHE_SCHEMA_VERSION` in `src/types.ts` and add
-a migration step in `src/utils/migrate.ts`.
+a migration step in `packages/core/src/store/migrate.ts`.
 
 ### 2. Diagnose the specific confusion
 

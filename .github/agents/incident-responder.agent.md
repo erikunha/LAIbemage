@@ -68,7 +68,7 @@ ls -la output/.analysis_cache_partial.json 2>/dev/null && echo "PARTIAL CACHE EX
 The tool resumes automatically when a partial cache exists. Simply re-run:
 
 ```bash
-node dist/cli/index.js --input ./input --output ./output [original flags]
+node packages/cli/dist/index.js --input ./input --output ./output [original flags]
 ```
 
 The runner will:
@@ -130,7 +130,7 @@ If no recoverable data exists: delete the cache and re-run without `--skip-analy
 ### Recovery
 
 The safest fix is always to **delete all output files and re-run from scratch**.
-Sequence numbers are assigned by `src/classifier/` based on sorted order —
+Sequence numbers are assigned by `packages/core/src/classifier/` based on sorted order —
 they cannot be patched post-hoc without re-running the full pipeline.
 
 ```bash
@@ -138,7 +138,7 @@ they cannot be patched post-hoc without re-running the full pipeline.
 cp -r output/ output.bak.$(date +%s)/
 # Then clean and re-run
 rm output/*.jpg output/analysis_results.json
-node dist/cli/index.js --input ./input --output ./output [flags]
+node packages/cli/dist/index.js --input ./input --output ./output [flags]
 ```
 
 ---
@@ -164,7 +164,7 @@ node dist/cli/index.js --input ./input --output ./output [flags]
 
 3. Switch provider temporarily:
    ```bash
-   node dist/cli/index.js --input ./input --output ./output --provider anthropic
+   node packages/cli/dist/index.js --input ./input --output ./output --provider anthropic
    ```
    Note: results will be written to a fresh `analysis_results.json` — back up the old one first.
 

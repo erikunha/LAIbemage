@@ -78,12 +78,12 @@ reversible** whenever possible.
 
 ### Protocol
 
-1. **Read** `src/types.ts` to find current `CACHE_SCHEMA_VERSION` and `AnalysisCache` shape
+1. **Read** `packages/core/src/types.ts` to find current `CACHE_SCHEMA_VERSION` and `AnalysisCache` shape
 2. **Plan** the new shape: what is added, removed, or changed?
 3. **Consult** the `schema-migration.prompt.md` checklist (`.github/prompts/`)
 4. **Implement** the change:
-   - Increment `CACHE_SCHEMA_VERSION` in `src/types.ts`
-   - Update `PartialAnalysisCache` in `src/types.ts`
+   - Increment `CACHE_SCHEMA_VERSION` in `packages/core/src/types.ts`
+   - Update `PartialAnalysisCache` in `packages/core/src/types.ts`
    - Update every place `AnalysisCache` is constructed or read (use `search/usages`)
    - Update test fixtures that include `AnalysisCache` objects
 5. **Verify** old cache invalidation works:
@@ -132,12 +132,12 @@ Never remove a flag in one step. Use a deprecation cycle:
 **Step 1 (current release) — deprecate:**
 
 ```typescript
-// src/cli/index.ts
+// packages/cli/src/index.ts
 .option('--old-flag <value>', '(deprecated: use --new-flag instead)')
 ```
 
 ```typescript
-// src/config/index.ts — in loadConfig()
+// packages/core/src/config/index.ts — in loadConfig()
 if (opts['oldFlag']) {
   logger.warn('--old-flag is deprecated and will be removed in v3.0. Use --new-flag instead.');
   opts['newFlag'] ??= opts['oldFlag']; // apply the old value to the new flag
@@ -164,12 +164,12 @@ if (opts['oldName']) logger.warn('--old-name is deprecated; use --new-name');
 
 ## Provider interface migration
 
-When changing the `LLMClient` interface in `src/analyzer/client.ts`:
+When changing the `LLMClient` interface in `packages/core/src/analyzer/client.ts`:
 
 1. Use `search/usages` on the interface method being changed to find all call sites
-2. Update `src/analyzer/client.ts` first (the implementation)
-3. Update each call site in `src/analyzer/` (never in other modules — they don't call LLMClient directly)
-4. Update the mock in `tests/` — the mock interface MUST match the real interface exactly
+2. Update `packages/core/src/analyzer/client.ts` first (the implementation)
+3. Update each call site in `packages/core/src/analyzer/` (never in other modules — they don't call LLMClient directly)
+4. Update the mock in `packages/core/tests/` — the mock interface MUST match the real interface exactly
 5. Run `npm run typecheck` — this is the authoritative check for interface completeness
 
 ---
@@ -180,7 +180,7 @@ When the `Plugin` interface changes:
 
 - **New optional hook** → increment `PLUGIN_API_VERSION`; no existing plugins break
 - **Changed hook signature** → increment `PLUGIN_API_VERSION`; publish migration note
-- Update the version assertion comment in `src/types.ts`
+- Update the version assertion comment in `packages/core/src/types.ts`
 - Update `.github/agents/plugin-author.agent.md` with the new hook signature
 - Update `.github/skills/write-plugin/SKILL.md` with the new hook
 

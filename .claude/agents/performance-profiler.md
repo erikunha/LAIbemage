@@ -30,7 +30,7 @@ check, not an accuracy source — never report its precision/recall as product a
 
 Run with `--timing` flag:
 ```bash
-node dist/cli/index.js --input ./input --output ./output --timing --dry-run
+node packages/cli/dist/index.js --input ./input --output ./output --timing --dry-run
 ```
 
 This prints time spent per step: EXIF read, dedup, LLM batch, temporal, process, report.
@@ -38,11 +38,11 @@ This prints time spent per step: EXIF read, dedup, LLM batch, temporal, process,
 ### 3. Sharp pipeline profiling
 
 The Sharp pipeline runs in:
-- `src/analyzer/batch.ts` — resize for API (before LLM call)
-- `src/analyzer/dedup.ts` — perceptual hash (dHash)
-- `src/analyzer/async-batch.ts` — resize for async submission
-- `src/processor/overlay.ts` — timestamp overlay
-- `src/processor/exporter.ts` — JPEG export
+- `packages/core/src/analyzer/batch.ts` — resize for API (before LLM call)
+- `packages/core/src/analyzer/dedup.ts` — perceptual hash (dHash)
+- `packages/core/src/analyzer/async-batch.ts` — resize for async submission
+- `packages/core/src/processor/overlay.ts` — timestamp overlay
+- `packages/core/src/processor/exporter.ts` — JPEG export
 
 To profile Sharp specifically, instrument with `console.time()` / `console.timeEnd()` temporarily.
 
@@ -64,7 +64,7 @@ For large batches:
 | Slow EXIF step | Many files with large EXIF data | Already capped at 32 concurrent reads |
 | Slow dedup step | Large images needing full decode | Sharp already resizes for dHash — check `dedupeThreshold` |
 | Slow Sharp resize | Large input images | Add pre-resize step to reduce to max 2048px before API |
-| High API cost | `detail: 'high'` in batch | Batch should use `detail: 'low'` — check `src/analyzer/batch.ts` |
+| High API cost | `detail: 'high'` in batch | Batch should use `detail: 'low'` — check `packages/core/src/analyzer/batch.ts` |
 
 ## Output format
 

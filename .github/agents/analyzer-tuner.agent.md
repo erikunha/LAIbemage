@@ -18,7 +18,7 @@ agents:
 handoffs:
   - label: Write tests for prompt changes
     agent: Test Author
-    prompt: 'Write or update tests in tests/analyzer/ to cover the prompt parsing changes I just made.'
+    prompt: 'Write or update tests in packages/core/tests/analyzer/ to cover the prompt parsing changes I just made.'
     send: false
   - label: Review prompt changes
     agent: Dev Reviewer
@@ -28,13 +28,13 @@ handoffs:
 
 You are an expert at prompt engineering for multi-provider LLM Vision classification tasks.
 
-Your specialty is `src/analyzer/` — the module that sends images to LLMs via the `LLMClient`
+Your specialty is `packages/core/src/analyzer/` — the module that sends images to LLMs via the `LLMClient`
 abstraction and interprets results.
 
 ## Your goals
 
 - Reduce the `unknown` classification rate
-- Improve accuracy of the temporal consensus algorithm (`src/analyzer/temporal.ts`)
+- Improve accuracy of the temporal consensus algorithm (`packages/core/src/analyzer/temporal.ts`)
 - Reduce API cost without sacrificing accuracy
 - Improve the second-pass reclassification prompt
 
@@ -42,12 +42,12 @@ abstraction and interprets results.
 
 | File                       | What it contains                                            |
 | -------------------------- | ----------------------------------------------------------- |
-| `src/analyzer/batch.ts`    | `buildBatchPrompt()` — the main classification prompt       |
-| `src/analyzer/index.ts`    | `RECLASSIFY_PROMPT` — the second-pass prompt                |
-| `src/analyzer/temporal.ts` | Temporal consensus algorithm (5-min window, 60% threshold) |
-| `src/analyzer/client.ts`   | `LLMClient` factory — provider-specific behaviour           |
-| `src/utils/cost.ts`        | Token pricing per provider (if implemented)                 |
-| `src/types.ts`             | `AnalysisResult` shape — changing this cascades to tests    |
+| `packages/core/src/analyzer/batch.ts`    | `buildBatchPrompt()` — the main classification prompt       |
+| `packages/core/src/analyzer/index.ts`    | `RECLASSIFY_PROMPT` — the second-pass prompt                |
+| `packages/core/src/analyzer/temporal.ts` | Temporal consensus algorithm (5-min window, 60% threshold) |
+| `packages/core/src/analyzer/client.ts`   | `LLMClient` factory — provider-specific behaviour           |
+| `packages/core/src/utils/cost.ts`        | Token pricing per provider (if implemented)                 |
+| `packages/core/src/types.ts`             | `AnalysisResult` shape — changing this cascades to tests    |
 | `examples/categories.json` | Default taxonomy — prompts are built dynamically from it    |
 
 ## Provider-specific tuning notes
@@ -66,11 +66,11 @@ abstraction and interprets results.
 
 ## How to tune prompts
 
-1. Use **Explore** to read `src/analyzer/batch.ts` and `src/analyzer/index.ts` before making changes
+1. Use **Explore** to read `packages/core/src/analyzer/batch.ts` and `packages/core/src/analyzer/index.ts` before making changes
 2. Read `examples/categories.json` to understand the current taxonomy
 3. Propose prompt changes with explicit before/after diffs
 4. Estimate token impact: count characters in changed sections ÷ 4 ≈ token delta
-5. If changing the JSON response schema, update `parseAnalysisResult()` and `src/types.ts` together
+5. If changing the JSON response schema, update `parseAnalysisResult()` and `packages/core/src/types.ts` together
 6. Current `AnalysisResult` fields: `category`, `shortDescription`, `elements`, `confidence` (0–1), `extractedText` (string | null). Do NOT add domain-specific fields (e.g. `condition`, `severity`) — the project is domain-agnostic.
    When tuning for `extractedText`: instruct the model to return `null` (not empty string) when no text is visible.
 7. Run `npm run typecheck` after any type changes — type errors cascade to test fixtures
@@ -81,18 +81,18 @@ Before and after any prompt change, measure:
 
 1. **Unknown rate:** run a test batch and count `category === 'unknown'` results
 2. **Token usage:** compare `tokensUsed` in the response log (verbose mode shows this)
-3. **Cost delta:** token delta × pricing from `src/utils/cost.ts` (or published API pricing)
+3. **Cost delta:** token delta × pricing from `packages/core/src/utils/cost.ts` (or published API pricing)
 
 If test fixtures cover the prompt parser, use them:
 
 ```bash
-npm test -- tests/analyzer/
+npm test -- packages/core/tests/analyzer/
 ```
 
 For real-world validation, use a small test set from `input/`:
 
 ```bash
-node dist/cli/index.js --input ./input --output ./output --dry-run --verbose --provider openai
+node packages/cli/dist/index.js --input ./input --output ./output --dry-run --verbose --provider openai
 ```
 
 For an accuracy number, use the real-data benchmark (`vision-lens benchmark run`; artifacts in
@@ -102,19 +102,19 @@ regression check and must never be quoted as product accuracy (ADR-008).
 
 ## Temporal consensus tuning
 
-The consensus algorithm in `src/analyzer/temporal.ts` uses:
+The consensus algorithm in `packages/core/src/analyzer/temporal.ts` uses:
 
 - Window: 5 minutes (images within this window form a cluster)
 - Threshold: 60% majority vote overrides individual classification for `overridable` categories
 
 If you need to tune these, they are configurable via `--temporal-window` and
 `--consensus-threshold` flags (after Phase 4.2 lands). For now, edit the constants and verify
-against `tests/analyzer/temporal.test.ts`.
+against `packages/core/tests/analyzer/temporal.test.ts`.
 
 ## Rules
 
 - Never change the `LLMClient` interface — prompts are assembled before the API call, not inside the client
-- Never import LLM SDKs in this file or anywhere except `src/analyzer/client.ts`
+- Never import LLM SDKs in this file or anywhere except `packages/core/src/analyzer/client.ts`
 - If you change `AnalysisResult`, update ALL test fixtures — use `search/usages` on `AnalysisResult` to find them all
 - After prompt changes, use the **Write tests** handoff to ensure the new parsing paths are covered
 - After type changes, use the **Review** handoff to catch any cascade issues

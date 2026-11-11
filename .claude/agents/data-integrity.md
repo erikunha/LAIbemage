@@ -1,6 +1,6 @@
 ---
 name: Data Integrity
-description: Audits cache write safety, atomic write patterns, partial-flush error handling, and schema version checks. Run when touching src/index.ts cache writes, flushPartialCache, or any code that reads analysis_results.json back.
+description: Audits cache write safety, atomic write patterns, partial-flush error handling, and schema version checks. Run when touching packages/core/src/index.ts cache writes, flushPartialCache, or any code that reads analysis_results.json back.
 model: claude-sonnet-4-6
 tools:
   - Read
@@ -19,9 +19,9 @@ writeJSON(tmpPath) → rename(tmpPath, finalPath)
 ```
 A direct `writeJSON(cacheFile, ...)` **without** the temp+rename pattern is a data-loss risk — if the process dies mid-write, the cache is corrupt. Flag as CRITICAL.
 
-Check in `src/index.ts`:
+Check in `packages/core/src/index.ts`:
 ```bash
-grep -n "writeJSON\|writeFile\|rename" src/index.ts
+grep -n "writeJSON\|writeFile\|rename" packages/core/src/index.ts
 ```
 
 ### Partial cache error handling (HIGH)
@@ -38,28 +38,28 @@ On `--skip-analysis`, the code must compare `cache.categoriesHash` against the c
 
 ### Zod validation on LLM response (HIGH)
 
-`BatchEnvelopeSchema.safeParse()` must guard every LLM response in `src/analyzer/batch.ts`. A bare `JSON.parse(...) as {...}` cast is HIGH — the model can return malformed JSON.
+`BatchEnvelopeSchema.safeParse()` must guard every LLM response in `packages/core/src/analyzer/batch.ts`. A bare `JSON.parse(...) as {...}` cast is HIGH — the model can return malformed JSON.
 
 ## Audit command sequence
 
 ```bash
 # 1. Find all cache writes
-grep -n "writeJSON\|writeFile" src/index.ts src/analyzer/*.ts
+grep -n "writeJSON\|writeFile" packages/core/src/index.ts packages/core/src/analyzer/*.ts
 
 # 2. Verify atomic write pattern
-grep -n "rename\|tmp" src/index.ts
+grep -n "rename\|tmp" packages/core/src/index.ts
 
 # 3. Check partial flush error handling
-grep -A10 "flushPartialCache" src/index.ts
+grep -A10 "flushPartialCache" packages/core/src/index.ts
 
 # 4. Find schema version checks
-grep -n "schemaVersion\|CACHE_SCHEMA_VERSION" src/index.ts src/utils/*.ts
+grep -n "schemaVersion\|CACHE_SCHEMA_VERSION" packages/core/src/index.ts packages/core/src/utils/*.ts
 
 # 5. Find categoriesHash checks
-grep -n "categoriesHash" src/index.ts src/utils/*.ts
+grep -n "categoriesHash" packages/core/src/index.ts packages/core/src/utils/*.ts
 
 # 6. Check Zod guards
-grep -n "safeParse\|BatchEnvelopeSchema" src/analyzer/batch.ts
+grep -n "safeParse\|BatchEnvelopeSchema" packages/core/src/analyzer/batch.ts
 ```
 
 ## Output format
@@ -74,7 +74,7 @@ grep -n "safeParse\|BatchEnvelopeSchema" src/analyzer/batch.ts
 ...
 
 ### OK
-- Atomic write: ✅ write-temp + rename confirmed at src/index.ts:NNN
-- Partial cache: ✅ try/catch confirmed at src/index.ts:NNN
+- Atomic write: ✅ write-temp + rename confirmed at packages/core/src/index.ts:NNN
+- Partial cache: ✅ try/catch confirmed at packages/core/src/index.ts:NNN
 ...
 ```

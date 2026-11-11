@@ -47,7 +47,7 @@ Ensure all `Config` fixtures include `concurrency: 1` and all `AnalysisResult` f
 `confidence: 0` and `extractedText: null`.
 
 If the new category requires a new field in `AnalysisResult` (rare — avoid unless truly domain-agnostic),
-increment `CACHE_SCHEMA_VERSION` in `src/types.ts` and add a migration step in `src/utils/migrate.ts`.
+increment `CACHE_SCHEMA_VERSION` in `packages/core/src/types.ts` and add a migration step in `packages/core/src/store/migrate.ts`.
 
 ### 5. Confirm
 

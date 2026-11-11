@@ -15,20 +15,20 @@ You are **read-only** — identify issues and explain how to fix them. Do not ed
 
 ### 1. Module boundary violations (BLOCK on failure)
 
-- `src/utils/` must NOT import OpenAI SDK, `@anthropic-ai/sdk`, `@google/generative-ai`, Sharp, or `fs-extra`
-- `src/analyzer/providers/*.ts` are the ONLY files allowed to import LLM SDKs (one SDK per file)
-- `src/analyzer/client.ts` is a thin routing layer — it imports from `./providers/` only, NOT from any LLM SDK directly
-- All other `src/analyzer/*.ts` must NOT import LLM SDKs — use `LLMClient` from `./client.js`
-- `src/analyzer/` may import Sharp only in `batch.ts`, `dedup.ts`, and `async-batch.ts`
-- `src/processor/` must NOT import any LLM SDK
-- `src/classifier/` must NOT import any LLM SDK, Sharp, or `fs-extra`
-- `src/plugin/` must NOT import analyzer/, processor/, any LLM SDK, or Sharp
-- `src/reporter/` must NOT import any LLM SDK or Sharp
+- `packages/core/src/utils/` must NOT import OpenAI SDK, `@anthropic-ai/sdk`, `@google/generative-ai`, Sharp, or `fs-extra`
+- `packages/core/src/analyzer/providers/*.ts` are the ONLY files allowed to import LLM SDKs (one SDK per file)
+- `packages/core/src/analyzer/client.ts` is a thin routing layer — it imports from `./providers/` only, NOT from any LLM SDK directly
+- All other `packages/core/src/analyzer/*.ts` must NOT import LLM SDKs — use `LLMClient` from `./client.js`
+- `packages/core/src/analyzer/` may import Sharp only in `batch.ts`, `dedup.ts`, and `async-batch.ts`
+- `packages/core/src/processor/` must NOT import any LLM SDK
+- `packages/core/src/classifier/` must NOT import any LLM SDK, Sharp, or `fs-extra`
+- `packages/core/src/plugin/` must NOT import analyzer/, processor/, any LLM SDK, or Sharp
+- `packages/core/src/reporter/` must NOT import any LLM SDK or Sharp
 
 ### 2. ESM import correctness (BLOCK on failure)
 
 - All relative imports must end in `.js` (not `.ts`, not bare)
-- Check: `grep -r "from '\\./" src/ --include="*.ts" | grep -v "\.js'"` should return nothing
+- Check: `grep -r "from '\\./" packages/core/src/ --include="*.ts" | grep -v "\.js'"` should return nothing
 
 ### 3. API key safety (BLOCK on failure)
 
@@ -45,7 +45,7 @@ You are **read-only** — identify issues and explain how to fix them. Do not ed
 
 - Run `pnpm test` — all tests must pass
 - Coverage thresholds: lines ≥ 75%, functions ≥ 85%, branches ≥ 75%
-- New logic in `src/analyzer/`, `src/classifier/`, or `src/processor/` must have corresponding tests
+- New logic in `packages/core/src/analyzer/`, `packages/core/src/classifier/`, or `packages/core/src/processor/` must have corresponding tests
 - Tests must NOT mock LLM SDK constructors — mock via `LLMClient` interface only
 - Every Config fixture must include ALL `Config` fields — `as Config` casts hide missing fields
 
@@ -56,8 +56,8 @@ You are **read-only** — identify issues and explain how to fix them. Do not ed
 
 ### 7. Console.log hygiene (WARN on failure)
 
-- `console.log` may only appear in `src/utils/logger.ts` and `src/utils/progress.ts`
-- Check: `grep -r "console\." src/ --include="*.ts" | grep -v "src/utils/logger\|src/utils/progress"`
+- `console.log` may only appear in `packages/core/src/utils/logger.ts` and `packages/core/src/utils/progress.ts`
+- Check: `grep -r "console\." packages/core/src/ --include="*.ts" | grep -v "packages/core/src/utils/logger\|packages/core/src/utils/progress"`
 
 ### 8. Security checks (BLOCK on P0, WARN on P1)
 
@@ -70,7 +70,7 @@ You are **read-only** — identify issues and explain how to fix them. Do not ed
 
 - **Atomic cache write:** the final `analysis_results.json` write must use write-temp → rename — a direct `writeJSON(cacheFile, ...)` is a BLOCK
 - **Partial cache error handling:** `flushPartialCache` must wrap `fs.writeJSON` in try/catch that logs a warning
-- **LLM response schema validated:** `BatchEnvelopeSchema.safeParse()` must guard the batch JSON parse in `src/analyzer/batch.ts`
+- **LLM response schema validated:** `BatchEnvelopeSchema.safeParse()` must guard the batch JSON parse in `packages/core/src/analyzer/batch.ts`
 - **CACHE_SCHEMA_VERSION incremented:** if any field was added/removed from `AnalysisCache` or `PartialAnalysisCache`, verify `CACHE_SCHEMA_VERSION` was incremented
 
 ### 10. AnalysisResult field correctness (WARN on failure)

@@ -42,7 +42,7 @@ Also verify:
 
 - `.nvmrc` matches the `engines.node` minimum in `package.json`
 - `npm audit --audit-level=high` exits with code 0 (no high/critical CVEs)
-- No uncommitted changes in `src/` or `tests/` (changelog and version bump are fine)
+- No uncommitted changes in `packages/core/src/` or `packages/core/tests/` (changelog and version bump are fine)
 
 ### 2. Version bump
 
@@ -94,7 +94,7 @@ Verify every field:
 
 - `"version"` matches the intended release
 - `"main"` points to `dist/index.js`
-- `"bin"` points to `dist/cli/index.js` (if it exists)
+- `"bin"` points to `packages/cli/dist/index.js` (if it exists)
 - `"engines"` specifies `"node": ">=18"`
 - `"files"` array includes `dist/`, `examples/`, `README.md`, `LICENSE`
 - No `devDependencies` leaked into `dependencies`
@@ -104,11 +104,11 @@ Verify every field:
 
 ```bash
 npm run build
-node dist/cli/index.js --help
-node dist/cli/index.js --version
+node packages/cli/dist/index.js --help
+node packages/cli/dist/index.js --version
 ```
 
-Confirm `dist/` contains compiled `.js` files. Verify `--help` output matches `src/cli/help.ts`.
+Confirm `dist/` contains compiled `.js` files. Verify `--help` output matches `packages/cli/src/help.ts`.
 
 ### 6. npm publish dry-run
 
@@ -120,8 +120,8 @@ Review the file list. Confirm these are NOT included:
 
 - `.env`, `.env.*` (except `.env.example`)
 - `input/`, `output/`, `backup output/`
-- `tests/`, `scripts/` (unless scripts are documented as user-facing)
-- Source `.ts` files from `src/`
+- `packages/core/tests/`, `scripts/` (unless scripts are documented as user-facing)
+- Source `.ts` files from `packages/core/src/`
 
 ### 7. SECURITY.md check
 

@@ -28,7 +28,7 @@ Or pass it with: --anthropic-api-key <key>
 Get a key at: https://console.anthropic.com
 ```
 
-### Help text (`src/cli/help.ts`)
+### Help text (`packages/cli/src/help.ts`)
 
 - Every flag must have a description, default value, and example value
 - Flags must be grouped logically (input/output, model, performance, advanced)
@@ -62,17 +62,17 @@ Get a key at: https://console.anthropic.com
 1. Build the CLI: `pnpm run build`
 2. Run the CLI with various bad inputs to see current error messages:
    ```bash
-   node dist/cli/index.js --help
-   node dist/cli/index.js  # missing required args
-   node dist/cli/index.js --input /nonexistent
+   node packages/cli/dist/index.js --help
+   node packages/cli/dist/index.js  # missing required args
+   node packages/cli/dist/index.js --input /nonexistent
    ```
-3. Read `src/cli/help.ts` and `src/utils/logger.ts`
+3. Read `packages/cli/src/help.ts` and `packages/core/src/utils/logger.ts`
 4. Identify gaps: missing `--how-to-fix` hints, truncated help text, wrong exit codes
-5. Edit `src/cli/help.ts` and error throw sites in `src/index.ts` or `src/config/index.ts`
+5. Edit `packages/cli/src/help.ts` and error throw sites in `packages/core/src/index.ts` or `packages/core/src/config/index.ts`
 6. Run `pnpm test` after any changes
 
 ## Rules
 
-- Never add `console.log` — use `logger.info()`, `logger.warn()`, `logger.error()` from `src/utils/logger.ts`
+- Never add `console.log` — use `logger.info()`, `logger.warn()`, `logger.error()` from `packages/core/src/utils/logger.ts`
 - Error messages in `--json` log format must be parseable JSON (handled by `logFormat: 'json'` mode)
 - Do not change exit codes without updating the README and `.github/copilot-instructions.md`

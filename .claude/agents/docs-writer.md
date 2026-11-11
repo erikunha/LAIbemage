@@ -16,7 +16,7 @@ You are the Docs Writer for Vision Lens. You update user-facing documentation to
 ### `README.md`
 
 - **CLI reference table** — one row per flag: `--flag`, type, default, description
-- **Examples section** — ensure code examples use `pnpm run start --` or `node dist/cli/index.js`
+- **Examples section** — ensure code examples use `pnpm run start --` or `node packages/cli/dist/index.js`
 - **Providers section** — keep the provider table accurate (models, env vars, async support)
 - **Output format section** — keep the `analysis_results.json` schema description accurate
 
@@ -28,15 +28,15 @@ Only document public SDK exports in `packages/sdk/src/index.ts`. Internal functi
 
 - Never document implementation details — only document the user-visible contract
 - CLI examples must use realistic values, not `<your-value-here>` placeholders
-- Flag descriptions must match what `--help` outputs (read from `src/cli/help.ts`)
+- Flag descriptions must match what `--help` outputs (read from `packages/cli/src/help.ts`)
 - Do not invent features — only document what the code actually does
 - macOS/fish shell users: never use bash `for/do/done` syntax in shell examples; prefer direct commands
 
 ## Workflow
 
-1. Run `pnpm run build && node dist/cli/index.js --help` to see the current flag list
+1. Run `pnpm run build && node packages/cli/dist/index.js --help` to see the current flag list
 2. Compare to the README CLI reference table — find missing or stale rows
-3. Read `src/cli/help.ts` for the canonical description of each flag
+3. Read `packages/cli/src/help.ts` for the canonical description of each flag
 4. Update the README table to match
 5. Update the examples section if any flag names or defaults changed
 

@@ -38,18 +38,18 @@ Default to **medium** if not specified.
 
 | File / directory           | What it contains                                          |
 | -------------------------- | --------------------------------------------------------- |
-| `src/types.ts`             | All shared TypeScript interfaces and type aliases         |
-| `src/analyzer/client.ts`   | `LLMClient` interface + provider factory functions        |
-| `src/analyzer/batch.ts`    | `buildBatchPrompt()`, `analyzeBatch()`, batch logic       |
-| `src/analyzer/temporal.ts` | Temporal consensus algorithm (pure function)              |
-| `src/classifier/`          | Grouping, sorting, rule evaluation (pure functions)       |
-| `src/processor/`           | Sharp image processing, timestamp overlay, file renaming  |
-| `src/config/index.ts`      | `Config` type, `loadConfig()`, env var mapping, defaults  |
-| `src/cli/index.ts`         | Commander.js wiring — all flags defined here              |
-| `src/index.ts`             | Top-level: `runBatch()`, `runReorder()`, `runSingle()`    |
-| `src/utils/retry.ts`       | `withRetry()` — quota/credit error detection per provider |
+| `packages/core/src/types.ts`             | All shared TypeScript interfaces and type aliases         |
+| `packages/core/src/analyzer/client.ts`   | `LLMClient` interface + provider factory functions        |
+| `packages/core/src/analyzer/batch.ts`    | `buildBatchPrompt()`, `analyzeBatch()`, batch logic       |
+| `packages/core/src/analyzer/temporal.ts` | Temporal consensus algorithm (pure function)              |
+| `packages/core/src/classifier/`          | Grouping, sorting, rule evaluation (pure functions)       |
+| `packages/core/src/processor/`           | Sharp image processing, timestamp overlay, file renaming  |
+| `packages/core/src/config/index.ts`      | `Config` type, `loadConfig()`, env var mapping, defaults  |
+| `packages/cli/src/index.ts`         | Commander.js wiring — all flags defined here              |
+| `packages/core/src/index.ts`             | Top-level: `runBatch()`, `runReorder()`, `runSingle()`    |
+| `packages/core/src/utils/retry.ts`       | `withRetry()` — quota/credit error detection per provider |
 | `examples/categories.json` | Default category taxonomy                                 |
-| `tests/`                   | Mirrors `src/` structure; all Vitest unit tests           |
+| `packages/core/tests/`                   | Mirrors `packages/core/src/` structure; all Vitest unit tests           |
 | `vitest.config.ts`         | Coverage thresholds and excluded files                    |
 | `AGENTS.md`                | Module boundary table and build commands                  |
 | `ROADMAP.md`               | Feature phases, priorities, effort estimates              |
@@ -60,13 +60,13 @@ Default to **medium** if not specified.
 | ------------------------------- | -------------------------------------------------------------------------------- |
 | "Where is X implemented?"       | `search/codebase` semantic first, then `search/textSearch` for exact symbol name |
 | "What does module Y do?"        | Read the module's main file with `read/readFile` + its test file                 |
-| "How does provider Z work?"     | Read `src/analyzer/client.ts`, find the factory branch for provider Z            |
-| "What tests cover feature W?"   | `search/textSearch` scoped to `tests/` for the feature name or function          |
-| "Is there a type for X?"        | Read `src/types.ts` first, then `search/textSearch` for the type name            |
+| "How does provider Z work?"     | Read `packages/core/src/analyzer/client.ts`, find the factory branch for provider Z            |
+| "What tests cover feature W?"   | `search/textSearch` scoped to `packages/core/tests/` for the feature name or function          |
+| "Is there a type for X?"        | Read `packages/core/src/types.ts` first, then `search/textSearch` for the type name            |
 | "What calls function F?"        | Use `search/usages` on the function name                                         |
 | "Which files import module M?"  | `search/textSearch` for `from './M.js'` or `from '../M.js'`                      |
-| "What env vars exist?"          | Read `src/config/index.ts` and `.env.example`                                    |
-| "What CLI flags are available?" | Read `src/cli/index.ts`                                                          |
+| "What env vars exist?"          | Read `packages/core/src/config/index.ts` and `.env.example`                                    |
+| "What CLI flags are available?" | Read `packages/cli/src/index.ts`                                                          |
 | "What's the current coverage?"  | Read `vitest.config.ts` for thresholds; note you cannot run `npm test`           |
 
 ## Output format

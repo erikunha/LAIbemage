@@ -29,7 +29,7 @@ handoffs:
     agent: Dev Reviewer
     prompt: >
       Validate the newly created categories.json against the CategoryConfigSchema in
-      src/config/index.ts. Run: npx tsx -e "import('./src/config/index.ts').then(m => console.log('schema ok'))"
+      packages/core/src/config/index.ts. Run: npx tsx -e "import('./packages/core/src/config/index.ts').then(m => console.log('schema ok'))"
       and confirm no Zod validation errors. Report PASS or BLOCK.
     send: false
 ---
@@ -130,7 +130,7 @@ After producing `categories.json`, run the schema validator:
 
 ```bash
 node --input-type=module --eval "
-import { CategoryConfigSchema } from './dist/config/index.js';
+import { CategoryConfigSchema } from './packages/core/dist/config/index.js';
 import { readFileSync } from 'fs';
 const raw = JSON.parse(readFileSync('./examples/categories.json', 'utf8'));
 CategoryConfigSchema.parse(raw);

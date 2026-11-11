@@ -8,15 +8,15 @@ on:
   # Mutation is slow (~10 min); limiting by path keeps PR feedback fast.
   pull_request:
     paths:
-      - 'src/classifier/**'
-      - 'src/analyzer/temporal.ts'
-      - 'tests/classifier/**'
-      - 'tests/analyzer/temporal.test.ts'
+      - 'packages/core/src/classifier/**'
+      - 'packages/core/src/analyzer/temporal.ts'
+      - 'packages/core/tests/classifier/**'
+      - 'packages/core/tests/analyzer/temporal.test.ts'
       - 'stryker.config.mjs'
   workflow_dispatch:
     inputs:
       mutate_only:
-        description: 'Limit mutation to a specific file (e.g. src/classifier/rules.ts)'
+        description: 'Limit mutation to a specific file (e.g. packages/core/src/classifier/rules.ts)'
         required: false
         default: ''
 

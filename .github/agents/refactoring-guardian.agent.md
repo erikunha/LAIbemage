@@ -33,7 +33,7 @@ handoffs:
     prompt: >
       The refactor revealed untested code paths. Write unit tests for the newly extracted
       functions/modules. Focus on pure functions first, then mocked I/O. Do not test
-      src/cli/ or src/index.ts.
+      packages/cli/src/ or packages/core/src/index.ts.
     send: false
 ---
 
@@ -76,22 +76,22 @@ Also check manually for:
 
 ```bash
 # Detect copy-pasted code blocks (requires jsinspect)
-npx jsinspect --threshold 30 src/ 2>/dev/null | head -40
+npx jsinspect --threshold 30 packages/core/src/ 2>/dev/null | head -40
 ```
 
 Common duplication sites in this codebase:
 
 - LLM error handling patterns (may be duplicated across `batch.ts` and `client.ts`)
-- File path resolution logic (check `src/config/`, `src/processor/`, `src/analyzer/`)
+- File path resolution logic (check `packages/core/src/config/`, `packages/core/src/processor/`, `packages/core/src/analyzer/`)
 - Zod schema validation patterns
 
 ### Step 3 — Module boundary drift
 
 ```bash
 # Find any import that crosses a forbidden boundary
-grep -rn "from '.*analyzer'" src/processor/ src/classifier/ src/plugin/ src/reporter/ 2>/dev/null && echo "DRIFT"
-grep -rn "from '.*processor'" src/analyzer/ src/classifier/ src/plugin/ 2>/dev/null && echo "DRIFT"
-grep -rn "from '.*sharp'" src/utils/ src/classifier/ src/cli/ src/plugin/ src/reporter/ 2>/dev/null && echo "DRIFT"
+grep -rn "from '.*analyzer'" packages/core/src/processor/ packages/core/src/classifier/ packages/core/src/plugin/ packages/core/src/reporter/ 2>/dev/null && echo "DRIFT"
+grep -rn "from '.*processor'" packages/core/src/analyzer/ packages/core/src/classifier/ packages/core/src/plugin/ 2>/dev/null && echo "DRIFT"
+grep -rn "from '.*sharp'" packages/core/src/utils/ packages/core/src/classifier/ packages/cli/src/ packages/core/src/plugin/ packages/core/src/reporter/ 2>/dev/null && echo "DRIFT"
 ```
 
 ### Step 4 — Function length and complexity
@@ -100,13 +100,13 @@ Flag any function > 60 lines or with > 5 `if`/`else` branches:
 
 ```bash
 # Find long functions (rough heuristic)
-awk '/^(export )?async function|^(export )?(const|function) \w+ = /{name=$0; count=0} {count++} count>60{print FILENAME ":" NR " — " name " (" count " lines)"}' src/**/*.ts 2>/dev/null | head -10
+awk '/^(export )?async function|^(export )?(const|function) \w+ = /{name=$0; count=0} {count++} count>60{print FILENAME ":" NR " — " name " (" count " lines)"}' packages/core/src/**/*.ts 2>/dev/null | head -10
 ```
 
 ### Step 5 — `any` usage audit
 
 ```bash
-grep -rn ": any\|as any\|<any>" src/ --include="*.ts" | grep -v "eslint-disable" | head -20
+grep -rn ": any\|as any\|<any>" packages/core/src/ --include="*.ts" | grep -v "eslint-disable" | head -20
 ```
 
 Every `any` without an `// eslint-disable` comment explaining WHY is a tech debt item.
@@ -118,17 +118,17 @@ Every `any` without an `// eslint-disable` comment explaining WHY is a tech debt
 ### Extract a pure helper
 
 **When:** A function does two unrelated things (side effect + computation)
-**How:** Extract the pure computation into `src/utils/` with a unit test
+**How:** Extract the pure computation into `packages/core/src/utils/` with a unit test
 
 ```typescript
-// BEFORE — mixed computation and I/O in src/analyzer/batch.ts
+// BEFORE — mixed computation and I/O in packages/core/src/analyzer/batch.ts
 async function processImage(file: string) {
   const resized = await sharp(file).resize(512).toBuffer();
   const base64 = resized.toString('base64'); // ← pure, extractable
   return sendToLLM(base64);
 }
 
-// AFTER — pure helper in src/utils/encoding.ts
+// AFTER — pure helper in packages/core/src/utils/encoding.ts
 export function bufferToBase64(buf: Buffer): string {
   return buf.toString('base64');
 }
@@ -162,14 +162,14 @@ return cache.results;
 ### Consolidate duplicate error handling
 
 **When:** Same `try/catch` pattern repeated in 3+ places
-**How:** Extract to `src/utils/` only if it's truly general; otherwise accept the duplication
+**How:** Extract to `packages/core/src/utils/` only if it's truly general; otherwise accept the duplication
 
 ---
 
 ## What NOT to refactor
 
-- **`src/analyzer/client.ts`** — the LLM adapter is intentionally monolithic; extracting it would break the provider boundary
-- **`src/cli/index.ts`** — Commander wiring is intentionally thin; no behaviour lives here to extract
+- **`packages/core/src/analyzer/client.ts`** — the LLM adapter is intentionally monolithic; extracting it would break the provider boundary
+- **`packages/cli/src/index.ts`** — Commander wiring is intentionally thin; no behaviour lives here to extract
 - **Test files** — test structure mirrors source; refactoring tests independently creates drift
 - **Any code protected by a `// TODO` with a ticket reference** — those are planned changes; coordinate with the Contributor
 

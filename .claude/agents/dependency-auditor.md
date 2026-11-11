@@ -30,8 +30,8 @@ Flag any MODERATE or higher severity finding as HIGH. Flag CRITICAL findings as 
 ### Unnecessary dependencies
 
 For each package in `dependencies`:
-- Is it imported in `src/`? (check: `grep -r "from '${pkg}" src/ --include="*.ts"`)
-- If not imported in `src/`, should it be in `devDependencies`?
+- Is it imported in `packages/core/src/`? (check: `grep -r "from '${pkg}" packages/core/src/ --include="*.ts"`)
+- If not imported in `packages/core/src/`, should it be in `devDependencies`?
 - Is it a duplicate of something already provided by another dep?
 
 ### pnpm native build configuration
@@ -53,10 +53,10 @@ If a new native dep is added, it must be added to this list AND approved with `p
 ### Module boundary audit
 
 New packages must only be imported in the allowed modules:
-- LLM SDKs → `src/analyzer/client.ts` only
-- `sharp` → `src/analyzer/batch.ts`, `src/analyzer/dedup.ts`, `src/analyzer/async-batch.ts`, `src/processor/` only
-- `fs-extra` → `src/reporter/`, `src/index.ts` only
-- `better-sqlite3` / `drizzle-orm` → `src/reporter/sqlite.ts` only (dynamic import)
+- LLM SDKs → `packages/core/src/analyzer/client.ts` only
+- `sharp` → `packages/core/src/analyzer/batch.ts`, `packages/core/src/analyzer/dedup.ts`, `packages/core/src/analyzer/async-batch.ts`, `packages/core/src/processor/` only
+- `fs-extra` → `packages/core/src/reporter/`, `packages/core/src/index.ts` only
+- `better-sqlite3` / `drizzle-orm` → `packages/core/src/reporter/sqlite.ts` only (dynamic import)
 
 ### Outdated packages
 

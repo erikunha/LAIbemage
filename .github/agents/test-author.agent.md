@@ -1,7 +1,7 @@
 ---
 name: Test Author
 description: Writes and improves unit tests for Vision Lens. Focuses on coverage gaps, correct LLMClient mocking, and pure-function test design. Does not write integration tests.
-argument-hint: "Name the module to cover (e.g. 'src/utils/retry.ts') or 'gaps' to run a full coverage scan"
+argument-hint: "Name the module to cover (e.g. 'packages/core/src/utils/retry.ts') or 'gaps' to run a full coverage scan"
 model: gpt-4o
 tools:
   - search/codebase
@@ -29,10 +29,10 @@ You are the Test Author for Vision Lens. You write and improve Vitest unit tests
 
 - **Unit tests only** — no network calls, no filesystem writes, no real LLM API calls
 - **Mock at the boundary**: mock `LLMClient` as an interface — never mock OpenAI, Anthropic, or Google SDK constructors directly
-- **Mirror structure**: tests for `src/foo/bar.ts` live in `tests/foo/bar.test.ts`
-- **No mocks for pure functions** — `src/classifier/`, `src/utils/`, and `src/analyzer/temporal.ts` are pure and must be tested without mocks
-- **No tests for**: `src/cli/`, `src/index.ts` (excluded from coverage per `vitest.config.ts`)
-- **Do not** modify any file in `src/` — if you discover a source bug while writing tests, note it and delegate to **Contributor**
+- **Mirror structure**: tests for `packages/core/src/foo/bar.ts` live in `packages/core/tests/foo/bar.test.ts`
+- **No mocks for pure functions** — `packages/core/src/classifier/`, `packages/core/src/utils/`, and `packages/core/src/analyzer/temporal.ts` are pure and must be tested without mocks
+- **No tests for**: `packages/cli/src/`, `packages/core/src/index.ts` (excluded from coverage per `vitest.config.ts`)
+- **Do not** modify any file in `packages/core/src/` — if you discover a source bug while writing tests, note it and delegate to **Contributor**
 
 ## Coverage targets
 
@@ -77,7 +77,7 @@ function makeConfig(overrides: Partial<Config> = {}): Config {
     inputDir: './input',
     outputDir: './output',
     categoryConfig: {
-      categories: [{ name: 'mold', description: 'Mold damage', condition: 'bad' }],
+      categories: [{ name: 'mold', description: 'Mold damage' }],
       pinnedLast: [],
       immune: [],
       overridable: [],
@@ -113,7 +113,7 @@ If tests need real JPEG files (processor module, EXIF extraction), run:
 npm run fixtures
 ```
 
-This generates minimal 100×100 JPEG fixtures in `tests/fixtures/images/` via
+This generates minimal 100×100 JPEG fixtures in `packages/core/tests/fixtures/images/` via
 `scripts/generate-fixtures.ts`. Do NOT commit binary files — the directory is git-ignored.
 Add fixture generator invocation to `vitest.config.ts` `globalSetup` if it isn't already.
 
@@ -123,18 +123,18 @@ Add fixture generator invocation to `vitest.config.ts` `globalSetup` if it isn't
 - Use `it('does X when Y', ...)` — describe the observable outcome, not the implementation
 - Never use `beforeAll` for shared mutable state — use factory functions instead
 - Do NOT assert on implementation details (call arguments) unless the call itself is the contract — assert on observable outputs
-- Each test must be independently runnable (`vitest run --reporter verbose tests/foo/bar.test.ts`)
+- Each test must be independently runnable (`vitest run --reporter verbose packages/core/tests/foo/bar.test.ts`)
 - Use `vi.useFakeTimers()` / `vi.useRealTimers()` in `beforeEach`/`afterEach` pairs — never leave fake timers active between tests
 
 ## Contract test awareness
 
-Contract tests live in `tests/analyzer/client.contract.test.ts` and are skipped unless
+Contract tests live in `packages/core/tests/analyzer/client.contract.test.ts` and are skipped unless
 `CI_CONTRACT=1` is set. Do NOT add real API calls to regular unit tests. If you need to
 verify a new provider adapter works, add a skipped contract test in that file.
 
 ## Mutation testing awareness
 
-`src/classifier/` and `src/analyzer/temporal.ts` are targets for Stryker mutation testing
+`packages/core/src/classifier/` and `packages/core/src/analyzer/temporal.ts` are targets for Stryker mutation testing
 (`npm run mutate`). When writing tests for these modules, prefer assertions that catch
 off-by-one and boundary conditions — tests that pass with mutated code are worthless.
 

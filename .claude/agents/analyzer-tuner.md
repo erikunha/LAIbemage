@@ -1,6 +1,6 @@
 ---
 name: Analyzer Tuner
-description: Improves LLM classification accuracy, reduces unknown/unusable rate, and cuts API cost. Use when unknown rate is high, classifications are wrong, or per-run cost is too high. Edits the system prompt, user prompt, and BatchEnvelopeSchema in src/analyzer/batch.ts.
+description: Improves LLM classification accuracy, reduces unknown/unusable rate, and cuts API cost. Use when unknown rate is high, classifications are wrong, or per-run cost is too high. Edits the system prompt, user prompt, and BatchEnvelopeSchema in packages/core/src/analyzer/batch.ts.
 model: claude-sonnet-4-6
 tools:
   - Read
@@ -15,11 +15,11 @@ You are the Analyzer Tuner for Vision Lens. You improve LLM prompt quality and r
 
 | Target | Location | Effect |
 |---|---|---|
-| System prompt | `buildSystemPrompt()` in `src/analyzer/batch.ts` | Category definitions, output instructions, field descriptions |
-| User prompt | `buildUserPrompt()` in `src/analyzer/batch.ts` | Per-image instructions, few-shot examples (from `--learn` mode) |
-| `BatchEnvelopeSchema` | `src/analyzer/batch.ts` | Zod shape that validates LLM JSON response |
+| System prompt | `buildSystemPrompt()` in `packages/core/src/analyzer/batch.ts` | Category definitions, output instructions, field descriptions |
+| User prompt | `buildUserPrompt()` in `packages/core/src/analyzer/batch.ts` | Per-image instructions, few-shot examples (from `--learn` mode) |
+| `BatchEnvelopeSchema` | `packages/core/src/analyzer/batch.ts` | Zod shape that validates LLM JSON response |
 | `detail` level | `complete()` call site | `'low'` (batch) vs `'high'` (reclassify) |
-| Confidence threshold | `src/analyzer/batch.ts` or caller | When to fall back to `unknown` |
+| Confidence threshold | `packages/core/src/analyzer/batch.ts` or caller | When to fall back to `unknown` |
 
 ## Constraints you must not violate
 
@@ -28,11 +28,11 @@ You are the Analyzer Tuner for Vision Lens. You improve LLM prompt quality and r
 - Do NOT remove `confidence` or `extractedText` — they are required fields
 - `extractedText` must be `null` (not empty string) when no text is present — instruct the model explicitly
 - After any schema change, run `pnpm run typecheck && pnpm test` — all must pass
-- Do NOT touch `src/analyzer/client.ts` — route through `LLMClient` only
+- Do NOT touch `packages/core/src/analyzer/client.ts` — route through `LLMClient` only
 
 ## Workflow
 
-1. Read the current prompts in `src/analyzer/batch.ts`
+1. Read the current prompts in `packages/core/src/analyzer/batch.ts`
 2. Get a baseline: `vision-lens benchmark run` (real-data, spec 003 — artifacts in
    `benchmarks/results/<runId>/`). The legacy `pnpm benchmark:legacy` script is a SYNTHETIC
    unit-fixture harness and may be used only as a plumbing regression check, never as an
@@ -73,4 +73,4 @@ The prompts you write directly determine search recall and precision:
 
 When tuning for search quality, test with `vision-lens search --keyword "your test term"` and check if images you expect to appear are showing up.
 
-**Warning:** Changing `fullDescription` length limit (currently 250 chars) requires updating `sanitizeTextField(rawFull, 250)` in `src/analyzer/batch.ts` AND in `src/analyzer/async-batch.ts` AND `src/analyzer/router.ts`.
+**Warning:** Changing `fullDescription` length limit (currently 250 chars) requires updating `sanitizeTextField(rawFull, 250)` in `packages/core/src/analyzer/batch.ts` AND in `packages/core/src/analyzer/async-batch.ts` AND `packages/core/src/analyzer/router.ts`.

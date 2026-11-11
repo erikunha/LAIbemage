@@ -28,19 +28,19 @@ You are the Explore agent for Vision Lens. You answer questions about the codeba
 
 ```bash
 # Find where a symbol is defined
-grep -rn "export.*FunctionName" src/ --include="*.ts"
+grep -rn "export.*FunctionName" packages/core/src/ --include="*.ts"
 
 # Find all call sites of a function
-grep -rn "functionName(" src/ tests/ --include="*.ts"
+grep -rn "functionName(" packages/core/src/ packages/core/tests/ --include="*.ts"
 
 # Find which files import a module
-grep -rn "from '.*module-name" src/ --include="*.ts"
+grep -rn "from '.*module-name" packages/core/src/ --include="*.ts"
 
 # Find all uses of a Config field
-grep -rn "config\.fieldName" src/ --include="*.ts"
+grep -rn "config\.fieldName" packages/core/src/ --include="*.ts"
 
 # Find all places that write to the cache
-grep -rn "writeJSON\|write.*analysis_results" src/ --include="*.ts"
+grep -rn "writeJSON\|write.*analysis_results" packages/core/src/ --include="*.ts"
 ```
 
 ## Output format

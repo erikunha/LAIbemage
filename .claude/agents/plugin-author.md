@@ -83,12 +83,12 @@ export default {
 ## How to use the plugin
 
 ```bash
-node dist/cli/index.js --input ./photos --output ./out --plugin ./my-plugin.mjs
+node packages/cli/dist/index.js --input ./photos --output ./out --plugin ./my-plugin.mjs
 ```
 
 Multiple plugins:
 ```bash
-node dist/cli/index.js --input ./photos --output ./out --plugin ./plugin-a.mjs --plugin ./plugin-b.mjs
+node packages/cli/dist/index.js --input ./photos --output ./out --plugin ./plugin-a.mjs --plugin ./plugin-b.mjs
 ```
 
 ## Validation checklist

@@ -1,6 +1,6 @@
 ---
 name: Data Integrity Auditor
-description: Audits code changes for data-loss risks — unprotected cache writes, non-atomic file operations, unhandled I/O errors, missing error handling on checkpoint flushes, and cache schema version drift. Run when touching src/index.ts, cache serialisation, or the partial-cache flush path.
+description: Audits code changes for data-loss risks — unprotected cache writes, non-atomic file operations, unhandled I/O errors, missing error handling on checkpoint flushes, and cache schema version drift. Run when touching packages/core/src/index.ts, cache serialisation, or the partial-cache flush path.
 argument-hint: 'Describe what changed, or leave blank to audit all cache/I/O paths'
 model: claude-opus-4-7
 tools:
@@ -32,7 +32,7 @@ Your output is a **Data Integrity Report**. You do NOT fix issues — you docume
 ### P0 — data loss on process death
 
 **1. Final cache write is atomic**
-- Find the write of `analysis_results.json` in `src/index.ts`
+- Find the write of `analysis_results.json` in `packages/core/src/index.ts`
 - Must follow the pattern: `writeJSON(tmp) → rename(tmp, final)`
 - A direct `writeJSON(cacheFile, ...)` is a BLOCK — truncates file before writing
 
@@ -48,7 +48,7 @@ Your output is a **Data Integrity Report**. You do NOT fix issues — you docume
 ### P1 — silent resume corruption
 
 **4. categoriesHash present in both cache types**
-- Verify `AnalysisCache` written in `src/index.ts` includes `categoriesHash`
+- Verify `AnalysisCache` written in `packages/core/src/index.ts` includes `categoriesHash`
 - Verify `PartialAnalysisCache` written in `flushPartialCache` includes `categoriesHash`
 - Verify `--skip-analysis` load compares current hash vs stored hash and warns on mismatch
 - Verify partial cache resume compares hash and invalidates on mismatch
@@ -60,12 +60,12 @@ Your output is a **Data Integrity Report**. You do NOT fix issues — you docume
 
 **6. Schema version incremented when cache shape changes**
 - If any field was added/removed from `AnalysisCache` or `PartialAnalysisCache`:
-  verify `CACHE_SCHEMA_VERSION` in `src/types.ts` was incremented
+  verify `CACHE_SCHEMA_VERSION` in `packages/core/src/types.ts` was incremented
 
 ### P2 — silent degradation
 
 **7. Batch results always accounted for**
-- In `src/analyzer/batch.ts` → `analyzeBatch()`: verify every batch slot is filled
+- In `packages/core/src/analyzer/batch.ts` → `analyzeBatch()`: verify every batch slot is filled
   even on API error (padded with `unknown` placeholders)
 - Verify `orderedResults` array length always equals `totalBatches`
 
@@ -75,7 +75,7 @@ Your output is a **Data Integrity Report**. You do NOT fix issues — you docume
 - A raw `JSON.parse(...) as { images?: unknown[] }` cast without Zod guard is a WARN
 
 **9. File descriptor exhaustion on EXIF reads**
-- Verify `pLimit(32)` (or similar) gates the `Promise.all` EXIF read in `src/index.ts`
+- Verify `pLimit(32)` (or similar) gates the `Promise.all` EXIF read in `packages/core/src/index.ts`
 - An unbounded `Promise.all(imageFiles.map(...getImageTimestamp))` on >200 files is a WARN
 
 ---

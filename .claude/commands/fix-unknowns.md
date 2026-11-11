@@ -15,7 +15,7 @@ Suggest rewritten descriptions for vague or overlapping ones.
 
 ## Step 2 — Check the batch prompt
 
-Read `src/analyzer/batch.ts` → `buildBatchPrompt()`. The prompt must:
+Read `packages/core/src/analyzer/batch.ts` → `buildBatchPrompt()`. The prompt must:
 - List all categories with their descriptions
 - Instruct the model to use `"unknown"` only when truly undecidable
 - Note that burst sequences are almost certainly the same category
@@ -24,18 +24,18 @@ Show any missing elements and the fix.
 
 ## Step 3 — Check the reclassify pass
 
-Read `src/analyzer/index.ts` → `reclassifyUnknowns()`. Verify:
+Read `packages/core/src/analyzer/index.ts` → `reclassifyUnknowns()`. Verify:
 - It runs after the batch pass (only skipped when `config.dryRun === true`)
 - It uses `detail: 'high'` for the reclassify call
 - It logs `Reclassified:` for each image that changed
 
 If the reclassify pass is missing or broken, show the fix.
 
-Note: This is the automatic third pass. It is separate from the optional `--self-critique` fourth pass in `src/analyzer/critique.ts`.
+Note: This is the automatic third pass. It is separate from the optional `--self-critique` fourth pass in `packages/core/src/analyzer/critique.ts`.
 
 ## Step 4 — Check temporal consensus
 
-Read `src/analyzer/temporal.ts` → `applyTemporalConsensus()`. Verify:
+Read `packages/core/src/analyzer/temporal.ts` → `applyTemporalConsensus()`. Verify:
 - Window (`config.temporalWindowMinutes`, default 5) is appropriate for the dataset
   (e.g. e-commerce shots seconds apart may need `--temporal-window 1`)
 - Threshold (`config.consensusThreshold`, default 0.6) isn't too high for small clusters
@@ -53,7 +53,7 @@ Produce an exact command using:
 
 Example:
 ```bash
-node dist/cli/index.js \
+node packages/cli/dist/index.js \
   --input ./photos \
   --output ./out \
   --categories ./categories.json \

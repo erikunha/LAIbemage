@@ -75,8 +75,8 @@ If this release contains breaking changes:
 ## What NOT to publish
 
 The `.gitignore` and `package.json` `files` field together exclude:
-- `src/` (TypeScript source — only `dist/` is published)
-- `tests/`
+- `packages/core/src/` (TypeScript source — only `dist/` is published)
+- `packages/core/tests/`
 - `.env`, `.env.*`
 - `node_modules/`
 - `.claude/` (AI agent files — not part of the public API)

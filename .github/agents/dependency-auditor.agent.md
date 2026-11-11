@@ -103,7 +103,7 @@ const deps = Object.keys(pkg.dependencies ?? {});
 const { execSync } = require('child_process');
 deps.forEach(dep => {
   const escaped = dep.replace(/\//g, '\\/').replace(/@/g, '\\@');
-  const count = execSync('grep -r \"' + dep + '\" src/ --include=\"*.ts\" -l 2>/dev/null | wc -l').toString().trim();
+  const count = execSync('grep -r \"' + dep + '\" packages/core/src/ --include=\"*.ts\" -l 2>/dev/null | wc -l').toString().trim();
   if (count === '0') console.log('UNUSED?', dep);
 });
 "
@@ -133,12 +133,12 @@ Verify that no production dependency is imported in a module that forbids it
 (per the module boundary table in `copilot-instructions.md`):
 
 ```bash
-# Check: Sharp is not imported in src/utils/, src/classifier/, src/cli/
-grep -r "from 'sharp'" src/utils/ src/classifier/ src/cli/ 2>/dev/null && echo "VIOLATION" || echo "ok"
+# Check: Sharp is not imported in packages/core/src/utils/, packages/core/src/classifier/, packages/cli/src/
+grep -r "from 'sharp'" packages/core/src/utils/ packages/core/src/classifier/ packages/cli/src/ 2>/dev/null && echo "VIOLATION" || echo "ok"
 
-# Check: No LLM SDK outside src/analyzer/client.ts
-grep -rn "from 'openai'\|from '@anthropic-ai\|from '@google/generative-ai'" src/ \
-  --include="*.ts" | grep -v "src/analyzer/client.ts" && echo "VIOLATION" || echo "ok"
+# Check: No LLM SDK outside packages/core/src/analyzer/client.ts
+grep -rn "from 'openai'\|from '@anthropic-ai\|from '@google/generative-ai'" packages/core/src/ \
+  --include="*.ts" | grep -v "packages/core/src/analyzer/client.ts" && echo "VIOLATION" || echo "ok"
 ```
 
 ---
@@ -163,7 +163,7 @@ Date: <today>
 All production dependencies: MIT/Apache-2.0 ✓
 
 ### Unused
-- package-name: no import found in src/ — REMOVE CANDIDATE
+- package-name: no import found in packages/core/src/ — REMOVE CANDIDATE
 
 ### Verdict
 BLOCK: [list critical issues]

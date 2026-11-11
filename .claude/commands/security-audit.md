@@ -18,35 +18,35 @@ Primary attack surfaces:
 
 ### CRITICAL — check these first
 
-- [ ] `src/processor/exporter.ts`: Is `category` sanitised before interpolation into filename?
+- [ ] `packages/core/src/processor/exporter.ts`: Is `category` sanitised before interpolation into filename?
   - Must strip `/`, `\`, null bytes; cap at 100 chars
-  - Check: `grep -n "category" src/processor/exporter.ts`
+  - Check: `grep -n "category" packages/core/src/processor/exporter.ts`
 
-- [ ] `src/analyzer/batch.ts`: Is parsed `category` validated against the known category list?
+- [ ] `packages/core/src/analyzer/batch.ts`: Is parsed `category` validated against the known category list?
   - A raw LLM string should NEVER reach the filesystem without allowlist check
-  - Check: `grep -n "category" src/analyzer/batch.ts`
+  - Check: `grep -n "category" packages/core/src/analyzer/batch.ts`
 
-- [ ] `src/config/index.ts`: Is `--categories` path resolved and validated?
+- [ ] `packages/core/src/config/index.ts`: Is `--categories` path resolved and validated?
   - Must use `path.resolve()` and optionally check it stays within a trusted base
-  - Check: `grep -n "categories" src/config/index.ts`
+  - Check: `grep -n "categories" packages/core/src/config/index.ts`
 
 ### HIGH
 
-- [ ] `src/analyzer/batch.ts`: Is `BatchEnvelopeSchema.safeParse()` used (not bare `JSON.parse as`)?
-- [ ] `src/analyzer/index.ts`: Is `ReclassifyResponseSchema.safeParse()` used?
-- [ ] Any HTML output: Are `shortDescription`, `elements`, `condition` HTML-escaped?
-- [ ] `src/index.ts` `--skip-analysis` path: Is `cache.images[].originalFile` sanitised before it is used to build a `fullPath` via `path.join(config.inputDir, r.originalFile)`?
+- [ ] `packages/core/src/analyzer/batch.ts`: Is `BatchEnvelopeSchema.safeParse()` used (not bare `JSON.parse as`)?
+- [ ] `packages/core/src/analyzer/index.ts`: Is `ReclassifyResponseSchema.safeParse()` used?
+- [ ] Any HTML output: Are `shortDescription`, `fullDescription`, `elements` HTML-escaped?
+- [ ] `packages/core/src/index.ts` `--skip-analysis` path: Is `cache.images[].originalFile` sanitised before it is used to build a `fullPath` via `path.join(config.inputDir, r.originalFile)`?
   - A crafted cache JSON with `"../../../etc/passwd"` as `originalFile` could escape `inputDir`
   - Fix: validate `originalFile` is a bare filename (no slashes) before use
 
 ### MEDIUM
 
-- [ ] `src/utils/logger.ts`: Does it ever interpolate LLM data into log messages without truncation?
+- [ ] `packages/core/src/utils/logger.ts`: Does it ever interpolate LLM data into log messages without truncation?
 - [ ] `.env` and `.env.*` (except `.env.example`) listed in `.gitignore`?
 
 ### LOW
 
-- [ ] `src/cli/index.ts`: Are all numeric flag values parsed with `parseInt`/`parseFloat`, not coerced?
+- [ ] `packages/cli/src/index.ts`: Are all numeric flag values parsed with `parseInt`/`parseFloat`, not coerced?
 - [ ] `--output` directory: Is it prevented from pointing to `--input` (would overwrite originals)?
 
 ## Output format

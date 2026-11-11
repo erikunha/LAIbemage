@@ -73,7 +73,7 @@ throw new Error(
 );
 ```
 
-### 2. Help text (`src/cli/help.ts`)
+### 2. Help text (`packages/cli/src/help.ts`)
 
 Verify for each flag:
 
@@ -85,7 +85,7 @@ Verify for each flag:
 
 ### 3. Progress output
 
-Check `src/utils/progress.ts` and all `logger.info(...)` calls during a run.
+Check `packages/core/src/utils/progress.ts` and all `logger.info(...)` calls during a run.
 
 Criteria:
 
@@ -134,8 +134,8 @@ Simulate a user who has just cloned the repo and runs the tool for the first tim
 Read each code block in `README.md`. Verify:
 
 - Every flag shown in examples exists in the current CLI
-- Default values in the README match the defaults in `src/config/index.ts`
-- Provider names shown match the `provider` type in `src/types.ts`
+- Default values in the README match the defaults in `packages/core/src/config/index.ts`
+- Provider names shown match the `provider` type in `packages/core/src/types.ts`
 - No examples use `--flag=value` syntax when the README convention is `--flag value`
 
 Also verify the README's **accuracy claims** (ADR-008):
@@ -172,7 +172,7 @@ Date: <today>
 ### Issues (priority order)
 
 #### [POOR] Progress output — no phase labels
-Location: src/utils/progress.ts:42
+Location: packages/core/src/utils/progress.ts:42
 Current: `Processing... 5/24`
 Proposed: `[3/4] Processing images... 5/24 (Sharp overlay + JPEG export)`
 Effort: XS

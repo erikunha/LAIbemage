@@ -35,13 +35,13 @@ Run through every item below against the current changes (`search/changes` tool 
 
 ### 1. Module boundary violations (BLOCK on failure)
 
-- `src/utils/` must NOT import OpenAI SDK, `@anthropic-ai/sdk`, `@google/generative-ai`, Sharp, or `fs-extra`
-- `src/analyzer/client.ts` is the ONLY file allowed to import any LLM SDK
-- `src/analyzer/*.ts` (except `client.ts`) must NOT import LLM SDKs directly — only via `LLMClient`
-- `src/analyzer/` may import Sharp only in `batch.ts` (resize) and `dedup.ts` (perceptual hash)
-- `src/processor/` must NOT import any LLM SDK
-- `src/classifier/` must NOT import any LLM SDK, Sharp, or `fs-extra`
-- `src/cli/` must NOT import `analyzer/`, `processor/`, or `classifier/` directly
+- `packages/core/src/utils/` must NOT import OpenAI SDK, `@anthropic-ai/sdk`, `@google/generative-ai`, Sharp, or `fs-extra`
+- `packages/core/src/analyzer/client.ts` is the ONLY file allowed to import any LLM SDK
+- `packages/core/src/analyzer/*.ts` (except `client.ts`) must NOT import LLM SDKs directly — only via `LLMClient`
+- `packages/core/src/analyzer/` may import Sharp only in `batch.ts` (resize) and `dedup.ts` (perceptual hash)
+- `packages/core/src/processor/` must NOT import any LLM SDK
+- `packages/core/src/classifier/` must NOT import any LLM SDK, Sharp, or `fs-extra`
+- `packages/cli/src/` must NOT import `analyzer/`, `processor/`, or `classifier/` directly
 
 ### 2. ESM import correctness (BLOCK on failure)
 
@@ -65,7 +65,7 @@ Run through every item below against the current changes (`search/changes` tool 
 
 - Run `npm test` — all tests must pass
 - Coverage thresholds (from `vitest.config.ts`): lines ≥ 75%, functions ≥ 85%, branches ≥ 75%
-- New logic in `src/analyzer/`, `src/classifier/`, or `src/processor/` must have corresponding tests
+- New logic in `packages/core/src/analyzer/`, `packages/core/src/classifier/`, or `packages/core/src/processor/` must have corresponding tests
 - Tests must NOT mock LLM SDK constructors — mock via the `LLMClient` interface only
 - Every `makeConfig()` / Config fixture must include **all** `Config` fields — missing `concurrency`
   or `estimate` (or any future field) causes a TypeScript error; `as Config` casts hide this silently
@@ -77,13 +77,13 @@ Run through every item below against the current changes (`search/changes` tool 
 
 ### 7. Console.log hygiene (WARN on failure)
 
-- `console.log` may only appear in `src/utils/logger.ts` and `src/utils/progress.ts`
-- Grep `src/` excluding those two files for any `console.log` or `console.error` calls
+- `console.log` may only appear in `packages/core/src/utils/logger.ts` and `packages/core/src/utils/progress.ts`
+- Grep `packages/core/src/` excluding those two files for any `console.log` or `console.error` calls
 
 ### 8. Security checks (BLOCK on P0 issues, WARN on P1)
 
 - **LLM response sanitisation (P1):** If changes touch the code that writes `category`,
-  `shortDescription`, or `condition` to the output file or cache — verify these fields are
+  `shortDescription`, `fullDescription`, or `elements` to the output file or cache — verify these fields are
   sanitised before use as filesystem paths (strip `/`, `\`, null bytes; cap length to 100 chars)
 - **Path traversal via `--categories` (P1):** If `--categories` flag handling changed, verify the
   path is resolved to an absolute path and validated against a trusted base directory
@@ -100,14 +100,14 @@ Run through every item below against the current changes (`search/changes` tool 
 
 ### 11. Data integrity invariants (BLOCK on failure)
 
-- **Atomic cache write:** the final `analysis_results.json` write in `src/index.ts` must use
+- **Atomic cache write:** the final `analysis_results.json` write in `packages/core/src/index.ts` must use
   `writeJSON(tmp) → rename(tmp, final)` — a direct `writeJSON(cacheFile, ...)` is a BLOCK
 - **Partial cache error handling:** `flushPartialCache` must wrap `fs.writeJSON` in `try/catch`
   that logs a warning; an unwrapped write that can throw is a BLOCK
 - **LLM response schema validated:** `BatchEnvelopeSchema.safeParse()` must guard the batch
-  JSON parse in `src/analyzer/batch.ts`; a bare `JSON.parse(...) as {...}` cast is a WARN
+  JSON parse in `packages/core/src/analyzer/batch.ts`; a bare `JSON.parse(...) as {...}` cast is a WARN
 - **CACHE_SCHEMA_VERSION incremented:** if any field was added/removed from `AnalysisCache`
-  or `PartialAnalysisCache` in `src/types.ts`, verify `CACHE_SCHEMA_VERSION` was incremented
+  or `PartialAnalysisCache` in `packages/core/src/types.ts`, verify `CACHE_SCHEMA_VERSION` was incremented
 - **categoriesHash included:** any object literal constructing `AnalysisCache` or
   `PartialAnalysisCache` must include the `categoriesHash` field
 
@@ -115,7 +115,7 @@ Run through every item below against the current changes (`search/changes` tool 
 
 - New `Config` fields must be `readonly`
 - New string-union `Config` fields should use a Zod schema or explicit validation — not raw string casts
-- `CategoryConfigSchema` in `src/config/index.ts` must be updated if `CategoryConfig` interface changes
+- `CategoryConfigSchema` in `packages/core/src/config/index.ts` must be updated if `CategoryConfig` interface changes
 - New `--categories`-like file loads must go through `CategoryConfigSchema.safeParse()`, not bare `JSON.parse`
 
 ### 10. Commit message convention (WARN on failure)

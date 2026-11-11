@@ -14,7 +14,7 @@ Add a new entry to `categories[]`:
 }
 ```
 
-Name rules (enforced by `CategoryConfigSchema` in `src/config/index.ts`):
+Name rules (enforced by `CategoryConfigSchema` in `packages/core/src/config/index.ts`):
 - **lowercase snake_case only**: regex `/^[a-z][a-z0-9_]*$/` — underscores, no hyphens
 - Examples: `water_damage`, `mold_growth`, `misc` — NOT `water-damage`
 
@@ -46,7 +46,7 @@ If two descriptions could apply to the same image, rewrite one to be more specif
 ### 5. Test with a dry run
 
 ```bash
-node dist/cli/index.js \
+node packages/cli/dist/index.js \
   --input ./sample-photos \
   --output ./out \
   --categories ./examples/categories.json \

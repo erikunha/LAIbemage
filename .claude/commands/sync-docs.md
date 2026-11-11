@@ -50,7 +50,7 @@ Check CLAUDE.md for claims that contradict the actual code structure:
 ```bash
 # Verify the client.ts / providers/ claim matches reality
 grep -n "client.ts\|providers/" CLAUDE.md
-grep -rn "^import.*from.*openai\|^import.*from.*@anthropic\|^import.*from.*@google" src/analyzer/ --include="*.ts"
+grep -rn "^import.*from.*openai\|^import.*from.*@anthropic\|^import.*from.*@google" packages/core/src/analyzer/ --include="*.ts"
 ```
 
 Flag any claim in CLAUDE.md that contradicts what the code actually does.
@@ -78,7 +78,7 @@ Add to CLAUDE.md makeConfig() after line N:
 ### Fix: CLAUDE.md boundary table missing row
 
 Add to module boundary table:
-| `src/analyzer/providers/*.ts` | ... | ... |
+| `packages/core/src/analyzer/providers/*.ts` | ... | ... |
 ```
 
 Apply all fixes directly. Do not prompt for confirmation on documentation-only changes.

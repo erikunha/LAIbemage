@@ -15,10 +15,10 @@ You are the Test Author for Vision Lens. You write and improve Vitest unit tests
 
 - **Unit tests only** — no network calls, no filesystem writes outside temp dirs, no real LLM API calls
 - **Mock at the boundary**: mock `LLMClient` as an interface — never mock OpenAI, Anthropic, or Google SDK constructors
-- **Mirror structure**: tests for `src/foo/bar.ts` live in `tests/foo/bar.test.ts`
-- **No mocks for pure functions** — `src/classifier/`, `src/utils/`, and `src/analyzer/temporal.ts` are pure and must be tested without mocks
-- **No tests for**: `src/cli/`, `src/index.ts` (excluded from coverage)
-- **Do not modify `src/`** — if you discover a source bug, note it and stop
+- **Mirror structure**: tests for `packages/core/src/foo/bar.ts` live in `packages/core/tests/foo/bar.test.ts`
+- **No mocks for pure functions** — `packages/core/src/classifier/`, `packages/core/src/utils/`, and `packages/core/src/analyzer/temporal.ts` are pure and must be tested without mocks
+- **No tests for**: `packages/cli/src/`, `packages/core/src/index.ts` (excluded from coverage)
+- **Do not modify `packages/core/src/`** — if you discover a source bug, note it and stop
 
 ## Coverage targets
 
@@ -91,17 +91,17 @@ const result: AnalysisResult = {
 - Use `it('does X when Y', ...)` — describe observable outcomes, not implementation details
 - Never use `beforeAll` for shared mutable state — use factory functions
 - Use `vi.useFakeTimers()` / `vi.useRealTimers()` in `beforeEach`/`afterEach` pairs
-- Each test must be independently runnable: `npx vitest run tests/foo/bar.test.ts`
+- Each test must be independently runnable: `npx vitest run packages/core/tests/foo/bar.test.ts`
 
 ## SQLite reporter tests
 
-`tests/reporter/sqlite.test.ts` uses a real `better-sqlite3` database in a temp directory — no mocks.
+`packages/core/tests/reporter/sqlite.test.ts` uses a real `better-sqlite3` database in a temp directory — no mocks.
 This pattern is intentional: the test opens the temp `.db` file with `new Database(path, { readonly: true })`
 and queries it with `SELECT` statements to verify the data written by `writeSqlite()`.
 
 ## Async batch tests
 
-To test `src/analyzer/async-batch.ts`, mock the `AsyncBatchClient` interface — same pattern as `LLMClient`:
+To test `packages/core/src/analyzer/async-batch.ts`, mock the `AsyncBatchClient` interface — same pattern as `LLMClient`:
 
 ```typescript
 function makeMockAsyncClient(): AsyncBatchClient {

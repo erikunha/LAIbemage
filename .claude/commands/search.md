@@ -64,7 +64,7 @@ Re-run `--embed` with the new provider — the old index will be replaced.
 |---|---|---|
 | Search returns nothing | Index missing or stale | Re-run `--skip-analysis --embed` |
 | Wrong provider mismatch error | Old index is different dimension than new query | Re-run `--embed` with current provider |
-| Semantic search finds unrelated images | `fullDescription` is empty or unhelpful | Re-run analysis with a better model; check `buildEmbeddingText()` in `src/analyzer/embeddings.ts` |
+| Semantic search finds unrelated images | `fullDescription` is empty or unhelpful | Re-run analysis with a better model; check `buildEmbeddingText()` in `packages/core/src/analyzer/embeddings.ts` |
 | Keyword search misses obvious matches | Stemming/synonym gap | Keyword search is literal `.includes()` — use semantic search instead, or try expanding the query |
 
 ## Current limitations (see H13 in ROADMAP.md)

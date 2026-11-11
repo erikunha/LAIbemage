@@ -51,7 +51,7 @@ Rules:
 4. Add `unknown` (image content unrecognisable) and `unusable` (blurry/corrupt/out-of-scope)
 5. Assign `pinnedLast: ["unknown", "unusable"]`
 6. Assign `immune: []` initially — add categories only after testing confirms they are never wrong
-7. Validate the JSON schema: `node -e "const {CategoryConfigSchema} = await import('./dist/config/index.js'); console.log(CategoryConfigSchema.safeParse(JSON.parse(require('fs').readFileSync('categories.json', 'utf8'))))" --input-type=module`
+7. Validate the JSON schema: `node -e "const {CategoryConfigSchema} = await import('./packages/core/dist/config/index.js'); console.log(CategoryConfigSchema.safeParse(JSON.parse(require('fs').readFileSync('categories.json', 'utf8'))))" --input-type=module`
 8. Run a test batch on representative images with `--dry-run --estimate` to estimate cost
 9. Run a real small batch and check the `unknown` rate — should be < 5%
 

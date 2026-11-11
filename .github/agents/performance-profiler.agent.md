@@ -35,8 +35,8 @@ A **Performance Report** with three sections:
 
 ### Step 1 — Instrument the current pipeline
 
-Add temporary `process.hrtime.bigint()` checkpoints in `src/processor/overlay.ts`
-and `src/index.ts` around the processing loop. Do NOT commit these — they are temporary.
+Add temporary `process.hrtime.bigint()` checkpoints in `packages/core/src/processor/overlay.ts`
+and `packages/core/src/index.ts` around the processing loop. Do NOT commit these — they are temporary.
 
 ### Step 2 — Generate a realistic workload
 
@@ -59,19 +59,19 @@ If the user can provide real images, prefer those over synthetic fixtures.
 npx clinic --help
 
 # CPU flame graph (is Sharp actually the bottleneck?)
-npx clinic flame -- node dist/cli/index.js --input ./test-images --output ./test-out --dry-run
+npx clinic flame -- node packages/cli/dist/index.js --input ./test-images --output ./test-out --dry-run
 
 # Bubble chart (event loop blocking?)
-npx clinic bubbles -- node dist/cli/index.js --input ./test-images --output ./test-out --dry-run
+npx clinic bubbles -- node packages/cli/dist/index.js --input ./test-images --output ./test-out --dry-run
 
 # Doctor (overall health check)
-npx clinic doctor -- node dist/cli/index.js --input ./test-images --output ./test-out --dry-run
+npx clinic doctor -- node packages/cli/dist/index.js --input ./test-images --output ./test-out --dry-run
 ```
 
 ### Step 4 — Measure peak RSS
 
 ```bash
-/usr/bin/time -l node dist/cli/index.js --input ./test-images --output ./test-out 2>&1 | grep "maximum resident"
+/usr/bin/time -l node packages/cli/dist/index.js --input ./test-images --output ./test-out 2>&1 | grep "maximum resident"
 ```
 
 On Linux: `/usr/bin/time -v ...` → look for `Maximum resident set size`.
@@ -110,7 +110,7 @@ On Linux: `/usr/bin/time -v ...` → look for `Maximum resident set size`.
 
 ## Important constraints
 
-- **Read-only** — do not make permanent changes to `src/`; all instrumentation is temporary
+- **Read-only** — do not make permanent changes to `packages/core/src/`; all instrumentation is temporary
 - **Document your test setup**: machine spec, image count, avg JPEG size, Node version, provider used
 - **Include raw numbers** in the report — no qualitative-only statements
 - **Do not install `piscina` or any worker lib** — that is the Contributor agent's job after IMPLEMENT is decided

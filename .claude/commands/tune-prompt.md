@@ -7,9 +7,9 @@ Improve batch or reclassify prompt accuracy for a specific domain or failure pat
 ## Step 1 — Identify the failing prompt
 
 Read both prompts:
-- `src/analyzer/batch.ts` → `buildBatchPrompt()` — used for initial batch classification
-- `src/analyzer/index.ts` → `reclassifyUnknowns()` — automatic third pass that re-analyzes `unknown`/low-confidence images (always runs unless `--dry-run`)
-- `src/analyzer/critique.ts` → `runSelfCritique()` — optional self-critique fourth pass (`--self-critique` flag). This runs only when explicitly requested and flags any images that are inconsistent with their neighbors.
+- `packages/core/src/analyzer/batch.ts` → `buildBatchPrompt()` — used for initial batch classification
+- `packages/core/src/analyzer/index.ts` → `reclassifyUnknowns()` — automatic third pass that re-analyzes `unknown`/low-confidence images (always runs unless `--dry-run`)
+- `packages/core/src/analyzer/critique.ts` → `runSelfCritique()` — optional self-critique fourth pass (`--self-critique` flag). This runs only when explicitly requested and flags any images that are inconsistent with their neighbors.
 
 Identify which one is responsible for the described failure.
 
@@ -27,7 +27,7 @@ Common patterns:
 
 Run with `--dry-run --verbose --batch-size 5` on a sample of the problematic images:
 ```bash
-node dist/cli/index.js batch \
+node packages/cli/dist/index.js batch \
   --input ./failing-samples \
   --output ./out \
   --dry-run --verbose --batch-size 5
@@ -52,7 +52,7 @@ Compare unknown rate before and after.
 ## Step 6 — Update tests
 
 If the prompt structure changed (new instruction, new format requirement):
-- Update `tests/analyzer/batch.test.ts` — especially the prompt content assertions
+- Update `packages/core/tests/analyzer/batch.test.ts` — especially the prompt content assertions
 - Verify `pnpm test` still passes
 
 ## Step 7 — Document

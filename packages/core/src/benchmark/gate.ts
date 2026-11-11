@@ -56,10 +56,19 @@ export const BASELINE_REVIEW_THRESHOLD = 0.05;
  */
 export const GATE_TOLERANCE_EPSILON = 1e-9;
 
-/** One (suite, model) entry of a baseline file. */
+/** One (suite, model, model version) entry of a baseline file. */
 export interface BaselineEntry {
   readonly suite: string;
   readonly model: string;
+  /**
+   * The model VERSION the baseline was recorded from.
+   *
+   * A baseline is only comparable with a run of the same model AND the same
+   * model version: `gpt-4o` and `gpt-4o-2025-11` are different models, and
+   * comparing their macro F1 would be a comparison of two different things.
+   * The baseline is therefore keyed by the triple.
+   */
+  readonly modelVersion?: string;
   /** The macro F1 of the run the baseline was recorded from. */
   readonly macroF1: number;
   /** Per-class F1, keyed by label. */
@@ -111,6 +120,13 @@ export interface GateResult {
 export interface GateOptions {
   readonly suite: string;
   readonly model: string;
+  /**
+   * The model VERSION of the run being gated. A baseline recorded for a
+   * different version is a different model, and comparing them would be a
+   * comparison of two different things — so the baseline is looked up by the
+   * (suite, model, version) triple.
+   */
+  readonly modelVersion?: string;
   /** The metrics of the run being gated. */
   readonly metrics: MetricsResult;
   /** Whether the run is partial. A partial run is skipped. */
@@ -154,13 +170,19 @@ export function writeBaselineFile(baselinePath: string, file: BaselineFile): voi
   writeFileSync(baselinePath, `${JSON.stringify(file, null, 2)}\n`, 'utf8');
 }
 
-/** The baseline entry of a (suite, model) pair, when there is one. */
+/** The baseline entry of a (suite, model, model version) triple, when there is one. */
 export function findBaselineEntry(
   file: BaselineFile | undefined,
   suite: string,
   model: string,
+  modelVersion = '',
 ): BaselineEntry | undefined {
-  return file?.entries.find((entry) => entry.suite === suite && entry.model === model);
+  return file?.entries.find(
+    (entry) =>
+      entry.suite === suite &&
+      entry.model === model &&
+      (entry.modelVersion ?? '') === modelVersion,
+  );
 }
 
 /**
@@ -279,7 +301,8 @@ export function evaluateGate(options: GateOptions): GateResult {
   }
 
   const file = readBaselineFile(baselinePath);
-  const baseline = findBaselineEntry(file, options.suite, options.model);
+  const modelVersion = options.modelVersion ?? '';
+  const baseline = findBaselineEntry(file, options.suite, options.model, modelVersion);
 
   if (options.updateBaseline === true) {
     const delta = baseline === undefined ? 0 : options.metrics.macroF1 - baseline.macroF1;
@@ -296,6 +319,7 @@ export function evaluateGate(options: GateOptions): GateResult {
     const entry: BaselineEntry = {
       suite: options.suite,
       model: options.model,
+      ...(modelVersion === '' ? {} : { modelVersion }),
       macroF1: options.metrics.macroF1,
       perClass: Object.fromEntries(
         options.metrics.perClass.map((metrics) => [metrics.labelKey, metrics.f1]),
@@ -307,7 +331,12 @@ export function evaluateGate(options: GateOptions): GateResult {
 
     const entries = [
       ...(file?.entries ?? []).filter(
-        (existing) => !(existing.suite === options.suite && existing.model === options.model),
+        (existing) =>
+          !(
+            existing.suite === options.suite &&
+            existing.model === options.model &&
+            (existing.modelVersion ?? '') === modelVersion
+          ),
       ),
       entry,
     ];

@@ -514,7 +514,7 @@ benchmark
   .option('--min-samples <n>', 'Minimum gold samples per class', '30')
   .option('--snapshot-id <id>', 'Code snapshot the run belongs to (defaults to the git HEAD)')
   .option('--split-fingerprint <hash>', 'Split fingerprint (defaults to the manifest hash)')
-  .option('--model-version <version>', 'Model identity AND version')
+  .requiredOption('--model-version <version>', 'Model identity AND version (mandatory: a report without the version is not attributable)')
   .requiredOption('--config-fingerprint <hash>', 'Config fingerprint the run used (mandatory: a report without it is not attributed)')
   .option('--partial', 'Mark the run as partial (e.g. a provider outage)', false)
   .action(async (opts: Record<string, string | boolean>) => {

@@ -91,7 +91,7 @@ docblock of the function that applies each one.
 | Manifest timestamps | None. A timestamp would change the bytes on every run and break byte-stability. | `splits.ts` |
 | Gate tolerance | −0.02 on the macro F1. Exactly at the tolerance passes; beyond it fails. The comparison carries a `1e-9` slack so a mathematically exact −0.02 is not failed by float noise. | `gate.ts` |
 | Gate comparison | Over the **union** of the baseline's and the current run's class sets, with a class missing from one side counted as `0`. Two runs rarely score the same classes, and the plain macro F1 of each is then not comparable: dropping a badly-scored class RAISES the mean, so a collapsed class could make the gate PASS. | `gate.ts` (`compareMacroF1`) |
-| Gate scope | The artifact's suite AND model must match the requested ones. A baseline is recorded per (suite, model), so scoring one model's run against another model's baseline is refused. | `commands/benchmark.ts` |
+| Gate scope | The artifact's suite AND model must match the requested ones, and the baseline is keyed by the **(suite, model, model version)** triple. `gpt-4o` and `gpt-4o-2025-11` are different models: comparing their macro F1 would be a comparison of two different things, so a baseline of another version is not reused. | `commands/benchmark.ts`, `gate.ts` |
 | Partial runs | A partial run is skipped by the gate — never compared, never failed. The artifact's own `partial` flag is honoured, not only a CLI flag. A gate that flaps on an outage trains its readers to ignore it. | `gate.ts` |
 | Baseline rewrite | A change larger than 0.05 requires an explicit `--force`; the baseline carries a dated header. | `gate.ts` |
 | Non-finite inputs | A non-finite latency or cost is REJECTED with a `RangeError` naming the item — never reported. A `NaN` metric serialises as `null` and prints as "NaN ms", and neither reads as "no data". | `metrics.ts` |
@@ -126,10 +126,10 @@ each other's evidence.
 ```
 laib benchmark run   --suite <name> --model-id <name>
                       --config-fingerprint <hash>
+                      --model-version <version>
                       [--split <file>] [--gold <file>] [--predictions <file>]
                       [--out <dir>] [--min-samples <n>] [--partial]
                       [--snapshot-id <id>] [--split-fingerprint <hash>]
-                      [--model-version <version>]
 
 laib benchmark gate  --suite <name> --model-id <name>
                       [--metrics <file>] [--baseline <file>] [--tolerance <n>]
@@ -146,9 +146,11 @@ explicitly to gate a specific run.
 Defaults worth knowing: `--out` is `benchmarks/results`, `--dir` is
 `benchmarks/results`, `--min-samples` is `30` and `--tolerance` is `-0.02`.
 
-`--config-fingerprint` is **required**: a report without it is not attributed
-(ADR-008), so the runner refuses it rather than emitting an empty field. The
-environment capture is filled by the CLI (`captureEnv()` — runtime, platform,
+`--config-fingerprint` and `--model-version` are **required**: a report without
+them is not attributed (ADR-008), so the runner refuses it rather than emitting
+an empty field. The model version is the model identity AND its version (the
+constitutional `model:<id>@<version>` form) — a bare model id is not a version.
+The environment capture is filled by the CLI (`captureEnv()` — runtime, platform,
 arch); no secret ever reaches an artifact.
 
 > **Why `--model-id` and not `--model`:** the root command already owns

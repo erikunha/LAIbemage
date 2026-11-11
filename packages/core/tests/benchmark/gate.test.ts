@@ -368,3 +368,95 @@ describe('evaluateGate', () => {
     expect(raw.endsWith('\n')).toBe(true);
   });
 });
+
+describe('the baseline is keyed by (suite, model, model version)', () => {
+  let dir: string;
+  let baselinePath: string;
+
+  beforeEach(() => {
+    dir = mkdtempSync(path.join(tmpdir(), 'laib-gate-version-'));
+    baselinePath = path.join(dir, 'synthetic.json');
+  });
+
+  afterEach(() => {
+    rmSync(dir, { recursive: true, force: true });
+  });
+
+  it('does not reuse a baseline recorded for a DIFFERENT model version', () => {
+    const { metrics } = buildRun(8);
+    writeBaselineFile(baselinePath, {
+      schemaVersion: 1,
+      generatedAt: '2026-01-01T00:00:00.000Z',
+      entries: [
+        {
+          suite: 'synthetic',
+          model: 'demo',
+          modelVersion: 'model:demo@1.0.0',
+          macroF1: 1,
+          perClass: { alpha: 1, beta: 1 },
+          generatedAt: '2026-01-01T00:00:00.000Z',
+        },
+      ],
+    });
+
+    // The run is of model:demo@2.0.0 — a DIFFERENT model.
+    const result = evaluateGate({
+      suite: 'synthetic',
+      model: 'demo',
+      modelVersion: 'model:demo@2.0.0',
+      metrics,
+      baselinePath,
+    });
+
+    expect(result.skipped).toBe(true);
+    expect(result.passed).toBe(true);
+    expect(result.reason).toMatch(/no baseline/i);
+  });
+
+  it('compares against the baseline of the SAME model version', () => {
+    const { metrics } = buildRun(8);
+    writeBaselineFile(baselinePath, {
+      schemaVersion: 1,
+      generatedAt: '2026-01-01T00:00:00.000Z',
+      entries: [
+        {
+          suite: 'synthetic',
+          model: 'demo',
+          modelVersion: 'model:demo@2.0.0',
+          macroF1: 1,
+          perClass: { alpha: 1, beta: 1 },
+          generatedAt: '2026-01-01T00:00:00.000Z',
+        },
+      ],
+    });
+
+    const result = evaluateGate({
+      suite: 'synthetic',
+      model: 'demo',
+      modelVersion: 'model:demo@2.0.0',
+      metrics,
+      baselinePath,
+    });
+
+    expect(result.skipped).toBe(false);
+    expect(result.passed).toBe(false);
+    expect(result.regressedClasses.length).toBeGreaterThan(0);
+  });
+
+  it('records the model version when it writes a baseline', () => {
+    const { metrics } = buildRun(8);
+    evaluateGate({
+      suite: 'synthetic',
+      model: 'demo',
+      modelVersion: 'model:demo@3.0.0',
+      metrics,
+      baselinePath,
+      updateBaseline: true,
+    });
+
+    const file = readBaselineFile(baselinePath) as BaselineFile;
+    const entry = findBaselineEntry(file, 'synthetic', 'demo', 'model:demo@3.0.0');
+    expect(entry).toBeDefined();
+    expect(entry?.modelVersion).toBe('model:demo@3.0.0');
+  });
+});

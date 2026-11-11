@@ -144,6 +144,8 @@ describe.skipIf(!BINS_BUILT)('laib benchmark (requires built dist)', () => {
       path.join(tmpdir(), 'no-such-predictions.json'),
       '--config-fingerprint',
       'cfg-test',
+      '--model-version',
+      'model:demo@1',
     ]);
     const output = `${result.stdout}${result.stderr}`;
     expect(output).toContain('dataset=absent');
@@ -164,6 +166,7 @@ describe.skipIf(!BINS_BUILT)('laib benchmark (requires built dist)', () => {
               {
                 suite: 'synthetic',
                 model: 'demo',
+                modelVersion: 'model:demo@1',
                 macroF1: 1,
                 perClass: { alpha: 1, beta: 1 },
                 generatedAt: '2026-01-01T00:00:00.000Z',
@@ -214,6 +217,7 @@ describe.skipIf(!BINS_BUILT)('laib benchmark (requires built dist)', () => {
               {
                 suite: 'synthetic',
                 model: 'demo',
+                modelVersion: 'model:demo@1',
                 macroF1: 0.5,
                 perClass: { alpha: 0.5, beta: 0.5 },
                 generatedAt: '2026-01-01T00:00:00.000Z',
@@ -278,6 +282,7 @@ describe.skipIf(!BINS_BUILT)('laib benchmark (requires built dist)', () => {
               {
                 suite: 'synthetic',
                 model: 'demo',
+                modelVersion: 'model:demo@1',
                 macroF1: 1,
                 perClass: { alpha: 1 },
                 generatedAt: '2026-01-01T00:00:00.000Z',
@@ -327,6 +332,7 @@ describe.skipIf(!BINS_BUILT)('laib benchmark (requires built dist)', () => {
               {
                 suite: 'synthetic',
                 model: 'demo',
+                modelVersion: 'model:demo@1',
                 macroF1: 1,
                 perClass: { alpha: 1 },
                 generatedAt: '2026-01-01T00:00:00.000Z',

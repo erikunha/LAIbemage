@@ -247,7 +247,7 @@ export async function runBenchmarkCommand(options: BenchmarkRunOptions): Promise
     tuple: {
       snapshotId: options.snapshotId ?? currentSnapshotId(),
       splitFingerprint: options.splitFingerprint ?? manifest.manifestHash,
-      modelVersion: options.modelVersion ?? options.model,
+      modelVersion: options.modelVersion ?? '',
       configFingerprint: options.configFingerprint ?? '',
       // The environment capture is part of the attribution (ADR-008): an
       // artifact with an EMPTY environment field is not attributed. Only
@@ -346,6 +346,9 @@ export async function runBenchmarkGateCommand(
     );
   }
   const metrics = report.metrics as MetricsResult;
+  // The baseline is keyed by (suite, model, model version): a baseline of a
+  // different model version is a different model.
+  const modelVersion = report.tuple.modelVersion;
 
   // The artifact's OWN partial flag is honoured: a partial run (a provider
   // outage) must be skipped by the gate, never compared and never failed.
@@ -354,6 +357,7 @@ export async function runBenchmarkGateCommand(
   const result = evaluateGate({
     suite: options.suite,
     model: options.model,
+    ...(modelVersion === undefined ? {} : { modelVersion }),
     metrics,
     partial,
     ...(options.tolerance === undefined ? {} : { tolerance: options.tolerance }),

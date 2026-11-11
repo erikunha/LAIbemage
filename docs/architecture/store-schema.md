@@ -385,6 +385,15 @@ The runner (`packages/core/src/store/migrate.ts`) applies them as follows:
 
    Both raise a `StoreMigrationError` that names the offending ids, before
    anything is applied.
+
+> **Migration files are immutable, even for a rename.** Rule 2 hashes the raw
+> bytes of the file, so a comment-only edit still changes the hash and makes
+> every store created before the edit unopenable. The Vision Lens rename
+> therefore left `migrations/0001_init.sql` and `migrations/0002_legacy_import.sql`
+> **byte-identical** to their pre-rename versions — they still mention
+> `Master Vision` and `@master-vision/contracts` in their header comments on
+> purpose. A rename that touches an applied migration file is a defect, not a
+> cosmetic edit.
 6. **Rollback is real.** `rollbackMigrations(db, targetVersion)` applies the
    paired rollback files in descending id order, each in its own
    transaction, and removes the ledger rows. A missing rollback script is an
@@ -548,7 +557,8 @@ wrapped: it surfaces as the driver's own `SqliteError`, whose `code`
 
 `defaultStorePath()` follows ADR-007 (local-first): `VISION_LENS_HOME`
 when set, otherwise `~/.vision-lens`, with the database in `store.db`.
-**This default is a PROPOSAL pending maintainer confirmation** — the location
-is not yet pinned by an ADR. Every store function accepts an explicit path,
+The product rename fixed the NAME of the home directory (`~/.vision-lens`);
+**the LOCATION is still a PROPOSAL pending maintainer confirmation** — it is
+not yet pinned by an ADR. Every store function accepts an explicit path,
 and the test suite always uses an explicit temporary directory: the home
 directory is never touched by the tests.

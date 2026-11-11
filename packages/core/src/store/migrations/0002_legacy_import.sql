@@ -26,7 +26,7 @@
 -- ## Conventions
 --
 -- Same conventions as 0001_init: snake_case columns, canonical JSON in the
--- JSON columns (produced by `canonicalJson` from @vision-lens/contracts),
+-- JSON columns (produced by `canonicalJson` from @master-vision/contracts),
 -- and `created_at`/`updated_at` bookkeeping on the ledger table.
 --
 -- Destructive changes to this schema require a MAJOR CONTRACTS_VERSION bump.

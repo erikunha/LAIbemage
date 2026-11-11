@@ -49,8 +49,9 @@
  *
  * {@link defaultStorePath} follows ADR-007 (local-first): `VISION_LENS_HOME`
  * when set, otherwise `~/.vision-lens`, with the database in `store.db`.
- * **This default is a PROPOSAL pending maintainer confirmation** — the
- * location is not yet pinned by an ADR. Every function in the store accepts an
+ * The product rename fixed the NAME of the home directory (`~/.vision-lens`);
+ * **the LOCATION is still a PROPOSAL pending maintainer confirmation** — it
+ * is not yet pinned by an ADR. Every function in the store accepts an
  * explicit path, and every test uses an explicit temporary path: the home
  * directory is never touched by the test suite.
  */
@@ -103,7 +104,8 @@ export interface Store {
 /**
  * The default location of the store file.
  *
- * PROPOSAL pending maintainer confirmation (see the module docblock).
+ * The path NAME is settled; the LOCATION is a PROPOSAL pending maintainer
+ * confirmation (see the module docblock).
  */
 export function defaultStorePath(): string {
   const home = process.env['VISION_LENS_HOME'] ?? path.join(homedir(), '.vision-lens');

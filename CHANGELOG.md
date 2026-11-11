@@ -30,6 +30,10 @@ versioning adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html)
   `VISION_LENS_DATASETS_DIR`, `VISION_LENS_BENCHMARK_MODEL`).
 - The store home is now `VISION_LENS_HOME`, defaulting to `~/.vision-lens/store.db`.
 - The deprecated `ai-image-labeling` compat bin now points at `vision-lens`.
+- The applied migration files (`0001_init.sql`, `0002_legacy_import.sql`) are deliberately
+  **unchanged** by the rename: the runner hashes their raw bytes into the store's migration
+  ledger, so even a comment-only edit would make every store created before it unopenable. Their
+  header comments therefore still mention the previous product name.
 - Engines requirement raised to Node >= 20 across the root and all workspace packages
   (commander 14 requires Node 20).
 - CI: least-privilege `permissions: contents: read`; CI now also runs on `feat/**` branch pushes.

@@ -106,7 +106,7 @@ describe('runBenchmark', () => {
   let outputDir: string;
 
   beforeEach(() => {
-    outputDir = mkdtempSync(path.join(tmpdir(), 'laib-runner-'));
+    outputDir = mkdtempSync(path.join(tmpdir(), 'vision-lens-runner-'));
   });
 
   afterEach(() => {
@@ -404,7 +404,7 @@ describe('the runner records what it could NOT verify', () => {
       tuple: TUPLE,
       splitManifest: manifest,
       minSamples: 1,
-      outputDir: path.join(tmpdir(), 'laib-unverified'),
+      outputDir: path.join(tmpdir(), 'vision-lens-unverified'),
     });
 
     // The manifest hash WAS verified; the bytes behind the items were NOT.
@@ -436,7 +436,7 @@ describe('the runner records what it could NOT verify', () => {
       splitManifest: manifest,
       assetHashes,
       minSamples: 1,
-      outputDir: path.join(tmpdir(), 'laib-verified'),
+      outputDir: path.join(tmpdir(), 'vision-lens-verified'),
     });
 
     expect(result.caveats.join(' ')).not.toMatch(/NOT verified/i);

@@ -78,7 +78,7 @@ importers:
 
   packages/cli:
     dependencies:
-      '@master-vision/core':
+      '@vision-lens/core':
         specifier: workspace:*
         version: link:../core
       chalk:
@@ -143,7 +143,7 @@ importers:
       '@inquirer/select':
         specifier: ^5.1.4
         version: 5.1.4(@types/node@25.6.2)
-      '@master-vision/contracts':
+      '@vision-lens/contracts':
         specifier: workspace:*
         version: link:../contracts
       chalk:
@@ -208,10 +208,10 @@ importers:
 
   packages/sdk:
     dependencies:
-      '@master-vision/cli':
+      '@vision-lens/cli':
         specifier: workspace:*
         version: link:../cli
-      '@master-vision/core':
+      '@vision-lens/core':
         specifier: workspace:*
         version: link:../core
 
@@ -2490,6 +2490,7 @@ packages:
   git-raw-commits@5.0.1:
     resolution: {integrity: sha512-Y+csSm2GD/PCSh6Isd/WiMjNAydu0VBiG9J7EdQsNA5P9uXvLayqjmTsNlK5Gs9IhblFZqOU0yid5Il5JPoLiQ==}
     engines: {node: '>=18'}
+    deprecated: Deprecated and no longer maintained. Use @conventional-changelog/git-client instead.
     hasBin: true
 
   github-from-package@0.0.0:

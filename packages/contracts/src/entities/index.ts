@@ -1,5 +1,5 @@
 /**
- * The 14 entities of the Master Vision domain model (spec 002) plus the four
+ * The 14 entities of the Vision Lens domain model (spec 002) plus the four
  * reserved stubs.
  *
  * `ENTITY_SCHEMAS` is the registry consumed by the contract manifest

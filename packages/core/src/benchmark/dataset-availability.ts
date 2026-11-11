@@ -21,14 +21,14 @@
  *
  * ## Where the dataset is looked for
  *
- * The environment variable **`LAIB_DATASETS_DIR`** names the directory that
+ * The environment variable **`VISION_LENS_DATASETS_DIR`** names the directory that
  * holds the dataset. When it is not set, the default is `<repo>/datasets`.
  *
  * The dataset counts as **present** only when that directory exists *and*
  * contains the expected marker file:
  *
  * ```text
- * $LAIB_DATASETS_DIR/
+ * $VISION_LENS_DATASETS_DIR/
  * └── visa-subset/          ← the staged subset
  *     └── .dataset-ready    ← the marker the fetch script writes
  * ```
@@ -50,7 +50,7 @@ import { existsSync, statSync } from 'node:fs';
 import path from 'node:path';
 
 /** The environment variable that names the datasets directory. */
-export const DATASETS_DIR_ENV = 'LAIB_DATASETS_DIR';
+export const DATASETS_DIR_ENV = 'VISION_LENS_DATASETS_DIR';
 
 /** The explicit marker CI prints when the benchmark tests are skipped. */
 export const DATASET_ABSENT_MARKER = 'dataset=absent';

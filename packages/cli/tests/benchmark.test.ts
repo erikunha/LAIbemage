@@ -6,7 +6,7 @@ import { fileURLToPath } from 'node:url';
 import { describe, expect, it, vi } from 'vitest';
 
 /**
- * The `laib benchmark` CLI surface (spec 003, US3 + US4).
+ * The `vision-lens benchmark` CLI surface (spec 003, US3 + US4).
  *
  * The tests that matter here are the BEHAVIOURS a CI pipeline depends on:
  *
@@ -32,7 +32,7 @@ interface BinResult {
 function runBin(args: string[]): BinResult {
   const result = spawnSync(process.execPath, [INDEX_BIN, ...args], {
     encoding: 'utf8',
-    env: { ...process.env, LAIB_NO_DEPRECATION: '1' },
+    env: { ...process.env, VISION_LENS_NO_DEPRECATION: '1' },
   });
   expect(result.error).toBeUndefined();
   return {
@@ -103,7 +103,7 @@ function writeReport(dir: string, macroF1: number, perClass: Record<string, numb
   return reportPath;
 }
 
-describe.skipIf(!BINS_BUILT)('laib benchmark (requires built dist)', () => {
+describe.skipIf(!BINS_BUILT)('vision-lens benchmark (requires built dist)', () => {
   it('advertises the run, gate and report subcommands', () => {
     const result = runBin(['benchmark', '--help']);
     expect(result.stdout).toContain('run');
@@ -153,7 +153,7 @@ describe.skipIf(!BINS_BUILT)('laib benchmark (requires built dist)', () => {
   });
 
   it('fails with a non-zero exit code when the gate regresses', () => {
-    const dir = mkdtempSync(path.join(tmpdir(), 'laib-cli-gate-'));
+    const dir = mkdtempSync(path.join(tmpdir(), 'vision-lens-cli-gate-'));
     try {
       const baselinePath = path.join(dir, 'baseline.json');
       writeFileSync(
@@ -204,7 +204,7 @@ describe.skipIf(!BINS_BUILT)('laib benchmark (requires built dist)', () => {
   });
 
   it('passes when the run matches the baseline', () => {
-    const dir = mkdtempSync(path.join(tmpdir(), 'laib-cli-gate-pass-'));
+    const dir = mkdtempSync(path.join(tmpdir(), 'vision-lens-cli-gate-pass-'));
     try {
       const baselinePath = path.join(dir, 'baseline.json');
       writeFileSync(
@@ -252,7 +252,7 @@ describe.skipIf(!BINS_BUILT)('laib benchmark (requires built dist)', () => {
   });
 
   it('prints a stored report', () => {
-    const dir = mkdtempSync(path.join(tmpdir(), 'laib-cli-report-'));
+    const dir = mkdtempSync(path.join(tmpdir(), 'vision-lens-cli-report-'));
     try {
       const runDir = path.join(dir, 'test-run');
       mkdirSync(runDir, { recursive: true });
@@ -269,7 +269,7 @@ describe.skipIf(!BINS_BUILT)('laib benchmark (requires built dist)', () => {
   });
 
   it('refuses to gate an artifact of ANOTHER model against this baseline', () => {
-    const dir = mkdtempSync(path.join(tmpdir(), 'laib-cli-gate-model-'));
+    const dir = mkdtempSync(path.join(tmpdir(), 'vision-lens-cli-gate-model-'));
     try {
       const baselinePath = path.join(dir, 'baseline.json');
       writeFileSync(
@@ -319,7 +319,7 @@ describe.skipIf(!BINS_BUILT)('laib benchmark (requires built dist)', () => {
   });
 
   it('SKIPS a partial artifact instead of failing it', () => {
-    const dir = mkdtempSync(path.join(tmpdir(), 'laib-cli-gate-partial-'));
+    const dir = mkdtempSync(path.join(tmpdir(), 'vision-lens-cli-gate-partial-'));
     try {
       const baselinePath = path.join(dir, 'baseline.json');
       writeFileSync(

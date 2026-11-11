@@ -31,7 +31,7 @@
  * changed).
  */
 
-import { PredictionSchema, type Prediction } from '@master-vision/contracts';
+import { PredictionSchema, type Prediction } from '@vision-lens/contracts';
 import type { SqliteDatabase } from '../db.js';
 import { fromJsonColumn, toJsonColumn } from '../json.js';
 import {

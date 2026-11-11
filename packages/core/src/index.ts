@@ -1,5 +1,5 @@
 import { watch as chokidarWatch, type FSWatcher } from 'chokidar';
-import { CONTRACTS_VERSION, fingerprintV2 } from '@master-vision/contracts';
+import { CONTRACTS_VERSION, fingerprintV2 } from '@vision-lens/contracts';
 import path from 'node:path';
 import pLimit from 'p-limit';
 import type { FileRepository } from './fs/index.js';

@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 import { Command } from 'commander';
-import { loadConfig, REORDER_SENTINEL_KEY } from '@master-vision/core/config';
+import { loadConfig, REORDER_SENTINEL_KEY } from '@vision-lens/core/config';
 import {
   runBatch,
   runDiff,
@@ -10,14 +10,14 @@ import {
   runSingle,
   runSuggestCategories,
   runWatch,
-} from '@master-vision/core';
-import { configureLogger, logger } from '@master-vision/core/utils/logger';
+} from '@vision-lens/core';
+import { configureLogger, logger } from '@vision-lens/core/utils/logger';
 import { printHelp } from './help.js';
 
 const program = new Command();
 
 program
-  .name('ai-image-labeling')
+  .name('vision-lens')
   .description('AI-powered image classification and organization')
   .version('0.0.1')
   .option('-i, --input <dir>', 'Input directory with source images', './input')
@@ -457,7 +457,7 @@ program
 // Import-run subcommand (spec 002, task 4.3)
 program
   .command('import-run <path>')
-  .description('Import a legacy analysis_results.json run into the Master Vision store')
+  .description('Import a legacy analysis_results.json run into the Vision Lens store')
   .option('--dry-run', 'Print the mapping counts without writing anything', false)
   .option('--db <path>', 'Path of the target store database (default: the store default path)')
   .action(async (runPath: string, opts: Record<string, string | boolean>, cmd: Command) => {
@@ -465,7 +465,7 @@ program
       // The root program ALSO defines --dry-run (for the batch run), and
       // Commander lets the PARENT consume an option that appears after a
       // subcommand name. The flag is therefore read from both places, so
-      // `laib import-run <path> --dry-run` is a preview whichever way the
+      // `vision-lens import-run <path> --dry-run` is a preview whichever way the
       // flag is written.
       const parent = (cmd.parent?.opts() ?? {}) as Record<string, string | boolean>;
       const dryRun = Boolean(opts['dryRun']) || Boolean(parent['dryRun']);
@@ -491,13 +491,13 @@ program
 // The root program disables Commander's built-in help (the legacy CLI owns its
 // help text), and Commander copies the help settings to every subcommand — so
 // the benchmark commands re-enable the help option explicitly. Without that,
-// `laib benchmark --help` would fail with "unknown option '--help'".
+// `vision-lens benchmark --help` would fail with "unknown option '--help'".
 const benchmark = program
   .command('benchmark')
   .description('Score a benchmark suite, gate it against its baseline, or read a stored report')
   .helpOption(true)
   .action(async (_opts: Record<string, string | boolean>, cmd: Command) => {
-    // `laib benchmark` without a subcommand prints the subcommand help.
+    // `vision-lens benchmark` without a subcommand prints the subcommand help.
     cmd.outputHelp();
   });
 
@@ -604,7 +604,7 @@ benchmark
 
 program.parseAsync(process.argv);
 
-// Exported for the `@master-vision/sdk/cli` re-export shim (library consumers
+// Exported for the `@vision-lens/sdk/cli` re-export shim (library consumers
 // can inspect/extend the command surface). NOTE: importing this module still
 // executes the CLI — `parseAsync(process.argv)` above runs at import time,
 // exactly as in the pre-migration `dist/cli/index.js` bin entry.

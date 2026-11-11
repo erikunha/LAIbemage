@@ -1,5 +1,5 @@
 /**
- * The Master Vision store (spec 002, US2 / US4).
+ * The Vision Lens store (spec 002, US2 / US4).
  *
  * The store is the local metadata spine of the platform: a SQLite database
  * with the 14 domain entities, the repositories that write them, the

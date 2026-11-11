@@ -2,16 +2,16 @@ import chalk from 'chalk';
 
 export function printHelp(): void {
   console.log(`
-${chalk.bold('ai-image-labeling')} — AI-powered image classification and organization
+${chalk.bold('vision-lens')} — AI-powered image classification and organization
 
 ${chalk.bold('USAGE')}
-  ai-image-labeling [OPTIONS]
-  ai-image-labeling diff <before> <after> [--output-format json]
-  ai-image-labeling import-run <path> [--dry-run] [--db <path>]
-  ai-image-labeling suggest-categories [OPTIONS]
-  ai-image-labeling serve [OPTIONS]
-  ai-image-labeling reorder
-  ai-image-labeling single <number> <file>
+  vision-lens [OPTIONS]
+  vision-lens diff <before> <after> [--output-format json]
+  vision-lens import-run <path> [--dry-run] [--db <path>]
+  vision-lens suggest-categories [OPTIONS]
+  vision-lens serve [OPTIONS]
+  vision-lens reorder
+  vision-lens single <number> <file>
 
 ${chalk.bold('OPTIONS')}
   --input, -i             <dir>     Directory with source images       (default: ./input)
@@ -76,7 +76,7 @@ ${chalk.bold('OPTIONS')}
   --help, -h                        Show this help
 
 ${chalk.bold('DIFF SUBCOMMAND')}
-  ai-image-labeling diff <before> <after> [OPTIONS]
+  vision-lens diff <before> <after> [OPTIONS]
 
   Compare two analysis_results.json files and show what changed between runs.
   Useful for auditing re-analysis after updating categories.json or model.
@@ -84,11 +84,11 @@ ${chalk.bold('DIFF SUBCOMMAND')}
   --output-format <fmt>  pretty | json  (default: pretty)
 
   Examples:
-    ${chalk.cyan('ai-image-labeling diff ./output/analysis_results.json ./output_v2/analysis_results.json')}
-    ${chalk.cyan('ai-image-labeling diff before.json after.json --output-format json')}
+    ${chalk.cyan('vision-lens diff ./output/analysis_results.json ./output_v2/analysis_results.json')}
+    ${chalk.cyan('vision-lens diff before.json after.json --output-format json')}
 
 ${chalk.bold('SEARCH SUBCOMMAND')}
-  ai-image-labeling search [OPTIONS]
+  vision-lens search [OPTIONS]
 
   Search classified images by semantic query or keyword.
   Semantic search requires a prior run with --embed.
@@ -101,14 +101,14 @@ ${chalk.bold('SEARCH SUBCOMMAND')}
   --output-format <fmt>    pretty | json                                (default: pretty)
 
   Examples:
-    ${chalk.cyan('ai-image-labeling search --query "kitchen with modern appliances" --top 10')}
-    ${chalk.cyan('ai-image-labeling search --keyword "crack" --top 20')}
+    ${chalk.cyan('vision-lens search --query "kitchen with modern appliances" --top 10')}
+    ${chalk.cyan('vision-lens search --keyword "crack" --top 20')}
 
 ${chalk.bold('IMPORT-RUN SUBCOMMAND')}
-  ai-image-labeling import-run <path> [--dry-run] [--db <path>]
+  vision-lens import-run <path> [--dry-run] [--db <path>]
 
   Import a legacy analysis run (analysis_results.json and its historical variants) into the
-  Master Vision store: assets, samples, predictions, the human overrides, the capture
+  Vision Lens store: assets, samples, predictions, the human overrides, the capture
   sessions, the taxonomy and the run itself. The originals are never modified, and
   importing the same run twice writes nothing.
 
@@ -116,11 +116,11 @@ ${chalk.bold('IMPORT-RUN SUBCOMMAND')}
   --db   <path>   Target store database (default: the store's default path)
 
   Examples:
-    ${chalk.cyan('ai-image-labeling import-run ./output/analysis_results.json --dry-run')}
-    ${chalk.cyan('ai-image-labeling import-run ./output/analysis_results.json --db ./store.db')}
+    ${chalk.cyan('vision-lens import-run ./output/analysis_results.json --dry-run')}
+    ${chalk.cyan('vision-lens import-run ./output/analysis_results.json --db ./store.db')}
 
 ${chalk.bold('SUGGEST-CATEGORIES SUBCOMMAND')}
-  ai-image-labeling suggest-categories [OPTIONS]
+  vision-lens suggest-categories [OPTIONS]
 
   Sample images from your input directory and ask the LLM to suggest a domain-appropriate
   category taxonomy. Writes a ready-to-use categories.json that you can edit and pass to
@@ -151,51 +151,51 @@ ${chalk.bold('PROVIDERS')}
 
 ${chalk.bold('EXAMPLES')}
   # Basic: analyze all images in ./input → ./output (OpenAI)
-  ${chalk.cyan('ai-image-labeling')}
+  ${chalk.cyan('vision-lens')}
 
   # Use Anthropic Claude
-  ${chalk.cyan('ai-image-labeling --provider anthropic --anthropic-api-key sk-ant-...')}
+  ${chalk.cyan('vision-lens --provider anthropic --anthropic-api-key sk-ant-...')}
 
   # Use Google Gemini
-  ${chalk.cyan('ai-image-labeling --provider google --google-api-key AIza...')}
+  ${chalk.cyan('vision-lens --provider google --google-api-key AIza...')}
 
   # Custom input/output with a specific model
-  ${chalk.cyan('ai-image-labeling --input ~/photos --output ~/sorted --model gpt-4o-mini')}
+  ${chalk.cyan('vision-lens --input ~/photos --output ~/sorted --model gpt-4o-mini')}
 
   # Dry-run: classify without writing any files
-  ${chalk.cyan('ai-image-labeling --dry-run')}
+  ${chalk.cyan('vision-lens --dry-run')}
 
   # Preview cost across all providers before running
-  ${chalk.cyan('ai-image-labeling --estimate')}
+  ${chalk.cyan('vision-lens --estimate')}
 
   # Run with higher concurrency (3 batches in-flight at once)
-  ${chalk.cyan('ai-image-labeling --concurrency 5')}
+  ${chalk.cyan('vision-lens --concurrency 5')}
 
   # Re-order after manually editing analysis_results.json
-  ${chalk.cyan('ai-image-labeling reorder')}
+  ${chalk.cyan('vision-lens reorder')}
 
   # Use a custom category taxonomy
-  ${chalk.cyan('ai-image-labeling --categories ./my-categories.json')}
+  ${chalk.cyan('vision-lens --categories ./my-categories.json')}
 
   # Use Azure OpenAI
-  ${chalk.cyan('ai-image-labeling --provider azure --azure-endpoint https://my.openai.azure.com/ --azure-api-key <key>')}
+  ${chalk.cyan('vision-lens --provider azure --azure-endpoint https://my.openai.azure.com/ --azure-api-key <key>')}
 
   # Use Ollama (local, no API key needed)
-  ${chalk.cyan('ai-image-labeling --provider ollama --model llava')}
+  ${chalk.cyan('vision-lens --provider ollama --model llava')}
 
   # Custom filename template — 4-digit number, ISO date, description slug
-  ${chalk.cyan("ai-image-labeling --filename-template '{n:4}. {category} {date:YYYY-MM-DD} {description}'")}
+  ${chalk.cyan("vision-lens --filename-template '{n:4}. {category} {date:YYYY-MM-DD} {description}'")}
 
   # Custom date format with slashes and time
-  ${chalk.cyan("ai-image-labeling --filename-template '{n}_{datetime:YYYY-MM-DD_HH-mm}_{description}'")}
+  ${chalk.cyan("vision-lens --filename-template '{n}_{datetime:YYYY-MM-DD_HH-mm}_{description}'")}
 
   # 2-digit sequence number, European date
-  ${chalk.cyan("ai-image-labeling --filename-template '{n:2}. {category} {date:DD.MM.YYYY}'")}
+  ${chalk.cyan("vision-lens --filename-template '{n:2}. {category} {date:DD.MM.YYYY}'")}
 
   # Watch input directory and process new images as they arrive
-  ${chalk.cyan('ai-image-labeling --watch')}
+  ${chalk.cyan('vision-lens --watch')}
 
   # Watch with polling (required on NFS/SMB/Docker mounts)
-  ${chalk.cyan('ai-image-labeling --watch --watch-poll')}
+  ${chalk.cyan('vision-lens --watch --watch-poll')}
 `);
 }

@@ -1,7 +1,7 @@
 import { describe, expect, it, vi } from 'vitest';
 import type { AnalysisCache } from '../../src/types.js';
 
-// H16.3: better-sqlite3 is an optionalDependency of @master-vision/core —
+// H16.3: better-sqlite3 is an optionalDependency of @vision-lens/core —
 // simulate a machine where it is NOT installed. The mock factory throws on
 // any import of the module, so the guarded dynamic import inside writeSqlite
 // rejects and the guard must surface the actionable install hint instead of

@@ -1,7 +1,7 @@
 /**
  * Seeded, stratified gold split generator — spec 003, US2 (FR-003, SC-001).
  *
- * WHY this module exists: every metric Master Vision reports must name the
+ * WHY this module exists: every metric Vision Lens reports must name the
  * split it was computed on (constitution I — "a metric without its
  * reproduction record is a hypothesis"). A split that cannot be regenerated
  * byte-for-byte makes the metric unfalsifiable, so every convention below is
@@ -54,7 +54,7 @@
  *                        structural record (e.g. `capture-group-overflow:`).
  *                    Both kinds are part of the hashed manifest.
  * Hash ............ `manifestHash` = sha256 (hex) over the canonical JSON
- *                    (recursive key sort, from @master-vision/contracts) of
+ *                    (recursive key sort, from @vision-lens/contracts) of
  *                    the manifest WITHOUT the `manifestHash` field. The
  *                    canonical JSON is the contracts' own serialiser — never
  *                    re-implemented here — so this hash agrees with every
@@ -74,7 +74,7 @@
 import { createHash } from 'node:crypto';
 import { readFile } from 'node:fs/promises';
 import path from 'node:path';
-import { canonicalJson } from '@master-vision/contracts';
+import { canonicalJson } from '@vision-lens/contracts';
 
 /** Schema version of the split manifest. Bump on any breaking field change. */
 export const SPLIT_MANIFEST_SCHEMA_VERSION = 1;

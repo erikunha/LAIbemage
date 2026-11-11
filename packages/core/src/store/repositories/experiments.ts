@@ -15,7 +15,7 @@ import {
   ExperimentRunSchema,
   type ExperimentRun,
   type JobState,
-} from '@master-vision/contracts';
+} from '@vision-lens/contracts';
 import type { SqliteDatabase } from '../db.js';
 import { nextTimestamp } from '../clock.js';
 import { StoreValidationError } from '../errors.js';

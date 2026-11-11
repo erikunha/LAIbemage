@@ -34,7 +34,7 @@ import type {
   ModelVersion,
   Prediction,
   Sample,
-} from '@master-vision/contracts';
+} from '@vision-lens/contracts';
 import type { SqliteDatabase } from './db.js';
 import { StoreConsistencyError } from './errors.js';
 import { toAsset } from './repositories/assets.js';

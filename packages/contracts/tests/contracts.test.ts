@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import { CONTRACTS_VERSION, UnitSeededSchema } from '../src/index.js';
 
-describe('@master-vision/contracts', () => {
+describe('@vision-lens/contracts', () => {
   it('exposes CONTRACTS_VERSION in semver format', () => {
     expect(CONTRACTS_VERSION).toMatch(/^\d+\.\d+\.\d+$/);
   });

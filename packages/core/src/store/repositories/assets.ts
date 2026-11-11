@@ -14,7 +14,7 @@
  * deliberate, auditable act that belongs to its own repository method in 004.
  */
 
-import { AssetSchema, type Asset } from '@master-vision/contracts';
+import { AssetSchema, type Asset } from '@vision-lens/contracts';
 import type { SqliteDatabase } from '../db.js';
 import { StoreValidationError } from '../errors.js';
 import { pathHashPlaceholderId } from '../ids.js';

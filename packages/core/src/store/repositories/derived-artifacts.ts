@@ -30,7 +30,7 @@
  * A derived artifact is immutable — there is no update method.
  */
 
-import { DerivedArtifactSchema, type DerivedArtifact } from '@master-vision/contracts';
+import { DerivedArtifactSchema, type DerivedArtifact } from '@vision-lens/contracts';
 import type { SqliteDatabase } from '../db.js';
 import { StoreValidationError } from '../errors.js';
 import { fromJsonColumn, toRequiredJsonColumn } from '../json.js';

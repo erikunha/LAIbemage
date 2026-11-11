@@ -1,5 +1,5 @@
 /**
- * Normalisation: VisA → the Master Vision store (spec 003, US1 / task 1.3).
+ * Normalisation: VisA → the Vision Lens store (spec 003, US1 / task 1.3).
  *
  * ## What this module does
  *
@@ -82,7 +82,7 @@
 import { createHash } from 'node:crypto';
 import { readdir, readFile, stat } from 'node:fs/promises';
 import path from 'node:path';
-import { CONTRACTS_VERSION, fingerprintV2, type OntologyCategory } from '@master-vision/contracts';
+import { CONTRACTS_VERSION, fingerprintV2, type OntologyCategory } from '@vision-lens/contracts';
 import { nextTimestamp } from '../store/clock.js';
 import type { SqliteDatabase } from '../store/db.js';
 import { newEntityId } from '../store/ids.js';

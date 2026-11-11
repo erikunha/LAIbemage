@@ -6,7 +6,7 @@ import { describe, expect, it, vi } from 'vitest';
  * (optional dep, spec 001) → repos fail fast with actionable install
  * message").
  *
- * `better-sqlite3` is an optional dependency of `@master-vision/core`: it is
+ * `better-sqlite3` is an optional dependency of `@vision-lens/core`: it is
  * a NATIVE module and must never be a hard import. The mock below simulates a
  * machine where the package is NOT installed, without uninstalling anything
  * (the same technique the reporter's own guard test uses).
@@ -40,20 +40,20 @@ describe('the optional dependency guard', () => {
 
   it('computes a default path without touching the home directory', async () => {
     const { defaultStorePath } = await import('../../src/store/index.js');
-    const previous = process.env['MASTER_VISION_HOME'];
+    const previous = process.env['VISION_LENS_HOME'];
     try {
-      process.env['MASTER_VISION_HOME'] = '/tmp/master-vision-home';
-      expect(defaultStorePath()).toBe(path.join('/tmp/master-vision-home', 'store.db'));
+      process.env['VISION_LENS_HOME'] = '/tmp/vision-lens-home';
+      expect(defaultStorePath()).toBe(path.join('/tmp/vision-lens-home', 'store.db'));
 
-      delete process.env['MASTER_VISION_HOME'];
+      delete process.env['VISION_LENS_HOME'];
       // The fallback is the user's home directory — the function only
       // COMPUTES the path, it never creates or writes anything.
-      expect(defaultStorePath().endsWith(path.join('.master-vision', 'store.db'))).toBe(true);
+      expect(defaultStorePath().endsWith(path.join('.vision-lens', 'store.db'))).toBe(true);
     } finally {
       if (previous === undefined) {
-        delete process.env['MASTER_VISION_HOME'];
+        delete process.env['VISION_LENS_HOME'];
       } else {
-        process.env['MASTER_VISION_HOME'] = previous;
+        process.env['VISION_LENS_HOME'] = previous;
       }
     }
   });

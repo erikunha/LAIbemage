@@ -1,9 +1,9 @@
--- 0001_init — the Master Vision domain store (spec 002, US2 / US4).
+-- 0001_init — the Vision Lens domain store (spec 002, US2 / US4).
 --
 -- Conventions used by every table in this file:
 --
 --   * Column names are snake_case; the repository layer maps them to the
---     camelCase field names of the contracts in @master-vision/contracts.
+--     camelCase field names of the contracts in @vision-lens/contracts.
 --   * JSON-shaped columns hold CANONICAL JSON (sorted keys, no whitespace),
 --     produced by `canonicalJson` from the contracts. Absent is NULL.
 --   * Every table carries `created_at` (insert time) and `updated_at`

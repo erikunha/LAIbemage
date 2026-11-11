@@ -1,5 +1,5 @@
 /**
- * The public benchmark surface of `@master-vision/core`.
+ * The public benchmark surface of `@vision-lens/core`.
  *
  * Everything a caller needs to score a run, gate it and read its artifact.
  * Specs 006 (arena) and 007 (training) consume THIS module — there is no

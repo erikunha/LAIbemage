@@ -2,7 +2,7 @@
   "entryPoints": ["packages/sdk/src/index.ts"],
   "tsconfig": "packages/sdk/tsconfig.json",
   "out": "docs/api",
-  "name": "Master Vision SDK",
+  "name": "Vision Lens SDK",
   "readme": "none",
   "excludePrivate": true,
   "excludeInternal": true,

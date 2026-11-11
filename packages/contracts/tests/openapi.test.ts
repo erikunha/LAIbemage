@@ -69,7 +69,7 @@ function firstDifference(actual: string, expected: string): string | null {
     ...context,
     '',
     'refresh it with:',
-    '  pnpm --filter @master-vision/contracts run openapi:snapshot',
+    '  pnpm --filter @vision-lens/contracts run openapi:snapshot',
   ].join('\n');
 }
 
@@ -92,7 +92,7 @@ describe('the OpenAPI seed', () => {
     expect(document.openapi).toBe(OPENAPI_VERSION);
     expect(document.openapi).toBe('3.1.0');
     expect(document.jsonSchemaDialect).toBe(OPENAPI_JSON_SCHEMA_DIALECT);
-    expect(document.info.title).toBe('Master Vision');
+    expect(document.info.title).toBe('Vision Lens');
     expect(document.info.version).toBe(CONTRACTS_VERSION);
   });
 

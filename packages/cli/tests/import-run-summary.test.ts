@@ -1,9 +1,9 @@
 import { describe, expect, it } from 'vitest';
 import { formatImportRunSummary } from '../src/commands/import-run.js';
-import type { LegacyImportResult } from '@master-vision/core/store';
+import type { LegacyImportResult } from '@vision-lens/core/store';
 
 /**
- * The output shape of `laib import-run` (spec 002, task 4.3).
+ * The output shape of `vision-lens import-run` (spec 002, task 4.3).
  *
  * Pure formatting: no store, no I/O. The command prints ONE LINE PER COUNT,
  * and the dry run prints the SAME lines as the real import — a dry run is a

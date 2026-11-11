@@ -1,7 +1,7 @@
 {
-  "name": "@master-vision/core",
+  "name": "@vision-lens/core",
   "version": "0.0.1",
-  "description": "Master Vision core: pipeline, providers, domain services (evolved from ai-image-labeling).",
+  "description": "Vision Lens core: pipeline, providers, domain services (evolved from the legacy `ai-image-labeling` package).",
   "type": "module",
   "main": "./dist/index.js",
   "exports": {
@@ -43,7 +43,7 @@
     "@google/generative-ai": "0.24.1",
     "@inquirer/input": "^5.0.12",
     "@inquirer/select": "^5.1.4",
-    "@master-vision/contracts": "workspace:*",
+    "@vision-lens/contracts": "workspace:*",
     "chalk": "5.6.2",
     "chokidar": "5.0.0",
     "cli-progress": "3.12.0",

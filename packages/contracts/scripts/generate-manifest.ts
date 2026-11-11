@@ -7,7 +7,7 @@ import { buildContractManifest } from '../src/manifest.js';
  * schemas (spec 002 task 1.4).
  *
  * Run it with:
- *   corepack pnpm --filter @master-vision/contracts run manifest:generate
+ *   corepack pnpm --filter @vision-lens/contracts run manifest:generate
  *
  * `tests/version-guard.test.ts` fails when the committed manifest no longer
  * matches the live schemas, and prints this command.

@@ -10,7 +10,7 @@
  * The repository therefore offers no update method.
  */
 
-import { DatasetSnapshotSchema, type DatasetSnapshot } from '@master-vision/contracts';
+import { DatasetSnapshotSchema, type DatasetSnapshot } from '@vision-lens/contracts';
 import type { SqliteDatabase } from '../db.js';
 import { fromJsonColumn, toJsonColumn } from '../json.js';
 import {

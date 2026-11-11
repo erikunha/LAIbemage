@@ -1,13 +1,13 @@
 {
-  "name": "@master-vision/cli",
+  "name": "@vision-lens/cli",
   "version": "0.0.1",
-  "description": "Master Vision CLI: canonical `laib` bin plus the deprecated `ai-image-labeling` compatibility bin (spec 001 US2).",
+  "description": "Vision Lens CLI: canonical `vision-lens` bin plus the deprecated `ai-image-labeling` compatibility bin (spec 001 US2).",
   "type": "module",
   "private": true,
   "main": "./dist/index.js",
   "types": "./dist/index.d.ts",
   "bin": {
-    "laib": "./dist/index.js",
+    "vision-lens": "./dist/index.js",
     "ai-image-labeling": "./dist/compat.js"
   },
   "engines": {
@@ -18,10 +18,10 @@
     "typecheck": "tsc --project tsconfig.json --noEmit",
     "lint": "eslint src tests",
     "test": "vitest run --root ../.. packages/cli --testTimeout 15000",
-    "test:bins": "pnpm --filter @master-vision/cli --filter @master-vision/core run build && vitest run --root ../.. packages/cli --testTimeout 15000"
+    "test:bins": "pnpm --filter @vision-lens/cli --filter @vision-lens/core run build && vitest run --root ../.. packages/cli --testTimeout 15000"
   },
   "dependencies": {
-    "@master-vision/core": "workspace:*",
+    "@vision-lens/core": "workspace:*",
     "chalk": "5.6.2",
     "commander": "14.0.3"
   },

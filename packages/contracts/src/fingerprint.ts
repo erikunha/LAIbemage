@@ -26,7 +26,7 @@ export interface FingerprintInput {
   preprocessing: Record<string, unknown>;
   /** Dataset identity (snapshot id; 'legacy-v2' pre-snapshots) */
   dataVersion: string;
-  /** @master-vision/contracts version */
+  /** @vision-lens/contracts version */
   contractsVersion: string;
 }
 

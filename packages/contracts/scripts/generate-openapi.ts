@@ -10,17 +10,17 @@ import { buildOpenApiDocument, serializeOpenApiDocument } from '../src/openapi.j
  * disagree:
  *
  *  - `packages/contracts/dist/openapi.json` — the build artefact. It is what
- *    the package exports as `@master-vision/contracts/openapi.json`, and it is
+ *    the package exports as `@vision-lens/contracts/openapi.json`, and it is
  *    what spec 009 serves.
  *  - `packages/contracts/openapi.snapshot.json` — the committed snapshot the
  *    drift test compares against. It is only written when `--snapshot` is
  *    passed, because a build must never modify a committed file.
  *
  * Run it with:
- *   pnpm --filter @master-vision/contracts run openapi:generate
+ *   pnpm --filter @vision-lens/contracts run openapi:generate
  *
  * Refresh the committed snapshot with:
- *   pnpm --filter @master-vision/contracts run openapi:snapshot
+ *   pnpm --filter @vision-lens/contracts run openapi:snapshot
  */
 const document = buildOpenApiDocument();
 const serialized = serializeOpenApiDocument(document);

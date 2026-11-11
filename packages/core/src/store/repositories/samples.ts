@@ -20,7 +20,7 @@
  * ("which assets does this snapshot contain?" would answer "none").
  */
 
-import { SampleSchema, type Region, type Sample } from '@master-vision/contracts';
+import { SampleSchema, type Region, type Sample } from '@vision-lens/contracts';
 import type { SqliteDatabase } from '../db.js';
 import { StoreValidationError } from '../errors.js';
 import { fromJsonColumn, toJsonColumn, toRequiredJsonColumn } from '../json.js';

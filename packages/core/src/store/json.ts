@@ -1,5 +1,5 @@
 /**
- * JSON column convention for the Master Vision store.
+ * JSON column convention for the Vision Lens store.
  *
  * Every JSON-shaped column (`geometry_json`, `context_json`,
  * `metrics_summary_json`, `lineage_json`, `budget_json`, `tool_calls_json`,
@@ -10,7 +10,7 @@
  *
  * Canonicalisation is NOT re-implemented here — it is the very same
  * `canonicalJson` the contracts use for fingerprint v2
- * (`@master-vision/contracts`, plan: "canonical JSON = sorted keys, no
+ * (`@vision-lens/contracts`, plan: "canonical JSON = sorted keys, no
  * whitespace, arrays keep order"). Re-using it means a value written to a
  * JSON column and the same value used in a fingerprint serialize identically,
  * so a fingerprint can be recomputed from the stored row.
@@ -25,7 +25,7 @@
  *    Node — the same guarantee the fingerprint spec pins.
  */
 
-import { canonicalJson } from '@master-vision/contracts';
+import { canonicalJson } from '@vision-lens/contracts';
 
 /**
  * Serializes a JSON value for storage, or returns `null` when the value is

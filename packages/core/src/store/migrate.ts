@@ -1,5 +1,5 @@
 /**
- * The migration runner of the Master Vision store (spec 002, task 3.1).
+ * The migration runner of the Vision Lens store (spec 002, task 3.1).
  *
  * ## Protocol
  *

@@ -22,7 +22,7 @@
  * ## The manifest id (the idempotency key)
  *
  * The identity of a run is `sha256(canonicalJson(parsedContent))`.
- * `canonicalJson` (from `@master-vision/contracts`) sorts object keys, so a
+ * `canonicalJson` (from `@vision-lens/contracts`) sorts object keys, so a
  * file that was re-serialized with a different key order yields the SAME id.
  *
  * `processedDate` is deliberately NOT used: two different runs can share it,
@@ -38,7 +38,7 @@
  */
 
 import { createHash } from 'node:crypto';
-import { canonicalJson } from '@master-vision/contracts';
+import { canonicalJson } from '@vision-lens/contracts';
 
 /** A legacy run the importer could not read, or could not make sense of. */
 export class LegacyImportError extends Error {

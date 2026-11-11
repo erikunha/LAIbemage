@@ -4,7 +4,7 @@
  * ## Contracts-first (constitution III)
  *
  * Every repository validates its payload with the Zod schema from
- * `@master-vision/contracts` BEFORE touching the database. The schema is the
+ * `@vision-lens/contracts` BEFORE touching the database. The schema is the
  * first line of defence; the database constraints (NOT NULL, FOREIGN KEY,
  * CHECK) are the second. A payload that the contracts reject never reaches
  * SQLite, and a payload that somehow bypasses the repository is still

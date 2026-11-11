@@ -1,7 +1,7 @@
 import { z } from 'zod';
 
 /**
- * Enumerations of the Master Vision domain model (spec 002).
+ * Enumerations of the Vision Lens domain model (spec 002).
  *
  * Every enum here is part of the public contract surface: a value removed from
  * one of them is a breaking change and requires a MAJOR `CONTRACTS_VERSION`

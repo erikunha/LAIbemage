@@ -7,7 +7,7 @@
  * The repository therefore offers no update method.
  */
 
-import { OntologyVersionSchema, type OntologyCategory, type OntologyVersion } from '@master-vision/contracts';
+import { OntologyVersionSchema, type OntologyCategory, type OntologyVersion } from '@vision-lens/contracts';
 import type { SqliteDatabase } from '../db.js';
 import { fromJsonColumn, toRequiredJsonColumn } from '../json.js';
 import {

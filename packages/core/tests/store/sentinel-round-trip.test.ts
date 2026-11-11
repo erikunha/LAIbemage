@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { AnnotationSchema, ENTITY_SCHEMAS, PredictionSchema } from '@master-vision/contracts';
+import { AnnotationSchema, ENTITY_SCHEMAS, PredictionSchema } from '@vision-lens/contracts';
 import {
   NOT_RECORDED,
   StoreValidationError,

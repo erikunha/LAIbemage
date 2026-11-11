@@ -13,7 +13,7 @@
  *   - `benchmarks/baselines/<suite>.json` — regression baselines
  *   - `benchmarks/splits/*.gold.json` — seeded, hash-pinned gold splits
  *   - `datasets/registry.json` — dataset source, license and checksums
- *   - `laib benchmark run|gate|report` — the CLI that produces the above
+ *   - `vision-lens benchmark run|gate|report` — the CLI that produces the above
  *
  * It runs LLM analysis against the labelled benchmark fixtures and produces:
  *   - Per-category precision / recall

@@ -1,7 +1,7 @@
 {
-  "name": "@master-vision/contracts",
+  "name": "@vision-lens/contracts",
   "version": "1.0.0",
-  "description": "Master Vision shared contracts: versioned zod schemas and inferred types shared across packages and services.",
+  "description": "Vision Lens shared contracts: versioned zod schemas and inferred types shared across packages and services.",
   "type": "module",
   "main": "./dist/index.js",
   "exports": {

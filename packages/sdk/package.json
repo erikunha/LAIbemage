@@ -1,7 +1,7 @@
 {
-  "name": "@master-vision/sdk",
+  "name": "@vision-lens/sdk",
   "version": "0.0.1",
-  "description": "Master Vision public SDK: stable library API re-exported from @master-vision/core (evolved from ai-image-labeling sdk.ts; publishing identity decided in a later commit).",
+  "description": "Vision Lens public SDK: stable library API re-exported from @vision-lens/core (evolved from the legacy `ai-image-labeling` package's sdk.ts; publishing identity decided in a later commit).",
   "type": "module",
   "main": "./dist/index.js",
   "exports": {
@@ -17,7 +17,7 @@
     "lint": "eslint src"
   },
   "dependencies": {
-    "@master-vision/cli": "workspace:*",
-    "@master-vision/core": "workspace:*"
+    "@vision-lens/cli": "workspace:*",
+    "@vision-lens/core": "workspace:*"
   }
 }

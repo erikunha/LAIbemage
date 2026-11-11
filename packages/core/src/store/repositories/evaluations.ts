@@ -8,7 +8,7 @@
  * Evaluations are immutable: a re-run produces a new row.
  */
 
-import { EvaluationRunSchema, type EvaluationRun } from '@master-vision/contracts';
+import { EvaluationRunSchema, type EvaluationRun } from '@vision-lens/contracts';
 import type { SqliteDatabase } from '../db.js';
 import { fromJsonColumn, toRequiredJsonColumn } from '../json.js';
 import {

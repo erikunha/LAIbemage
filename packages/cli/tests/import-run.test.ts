@@ -6,13 +6,13 @@ import { fileURLToPath } from 'node:url';
 import { describe, expect, it, vi } from 'vitest';
 
 /**
- * `laib import-run` — the user flow (spec 002, task 4.3 / 7.2).
+ * `vision-lens import-run` — the user flow (spec 002, task 4.3 / 7.2).
  *
  * The command is driven through the REAL BINARY, because the user flow is
  * the product: the counts on stdout, the rows in the store, the exit code.
  *
  * Requires built binaries. Skips (fast unit runs) when dist is missing; the
- * integration entry point is: pnpm --filter @master-vision/cli test:bins
+ * integration entry point is: pnpm --filter @vision-lens/cli test:bins
  */
 
 vi.setConfig({ testTimeout: 30_000 });
@@ -56,7 +56,7 @@ interface BinResult {
   readonly status: number;
 }
 
-/** Runs the built `laib` binary with the given arguments. */
+/** Runs the built `vision-lens` binary with the given arguments. */
 function runBin(args: string[]): BinResult {
   const result = spawnSync(process.execPath, [INDEX_BIN, ...args], { encoding: 'utf8' });
   expect(result.error).toBeUndefined();
@@ -90,7 +90,7 @@ function countLines(stdout: string): string[] {
 }
 
 describe.skipIf(!BINS_BUILT)(
-  'laib import-run (requires built dist — pnpm --filter @master-vision/cli test:bins)',
+  'vision-lens import-run (requires built dist — pnpm --filter @vision-lens/cli test:bins)',
   () => {
     it('previews the mapping with --dry-run and writes NOTHING', async () => {
       const workspace = makeLegacyWorkspace();
@@ -121,7 +121,7 @@ describe.skipIf(!BINS_BUILT)(
         expect(existsSync(dbPath)).toBe(true);
 
         // The rows really landed.
-        const store = await import('@master-vision/core/store');
+        const store = await import('@vision-lens/core/store');
         const handle = await store.openMigratedStore(dbPath);
         try {
           const count = (table: string): number =>

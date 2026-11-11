@@ -2,9 +2,9 @@
   "openapi": "3.1.0",
   "jsonSchemaDialect": "https://json-schema.org/draft/2020-12/schema",
   "info": {
-    "title": "Master Vision",
+    "title": "Vision Lens",
     "version": "1.0.0",
-    "description": "Master Vision — Visual Intelligence Engineering Workbench. Generated from @master-vision/contracts, the single source of truth for the domain model and the operations of the platform (constitution III, contracts-first). The entity schemas are served unchanged by the API service of spec 009."
+    "description": "Vision Lens — Visual Intelligence Engineering Workbench. Generated from @vision-lens/contracts, the single source of truth for the domain model and the operations of the platform (constitution III, contracts-first). The entity schemas are served unchanged by the API service of spec 009."
   },
   "paths": {
     "/assets": {
@@ -3554,59 +3554,59 @@
   "tags": [
     {
       "name": "Asset",
-      "description": "Asset — an entity of the Master Vision domain model."
+      "description": "Asset — an entity of the Vision Lens domain model."
     },
     {
       "name": "CaptureSession",
-      "description": "CaptureSession — an entity of the Master Vision domain model."
+      "description": "CaptureSession — an entity of the Vision Lens domain model."
     },
     {
       "name": "Sample",
-      "description": "Sample — an entity of the Master Vision domain model."
+      "description": "Sample — an entity of the Vision Lens domain model."
     },
     {
       "name": "OntologyVersion",
-      "description": "OntologyVersion — an entity of the Master Vision domain model."
+      "description": "OntologyVersion — an entity of the Vision Lens domain model."
     },
     {
       "name": "Annotation",
-      "description": "Annotation — an entity of the Master Vision domain model."
+      "description": "Annotation — an entity of the Vision Lens domain model."
     },
     {
       "name": "Prediction",
-      "description": "Prediction — an entity of the Master Vision domain model."
+      "description": "Prediction — an entity of the Vision Lens domain model."
     },
     {
       "name": "DatasetSnapshot",
-      "description": "DatasetSnapshot — an entity of the Master Vision domain model."
+      "description": "DatasetSnapshot — an entity of the Vision Lens domain model."
     },
     {
       "name": "ExperimentRun",
-      "description": "ExperimentRun — an entity of the Master Vision domain model."
+      "description": "ExperimentRun — an entity of the Vision Lens domain model."
     },
     {
       "name": "ModelVersion",
-      "description": "ModelVersion — an entity of the Master Vision domain model."
+      "description": "ModelVersion — an entity of the Vision Lens domain model."
     },
     {
       "name": "EvaluationRun",
-      "description": "EvaluationRun — an entity of the Master Vision domain model."
+      "description": "EvaluationRun — an entity of the Vision Lens domain model."
     },
     {
       "name": "Deployment",
-      "description": "Deployment — an entity of the Master Vision domain model."
+      "description": "Deployment — an entity of the Vision Lens domain model."
     },
     {
       "name": "FeedbackEvent",
-      "description": "FeedbackEvent — an entity of the Master Vision domain model."
+      "description": "FeedbackEvent — an entity of the Vision Lens domain model."
     },
     {
       "name": "AgentRun",
-      "description": "AgentRun — an entity of the Master Vision domain model."
+      "description": "AgentRun — an entity of the Vision Lens domain model."
     },
     {
       "name": "DerivedArtifact",
-      "description": "DerivedArtifact — an entity of the Master Vision domain model."
+      "description": "DerivedArtifact — an entity of the Vision Lens domain model."
     }
   ]
 }

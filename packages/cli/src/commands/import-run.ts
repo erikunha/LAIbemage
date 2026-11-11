@@ -1,5 +1,5 @@
 /**
- * `laib import-run <path>` — import a legacy analysis run into the store
+ * `vision-lens import-run <path>` — import a legacy analysis run into the store
  * (spec 002, US2 / task 4.3).
  *
  * ## What the command does
@@ -19,12 +19,12 @@
  *
  * ## Why the store is imported DYNAMICALLY
  *
- * `better-sqlite3` is an OPTIONAL dependency of `@master-vision/core`: it is
+ * `better-sqlite3` is an OPTIONAL dependency of `@vision-lens/core`: it is
  * a native module and it must not be loaded by commands that do not need it.
- * The dynamic import also keeps `laib --help` and the other subcommands free
+ * The dynamic import also keeps `vision-lens --help` and the other subcommands free
  * of the native driver.
  */
-import type { LegacyImportCounts, LegacyImportResult } from '@master-vision/core/store';
+import type { LegacyImportCounts, LegacyImportResult } from '@vision-lens/core/store';
 
 /** Options of the `import-run` command. */
 export interface ImportRunCommandOptions {
@@ -86,7 +86,7 @@ export function formatImportRunSummary(
 export async function runImportRun(options: ImportRunCommandOptions): Promise<LegacyImportResult> {
   // The store is loaded lazily: better-sqlite3 is an optional native
   // dependency and must not be loaded by the other commands.
-  const store = await import('@master-vision/core/store');
+  const store = await import('@vision-lens/core/store');
   const dbPath = options.dbPath ?? store.defaultStorePath();
 
   if (options.dryRun) {
@@ -118,7 +118,7 @@ async function printSummary(
 ): Promise<void> {
   // The logger is loaded lazily as well, so this module can be imported
   // (and its pure formatter tested) without a built core package.
-  const { logger } = await import('@master-vision/core/utils/logger');
+  const { logger } = await import('@vision-lens/core/utils/logger');
   for (const line of formatImportRunSummary(result, options)) {
     logger.raw(line);
   }

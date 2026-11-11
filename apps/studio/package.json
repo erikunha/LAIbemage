@@ -1,7 +1,7 @@
 {
-  "name": "@master-vision/studio-placeholder",
+  "name": "@vision-lens/studio-placeholder",
   "version": "0.0.1",
-  "description": "Master Vision studio review app placeholder (spec 010); real app lands in a later spec.",
+  "description": "Vision Lens studio review app placeholder (spec 010); real app lands in a later spec.",
   "type": "module",
   "private": true,
   "engines": {

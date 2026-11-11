@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { AnnotationSchema, PredictionSchema } from '@master-vision/contracts';
+import { AnnotationSchema, PredictionSchema } from '@vision-lens/contracts';
 import { StoreValidationError, isStoreValidationError } from '../../src/store/index.js';
 import {
   agentRunFixture,

@@ -822,7 +822,7 @@ export function buildOpenApiDocument(): OpenApiDocument {
     Object.assign(paths, crudSkeleton(name, name));
     tags.push({
       name,
-      description: `${name} — an entity of the Master Vision domain model.`,
+      description: `${name} — an entity of the Vision Lens domain model.`,
     });
   }
 
@@ -844,11 +844,11 @@ export function buildOpenApiDocument(): OpenApiDocument {
     openapi: OPENAPI_VERSION,
     jsonSchemaDialect: OPENAPI_JSON_SCHEMA_DIALECT,
     info: {
-      title: 'Master Vision',
+      title: 'Vision Lens',
       version: CONTRACTS_VERSION,
       description:
-        'Master Vision — Visual Intelligence Engineering Workbench. ' +
-        'Generated from @master-vision/contracts, the single source of truth for ' +
+        'Vision Lens — Visual Intelligence Engineering Workbench. ' +
+        'Generated from @vision-lens/contracts, the single source of truth for ' +
         'the domain model and the operations of the platform (constitution III, ' +
         'contracts-first). The entity schemas are served unchanged by the API ' +
         'service of spec 009.',
@@ -871,6 +871,6 @@ export function serializeOpenApiDocument(document: OpenApiDocument): string {
  * The generated OpenAPI document.
  *
  * Exported so a consumer (spec 009) can `import { openapiDocument } from
- * '@master-vision/contracts/openapi'` without reading the file.
+ * '@vision-lens/contracts/openapi'` without reading the file.
  */
 export const openapiDocument: OpenApiDocument = buildOpenApiDocument();

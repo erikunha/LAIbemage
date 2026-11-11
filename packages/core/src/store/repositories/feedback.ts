@@ -7,7 +7,7 @@
  * there is no update method at all.
  */
 
-import { FeedbackEventSchema, type FeedbackEvent } from '@master-vision/contracts';
+import { FeedbackEventSchema, type FeedbackEvent } from '@vision-lens/contracts';
 import type { SqliteDatabase } from '../db.js';
 import { fromJsonColumn, toRequiredJsonColumn } from '../json.js';
 import { BaseRepository, parseEntity, type JsonValue, type Row } from './base.js';

@@ -16,7 +16,7 @@ import type {
   OntologyVersion,
   Prediction,
   Sample,
-} from '@master-vision/contracts';
+} from '@vision-lens/contracts';
 import {
   applyMigrations,
   createRepositories,

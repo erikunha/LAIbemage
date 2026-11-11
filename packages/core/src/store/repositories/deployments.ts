@@ -8,7 +8,7 @@
  * the deployment's identity or configuration.
  */
 
-import { DeploymentSchema, type Deployment } from '@master-vision/contracts';
+import { DeploymentSchema, type Deployment } from '@vision-lens/contracts';
 import type { SqliteDatabase } from '../db.js';
 import { nextTimestamp } from '../clock.js';
 import { StoreValidationError } from '../errors.js';

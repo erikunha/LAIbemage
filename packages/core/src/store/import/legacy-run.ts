@@ -4,7 +4,7 @@
  * ## What it does
  *
  * Reads a legacy analysis run (`analysis_results.json` and its historical
- * variants) and writes the domain entities into the Master Vision store:
+ * variants) and writes the domain entities into the Vision Lens store:
  * `Asset` → `Sample` → `Prediction`, plus the run-level `ExperimentRun`,
  * `OntologyVersion` and `ModelVersion`, plus the human `Annotation`s of the
  * legacy review history and the `CaptureSession`s of the legacy session
@@ -66,7 +66,7 @@
 import { createHash } from 'node:crypto';
 import { readFileSync, statSync } from 'node:fs';
 import path from 'node:path';
-import { CONTRACTS_VERSION, fingerprintV2, type OntologyCategory } from '@master-vision/contracts';
+import { CONTRACTS_VERSION, fingerprintV2, type OntologyCategory } from '@vision-lens/contracts';
 import type { Store } from '../db.js';
 import { newEntityId, pathHashPlaceholderId } from '../ids.js';
 import { toJsonColumn } from '../json.js';

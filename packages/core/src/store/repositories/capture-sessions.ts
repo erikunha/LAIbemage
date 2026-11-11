@@ -7,7 +7,7 @@
  * never destroy the assets it produced — originals are immutable).
  */
 
-import { CaptureSessionSchema, type CaptureSession } from '@master-vision/contracts';
+import { CaptureSessionSchema, type CaptureSession } from '@vision-lens/contracts';
 import type { SqliteDatabase } from '../db.js';
 import { nextTimestamp } from '../clock.js';
 import { fromJsonColumn, toJsonColumn } from '../json.js';

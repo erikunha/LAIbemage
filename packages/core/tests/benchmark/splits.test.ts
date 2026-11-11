@@ -12,7 +12,7 @@ import { tmpdir } from 'node:os';
 import path from 'node:path';
 import { describe, expect, it } from 'vitest';
 import fastCheck from 'fast-check';
-import { canonicalJson } from '@master-vision/contracts';
+import { canonicalJson } from '@vision-lens/contracts';
 import {
   CAPTURE_GROUP_OVERFLOW_REASON_PREFIX,
   computeManifestHash,
@@ -361,7 +361,7 @@ describe('split manifest — tamper detection', () => {
   });
 
   it('detects a tampered image on disk', async () => {
-    const root = await mkdtemp(path.join(tmpdir(), 'laib-splits-'));
+    const root = await mkdtemp(path.join(tmpdir(), 'vision-lens-splits-'));
     const bytes = Buffer.from('not the bytes the manifest was built from');
     await writeFile(path.join(root, 'a.JPG'), bytes);
 

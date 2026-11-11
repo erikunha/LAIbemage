@@ -1,5 +1,5 @@
 /**
- * The Master Vision store: opening the SQLite database (spec 002, US2).
+ * The Vision Lens store: opening the SQLite database (spec 002, US2).
  *
  * ## Why SQLite, and why here
  *
@@ -16,7 +16,7 @@
  * ## Optional dependency
  *
  * `better-sqlite3` is a NATIVE module and is declared as an **optional
- * dependency** of `@master-vision/core`. It must never be a hard import:
+ * dependency** of `@vision-lens/core`. It must never be a hard import:
  * the import is dynamic and guarded, so a machine without the native binding
  * gets an actionable error instead of a module-resolution stack trace. The
  * guard is the same pattern the reporter uses (`reporter/sqlite.ts`), plus a
@@ -47,8 +47,8 @@
  *
  * ## The default path is a proposal, not a decision
  *
- * {@link defaultStorePath} follows ADR-007 (local-first): `MASTER_VISION_HOME`
- * when set, otherwise `~/.master-vision`, with the database in `store.db`.
+ * {@link defaultStorePath} follows ADR-007 (local-first): `VISION_LENS_HOME`
+ * when set, otherwise `~/.vision-lens`, with the database in `store.db`.
  * **This default is a PROPOSAL pending maintainer confirmation** — the
  * location is not yet pinned by an ADR. Every function in the store accepts an
  * explicit path, and every test uses an explicit temporary path: the home
@@ -106,7 +106,7 @@ export interface Store {
  * PROPOSAL pending maintainer confirmation (see the module docblock).
  */
 export function defaultStorePath(): string {
-  const home = process.env['MASTER_VISION_HOME'] ?? path.join(homedir(), '.master-vision');
+  const home = process.env['VISION_LENS_HOME'] ?? path.join(homedir(), '.vision-lens');
   return path.join(home, 'store.db');
 }
 
@@ -124,7 +124,7 @@ export const defaultDriverFactory: DriverFactory = async () => {
     return mod.default;
   } catch (error) {
     throw new StoreUnavailableError(
-      'better-sqlite3 is not installed (it is an optional dependency of @master-vision/core). ' +
+      'better-sqlite3 is not installed (it is an optional dependency of @vision-lens/core). ' +
         'Run `pnpm add better-sqlite3` (in this workspace: `pnpm add -w --save-optional better-sqlite3`) and try again.',
       { cause: error },
     );
@@ -152,7 +152,7 @@ export async function openStore(
     // A driver factory that fails for any reason means the native module is
     // unusable; surface the same actionable message with the cause attached.
     throw new StoreUnavailableError(
-      'better-sqlite3 is not installed (it is an optional dependency of @master-vision/core). ' +
+      'better-sqlite3 is not installed (it is an optional dependency of @vision-lens/core). ' +
         'Run `pnpm add better-sqlite3` (in this workspace: `pnpm add -w --save-optional better-sqlite3`) and try again.',
       { cause: error },
     );

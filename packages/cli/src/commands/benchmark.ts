@@ -1,5 +1,5 @@
 /**
- * `laib benchmark run|gate|report` — the spec-003 benchmark surface (US3, US4).
+ * `vision-lens benchmark run|gate|report` — the spec-003 benchmark surface (US3, US4).
  *
  * ## The three commands
  *
@@ -30,16 +30,16 @@ import type {
   PredictionItem,
   SplitAssignment,
   SplitManifest,
-} from '@master-vision/core/benchmark';
+} from '@vision-lens/core/benchmark';
 import {
   captureEnv,
   evaluateGate,
   runBenchmark,
   DEFAULT_GATE_TOLERANCE,
-} from '@master-vision/core/benchmark';
-import { logger } from '@master-vision/core/utils/logger';
+} from '@vision-lens/core/benchmark';
+import { logger } from '@vision-lens/core/utils/logger';
 
-/** Options of the `laib benchmark run` command. */
+/** Options of the `vision-lens benchmark run` command. */
 export interface BenchmarkRunOptions {
   readonly suite: string;
   readonly model: string;
@@ -67,7 +67,7 @@ export interface BenchmarkRunOptions {
   readonly env?: Readonly<Record<string, string>>;
 }
 
-/** Options of the `laib benchmark gate` command. */
+/** Options of the `vision-lens benchmark gate` command. */
 export interface BenchmarkGateOptions {
   readonly suite: string;
   readonly model: string;
@@ -85,7 +85,7 @@ export interface BenchmarkGateOptions {
   readonly partial?: boolean;
 }
 
-/** Options of the `laib benchmark report` command. */
+/** Options of the `vision-lens benchmark report` command. */
 export interface BenchmarkReportOptions {
   readonly runId: string;
   /** Directory holding the run artifacts. Defaults to `benchmarks/results`. */
@@ -196,7 +196,7 @@ function computeAssetHashes(
 }
 
 /**
- * `laib benchmark run` — score a prediction set and emit the artifacts.
+ * `vision-lens benchmark run` — score a prediction set and emit the artifacts.
  *
  * @returns `true` when the run produced artifacts, `false` when it was
  *   skipped because the dataset is absent.
@@ -313,7 +313,7 @@ function findLatestRunArtifact(
 }
 
 /**
- * `laib benchmark gate` — compare a run against its baseline.
+ * `vision-lens benchmark gate` — compare a run against its baseline.
  *
  * @returns the gate result, or `undefined` when the gate was skipped because
  *   the dataset or the run artifact is absent.
@@ -329,7 +329,7 @@ export async function runBenchmarkGateCommand(
     logger.warn(`artifact=absent — no run artifact for suite '${options.suite}'.`);
     logger.warn('gate=skipped — nothing to compare against the baseline.');
     logger.warn(
-      `Run 'laib benchmark run --suite ${options.suite} --model-id ${options.model} ...' first, ` +
+      `Run 'vision-lens benchmark run --suite ${options.suite} --model-id ${options.model} ...' first, ` +
         'or pass --metrics <report.json>.',
     );
     return undefined;
@@ -388,7 +388,7 @@ export async function runBenchmarkGateCommand(
 }
 
 /**
- * `laib benchmark report` — print a stored artifact.
+ * `vision-lens benchmark report` — print a stored artifact.
  *
  * @returns `false` when the artifact does not exist.
  */

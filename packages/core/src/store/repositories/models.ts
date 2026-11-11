@@ -18,7 +18,7 @@
  * A model version is otherwise immutable — there is no update method.
  */
 
-import { ModelVersionSchema, type ModelVersion } from '@master-vision/contracts';
+import { ModelVersionSchema, type ModelVersion } from '@vision-lens/contracts';
 import type { SqliteDatabase } from '../db.js';
 import { StoreValidationError } from '../errors.js';
 import { fromJsonColumn, toJsonColumn } from '../json.js';

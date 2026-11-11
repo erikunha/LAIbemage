@@ -30,7 +30,7 @@ const require = createRequire(import.meta.url);
 const OPENAPI_31_SCHEMA = '@apidevtools/openapi-schemas/schemas/v3.1/schema.json';
 
 /** The `$id` the generated document is registered under while validating. */
-export const DOCUMENT_SCHEMA_ID = 'urn:master-vision:openapi';
+export const DOCUMENT_SCHEMA_ID = 'urn:vision-lens:openapi';
 
 /** Reads a JSON module of a package as a plain object. */
 function readJsonModule(specifier: string): Record<string, unknown> {

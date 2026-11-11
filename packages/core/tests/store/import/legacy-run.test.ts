@@ -2,7 +2,7 @@ import { createHash } from 'node:crypto';
 import { existsSync, mkdirSync, readFileSync, readdirSync, statSync, writeFileSync } from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
-import { EntityIdSchema } from '@master-vision/contracts';
+import { EntityIdSchema } from '@vision-lens/contracts';
 import { describe, expect, it } from 'vitest';
 import {
   LegacyImportError,

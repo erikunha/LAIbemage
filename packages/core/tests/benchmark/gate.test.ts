@@ -71,7 +71,7 @@ describe('evaluateGate', () => {
   let baselinePath: string;
 
   beforeEach(() => {
-    dir = mkdtempSync(path.join(tmpdir(), 'laib-gate-'));
+    dir = mkdtempSync(path.join(tmpdir(), 'vision-lens-gate-'));
     baselinePath = path.join(dir, 'synthetic.json');
   });
 
@@ -374,7 +374,7 @@ describe('the baseline is keyed by (suite, model, model version)', () => {
   let baselinePath: string;
 
   beforeEach(() => {
-    dir = mkdtempSync(path.join(tmpdir(), 'laib-gate-version-'));
+    dir = mkdtempSync(path.join(tmpdir(), 'vision-lens-gate-version-'));
     baselinePath = path.join(dir, 'synthetic.json');
   });
 

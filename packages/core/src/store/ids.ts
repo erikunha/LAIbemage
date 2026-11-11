@@ -1,5 +1,5 @@
 /**
- * Identity helpers for the Master Vision store (spec 002, plan: "Identity").
+ * Identity helpers for the Vision Lens store (spec 002, plan: "Identity").
  *
  * The contracts fix entity identity as **UUIDv7** (`z.uuidv7()`): time-ordered
  * so that primary-key inserts stay append-mostly and index locality is

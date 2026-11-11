@@ -1,5 +1,5 @@
 /**
- * Normalise the staged VisA subset into the Master Vision store
+ * Normalise the staged VisA subset into the Vision Lens store
  * (spec 003, US1 / task 1.3).
  *
  * ## One place for the mapping

@@ -37,7 +37,7 @@ import {
 const REPO_ROOT = fileURLToPath(new URL('../../../', import.meta.url));
 const MANIFEST_PATH = fileURLToPath(new URL('../contract-manifest.json', import.meta.url));
 
-const REGENERATE_COMMAND = 'corepack pnpm --filter @master-vision/contracts run manifest:generate';
+const REGENERATE_COMMAND = 'corepack pnpm --filter @vision-lens/contracts run manifest:generate';
 
 /** Runs a git command in the repository root, returning null on failure. */
 function git(args: string[]): string | null {

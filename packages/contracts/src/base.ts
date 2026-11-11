@@ -2,7 +2,7 @@ import { z } from 'zod';
 import { ActorKindSchema, SurfaceSchema } from './enums.js';
 
 /**
- * Shared primitives for every Master Vision entity (spec 002).
+ * Shared primitives for every Vision Lens entity (spec 002).
  *
  * The rules encoded here are constitutional, not stylistic:
  *  - identity is UUIDv7 (time-ordered, index-friendly);

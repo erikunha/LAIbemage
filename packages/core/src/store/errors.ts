@@ -1,5 +1,5 @@
 /**
- * Error types of the Master Vision store (spec 002, US2 / US4).
+ * Error types of the Vision Lens store (spec 002, US2 / US4).
  *
  * The store distinguishes four failure classes, because they call for
  * different operator responses:
@@ -7,7 +7,7 @@
  *  - {@link StoreUnavailableError} — the optional native driver
  *    (`better-sqlite3`) could not be loaded. Operator action: install it.
  *  - {@link StoreValidationError} — a payload was rejected at the repository
- *    boundary by the contracts (`@master-vision/contracts`) or by the
+ *    boundary by the contracts (`@vision-lens/contracts`) or by the
  *    repository's own link rules. Operator action: fix the payload; the row
  *    was NOT written.
  *  - {@link StoreMigrationError} — the schema history is inconsistent (edited

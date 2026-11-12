@@ -160,6 +160,76 @@ Activation requires a new ADR + spec per track.
 
 ---
 
+## Phase map (vNext series, 015-027)
+
+The canonical design package delivered 2026-11-11 is integrated verbatim under `docs/vnext/`
+(64 tracked files, `docs/vnext/MANIFEST.sha256` validated). It supersedes the earlier design
+only where it says so (`docs/vnext/00-ADOPTION-NO-OVERWRITE.md`): Python-first public ML
+library, a lightweight remote SDK split from the fat in-process exports, Python usable
+in-process without an HTTP server, the VisA number treated as a regression baseline with no
+holdout claim, registry and publishing gates before any availability claim, and one Python
+distribution with optional extras. The working breakdown of the pack is local planning
+material (ADR-020); this section is the tracked mirror. Statuses here are implementation
+statuses in words, not the emoji key above: done, partially shipped (concrete gaps named),
+divergence recorded (maintainer decision pending), not started. Each milestone ships one
+reproducible vertical slice and counts as done only after passing its exit gate; the full
+train definition (R0 to R9) is `docs/vnext/23-RELEASE-ROADMAP.md`.
+
+```mermaid
+flowchart LR
+  R2[["R2 Data Foundation<br/>partially shipped<br/>021 done · 022 partially shipped"]] --> R3["R3 Visual Embeddings<br/>open · no ticket yet"]
+  R3 --> R4["R4 Model Arena<br/>open · no ticket yet"]
+  R4 --> R5["R5 Training Flywheel<br/>open · 023 not started"]
+  R2 --> R4
+  R2 --> R5
+  R2 --> R6["R6 Studio and API<br/>open · 024/025 not started"]
+  R2 --> R7["R7 SDK, MCP and Agent<br/>open · 026 decision pending"]
+```
+
+Shape key: the subroutine box is partially shipped, plain boxes are open. R2 feeds every later
+milestone: the leakage-resistant split and the scorecard gate what R3 through R7 may claim.
+
+| Release | Focus (specs in this series) | Exit gate | Status |
+|---|---|---|---|
+| R0 Reconcile | reconciliation record, baseline, the Python-first decision (015, 016) | zero lost work; green baseline; signed reconciliation | 015 done · 016 divergence recorded, maintainer decision pending |
+| R1 Python Library | public `visionlens` wheel (017), JSONL worker protocol (018), CPU vision adapter (019), TS facade (020) | the wheel works without Node; TS and Python reach golden parity | 017 and 018 partially shipped · 019 not started · 020 divergence recorded, maintainer decision pending |
+| R2 Data Foundation | leakage-resistant split (021), evaluation scorecard v2 (022) | nonempty train/val/test; source, license and hash gating | 021 done · 022 partially shipped |
+| R3 Visual Embeddings | no ticket in this series yet | Recall@k test; hardware profiling; index mismatch tests | not started |
+| R4 Model Arena | no ticket in this series yet | identical locked test set; per-class plus cost and latency reports | not started |
+| R5 Training Flywheel | encoder plus linear probe baseline (023) | active learning vs random; independent holdout delta | not started |
+| R6 Studio and API | thin npm remote client (024), read-only Studio Arena slice (025) | one guided end-to-end workflow with accessibility and SSE | not started |
+| R7 SDK, MCP and Agent | MCP dataset investigator (026) | same operation parity; injection and budget approval gates | divergence recorded, maintainer decision pending |
+| Process | ADR-020 repository separation (027) | knowledge kept under `docs/procedures/`; the tracked-file guard stays green | done |
+
+Spec-level statuses (post-audit, 2026-11-12):
+
+| Spec | Pack id | Release | Scope | Status |
+|---|---|---|---|---|
+| 015 | VLN-001 | R0 | reconciliation report and the baseline record the rest of the series cites | done |
+| 016 | VLN-002 | R0 | Python-first ML runtime ADR and the owner map of what moves to Python | divergence recorded, maintainer decision pending: the spec's python-ownership artifacts (its numbered ADR, the owner map, the boundary checker) never landed; `python/visionlens` exists and supersedes the spec's "no python yet" premise |
+| 017 | VLN-003 | R1 | public `visionlens` distribution: packaging, extras, wheel, publishing gates | partially shipped: the wheel is built, release engineering absent (`uv.lock`, the release gate, the release workflow, the typed facade for capabilities and image metadata) |
+| 018 | VLN-004 | R1 | cross-language JSONL worker protocol: handshake, events, errors, cancellation | partially shipped: the protocol landed across contracts, core and Python (both hosts and the suites); golden fixtures, secret redaction, retry backoff, the `CANCEL_REQUESTED` job transition, the schema generator and the ADR still open |
+| 019 | VLN-005 | R1 | one CPU vision adapter with golden predictions and fingerprints | not started |
+| 020 | VLN-006 | R1 | TypeScript facade over the Python worker, old CLI path preserved | divergence recorded, maintainer decision pending: the facade module it names (`packages/core/src/facade/`) never landed; the TS host client shipped inside the worker module as-built |
+| 021 | VLN-007 | R2 | leakage-resistant train/val/test partition and the gate that protects it | done |
+| 022 | VLN-008 | R2 | evaluation scorecard: held-out metrics, calibration, per-sample artifacts | partially shipped: the scorecard module, the regime gate and five suites landed; the CLI surface, the committed pointer directory and the docs still open |
+| 023 | VLN-009 | R5 | local encoder plus linear probe baseline, recorded on CPU and MPS | not started |
+| 024 | VLN-010 | R6 | thin npm remote client with no heavy transitives | not started |
+| 025 | VLN-011 | R6 | read-only Studio Arena slice over the controlled API | not started |
+| 026 | VLN-012 | R7 | MCP dataset investigator: tool parity, injection and budget gates | divergence recorded, maintainer decision pending: `packages/mcp/` does not exist; only the read-only contract inputs it cites are in the tree |
+| 027 | - | process | ADR-020 repository separation: procedures kept, personal machinery removed, tracked-file guard green | done |
+
+The three divergence rows (016, 020, 026) each carry their divergence record inline, naming
+how the written plan and the shipped tree drifted apart (audited 2026-11-12), and leave the
+maintainer the choice between rewriting as-built, closing as superseded, or implementing
+later; no choice is recorded yet.
+
+| Series | State after the reconciliation audit (015, done) |
+|---|---|
+| 001-014 foundation | largely landed at the foundation: monorepo (001), entities and contracts (002), real benchmark splits (003); 004 and 006 partially landed; 005, 007, 008, 011, 012, 013, 014 not started; 009 and 010 placeholders. Tracked record: `docs/migration/vision-lens-vnext-reconciliation.md` |
+
+---
+
 ## What we are not building (current)
 
 | Item | Reason |

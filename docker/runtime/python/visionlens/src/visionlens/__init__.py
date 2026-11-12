@@ -10,6 +10,13 @@ statements; this surface re-exports only what callers need.
 
 from __future__ import annotations
 
+from .downloads import (
+    DOWNLOAD_REFUSED,
+    AuthorizedDownload,
+    DownloadProvenance,
+    DownloadRefusedError,
+    authorize_download,
+)
 from .encoder import DTYPE, canonical_json, digest_of, embed_bytes, preprocessing_fingerprint
 from .errors import ErrorCode, WorkerError, is_retryable
 from .registry import DEFAULT_MODELS, ModelRegistry, ModelSpec, UnknownModelError
@@ -18,8 +25,12 @@ from .worker import Worker
 __version__ = "0.1.0"
 
 __all__ = [
+    "DOWNLOAD_REFUSED",
     "DTYPE",
     "DEFAULT_MODELS",
+    "AuthorizedDownload",
+    "DownloadProvenance",
+    "DownloadRefusedError",
     "ErrorCode",
     "ModelRegistry",
     "ModelSpec",
@@ -27,6 +38,7 @@ __all__ = [
     "Worker",
     "WorkerError",
     "__version__",
+    "authorize_download",
     "canonical_json",
     "digest_of",
     "embed_bytes",

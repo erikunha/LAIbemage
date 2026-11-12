@@ -26,5 +26,24 @@ packages = ["src/visionlens"]
 [tool.hatch.build.targets.sdist]
 include = ["src", "tests", "README.md", "pyproject.toml"]
 
+[dependency-groups]
+# Development workspace only: never published, never a wheel dependency.
+# Ranges here, exact pins in uv.lock (regenerate with `uv lock`).
+dev = ["pytest>=9", "mypy>=1.15"]
+
+[tool.uv]
+# Reproducible development resolution: nothing released after this instant
+# can enter uv.lock. Recorded by uv in uv.lock's [manifest] section.
+exclude-newer = "2026-11-12T00:00:00Z"
+
+[tool.mypy]
+# Type checker gate over the shipped sources; zero errors is the bar.
+files = ["src/visionlens"]
+python_version = "3.11"
+check_untyped_defs = true
+no_implicit_optional = true
+warn_redundant_casts = true
+warn_unused_ignores = true
+
 [tool.pytest.ini_options]
 testpaths = ["tests"]

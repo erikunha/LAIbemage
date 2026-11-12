@@ -19,7 +19,8 @@ import signal
 import sys
 import threading
 import time
-from typing import BinaryIO, Callable, Mapping, Sequence
+from types import FrameType
+from typing import Any, BinaryIO, Callable, Mapping, Sequence
 
 from . import protocol
 from .errors import ErrorCode, WorkerError
@@ -615,7 +616,9 @@ def main(argv: Sequence[str] | None = None) -> int:
     os.set_blocking(wake_read_fd, False)
     os.set_blocking(wake_write_fd, False)
     shutdown_event = threading.Event()
-    previous_handlers: dict[int, object] = {}
+    # Values typed as signal.signal's own return union, so the restore below
+    # needs no cast and no ignore.
+    previous_handlers: dict[int, Callable[[int, FrameType | None], Any] | int | None] = {}
 
     def _on_signal(signum: int, frame: object) -> None:
         shutdown_event.set()
@@ -652,8 +655,8 @@ def main(argv: Sequence[str] | None = None) -> int:
                 os.dup2(devnull, sys.stdout.fileno())
     finally:
         signal.set_wakeup_fd(-1)
-        for signum, handler in previous_handlers.items():
-            signal.signal(signum, handler)  # type: ignore[arg-type]
+        for restored_signum, handler in previous_handlers.items():
+            signal.signal(restored_signum, handler)
         os.close(wake_read_fd)
         os.close(wake_write_fd)
 

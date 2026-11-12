@@ -24,9 +24,11 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - uses: pnpm/action-setup@v4
+      # Node 24 to match ci.yml: the packageManager pin (pnpm 11.0.8)
+      # requires node >=22.13, so Node 20 cannot run the install.
       - uses: actions/setup-node@v4
         with:
-          node-version: 20
+          node-version: 24
           cache: pnpm
       - run: pnpm install --frozen-lockfile
       - run: pnpm run docs:generate

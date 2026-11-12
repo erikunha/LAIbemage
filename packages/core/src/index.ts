@@ -47,6 +47,16 @@ import type {
 import { CACHE_SCHEMA_VERSION, PLUGIN_API_VERSION } from './types.js';
 import { diffCaches } from './diff/index.js';
 export type { DiffSummary } from './diff/index.js';
+export { WorkerClient } from './worker/index.js';
+export type {
+  CancellationOutcome,
+  WorkerClientOptions,
+  WorkerClientState,
+  WorkerFailureKind,
+  WorkerRequestInput,
+  WorkerRequestResult,
+} from './worker/index.js';
+export { WorkerDeadlineError, WorkerLaunchError, WorkerProtocolError } from './worker/index.js';
 import { computeCostUsd, printCostEstimate } from './utils/cost.js';
 import { getImageTimestamp } from './utils/exif.js';
 import { logger } from './utils/logger.js';

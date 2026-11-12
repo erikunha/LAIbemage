@@ -512,7 +512,6 @@ datasets/           Dataset registry (license, source, checksums)
 docs/               Architecture notes, ADRs, plugin API reference
 examples/           Starter category configs (property, e-commerce, etc.)
 scripts/            Fixture generation, benchmark harnesses, dataset tooling
-specs/              Local-only spec-kit specs (untracked, per ADR-010)
 ```
 
 Tests live next to the code they cover — `packages/*/tests/` and `apps/*/tests/`. There is no

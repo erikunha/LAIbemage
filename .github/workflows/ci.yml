@@ -68,20 +68,6 @@ jobs:
       - name: Test with coverage (thresholds apply to packages/core)
         run: pnpm test:coverage
 
-      # The path-scoped rules have one canonical body under .agents/rules and one
-      # generated adapter per runtime. This fails when an adapter was edited by
-      # hand, when one is missing, when an adapter has no canonical rule, or
-      # when a rule's paths match no file (a silent hole).
-      - name: Agent rule adapters are up to date
-        run: pnpm agents:rules:check
-
-      # The canonical skills and agent roles live under .agents/ and each
-      # provider reaches them through a relative symlink. This fails when a
-      # symlink is a regular file, points at the wrong target, is missing, or
-      # when a provider adapter drifted from what the generator produces.
-      - name: Agent surface is consistent
-        run: pnpm agents:surface:check
-
       - name: Test Python (services + visionlens worker + mock provider)
         run: pnpm test:py
 

@@ -66,8 +66,6 @@ terminal fails. Every command in this guide is a plain single command that runs 
 | `pnpm --filter @vision-lens/cli test:bins` | Golden bin tests for `vision-lens` and the `ai-image-labeling` compat bin |
 | `pnpm run fixtures` | Regenerate test fixture images |
 | `pnpm run check` | lint + typecheck + test:coverage (the full gate) |
-| `pnpm run agents:rules:check` | The path-scoped rule adapters match `.agents/rules/` |
-| `pnpm run agents:surface:check` | The agent surface is consistent |
 
 ---
 
@@ -81,22 +79,23 @@ change must pass. Read it before you write code.
 `REVIEW.md` holds the review contract: what blocks a merge and what never does. `REVIEW.md` names
 the module boundary table in `AGENTS.md` as the contract for what a directory may import.
 
-The rules that apply to the files you are about to touch are path-scoped and live in
-`.agents/rules/`. Each runtime gets a generated adapter of the same rule, so there is one copy of
-each rule. Read the one that covers your path.
+The rules that apply to the files you are about to touch are the per-module boundary checklists in
+chapter 10 of `STANDARDS.md`, one section per module behind the boundary table. Read the section
+that covers your path. How-to procedures (add a provider, add a category, tune a prompt, recover a
+run) live in `docs/procedures/`.
 
 ---
 
 ## Adding a new LLM provider
 
-The `add-provider` skill carries the full procedure: the SDK dependency, the `LLMProvider` union and
-the `DEFAULT_MODEL` entry in `packages/core/src/config/index.ts`, the provider adapter in
+The full procedure is in `docs/procedures/add-provider.md`: the SDK dependency, the `LLMProvider`
+union and the `DEFAULT_MODEL` entry in `packages/core/src/config/index.ts`, the provider adapter in
 `packages/core/src/analyzer/providers/<provider>.ts`, the branch in the routing layer in
 `packages/core/src/analyzer/client.ts`, the CLI flag in `packages/cli/src/index.ts`, the flags table
 in `packages/cli/src/help.ts`, the key in `.env.example`, the quota error fingerprint in
 `packages/core/src/utils/retry.ts`, and the tests.
 
-Two steps the skill does not carry, so do not forget them:
+Two steps the procedure does not carry, so do not forget them:
 
 - Add the provider's billing page to the `BILLING_URL` map in `validateStartup()` in
   `packages/core/src/config/index.ts`. It is what the missing-key error points at.
@@ -163,8 +162,8 @@ pnpm run test:coverage
 
 Coverage thresholds (enforced in CI): lines >= 75%, functions >= 85%, branches >= 75%.
 
-The path-scoped rule for tests is `.agents/rules/tests.md`. It holds the mocking rules, the
-fixture rules and the framework rules in full.
+The test-module checklist in `STANDARDS.md` chapter 10 holds the mocking rules, the fixture rules
+and the framework rules in full.
 
 ---
 
@@ -177,8 +176,6 @@ Before opening a PR, ensure all of the following pass locally:
 - [ ] `pnpm exec tsc -p scripts/tsconfig.json --noEmit` → zero TypeScript errors in scripts/
 - [ ] `pnpm run test:coverage` → all tests pass, coverage thresholds met
 - [ ] `pnpm run check:boundaries` → the LLM-SDK boundary rule still fires
-- [ ] `pnpm run agents:rules:check` and `pnpm run agents:surface:check` → the agent surface is
-      consistent (only when you touched it)
 - [ ] No LLM SDK imported outside `packages/core/src/analyzer/providers/*.ts` (sole exception:
       `packages/core/src/analyzer/embeddings.ts`, which may import `openai` and
       `@google/generative-ai`)

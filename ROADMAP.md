@@ -6,8 +6,9 @@
 > **North star:** a Visual Intelligence Engineering Workbench — the local-first engineering
 > layer connecting visual data, specialized models and measured operational outcomes.
 > Decisions: ADR-005 (pivot), ADR-006 (monorepo), ADR-007 (local-first), ADR-008 (evidence
-> policy), ADR-009 (agent safety), ADR-010 (spec governance). Detailed plan lives in local
-> spec-kit specs 001–014 (untracked, ADR-010); this file is the tracked mirror.
+> policy), ADR-009 (agent safety), ADR-010 (spec governance, superseded by ADR-020). Detailed
+> plan lives in local planning material that is not tracked (ADR-020); this file is the tracked
+> mirror.
 
 ---
 
@@ -167,7 +168,7 @@ Activation requires a new ADR + spec per track.
 | Multi-user / SaaS / RBAC | Single-user local-first; revisit with validated demand (vision monetization hypotheses) |
 | Distributed/multi-GPU training | One MPS device; CUDA only via optional adapters (ADR-007) |
 | Medical imaging vertical | Validation/regulatory burden out of scope for now |
-| Spec-kit material in git | ADR-010 — planning stays local; ADRs + this roadmap are the tracked record |
+| Local planning material in git | Planning stays local (ADR-020); ADRs + this roadmap are the tracked record |
 
 ## Metrics that matter (Vision Lens additions)
 

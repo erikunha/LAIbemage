@@ -3,8 +3,9 @@
 Instructions for any coding agent working in this repository, on any runtime. Read it first.
 
 `STANDARDS.md` holds the engineering bar by chapter, `REVIEW.md` what a review reports and what blocks
-a merge, `docs/architecture/monorepo-map.md` the workspace map, `docs/adr/` the accepted decisions and
-`ROADMAP.md` the phase and spec status. Follow all of them.
+a merge, `docs/architecture/monorepo-map.md` the workspace map, `docs/adr/` the accepted decisions,
+`docs/procedures/` the step-by-step how-to procedures and `ROADMAP.md` the phase and spec status.
+Follow all of them.
 
 Everything a person reads in this repository is written in English: code, comments, commit messages,
 pull request bodies and documentation.
@@ -40,8 +41,6 @@ Other gates in this repository:
 ```bash
 pnpm run check:boundaries      # proves the LLM-SDK boundary rule fires
 pnpm run test:py               # pytest for services/
-pnpm run agents:rules:check    # the path-scoped rule adapters match .agents/rules/
-pnpm run agents:surface:check  # the agent surface is consistent
 pnpm run readme:check          # the README flag table matches the CLI
 ```
 
@@ -49,8 +48,7 @@ pnpm is pinned: the `packageManager` field in `package.json` names `pnpm@11.0.8`
 The lockfile is the source of truth and CI installs with the frozen lockfile.
 
 **Before any PR:** run `pnpm run lint && pnpm run typecheck && pnpm test` (all must pass), plus
-`pnpm run check:boundaries` and, when the agent surface changed, `pnpm run agents:rules:check` and
-`pnpm run agents:surface:check`.
+`pnpm run check:boundaries`.
 
 ## Done means verified
 
@@ -58,9 +56,6 @@ The lockfile is the source of truth and CI installs with the frozen lockfile.
 - Before a pull request, `pnpm run lint && pnpm run typecheck && pnpm test` must pass. `pnpm run
   check` is the superset (lint, typecheck, coverage). `pnpm run check:boundaries` proves the
   provider-SDK boundary rule still fires. The Python services are covered by `pnpm run test:py`.
-- A change to the agent surface regenerates its adapters and then passes the checks: `pnpm run
-  agents:rules` and `pnpm run agents:surface`, then `pnpm run agents:rules:check` and `pnpm run
-  agents:surface:check`.
 - The README flag table has its own generator and check (`pnpm run readme:check`). The check
   currently fails, because the README dropped the generator markers, and CI does not run it.
   `STANDARDS.md` chapter 8 states that gap. Until the markers come back, update the README flag
@@ -230,9 +225,9 @@ const result: AnalysisResult = {
 6. Update `README.md` CLI reference table
 7. Run `pnpm run check`; all must pass
 
-Two routes have a skill and a prompt that already know the steps: a new LLM provider uses the
-`add-provider` skill and a new category uses the `add-category` skill. A cache shape change follows
-`.github/prompts/schema-migration.prompt.md`.
+Two routes have a written procedure in `docs/procedures/`: a new LLM provider follows
+`docs/procedures/add-provider.md` and a new category (or a cache shape change) follows
+`docs/procedures/add-category.md`, whose cache schema migration section covers the version bump.
 
 ## Do NOT
 
@@ -320,109 +315,6 @@ key error points at.
   type-only file) are listed in `vitest.config.ts`
 - Coverage thresholds: lines 75%, functions 85%, branches 75%
 
-## The agent surface
-
-The repository owns one canonical agent surface. Every runtime reaches it through a thin adapter, so
-the rules exist once and a second copy cannot drift.
-
-- **Canonical skills** live in `.agents/skills/<name>/SKILL.md`, one directory per skill, with
-  frontmatter carrying `name` (equal to the directory name) and `description` (the routing signal).
-  Every runtime reaches a skill through a relative symlink in its own directory:
-  `.claude/skills/<name>` and `.github/skills/<name>` both point at `../../.agents/skills/<name>`,
-  and git tracks each link as mode `120000`
-- **Canonical path-scoped rules** live in `.agents/rules/<name>.md`. Each runtime gets a generated
-  adapter, because the two read different frontmatter keys: Claude Code reads a `paths:` list and
-  GitHub Copilot reads a single `applyTo:` glob string. Regenerate with `pnpm run agents:rules` and
-  verify with `pnpm run agents:rules:check`
-- **Canonical agent roles** live in `.agents/agents/<role>.md`, with a provider-neutral `tools:` list.
-  The adapters in `.claude/agents/` and `.github/agents/` are generated from them, because the
-  runtimes name their tools differently. Regenerate with `pnpm run agents:surface` and verify with
-  `pnpm run agents:surface:check`
-
-The guards that keep the surface honest are `scripts/check-agent-surface.mjs` (run by
-`pnpm run agents:surface:check`) and the rule adapters check (`pnpm run agents:rules:check`), with
-their tests in `packages/core/tests/agent-surface.test.ts` and
-`packages/core/tests/agent-rules.test.ts`. They fail closed: a hand edit of a generated adapter does
-not match its canonical source and the check fails, a canonical skill with no provider symlink
-fails, a canonical role with no adapter fails, and a rule whose `paths:` glob matches no file fails,
-because a glob that matches nothing is a silent hole.
-
-The rules themselves are readable per surface: `.agents/rules/core-modules.md`, `analyzer.md`,
-`config.md`, `cli.md`, `plugin.md`, `processor.md`, `reporter.md`, `reviewer.md`, `scripts.md`,
-`tests.md`, `utils.md`, `classifier.md` and `agent-surface.md`.
-
-The runtime-specific pointers sit next to this file and carry nothing but the facts of their own
-runtime: `CLAUDE.md` for Claude Code and `.github/copilot-instructions.md` for GitHub Copilot.
-
-## Skill tiers
-
-- **PROJECT skills** are tracked in this repository under `.agents/skills/` and are specific to this
-  codebase: the provider, category, prompt, benchmark, search and plugin procedures, plus the
-  procedure for writing a new skill
-- **VENDORED METHOD skills** are tracked in this repository under `.agents/skills/` as well, but
-  they are generic engineering methods rather than project-specific knowledge. There are
-  twelve: `adversarial-reviewer` (hostile-persona review), `definition-of-done` (compile
-  observable acceptance criteria), `env-secrets-manager` (audit `.env` files and environment
-  hygiene), `error-handling` (typed errors, retries, circuit breakers), `focused-fix`
-  (systematic repair of one feature end to end), `monorepo-navigator` (cross-package impact
-  analysis), `performance-profiler` (CPU, memory and I/O profiling), `self-review-before-push`
-  (the orchestrated review before a push), `senior-architect` (architecture patterns and
-  decision frameworks), `ship-gate` (the pre-production audit), `tech-debt-tracker` (find and
-  score technical debt) and `zero-hallucination-coder` (ground every claim in verified
-  structure)
-- **PERSONAL skills** are a developer's own machine-level library. They are not tracked here, they
-  are optional, and they are never a prerequisite for working in this repository. Nothing in this
-  repository assumes they exist, and no tracked file names a path on one developer's machine
-
-A project skill wins over a vendored method on the same surface, and a personal skill never becomes
-a second source of truth about this codebase.
-
-## Skill dispatch
-
-A skill supplies the method for one surface. Read its `description` before running it, and a skill
-that does not apply is not run. The table is a routing aid, not an index: `.agents/skills/` holds
-the complete registry, and a skill that is not listed here is still available.
-
-| Trigger | Skill |
-| ------- | ----- |
-| A new LLM vision provider is added: SDK dependency, provider factory, CLI key flag, quota detection, tests | `add-provider` |
-| A category is added to a `categories.json` taxonomy, or the `immune`, `overridable` or `pinnedLast` behaviour changes | `add-category` |
-| The unknown rate is high, two categories confuse each other, or a new image domain needs prompt guidance | `tune-prompt` |
-| Images land in the wrong category, results differ between runs or providers, or consensus overrides a correct label | `debug-classification` |
-| Hundreds or thousands of images go to a provider batch API, or a submitted batch is collected later | `async-batch` |
-| A run was interrupted (Ctrl-C, OOM kill, network failure, power loss) and must resume without losing or re-paying for images | `recover-partial-run` |
-| A benchmark has run and the report must be read: accuracy against the baseline, precision, recall, unknown rate, cost, latency | `interpret-benchmark` |
-| The classified collection is searched by description or concept, or the embedding index is built or misbehaving | `search` |
-| An external `.mjs` lifecycle plugin is written: hooks, secrets, I/O isolation, unit tests, dry run | `write-plugin` |
-| Domain knowledge is packaged as a reusable skill, or a skill is registered so the runtimes can discover it | `create-skill` |
-| A push or publish is imminent and the change must be reviewed against the gates and the running product | `self-review-before-push` |
-| A diff needs a hostile-persona review pass, with two independent reviewers in the dual-pass mode | `adversarial-reviewer` |
-
-## Agent roster
-
-The canonical role definitions live in `.agents/agents/<role>.md`, one file per role. Each runtime
-gets a generated adapter, so the roster is the same set of roles everywhere.
-
-| Role | When to invoke |
-|---|---|
-| `contributor` | Default for all coding work |
-| `code-reviewer` | Code audit before merge |
-| `security-auditor` | Threat model audit |
-| `dx-engineer` | CLI UX audit |
-| `dependency-auditor` | Supply chain audit |
-| `refactoring-guardian` | Structural refactor |
-| `migration-engineer` | Breaking changes |
-| `test-author` | Unit test coverage |
-| `data-integrity` | Cache write safety |
-| `analyzer-tuner` | LLM prompt quality and cost |
-| `performance-profiler` | Sharp and batch profiling |
-| `plugin-author` | External plugin scaffolding |
-| `incident-responder` | Production crash recovery |
-| `category-architect` | Domain taxonomy design |
-| `docs-writer` | README and CLI reference |
-| `release-engineer` | Versioning and publish |
-| `explore` | Read-only codebase questions |
-
 ## Git and pull requests
 
 - Commits follow Conventional Commits (`type(scope): subject`). The scope names the feature area
@@ -464,20 +356,3 @@ a `benchmarks/results/<runId>/` artifact.
 - `search`: semantic or keyword search over classified images; semantic mode needs `--embed`
 - `diff <before> <after>`: compare two `analysis_results.json` files
 - `suggest-categories`: sample images and ask the LLM to propose a `categories.json` taxonomy
-
-## Spec-kit workflow
-
-The Vision Lens evolution (ADR-005+) is planned with spec-kit. Specs, plans, tasks and research
-live under `specs/` and `.specify/` and are **never tracked in git** (ADR-010; the maintainer's
-global git ignore enforces it). The constitution binding every spec is
-`.specify/memory/constitution.md` (local only).
-
-Route a feature needing a written spec through speckit in order: **specify, clarify, plan, tasks,
-implement, analyze**; each step reads the previous output. The tracked mirrors of the plan are
-`docs/adr/` (decisions, numbering continues at 005) and `ROADMAP.md` (phase and spec status). The
-spec index with the phase map (F0 to F5, specs 001 to 014) is `specs/README.md`.
-
-When implementing from a spec: honor the constitution principles (evidence over vibes,
-Prediction is not Annotation, full-config fingerprints, calibrated uncertainty, untrusted visual
-content, cost as a first-class metric), keep the six quality gates green, and update every document
-that describes what changed in the same commit.

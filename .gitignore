@@ -61,13 +61,6 @@ __pycache__/
 *.pyc
 .pytest_cache/
 
-# The vNext specification pack is part of this repository and IS tracked.
-#
-# The machine-wide gitignore carries a bare `specs` rule for the spec-kit
-# personal dev flow, and a lower-precedence ignore cannot be overridden by
-# omission: this repository must re-include the pack's own directory
-# explicitly, or the 12 VLN specs are silently dropped from every commit.
-#
-# This negation is deliberately narrow. It re-includes the vNext pack and
-# nothing else, so the spec-kit flow stays ignored everywhere else.
+# The vNext specification pack is tracked; keep it re-included in case a future `specs` ignore
+# pattern ever matches it.
 !docs/vnext/specs/

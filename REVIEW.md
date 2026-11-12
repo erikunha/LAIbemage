@@ -1,7 +1,7 @@
 # REVIEW.md
 
-What a reviewer reports on a diff in this repository. The `.claude/agents/code-reviewer.md`
-agent and every human or agent review follow this file. It is a contract about what blocks a
+What a reviewer reports on a diff in this repository. This file is the review contract itself:
+every human or agent review follows it. It is a contract about what blocks a
 merge, not a summary of the toolchain.
 
 ## Severity
@@ -84,12 +84,12 @@ dropped.
   `datasets/registry.json` is not generated and is not skipped.
 - Issues the diff does not touch. Mention one only when the diff makes it newly reachable.
 - Style preferences, naming taste and acronym capitalization.
-- The maintainer's local environment: untracked spec material under `specs/` and `.specify/`
-  (ADR-010), and anything covered by a global git ignore.
+- The maintainer's local environment: local planning material is not tracked in this repository
+  (ADR-020), and anything covered by a global git ignore.
 
 ## Verdict
 
-The verdict follows the convention in `.claude/agents/code-reviewer.md`:
+The verdict follows the convention defined below:
 
 - **PASS**: every check ran and passed. Safe to merge.
 - **WARN**: no blocking finding, but the reviewer wants the maintainer to see something: a lint

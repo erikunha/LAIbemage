@@ -1,4 +1,4 @@
-import type { ContractManifest } from './manifest.js';
+import type { ContractManifest, ManifestEntity } from './manifest.js';
 
 /**
  * Breaking-change guard for the contract package (spec 002 task 1.4, FR-001).
@@ -55,47 +55,31 @@ export function majorVersion(version: string): number {
 }
 
 /**
- * Diffs two contract manifests and classifies every difference.
+ * Diffs one named-object surface (entities, worker frames) of two manifests.
  *
- * The direction of the rules is what matters here, and it is easy to get
- * backwards. A change is BREAKING when it NARROWS what a consumer may send
- * or RELIES on more than before; it is COMPATIBLE when it WIDENS what a
- * consumer may send or adds something optional.
- *
- * BREAKING (per FR-001 and the additive-only rule of the spec plan):
- *  - an entity was removed;
- *  - a field was removed;
- *  - a field changed its type/shape;
- *  - a field's validation constraint changed (e.g. the sha256 pattern was
- *    tightened — a payload that used to validate no longer does);
- *  - a field became REQUIRED, including a newly added required field: a
- *    consumer's existing payload stops validating;
- *  - an enum value was removed.
- *
- * COMPATIBLE (additive or a relaxation):
- *  - a new entity appeared;
- *  - a new OPTIONAL field appeared: existing payloads stay valid;
- *  - a field became optional: it is a relaxation, the payload that used to
- *    validate still validates;
- *  - a new enum value appeared: a payload that used to validate still does.
+ * The same field-level rules apply to every surface, so the loop is written
+ * once and parametrized by the noun used in the human-readable details.
  */
-export function diffManifests(base: ContractManifest, current: ContractManifest): ManifestDiff {
-  const breaking: BreakingChange[] = [];
-  const additive: string[] = [];
-
-  for (const [entityName, baseEntity] of Object.entries(base.entities)) {
-    const currentEntity = current.entities[entityName];
-    if (!currentEntity) {
+function diffObjectSurfaces(
+  baseObjects: Record<string, ManifestEntity>,
+  currentObjects: Record<string, ManifestEntity>,
+  noun: 'Entity' | 'Frame',
+  breaking: BreakingChange[],
+  additive: string[],
+): void {
+  for (const [objectName, baseObject] of Object.entries(baseObjects)) {
+    const currentObject = currentObjects[objectName];
+    if (!currentObject) {
       breaking.push({
         kind: 'entity-removed',
-        path: entityName,
-        detail: `Entity "${entityName}" no longer exists in the contract surface.`,
+        path: objectName,
+        detail: `${noun} "${objectName}" no longer exists in the contract surface.`,
       });
       continue;
     }
-    for (const [fieldName, baseField] of Object.entries(baseEntity.fields)) {
-      const currentField = currentEntity.fields[fieldName];
-      const path = `${entityName}.${fieldName}`;
+    for (const [fieldName, baseField] of Object.entries(baseObject.fields)) {
+      const currentField = currentObject.fields[fieldName];
+      const path = `${objectName}.${fieldName}`;
       if (!currentField) {
         breaking.push({
           kind: 'field-removed',
@@ -135,27 +119,60 @@ export function diffManifests(base: ContractManifest, current: ContractManifest)
         additive.push(`${path} became optional`);
       }
     }
-    for (const [fieldName, currentField] of Object.entries(currentEntity.fields)) {
-      if (baseEntity.fields[fieldName]) continue;
+    for (const [fieldName, currentField] of Object.entries(currentObject.fields)) {
+      if (baseObject.fields[fieldName]) continue;
       if (currentField.required) {
         // A newly added REQUIRED field is a tightening: a consumer's existing
         // payload stops validating because the field is now mandatory.
         breaking.push({
           kind: 'field-became-required',
-          path: `${entityName}.${fieldName}`,
+          path: `${objectName}.${fieldName}`,
           detail:
-            `Field "${entityName}.${fieldName}" was added as REQUIRED; ` +
+            `Field "${objectName}.${fieldName}" was added as REQUIRED; ` +
             "a consumer's existing payload no longer validates.",
         });
       } else {
-        additive.push(`${entityName}.${fieldName}`);
+        additive.push(`${objectName}.${fieldName}`);
       }
     }
   }
 
-  for (const entityName of Object.keys(current.entities)) {
-    if (!base.entities[entityName]) additive.push(entityName);
+  for (const objectName of Object.keys(currentObjects)) {
+    if (!baseObjects[objectName]) additive.push(objectName);
   }
+}
+
+/**
+ * Diffs two contract manifests and classifies every difference.
+ *
+ * The direction of the rules is what matters here, and it is easy to get
+ * backwards. A change is BREAKING when it NARROWS what a consumer may send
+ * or RELIES on more than before; it is COMPATIBLE when it WIDENS what a
+ * consumer may send or adds something optional.
+ *
+ * BREAKING (per FR-001 and the additive-only rule of the spec plan):
+ *  - an entity was removed;
+ *  - a field was removed;
+ *  - a field changed its type/shape;
+ *  - a field's validation constraint changed (e.g. the sha256 pattern was
+ *    tightened — a payload that used to validate no longer does);
+ *  - a field became REQUIRED, including a newly added required field: a
+ *    consumer's existing payload stops validating;
+ *  - an enum value was removed.
+ *
+ * COMPATIBLE (additive or a relaxation):
+ *  - a new entity appeared;
+ *  - a new OPTIONAL field appeared: existing payloads stay valid;
+ *  - a field became optional: it is a relaxation, the payload that used to
+ *    validate still validates;
+ *  - a new enum value appeared: a payload that used to validate still does.
+ */
+export function diffManifests(base: ContractManifest, current: ContractManifest): ManifestDiff {
+  const breaking: BreakingChange[] = [];
+  const additive: string[] = [];
+
+  diffObjectSurfaces(base.entities, current.entities, 'Entity', breaking, additive);
+  diffObjectSurfaces(base.frames ?? {}, current.frames ?? {}, 'Frame', breaking, additive);
 
   for (const [enumName, baseValues] of Object.entries(base.enums)) {
     const currentValues = current.enums[enumName];

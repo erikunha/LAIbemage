@@ -29,6 +29,9 @@ export * from './base.js';
 /* The 14 entities, the 4 reserved stubs and the entity registry. */
 export * from './entities/index.js';
 
+/* The worker wire protocol (visionlens.worker.v1): the six frame envelopes. */
+export * from './worker/index.js';
+
 /* Contract manifest (derived from the live schemas). */
 export * from './manifest.js';
 

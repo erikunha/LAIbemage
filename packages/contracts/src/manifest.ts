@@ -2,6 +2,7 @@ import { z } from 'zod';
 import { ENTITY_SCHEMAS } from './entities/index.js';
 import { ENUM_SCHEMAS } from './enums.js';
 import { CONTRACTS_VERSION } from './version.js';
+import { WORKER_ENUM_SCHEMAS, WORKER_FRAME_SCHEMAS } from './worker/index.js';
 
 /**
  * Contract manifest: a machine-readable digest of the public shape of the
@@ -49,6 +50,12 @@ export interface ContractManifest {
   contractsVersion: string;
   entities: Record<string, ManifestEntity>;
   enums: Record<string, string[]>;
+  /**
+   * The worker wire-protocol frames (`visionlens.worker.v1`), keyed by their
+   * public schema name. Absent in manifests generated before the worker
+   * protocol was ratified; the guard treats that absence as an empty map.
+   */
+  frames: Record<string, ManifestEntity>;
 }
 
 /** The subset of JSON Schema this module reads. */
@@ -232,9 +239,13 @@ export function buildContractManifest(): ContractManifest {
   for (const [name, schema] of Object.entries(ENTITY_SCHEMAS)) {
     entities[name] = manifestEntity(schema);
   }
+  const frames: Record<string, ManifestEntity> = {};
+  for (const [name, schema] of Object.entries(WORKER_FRAME_SCHEMAS)) {
+    frames[name] = manifestEntity(schema);
+  }
   const enums: Record<string, string[]> = {};
-  for (const [name, schema] of Object.entries(ENUM_SCHEMAS)) {
+  for (const [name, schema] of Object.entries({ ...ENUM_SCHEMAS, ...WORKER_ENUM_SCHEMAS })) {
     enums[name] = [...schema.options].sort();
   }
-  return { contractsVersion: CONTRACTS_VERSION, entities, enums };
+  return { contractsVersion: CONTRACTS_VERSION, entities, enums, frames };
 }

@@ -632,6 +632,211 @@
       "correction",
       "flag",
       "production"
+    ],
+    "WorkerOperation": [
+      "dataset.audit",
+      "eval.run",
+      "model.train",
+      "vision.embed",
+      "vision.predict"
+    ],
+    "WorkerErrorCode": [
+      "BUDGET_EXCEEDED",
+      "CANCELLED",
+      "DEADLINE_EXCEEDED",
+      "MALFORMED_FRAME",
+      "MISSING_EXTRA",
+      "PROTOCOL_MISMATCH",
+      "PROVIDER_UNAVAILABLE",
+      "UNSUPPORTED_OPERATION",
+      "UNSUPPORTED_PROTOCOL",
+      "WORKER_CRASHED"
     ]
+  },
+  "frames": {
+    "WorkerHelloFrame": {
+      "fields": {
+        "protocol": {
+          "required": true,
+          "type": "literal(\"visionlens.worker.v1\")"
+        },
+        "kind": {
+          "required": true,
+          "type": "literal(\"hello\")"
+        },
+        "protocolVersion": {
+          "required": true,
+          "type": "string",
+          "constraint": "pattern=^\\d+\\.\\d+\\.\\d+$"
+        },
+        "contractVersion": {
+          "required": true,
+          "type": "string",
+          "constraint": "pattern=^\\d+\\.\\d+\\.\\d+$"
+        },
+        "supportedOperations": {
+          "required": true,
+          "type": "array<enum(\"vision.embed\"|\"vision.predict\"|\"dataset.audit\"|\"eval.run\"|\"model.train\")>"
+        },
+        "capabilities": {
+          "required": true,
+          "type": "object{device,extras,models}"
+        },
+        "maxFrameBytes": {
+          "required": true,
+          "type": "integer",
+          "constraint": "exclusiveMinimum=0"
+        }
+      }
+    },
+    "WorkerRequestFrame": {
+      "fields": {
+        "protocol": {
+          "required": true,
+          "type": "literal(\"visionlens.worker.v1\")"
+        },
+        "kind": {
+          "required": true,
+          "type": "literal(\"request\")"
+        },
+        "requestId": {
+          "required": true,
+          "type": "string",
+          "constraint": "minLength=1;maxLength=128"
+        },
+        "operation": {
+          "required": true,
+          "type": "enum(\"vision.embed\"|\"vision.predict\"|\"dataset.audit\"|\"eval.run\"|\"model.train\")"
+        },
+        "contractVersion": {
+          "required": true,
+          "type": "string",
+          "constraint": "pattern=^\\d+\\.\\d+\\.\\d+$"
+        },
+        "workspaceId": {
+          "required": true,
+          "type": "string",
+          "constraint": "minLength=1"
+        },
+        "params": {
+          "required": true,
+          "type": "map<string,json>"
+        },
+        "budget": {
+          "required": true,
+          "type": "object{maxSeconds,maxTokens,maxUsdMicro}"
+        }
+      }
+    },
+    "WorkerProgressFrame": {
+      "fields": {
+        "protocol": {
+          "required": true,
+          "type": "literal(\"visionlens.worker.v1\")"
+        },
+        "kind": {
+          "required": true,
+          "type": "literal(\"progress\")"
+        },
+        "requestId": {
+          "required": true,
+          "type": "string",
+          "constraint": "minLength=1"
+        },
+        "seq": {
+          "required": true,
+          "type": "integer",
+          "constraint": "minimum=0"
+        },
+        "completed": {
+          "required": true,
+          "type": "integer",
+          "constraint": "minimum=0"
+        },
+        "total": {
+          "required": true,
+          "type": "integer",
+          "constraint": "minimum=0"
+        }
+      }
+    },
+    "WorkerResultFrame": {
+      "fields": {
+        "protocol": {
+          "required": true,
+          "type": "literal(\"visionlens.worker.v1\")"
+        },
+        "kind": {
+          "required": true,
+          "type": "literal(\"result\")"
+        },
+        "requestId": {
+          "required": true,
+          "type": "string",
+          "constraint": "minLength=1"
+        },
+        "seq": {
+          "required": true,
+          "type": "integer",
+          "constraint": "minimum=0"
+        },
+        "result": {
+          "required": true,
+          "type": "json"
+        }
+      }
+    },
+    "WorkerErrorFrame": {
+      "fields": {
+        "protocol": {
+          "required": true,
+          "type": "literal(\"visionlens.worker.v1\")"
+        },
+        "kind": {
+          "required": true,
+          "type": "literal(\"error\")"
+        },
+        "requestId": {
+          "required": false,
+          "type": "string",
+          "constraint": "minLength=1"
+        },
+        "seq": {
+          "required": false,
+          "type": "integer",
+          "constraint": "minimum=0"
+        },
+        "code": {
+          "required": true,
+          "type": "enum(\"UNSUPPORTED_PROTOCOL\"|\"MISSING_EXTRA\"|\"MALFORMED_FRAME\"|\"PROTOCOL_MISMATCH\"|\"UNSUPPORTED_OPERATION\"|\"CANCELLED\"|\"DEADLINE_EXCEEDED\"|\"BUDGET_EXCEEDED\"|\"WORKER_CRASHED\"|\"PROVIDER_UNAVAILABLE\")"
+        },
+        "message": {
+          "required": true,
+          "type": "string",
+          "constraint": "minLength=1"
+        },
+        "retryable": {
+          "required": true,
+          "type": "boolean"
+        }
+      }
+    },
+    "WorkerCancelFrame": {
+      "fields": {
+        "protocol": {
+          "required": true,
+          "type": "literal(\"visionlens.worker.v1\")"
+        },
+        "kind": {
+          "required": true,
+          "type": "literal(\"cancel\")"
+        },
+        "requestId": {
+          "required": true,
+          "type": "string",
+          "constraint": "minLength=1"
+        }
+      }
+    }
   }
 }

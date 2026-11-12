@@ -54,28 +54,34 @@ describe('request correlation', () => {
     expect(progressFrames.every((frame) => frame.requestId === 'r-happy')).toBe(true);
   });
 
-  it('five concurrent requests are each attributed to their own requestId', async () => {
+  it('ten concurrent requests are each attributed to their own requestId', async () => {
     const { client } = await launchFixture('happy');
     const seen: WorkerProgressFrame[] = [];
+    const completionOrder: string[] = [];
+
+    // The fixture answers requests in stdin order, so the slow operation is
+    // submitted last: all ten are in flight before the worker answers any of
+    // them, and the slow one stays in flight while every fast one completes.
+    const fastIds = ['r-a', 'r-b', 'r-c', 'r-d', 'r-e', 'r-f', 'r-g', 'r-h', 'r-i'];
+    const ids = [...fastIds, 'r-slow'];
 
     const outcomes = await Promise.all(
-      ['r-a', 'r-b', 'r-c', 'r-d', 'r-e'].map((requestId) =>
-        client.request({
-          ...EMBED_REQUEST,
-          requestId,
-          params: { ...EMBED_REQUEST.params, images: [`${requestId}.png`] },
-          onProgress: (frame) => seen.push(frame),
-        }),
+      ids.map((requestId) =>
+        client
+          .request({
+            ...EMBED_REQUEST,
+            requestId,
+            params: { ...EMBED_REQUEST.params, images: [`${requestId}.png`] },
+            onProgress: (frame) => seen.push(frame),
+          })
+          .then((outcome) => {
+            completionOrder.push(outcome.requestId);
+            return outcome;
+          }),
       ),
     );
 
-    expect(outcomes.map((outcome) => outcome.requestId).sort()).toEqual([
-      'r-a',
-      'r-b',
-      'r-c',
-      'r-d',
-      'r-e',
-    ]);
+    expect(outcomes.map((outcome) => outcome.requestId).sort()).toEqual([...ids].sort());
     for (const outcome of outcomes) {
       const params = outcome.result as { params: { images: string[] } };
       expect(params.params.images).toEqual([`${outcome.requestId}.png`]);
@@ -83,6 +89,10 @@ describe('request correlation', () => {
       const own = seen.filter((frame) => frame.requestId === outcome.requestId);
       expect(own.map((frame) => frame.seq)).toEqual([0, 1]);
     }
+    // The slow operation completed after all nine fast ones: its result frame
+    // arrived last on the shared channel while the fast results went first.
+    expect(completionOrder[completionOrder.length - 1]).toBe('r-slow');
+    expect(completionOrder.slice(0, -1).sort()).toEqual([...fastIds].sort());
   });
 
   it('refuses an operation the worker did not advertise, before writing it', async () => {

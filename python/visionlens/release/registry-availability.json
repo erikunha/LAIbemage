@@ -1,0 +1,9 @@
+{
+  "name": "visionlens",
+  "registry": "https://pypi.org",
+  "checkedAt": "2026-11-12",
+  "checkedBy": "release gate precondition, observed by hand from the repository tree",
+  "result": "available-observed",
+  "method": "HTTP GET https://pypi.org/pypi/visionlens/json returned 404; HTTP GET https://pypi.org/simple/visionlens/ returned 404 (both on 2026-11-12)",
+  "note": "Snapshot only. The name was observed unregistered on PyPI at the checked date. A 404 does not guarantee registrability (PyPI can administratively reserve or block names, and the name can be registered at any moment after this check). Re-run this check immediately before any publication; a later collision blocks publication and escalates to a compliant alternative identity, never a claim that the name is free. No document may claim pip install visionlens works from PyPI until the release gate is green and the publication is approved."
+}

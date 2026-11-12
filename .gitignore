@@ -61,6 +61,10 @@ __pycache__/
 *.pyc
 .pytest_cache/
 
+# Release-gate run records embed machine-local paths (venv temp dirs, absolute
+# command output); they are local evidence, never committed.
+python/visionlens/release/gate/
+
 # The vNext specification pack is tracked; keep it re-included in case a future `specs` ignore
 # pattern ever matches it.
 !docs/vnext/specs/

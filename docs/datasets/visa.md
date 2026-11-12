@@ -505,9 +505,9 @@ describes.
 > record of the first real run, and the baseline entry that carries it is
 > **retired** (`status: "retired"` with the reason recorded next to it in
 > `benchmarks/baselines/visa-subset.json`). Do not quote it as the accuracy of a
-> model. The tracked split is now the v2 one (§8.5), and the first number
-> recorded against it was measured on 2026-11-12: macro F1 0.9734 (whole-set,
-> 700 items, gpt-4o). It is still a whole-set figure, not a held-out scorecard;
+> model. The tracked split is now the v2 one (§8.5); the first number recorded
+> against it: macro F1 0.9734, measured 2026-11-12 (whole-set, 700 items,
+> gpt-4o). It is still a whole-set figure, not a held-out scorecard;
 > see the verification table and `benchmarks/baselines/visa-subset.v2.json`.
 
 ### 8.1 What was run

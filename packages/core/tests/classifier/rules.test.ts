@@ -94,6 +94,13 @@ describe('getSortedCategories', () => {
     expect(sorted).not.toContain('payment_receipt');
   });
 
+  it('returns each category exactly once with pinned ones at the end', () => {
+    const grouped = groupByCategory(makeImages(['kitchen', 'unknown', 'bedroom']));
+    const config = makeConfig(['unknown'], []);
+    const sorted = getSortedCategories(grouped, config);
+    expect(sorted).toEqual(['bedroom', 'kitchen', 'unknown']);
+  });
+
   it('sorts non-pinned categories alphabetically', () => {
     const grouped = groupByCategory(makeImages(['living_room', 'bedroom', 'exterior', 'kitchen']));
     const config = makeConfig([], []);

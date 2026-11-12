@@ -319,8 +319,8 @@ import the **same** `buildTaxonomy()`, so the two cannot drift apart.
 > the first real run, and the baseline entry that carries it is **retired**
 > (`status: "retired"`, with the reason recorded next to it in
 > `benchmarks/baselines/visa-subset.json`). Do not quote it as the accuracy of a model.
-> The tracked split is now the v2 one (§9.5), and the first number recorded against it
-> was measured on 2026-11-12: macro F1 0.9734 over the 700 items (whole-set, not a
+> The tracked split is now the v2 one (§9.5); the first number recorded against it:
+> macro F1 0.9734 over the 700 items, measured 2026-11-12 (whole-set, not a
 > held-out scorecard; baseline at `benchmarks/baselines/visa-subset.v2.json`).
 
 | | |

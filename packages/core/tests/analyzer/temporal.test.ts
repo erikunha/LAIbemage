@@ -180,6 +180,111 @@ describe('applyTemporalConsensus', () => {
     expect(result[2]?.analysis.category).toBe('unknown');
   });
 
+  it('overrides in a two-image cluster when the ratio meets the threshold exactly', () => {
+    // 1 kitchen vote out of 2 eligible images is exactly 0.5; with
+    // consensusThreshold 0.5 the boundary is inclusive and must correct
+    const config: Config = { ...makeConfig([], ['unknown']), consensusThreshold: 0.5 };
+    const imgs = [
+      makeImg('img1.jpg', 'kitchen', BASE),
+      makeImg('img2.jpg', 'unknown', BASE + 1 * MIN),
+    ];
+    const result = applyTemporalConsensus(imgs, config);
+    expect(result[1]?.analysis.category).toBe('kitchen');
+  });
+
+  it('treats a gap of exactly the window length as the same cluster', () => {
+    // Gaps of exactly 5 minutes (the default window) must not split the
+    // cluster: the unknown still reaches a 2/3 kitchen majority
+    const config = makeConfig([], ['unknown']);
+    const imgs = [
+      makeImg('img1.jpg', 'kitchen', BASE),
+      makeImg('img2.jpg', 'kitchen', BASE + 5 * MIN),
+      makeImg('img3.jpg', 'unknown', BASE + 10 * MIN),
+    ];
+    const result = applyTemporalConsensus(imgs, config);
+    expect(result[2]?.analysis.category).toBe('kitchen');
+  });
+
+  it('corrects an overridable image in the cluster before a long gap', () => {
+    // The kitchen/unknown burst ends 18 min before the bathroom pair; the
+    // unknown must be corrected by its own burst, not dropped with it
+    const config = makeConfig([], ['unknown']);
+    const imgs = [
+      makeImg('img1.jpg', 'kitchen', BASE),
+      makeImg('img2.jpg', 'kitchen', BASE + 1 * MIN),
+      makeImg('img3.jpg', 'unknown', BASE + 2 * MIN),
+      makeImg('img4.jpg', 'bathroom', BASE + 20 * MIN),
+      makeImg('img5.jpg', 'bathroom', BASE + 21 * MIN),
+    ];
+    const result = applyTemporalConsensus(imgs, config);
+    expect(result[2]?.analysis.category).toBe('kitchen');
+  });
+
+  it('clusters by creation time, not by input order', () => {
+    // Same bursts as above but delivered out of order: the unknown sits
+    // 2 min after the bathroom pair and must join THEM, not the kitchens
+    const config = makeConfig([], ['unknown']);
+    const imgs = [
+      makeImg('img1.jpg', 'unknown', BASE + 22 * MIN),
+      makeImg('img2.jpg', 'kitchen', BASE),
+      makeImg('img3.jpg', 'kitchen', BASE + 1 * MIN),
+      makeImg('img4.jpg', 'bathroom', BASE + 20 * MIN),
+      makeImg('img5.jpg', 'bathroom', BASE + 21 * MIN),
+    ];
+    const result = applyTemporalConsensus(imgs, config);
+    expect(result[0]?.analysis.category).toBe('bathroom');
+  });
+
+  it('overrides to the most-voted category in the cluster', () => {
+    // 3 bathroom vs 1 kitchen vs 1 bedroom vote: the unknown becomes
+    // bathroom even though kitchen was seen first and bedroom last
+    const config: Config = { ...makeConfig([], ['unknown']), consensusThreshold: 0.5 };
+    const imgs = [
+      makeImg('img1.jpg', 'kitchen', BASE),
+      makeImg('img2.jpg', 'bathroom', BASE + 1 * MIN),
+      makeImg('img3.jpg', 'bathroom', BASE + 2 * MIN),
+      makeImg('img4.jpg', 'bathroom', BASE + 3 * MIN),
+      makeImg('img5.jpg', 'bedroom', BASE + 4 * MIN),
+      makeImg('img6.jpg', 'unknown', BASE + 5 * MIN),
+    ];
+    const result = applyTemporalConsensus(imgs, config);
+    expect(result[5]?.analysis.category).toBe('bathroom');
+  });
+
+  it('does not let immune images dilute the consensus ratio', () => {
+    // A receipt captured in the same burst is excluded from the
+    // denominator: 2/3 kitchen agreement must still correct the unknown
+    const config = makeConfig(['payment_receipt'], ['unknown']);
+    const imgs = [
+      makeImg('img1.jpg', 'kitchen', BASE),
+      makeImg('img2.jpg', 'kitchen', BASE + 1 * MIN),
+      makeImg('img3.jpg', 'unknown', BASE + 2 * MIN),
+      makeImg('img4.jpg', 'payment_receipt', BASE + 3 * MIN),
+    ];
+    const result = applyTemporalConsensus(imgs, config);
+    expect(result[2]?.analysis.category).toBe('kitchen');
+  });
+
+  it('does not let overridable categories vote', () => {
+    // 3 unknowns and 2 blurries cannot outvote the single confident
+    // kitchen vote: with no confident majority nothing is overridden
+    const config: Config = {
+      ...makeConfig([], ['unknown', 'blurry']),
+      consensusThreshold: 0.45,
+    };
+    const imgs = [
+      makeImg('img1.jpg', 'unknown', BASE),
+      makeImg('img2.jpg', 'unknown', BASE + 1 * MIN),
+      makeImg('img3.jpg', 'unknown', BASE + 2 * MIN),
+      makeImg('img4.jpg', 'blurry', BASE + 3 * MIN),
+      makeImg('img5.jpg', 'blurry', BASE + 4 * MIN),
+      makeImg('img6.jpg', 'kitchen', BASE + 5 * MIN),
+    ];
+    const result = applyTemporalConsensus(imgs, config);
+    expect(result[0]?.analysis.category).toBe('unknown');
+    expect(result[3]?.analysis.category).toBe('blurry');
+  });
+
   it('does not mutate original images array', () => {
     const imgs = [
       makeImg('img1.jpg', 'kitchen', BASE),

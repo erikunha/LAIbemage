@@ -14,10 +14,14 @@ vision-lens/                # pnpm + turbo monorepo root (private tooling shell)
 ├── apps/                     # user-facing applications (TypeScript)
 │   ├── api/                  # @vision-lens/api-placeholder — jobs service (spec 009)
 │   └── studio/               # @vision-lens/studio-placeholder — review UI (spec 010)
-└── services/                 # Python services (uv + hatchling, >=3.11, stdlib-only for now)
-    ├── vision/               # vision-lens-vision — embeddings + visual search (spec 005)
-    ├── training/             # vision-lens-training — training engine (spec 007)
-    └── agents/               # vision-lens-agents — agent runtime (spec 012)
+├── services/                 # Python services (uv + hatchling, >=3.11, stdlib-only for now)
+│   ├── vision/               # vision-lens-vision — embeddings + visual search (spec 005)
+│   ├── training/             # vision-lens-training — training engine (spec 007)
+│   └── agents/               # vision-lens-agents — agent runtime (spec 012)
+├── python/                   # public visionlens distribution (spec 017): stdlib-only base, optional extras
+│   └── visionlens/           # wheel source (src/, tests/, pyproject.toml; hatchling, >=3.11); services stay thin entrypoints
+└── docker/                   # container images: the mock provider and the Python worker runtime (visionlens wheel, stdio JSONL, no Node)
+    └── mock-provider/        # deterministic OpenAI-compatible mock provider, the OPENAI_BASE_URL seam (server.py + Dockerfile + tests)
 ```
 
 ## Diagram
@@ -44,15 +48,28 @@ flowchart TD
         AGENTS["vision-lens-agents<br/>agent runtime<br/>spec 012"]
     end
 
+    subgraph PYPKG["python/ - public distribution"]
+        VISIONLENS["visionlens<br/>stdlib-only base, optional extras<br/>spec 017 (VLN-003)"]
+    end
+
+    subgraph DOCKERDIR["docker/ - container images"]
+        MOCK["mock-provider<br/>deterministic OpenAI-compatible mock<br/>OPENAI_BASE_URL seam"]
+        RUNTIME["worker runtime<br/>visionlens wheel on python:3.11-slim<br/>stdio JSONL, no Node"]
+    end
+
     ROOT --> PKGS
     ROOT --> APPS
     ROOT --> SVCS
+    ROOT --> PYPKG
+    ROOT --> DOCKERDIR
 
     CORE --> CONTRACTS
     CLI --> CORE
     SDK --> CORE
     API -.->|"placeholder — consumes contracts later"| CONTRACTS
     STUDIO -.->|"placeholder — consumes API later"| API
+    CORE -.->|"worker channel visionlens.worker.v1 (runtime spawn)"| VISIONLENS
+    CORE -.->|"OPENAI_BASE_URL seam (manual wiring)"| MOCK
 ```
 
 Solid arrows are current build-time dependencies; dotted arrows are planned integration points that land with their specs.
@@ -62,6 +79,7 @@ Solid arrows are current build-time dependencies; dotted arrows are planned inte
 | Component | Kind | Language | Spec | Status |
 |---|---|---|---|---|
 | `packages/core` | package | TypeScript | 001 | live (all former src + tests) |
+| `packages/core/src/worker` | package | TypeScript | 018 | live: visionlens.worker.v1 host client, env seam `VISION_LENS_WORKER_INTERPRETER` / `VISION_LENS_WORKER_SCRIPT` |
 | `packages/cli` | package | TypeScript | 001 | landing with spec 001 |
 | `packages/sdk` | package | TypeScript | 001 | landing with spec 001 |
 | `packages/contracts` | package | TypeScript | 001-002 | seeded (`CONTRACTS_VERSION`, `UnitSeededSchema`); grows into the 14-entity domain model |
@@ -77,4 +95,4 @@ Solid arrows are current build-time dependencies; dotted arrows are planned inte
 - **Tasks**: `turbo.json` defines `build`, `typecheck`, `test`, `lint`; turbo auto-discovers each package's scripts — no per-package wiring needed.
 - **TypeScript**: `tsconfig.base.json` (ES2022, NodeNext, strict) extended by every package; root `tsconfig.json` stays `{"files":[]}` with no project references.
 - **JS tests**: root `vitest.config.ts` includes `packages/*/tests/**/*.test.ts` and `apps/*/tests/**/*.test.ts`.
-- **Python tests**: root script `pnpm test:py` runs `python3 -m pytest services -q`; each service is uv-managed (`uv sync` creates `uv.lock` + `.venv`).
+- **Python tests**: root script `pnpm test:py` runs the services smoke tests (`services`), the visionlens worker suite (`python/visionlens/tests`) and the mock provider suite (`docker/mock-provider/test_server.py`); each service is uv-managed (`uv sync` creates `uv.lock` + `.venv`).

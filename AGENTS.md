@@ -16,7 +16,8 @@ organize images. It is domain-agnostic: the category taxonomy is supplied at run
 `categories.json` file, and the LLM provider is selected at runtime.
 
 `packages/` holds the TypeScript code (`core`, `cli`, `sdk`, `contracts`), `apps/` the user-facing
-apps and `services/` the Python services. The workspace map is
+apps, `services/` the Python services, `python/` the public `visionlens` distribution and `docker/`
+the container images (the mock provider and the Python worker runtime image). The workspace map is
 `docs/architecture/monorepo-map.md`.
 
 ## Build & test commands

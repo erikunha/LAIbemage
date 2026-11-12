@@ -39,6 +39,13 @@ export default [
     files: [
       'packages/*/src/**/*.ts',
       'packages/*/tests/**/*.ts',
+      // Package-owned generator scripts (e.g. packages/contracts/scripts/*.ts):
+      // without this glob those .ts files match no config block, so a
+      // per-package `eslint … scripts` (what `pnpm turbo run lint` invokes)
+      // fails with "all of the files matching the glob pattern are ignored".
+      // Globs resolve against this config's location (repo root), so they must
+      // cover package subdirectories for both root and package-cwd invocations.
+      'packages/*/scripts/**/*.ts',
       'apps/*/src/**/*.ts',
       'apps/*/tests/**/*.ts',
     ],

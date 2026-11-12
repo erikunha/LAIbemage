@@ -342,8 +342,11 @@ These are recorded, not decided. Each one is a decision only the maintainer can 
    proposed worker schemas use free-form strings.
 5. The names on the registries. The PyPI name `visionlens` and the npm scope `@vision-lens` are
    unverified against their registries.
-6. The acceptance of ADR-011 and the seven ADRs after it. Until they are accepted, ADR-006
-   stands and the architecture does not change.
+6. The acceptance of ADR-011 and the seven ADRs after it. Decided 2026-11-12: ADR-011 is
+   accepted (the maintainer delegated the decision; the record lives in the ADR header and
+   its open-decisions table); ADR-006 stands byte-unchanged with its supersession recorded.
+   The seven ADRs after it remain design targets accepted per milestone as their vNext
+   specs land, so no unbuilt surface is claimed.
 7. The port of `fix/anthropic-5x-retry-cost`. It is real work that is not on the branch, and
    the port is a manual one. It is its own pull request, separate from VLN-007, and it adds a
    public CLI flag and an environment variable, so it is the maintainer's to order.

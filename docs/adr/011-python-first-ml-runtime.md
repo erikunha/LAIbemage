@@ -2,9 +2,9 @@
 
 | Field    | Value                                  |
 | -------- | -------------------------------------- |
-| Status   | Proposed                               |
+| Status   | Accepted                               |
 | Date     | 2026-11-12                             |
-| Deciders | @erikunha (acceptance pending)         |
+| Deciders | @erikunha (decision delegated to the delivery loop and recorded 2026-11-12) |
 
 ## Context
 
@@ -205,7 +205,7 @@ each rule reddens on a violating scratch tree and the clean tree stays green.
 | Registry names `visionlens` and `@vision-lens` | unverified against their registries; no availability claim made (`docs/migration/vision-lens-vnext-reconciliation.md:345-346`) |
 | Extras naming | resolved as built (full-word set); the maintainer may reopen it before the first publication |
 | ADR-007 MPS-first versus the pack's ADR-017 CPU-reference | an ordering conflict, not a contradiction; recorded for the ADR-017 acceptance text, ADR-007 left unedited (`docs/migration/vision-lens-vnext-reconciliation.md:216`) |
-| Acceptance of this ADR and the later pack ADRs | maintainer's; until acceptance ADR-006 stands unchanged (`docs/migration/vision-lens-vnext-reconciliation.md:347-348`) |
+| Acceptance of this ADR and the later pack ADRs | decided 2026-11-12: this ADR is ACCEPTED (the maintainer delegated the call; the decision records as-built reality, byte-unchanged ADR-006 supersession included); the seven later pack ADRs stay design targets whose acceptance is milestone-gated by the vNext release train as their specs land, so no unbuilt surface is claimed (`docs/migration/vision-lens-vnext-reconciliation.md:347-348`) |
 | Agent tier vocabulary, cancel spelling, approval contract, worker identity space | belong to their own ADRs (`docs/migration/vision-lens-vnext-reconciliation.md:335-344`) |
 
 ## Evidence

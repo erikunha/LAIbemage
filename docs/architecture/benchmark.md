@@ -252,9 +252,10 @@ pnpm exec tsx scripts/benchmarks/make-splits.ts \
 ```
 
 The predictions and the baseline of that suite are `visa-subset.v2.gpt-4o.json` and
-`benchmarks/baselines/visa-subset.v2.json`. The predictions have not been re-run
-yet (a provider key and a paid run are needed), so the suite has no baseline and
-the gate skips rather than blessing the old number. See §9.3 and §9.5.
+`benchmarks/baselines/visa-subset.v2.json`. The v2 predictions were run on
+2026-11-12 (700 images, 35 calls, 0.543793 USD, capped by `--max-usd-micro`),
+scored at macro F1 0.9734 and recorded as the suite's first baseline; the gate
+now enforces it. See §9.3 and §9.5.
 
 The prediction run is the one step that spends real money, and it can be capped:
 `predict-visa.ts` takes an optional `--max-usd-micro <n>` ceiling in micro-USD
@@ -319,7 +320,8 @@ import the **same** `buildTaxonomy()`, so the two cannot drift apart.
 > (`status: "retired"`, with the reason recorded next to it in
 > `benchmarks/baselines/visa-subset.json`). Do not quote it as the accuracy of a model.
 > The tracked split is now the v2 one (§9.5), and the first number recorded against it
-> is still to be measured.
+> was measured on 2026-11-12: macro F1 0.9734 over the 700 items (whole-set, not a
+> held-out scorecard; baseline at `benchmarks/baselines/visa-subset.v2.json`).
 
 | | |
 |---|---|

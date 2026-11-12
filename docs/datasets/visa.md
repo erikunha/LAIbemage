@@ -481,6 +481,7 @@ pnpm exec tsx scripts/benchmarks/predict-visa.ts \
 pnpm exec tsx packages/cli/src/index.ts benchmark run \
   --suite visa-subset.v2 --model-id gpt-4o \
   --model-version 'model:gpt-4o@2024-11-20' \
+  --config-fingerprint fp2:3883e2f9a01107f8 \
   --split benchmarks/splits/visa-subset.v2.gold.json \
   --predictions benchmarks/predictions/visa-subset.v2.gpt-4o.json \
   --out benchmarks/results --min-samples 30
@@ -505,7 +506,9 @@ describes.
 > **retired** (`status: "retired"` with the reason recorded next to it in
 > `benchmarks/baselines/visa-subset.json`). Do not quote it as the accuracy of a
 > model. The tracked split is now the v2 one (§8.5), and the first number
-> recorded against it is still to be measured.
+> recorded against it was measured on 2026-11-12: macro F1 0.9734 (whole-set,
+> 700 items, gpt-4o). It is still a whole-set figure, not a held-out scorecard;
+> see the verification table and `benchmarks/baselines/visa-subset.v2.json`.
 
 ### 8.1 What was run
 
@@ -676,7 +679,7 @@ predictions are re-run against it.
 | The gold manifest | **COMMITTED**: 700 assignments, `manifestHash 76dee597ea8d42bdba657f37c357cdfc4afc3d3e1de617d90ced7b77e485a0b2`. **Frozen**: it is the v1 split, and all 700 of its assignments are `train`. The generator now emits the v2 schema, so this artifact is reproducible only at the commit that created it (`64a72d1`); its `manifestHash` is still validated on every read. |
 | The v2 split | **COMMITTED**: `benchmarks/splits/visa-subset.v2.gold.json`, strategy `stratified`, 420 train / 140 val / 140 test, `partitionFingerprint 4ac0940380d0283a4ac52bda0884449bc8778ea2605b27c7ef2f26f666b9c963`, regeneration byte-identical, verified against the image bytes on disk |
 | The first real measurement | **MEASURED, THEN RETIRED**: macro F1 0.9795 / balanced accuracy 0.9700 over the 700 items of the **v1** split, which has no held-out set. It is **not** publishable as model performance; the baseline entry carries `status: "retired"` and the reason |
-| The first measurement on the v2 split | **NOT MEASURED YET**: it needs a provider key and costs money. Until it is run, the suite `visa-subset.v2` has no baseline and the gate skips instead of blessing the old number. When it is run, it is still a **whole-set** figure over the same 700 items: the v2 partition is locked for future selection, not applied as a filter (the held-out scorecard is `VLN-008`), so it is **not** publishable as model performance either |
+| The first measurement on the v2 split | **MEASURED 2026-11-12**: macro F1 **0.9734** / balanced accuracy **0.9620** / ECE **0.0362** over the 700 items of the v2 split (gpt-4o, 35 calls, **0.543793 USD** total, 0.000777 USD per image, run capped at 0.80 USD by `--max-usd-micro`; per-batch latency p50 9424.91 ms, p95 12875.46 ms). First baseline recorded: `benchmarks/baselines/visa-subset.v2.json` (gate passed; snapshot `352d250`). It is still a **whole-set** figure over the same 700 items: the v2 partition is locked for future selection, not applied as a filter (the held-out scorecard is `VLN-008`), so it is **not** publishable as model performance either |
 
 ## References
 

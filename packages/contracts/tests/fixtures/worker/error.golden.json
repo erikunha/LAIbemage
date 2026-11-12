@@ -1,0 +1,9 @@
+{
+  "protocol": "visionlens.worker.v1",
+  "kind": "error",
+  "requestId": "req_demo_001",
+  "seq": 2,
+  "code": "PROVIDER_UNAVAILABLE",
+  "message": "the embedding provider is unreachable; the attempt made no paid call",
+  "retryable": true
+}

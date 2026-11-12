@@ -55,6 +55,34 @@ export function majorVersion(version: string): number {
 }
 
 /**
+ * Parses an `enum("a"|"b")` manifest type string into its value set, or
+ * null when the type is not an enum.
+ */
+function enumValuesOf(type: string): string[] | null {
+  const match = /^enum\("(.*)"\)$/.exec(type);
+  if (!match) return null;
+  return match[1]!.split('"|"');
+}
+
+/**
+ * True when `baseType` and `currentType` are BOTH enum type strings and the
+ * current value set contains every base value: a WIDENING.
+ *
+ * The guard's own rule (below, and the docblock of {@link diffManifests})
+ * calls a new enum value compatible: a payload that used to validate still
+ * does. That rule must hold for an enum carried inside a field type exactly
+ * as it holds for the named enums, so a widened field enum is additive, not
+ * a type change. A NARROWING (a value gone) is not a widening: it stays
+ * breaking.
+ */
+function isWideningEnumType(baseType: string, currentType: string): boolean {
+  const baseValues = enumValuesOf(baseType);
+  const currentValues = enumValuesOf(currentType);
+  if (!baseValues || !currentValues) return false;
+  return baseValues.every((value) => currentValues.includes(value));
+}
+
+/**
  * Diffs one named-object surface (entities, worker frames) of two manifests.
  *
  * The same field-level rules apply to every surface, so the loop is written
@@ -89,11 +117,16 @@ function diffObjectSurfaces(
         continue;
       }
       if (baseField.type !== currentField.type) {
-        breaking.push({
-          kind: 'field-type-changed',
-          path,
-          detail: `Field "${path}" changed type: ${baseField.type} → ${currentField.type}.`,
-        });
+        if (isWideningEnumType(baseField.type, currentField.type)) {
+          // A widened field enum accepts every payload the base accepted.
+          additive.push(`${path} widened its value set`);
+        } else {
+          breaking.push({
+            kind: 'field-type-changed',
+            path,
+            detail: `Field "${path}" changed type: ${baseField.type} → ${currentField.type}.`,
+          });
+        }
       }
       const baseConstraint = baseField.constraint ?? '';
       const currentConstraint = currentField.constraint ?? '';

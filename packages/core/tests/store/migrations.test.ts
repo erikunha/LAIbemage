@@ -68,9 +68,10 @@ describe('store migrations', () => {
         .prepare('SELECT id, hash, applied_at FROM schema_migrations ORDER BY id')
         .all() as { id: string; hash: string; applied_at: string }[];
 
-      expect(rows.length).toBe(2);
+      expect(rows.length).toBe(3);
       expect(rows[0]!.id).toBe('0001');
       expect(rows[1]!.id).toBe('0002');
+      expect(rows[2]!.id).toBe('0003');
 
       const definitions = readMigrations(defaultMigrationsDir());
       for (const row of rows) {
@@ -90,8 +91,8 @@ describe('store migrations', () => {
     try {
       const report = applyMigrations(store.db);
       expect(report.applied).toEqual([]);
-      expect(report.alreadyApplied).toEqual(['0001', '0002']);
-      expect(report.version).toBe('0002');
+      expect(report.alreadyApplied).toEqual(['0001', '0002', '0003']);
+      expect(report.version).toBe('0003');
     } finally {
       store.cleanup();
     }
@@ -127,7 +128,7 @@ describe('store migrations', () => {
       const rows = store.db.prepare('SELECT COUNT(*) AS c FROM schema_migrations').get() as {
         c: number;
       };
-      expect(rows.c).toBe(2);
+      expect(rows.c).toBe(3);
     } finally {
       store.cleanup();
       removeTempDir(tamperedDir);
@@ -139,7 +140,7 @@ describe('store migrations', () => {
     try {
       const rollback = rollbackMigrations(store.db, '0000');
       // The rollback runs in DESCENDING id order (the newest first).
-      expect(rollback.applied).toEqual(['0002', '0001']);
+      expect(rollback.applied).toEqual(['0003', '0002', '0001']);
 
       const tables = store.db
         .prepare("SELECT name FROM sqlite_master WHERE type='table' ORDER BY name")
@@ -155,7 +156,7 @@ describe('store migrations', () => {
 
       // Re-apply works and the schema comes back.
       const reapply = applyMigrations(store.db);
-      expect(reapply.applied).toEqual(['0001', '0002']);
+      expect(reapply.applied).toEqual(['0001', '0002', '0003']);
       const restored = store.db
         .prepare("SELECT name FROM sqlite_master WHERE type='table' AND name='assets'")
         .get();

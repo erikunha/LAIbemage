@@ -1,0 +1,14 @@
+{
+  "protocol": "visionlens.worker.v1",
+  "kind": "result",
+  "requestId": "req_demo_001",
+  "seq": 1,
+  "result": {
+    "embeddingRunId": "embed_demo_001",
+    "count": 5,
+    "dimensions": 768,
+    "dtype": "float32",
+    "artifactSha256": "0000000000000000000000000000000000000000000000000000000000000000",
+    "source": "synthetic-example-not-a-real-run"
+  }
+}

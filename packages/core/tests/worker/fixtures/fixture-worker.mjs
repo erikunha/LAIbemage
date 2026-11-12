@@ -119,6 +119,14 @@ function handleRequest(frame) {
     every(40, () => undefined); // pending work so the process stays busy
     return;
   }
+  if (MODE === 'stderr-secret') {
+    // Logs a secret on STDERR (never stdout) and then dies, so the host's
+    // structured stderr capture is exercised on the real channel.
+    process.stderr.write('starting embed with api_key=abc123\n');
+    log({ event: 'crashing', requestId });
+    process.exit(1);
+    return;
+  }
   if (MODE === 'crash') {
     log({ event: 'crashing', requestId });
     process.exit(1);

@@ -1,0 +1,8 @@
+{
+  "protocol": "visionlens.worker.v1",
+  "kind": "progress",
+  "requestId": "req_demo_001",
+  "seq": 0,
+  "completed": 2,
+  "total": 5
+}

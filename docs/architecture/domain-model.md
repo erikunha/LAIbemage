@@ -71,7 +71,7 @@ spec 014.
 ### Vocabulary
 
 `ActorKind` (human/model/agent) · `Surface` (cli/studio/api/mcp/agent) · `JobState`
-(queued/running/succeeded/failed/cancelled/abstained) · `SplitKind`
+(queued/running/cancel_requested/succeeded/failed/cancelled/abstained) · `SplitKind`
 (train/val/test/holdout/unassigned) · `RegistryState`
 (draft/candidate/registered/deprecated/legacy) · `AgentToolTier`
 (read/analyze/propose/gated-execute/approval-required) · `RunKind`

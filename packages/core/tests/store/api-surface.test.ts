@@ -78,16 +78,16 @@ describe('store public surface', () => {
     const dbPath = path.join(dir, 'store.db');
     try {
       const applied = await migrateStore(dbPath);
-      expect(applied.applied).toEqual(['0001', '0002']);
-      expect(applied.version).toBe('0002');
+      expect(applied.applied).toEqual(['0001', '0002', '0003']);
+      expect(applied.version).toBe('0003');
 
       const rolledBack = await rollbackStore(dbPath, '0000');
       // The rollback runs in DESCENDING id order (the newest first).
-      expect(rolledBack.applied).toEqual(['0002', '0001']);
+      expect(rolledBack.applied).toEqual(['0003', '0002', '0001']);
       expect(rolledBack.version).toBeNull();
 
       const reapplied = await migrateStore(dbPath);
-      expect(reapplied.applied).toEqual(['0001', '0002']);
+      expect(reapplied.applied).toEqual(['0001', '0002', '0003']);
     } finally {
       removeTempDir(dir);
     }

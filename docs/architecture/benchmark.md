@@ -256,6 +256,20 @@ The predictions and the baseline of that suite are `visa-subset.v2.gpt-4o.json` 
 yet (a provider key and a paid run are needed), so the suite has no baseline and
 the gate skips rather than blessing the old number. See §9.3 and §9.5.
 
+The prediction run is the one step that spends real money, and it can be capped:
+`predict-visa.ts` takes an optional `--max-usd-micro <n>` ceiling in micro-USD
+(`750000` caps a run at 0.75 USD). Given the ceiling, the run refuses before the
+first provider call when its pinned cost estimate already exceeds it, and aborts
+when the observed spend of the answered calls crosses it mid-run; both failures
+throw a typed `BudgetExceededError` naming the estimate or the partial spend, the
+ceiling and the provider, and neither writes a prediction file, because a partial
+prediction set is never published. Mid-run tracking, like `costUsd`, needs the
+run's model to be pinned in `PROVIDER_PRICING`: an unlisted model still passes
+the pre-flight gate, but its estimate is priced at the provider's pinned default
+model and its observed spend cannot be tracked, so its ceiling is pre-flight
+only. A ceiling of `0` means no paid calls. Without
+the flag no ceiling is enforced, exactly as before.
+
 The pnpm package scripts (`pnpm benchmark:splits`, `pnpm benchmark:run`,
 `pnpm benchmark:gate`) take their flags **directly** — no `--` separator. This
 pnpm version forwards a literal `--` to the script, and both `node:util parseArgs`

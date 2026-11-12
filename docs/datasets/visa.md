@@ -467,7 +467,16 @@ pnpm exec tsx scripts/benchmarks/predict-visa.ts \
   --split benchmarks/splits/visa-subset.v2.gold.json \
   --root datasets/visa-subset \
   --out benchmarks/predictions/visa-subset.v2.gpt-4o.json \
-  --provider openai --model gpt-4o --model-version 2024-11-20
+  --provider openai --model gpt-4o --model-version 2024-11-20 \
+  --max-usd-micro 750000
+# --max-usd-micro is an OPTIONAL ceiling in micro-USD (750000 = 0.75 USD): the
+# run refuses before the first provider call when the pinned estimate exceeds
+# it and aborts when the observed spend crosses it mid-run; in both cases no
+# prediction file is written, because partial results are never published. 0
+# means no paid calls; without the flag there is no ceiling. Mid-run tracking
+# needs the run's model pinned in PROVIDER_PRICING (gpt-4o above is); an
+# unlisted model's ceiling is pre-flight only, priced at the provider's
+# default model.
 
 pnpm exec tsx packages/cli/src/index.ts benchmark run \
   --suite visa-subset.v2 --model-id gpt-4o \

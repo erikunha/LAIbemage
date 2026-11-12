@@ -56,6 +56,10 @@ interface FakeClientOptions {
   readonly wrongIds?: readonly string[];
   /** A category outside the taxonomy — used to prove the run fails. */
   readonly foreignCategory?: string;
+  /** The input tokens each call reports. Defaults to 70. */
+  readonly inputTokens?: number;
+  /** The output tokens each call reports. Defaults to 30. */
+  readonly outputTokens?: number;
 }
 
 /**
@@ -112,9 +116,9 @@ function makeGoldClient(
       });
       return {
         text: JSON.stringify({ images: results }),
-        tokensUsed: 100,
-        inputTokens: 70,
-        outputTokens: 30,
+        tokensUsed: (options.inputTokens ?? 70) + (options.outputTokens ?? 30),
+        inputTokens: options.inputTokens ?? 70,
+        outputTokens: options.outputTokens ?? 30,
       };
     }),
   };
@@ -349,6 +353,9 @@ describe('a full run against the synthetic fixture', () => {
       batchSize: 10,
       concurrency: 1,
       delayBetweenCallsMs: 0,
+      // A huge explicit ceiling: the run must complete unchanged under a
+      // budget it can never reach.
+      maxUsdMicro: 10_000_000_000,
       client: makeGoldClient(manifest.assignments, taxonomyNameByLabelKey, {
         wrongIds: [wrongId],
       }),
@@ -417,6 +424,145 @@ describe('a full run against the synthetic fixture', () => {
     // `gpt-4o` is pinned in PROVIDER_PRICING, so the cost is recorded.
     expect(predictions.every((prediction) => (prediction.costUsd ?? 0) > 0)).toBe(true);
     expect(report.totalCostUsd).toBeGreaterThan(0);
+  });
+
+  it('a run whose pinned estimate exceeds --max-usd-micro refuses before the first provider call', async () => {
+    const manifest = readFixtureManifest();
+    const taxonomy = buildTaxonomy(manifest);
+    const taxonomyNameByLabelKey = new Map(
+      [...taxonomy.labelKeyByName].map(([name, labelKey]) => [labelKey, name]),
+    );
+    const client = makeGoldClient(manifest.assignments, taxonomyNameByLabelKey);
+    const outPath = path.join(workDir, 'predictions.json');
+
+    // The pinned estimate for this run (30 images, batch size 10, openai, the
+    // pinned gpt-4o rates at detail:low) is 34125 usd-micro; a ceiling of
+    // 1000 usd-micro is far below it.
+    const run = runPredict({
+      splitPath: FIXTURE_MANIFEST,
+      rootDir: FIXTURE_ROOT,
+      outPath,
+      provider: 'openai',
+      model: 'gpt-4o',
+      modelVersion: '2024-11-20',
+      apiKey: 'test-key',
+      batchSize: 10,
+      concurrency: 1,
+      delayBetweenCallsMs: 0,
+      maxUsdMicro: 1_000,
+      client,
+    });
+    await expect(run).rejects.toThrow(/34125/);
+    const refusal = await run.catch((error: unknown): unknown => error);
+
+    // The typed refusal names the estimate, the ceiling and the provider.
+    expect((refusal as Error).name).toBe('BudgetExceededError');
+    expect((refusal as Error).message).toContain('34125');
+    expect((refusal as Error).message).toContain('1000');
+    expect((refusal as Error).message).toContain('openai');
+    const fields = refusal as {
+      provider?: unknown;
+      budgetUsdMicro?: unknown;
+      estimatedUsdMicro?: unknown;
+    };
+    expect(fields.provider).toBe('openai');
+    expect(fields.budgetUsdMicro).toBe(1_000);
+    expect(fields.estimatedUsdMicro).toBe(34_125);
+
+    // Refused BEFORE the first provider call: the client was never used and
+    // nothing was written.
+    expect(vi.mocked(client.complete)).toHaveBeenCalledTimes(0);
+    expect(existsSync(outPath)).toBe(false);
+  });
+
+  it('a run whose pinned estimate equals the ceiling proceeds (only exceeding refuses)', async () => {
+    const manifest = readFixtureManifest();
+    const taxonomy = buildTaxonomy(manifest);
+    const taxonomyNameByLabelKey = new Map(
+      [...taxonomy.labelKeyByName].map(([name, labelKey]) => [labelKey, name]),
+    );
+    const client = makeGoldClient(manifest.assignments, taxonomyNameByLabelKey);
+    const outPath = path.join(workDir, 'predictions.json');
+
+    // The pinned estimate is 34125 usd-micro (see the refusal test above), so a
+    // ceiling exactly equal to it must proceed: the gate refuses only when the
+    // estimate EXCEEDS the ceiling.
+    await runPredict({
+      splitPath: FIXTURE_MANIFEST,
+      rootDir: FIXTURE_ROOT,
+      outPath,
+      provider: 'openai',
+      model: 'gpt-4o',
+      modelVersion: '2024-11-20',
+      apiKey: 'test-key',
+      batchSize: 10,
+      concurrency: 1,
+      delayBetweenCallsMs: 0,
+      maxUsdMicro: 34_125,
+      client,
+    });
+
+    expect(vi.mocked(client.complete)).toHaveBeenCalledTimes(3);
+    expect(existsSync(outPath)).toBe(true);
+    const predictions = JSON.parse(readFileSync(outPath, 'utf8')) as unknown[];
+    expect(predictions).toHaveLength(30);
+  });
+
+  it('accumulated observed cost crossing the budget mid-run aborts and reports the partial spend', async () => {
+    const manifest = readFixtureManifest();
+    const taxonomy = buildTaxonomy(manifest);
+    const taxonomyNameByLabelKey = new Map(
+      [...taxonomy.labelKeyByName].map(([name, labelKey]) => [labelKey, name]),
+    );
+    // Each answered call reports 4000 input + 1000 output tokens, which prices
+    // at 0.02 USD per call for gpt-4o: two calls spend 40000 usd-micro.
+    const client = makeGoldClient(manifest.assignments, taxonomyNameByLabelKey, {
+      inputTokens: 4_000,
+      outputTokens: 1_000,
+    });
+    const outPath = path.join(workDir, 'predictions.json');
+
+    // The pinned estimate (34125 usd-micro) fits the 35000 usd-micro ceiling,
+    // so the run starts; the OBSERVED spend crosses the ceiling on the second
+    // answered call.
+    const run = runPredict({
+      splitPath: FIXTURE_MANIFEST,
+      rootDir: FIXTURE_ROOT,
+      outPath,
+      provider: 'openai',
+      model: 'gpt-4o',
+      modelVersion: '2024-11-20',
+      apiKey: 'test-key',
+      batchSize: 10,
+      concurrency: 1,
+      delayBetweenCallsMs: 0,
+      maxUsdMicro: 35_000,
+      client,
+    });
+    await expect(run).rejects.toThrow(/40000/);
+    const abort = await run.catch((error: unknown): unknown => error);
+
+    // The abort names the partial spend observed so far, the ceiling and the
+    // provider.
+    expect((abort as Error).name).toBe('BudgetExceededError');
+    expect((abort as Error).message).toContain('40000');
+    expect((abort as Error).message).toContain('35000');
+    expect((abort as Error).message).toContain('openai');
+    const fields = abort as {
+      provider?: unknown;
+      budgetUsdMicro?: unknown;
+      spentUsdMicro?: unknown;
+    };
+    expect(fields.provider).toBe('openai');
+    expect(fields.budgetUsdMicro).toBe(35_000);
+    expect(fields.spentUsdMicro).toBe(40_000);
+
+    // The abort is genuinely mid-run: two calls were answered before the spend
+    // crossed the ceiling, and no third call is made.
+    expect(vi.mocked(client.complete)).toHaveBeenCalledTimes(2);
+
+    // A partial prediction set is never published: no file is written.
+    expect(existsSync(outPath)).toBe(false);
   });
 
   it('fails loudly when the manifest cannot be read', async () => {
@@ -496,6 +642,7 @@ describe('a full run against the synthetic fixture', () => {
       provider: 'openai',
       model: 'gpt-4o',
       apiKey: 'test-key',
+      maxUsdMicro: 10_000_000_000,
       client: makeGoldClient(manifest.assignments, taxonomyNameByLabelKey, {
         foreignCategory: 'kitchen',
       }),
@@ -605,6 +752,8 @@ describe('the command line', () => {
         'test-key',
         '--batch-size',
         '20',
+        '--max-usd-micro',
+        '10000000000',
       ],
       { client: makeGoldClient(manifest.assignments, taxonomyNameByLabelKey) },
     );

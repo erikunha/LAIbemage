@@ -16,7 +16,8 @@
  *   --split benchmarks/splits/visa-subset.gold.json \
  *   --root datasets/visa-subset \
  *   --out benchmarks/predictions/visa-subset.gpt-4o.json \
- *   --provider openai --model gpt-4o --model-version 2024-11-20 --api-key "$OPENAI_API_KEY"
+ *   --provider openai --model gpt-4o --model-version 2024-11-20 --api-key "$OPENAI_API_KEY" \
+ *   --max-usd-micro 750000
  *
  * # then score it:
  * node packages/cli/dist/index.js benchmark run \
@@ -61,6 +62,19 @@
  *    counts are real; the price table is per provider and per DEFAULT model,
  *    so an unlisted model has no honest price and the field is OMITTED. An
  *    omitted cost is better than a fabricated one.
+ *  - `--max-usd-micro <n>` optionally caps what the run may spend, in
+ *    micro-USD (`750000` is 0.75 USD). Without the flag NO ceiling is
+ *    enforced, exactly as before. With it, the run REFUSES before the first
+ *    provider call when the pinned estimate (`estimateCost`) already exceeds
+ *    the ceiling, and ABORTS when the observed spend of the answered calls
+ *    crosses it mid-run. Both throw a typed `BudgetExceededError` naming the
+ *    estimate or the partial spend, the ceiling and the provider, and neither
+ *    writes a prediction file: a partial prediction set is never published.
+ *    A ceiling of `0` refuses any run whose estimate is above 0, which is the
+ *    zero-budget rule of the worker protocol (`maxUsdMicro`): no paid calls.
+ *    The estimate is priced at the provider's PINNED model; mid-run tracking,
+ *    like `costUsd`, needs the run's own model to be pinned, so an unlisted
+ *    model passes the estimate gate but its observed spend cannot be tracked.
  *
  * ## `probability`
  *
@@ -100,7 +114,7 @@ import {
   type RawCliOptions,
 } from '../../packages/core/src/config/index.js';
 import type { AnalysisResult, FileWithStats } from '../../packages/core/src/types.js';
-import { PROVIDER_PRICING } from '../../packages/core/src/utils/cost.js';
+import { estimateCost, PROVIDER_PRICING } from '../../packages/core/src/utils/cost.js';
 import { getImageTimestamp } from '../../packages/core/src/utils/exif.js';
 import { configureLogger, logger } from '../../packages/core/src/utils/logger.js';
 
@@ -275,8 +289,89 @@ export interface PredictOptions {
   readonly delayBetweenCallsMs?: number;
   /** Where the generated taxonomy is written. Defaults to a temporary file. */
   readonly taxonomyPath?: string;
+  /**
+   * The run's spending ceiling in micro-USD (1 micro-USD is 1e-6 USD).
+   * Optional: absent means EXACTLY the behavior the script always had, with no
+   * ceiling enforced. `0` means no paid calls. When present, the run refuses
+   * before the first provider call when the pinned estimate exceeds the
+   * ceiling, and aborts when the observed spend of the answered calls crosses
+   * it mid-run; in both cases a {@link BudgetExceededError} is thrown and no
+   * prediction file is written.
+   */
+  readonly maxUsdMicro?: number;
   /** An injected client — the testability seam. Never used by the CLI. */
   readonly client?: LLMClient;
+}
+
+/**
+ * The budget comparison slack, in USD: the repo's pinned budget convention
+ * (`docs/architecture/benchmark.md`, the metrics budget rule), so a float sum
+ * like 0.1 + 0.2 is not read as crossing a 0.3 ceiling by binary noise.
+ */
+const BUDGET_SLACK_USD = 1e-6;
+
+/**
+ * The run's spending ceiling (`--max-usd-micro`) was crossed.
+ *
+ * Two moments produce it, and both fail the run CLOSED, like every other
+ * failure of this script: no prediction file is written, because a partial
+ * prediction set is never published.
+ *
+ *  - the PRE-FLIGHT refusal: the pinned estimate (`estimateCost`) already
+ *    exceeds the ceiling, so not one provider call is made. The error names
+ *    the estimate, the ceiling and the provider.
+ *  - the MID-RUN abort: the observed spend of the answered calls crossed the
+ *    ceiling. The error names the partial spend observed so far, the ceiling
+ *    and the provider.
+ *
+ * A ceiling of 0 is valid and refuses any run whose estimate is above 0: a
+ * zero budget means no paid calls, the same rule the worker protocol's
+ * `maxUsdMicro` documents.
+ */
+export class BudgetExceededError extends Error {
+  /** The provider the run refused to call, or was calling when it aborted. */
+  readonly provider: LLMProvider;
+  /** The model of the run. */
+  readonly model: string;
+  /** The ceiling, in micro-USD. */
+  readonly budgetUsdMicro: number;
+  /** The pinned pre-flight estimate, in micro-USD (pre-flight refusal only). */
+  readonly estimatedUsdMicro?: number;
+  /** The spend observed before the mid-run abort, in micro-USD (abort only). */
+  readonly spentUsdMicro?: number;
+
+  constructor(fields: {
+    readonly provider: LLMProvider;
+    readonly model: string;
+    readonly budgetUsdMicro: number;
+    readonly estimatedUsdMicro?: number;
+    readonly spentUsdMicro?: number;
+    readonly imageCount?: number;
+    readonly batchCount?: number;
+  }) {
+    const budgetUsd = (fields.budgetUsdMicro / 1_000_000).toFixed(6);
+    const estimatedUsd = ((fields.estimatedUsdMicro ?? 0) / 1_000_000).toFixed(6);
+    const spentUsd = ((fields.spentUsdMicro ?? 0) / 1_000_000).toFixed(6);
+    super(
+      fields.estimatedUsdMicro !== undefined
+        ? '--max-usd-micro budget exceeded before the first provider call: the pinned estimate ' +
+          `for ${fields.imageCount} image(s) over ${fields.batchCount} batch call(s) on ` +
+          `${fields.provider}/${fields.model} is ${fields.estimatedUsdMicro} usd-micro ` +
+          `(${estimatedUsd} USD), above the budget of ${fields.budgetUsdMicro} usd-micro ` +
+          `(${budgetUsd} USD). No provider call was made and no prediction file is written.`
+        : '--max-usd-micro budget crossed mid-run: the observed spend on ' +
+          `${fields.provider}/${fields.model} reached ${fields.spentUsdMicro} usd-micro ` +
+          `(${spentUsd} USD), above the budget of ${fields.budgetUsdMicro} usd-micro ` +
+          `(${budgetUsd} USD). The run is aborted and no prediction file is written: a ` +
+          'partial prediction set is never published.',
+    );
+    this.name = 'BudgetExceededError';
+    this.provider = fields.provider;
+    this.model = fields.model;
+    this.budgetUsdMicro = fields.budgetUsdMicro;
+    this.estimatedUsdMicro = fields.estimatedUsdMicro;
+    this.spentUsdMicro = fields.spentUsdMicro;
+  }
 }
 
 /** What one prediction run produced. */
@@ -407,14 +502,45 @@ async function collectImageEntries(
 }
 
 /**
+ * The mid-run budget watch of a run started with `--max-usd-micro`.
+ */
+interface BudgetWatch {
+  /** The pricing of the run's model, when it is pinned; `null` when it is not. */
+  readonly pricing: {
+    readonly inputPerMillion: number;
+    readonly outputPerMillion: number;
+  } | null;
+  /** The ceiling, in micro-USD (kept for the abort error). */
+  readonly budgetUsdMicro: number;
+  /** The ceiling, in USD. */
+  readonly budgetUsd: number;
+  /** The observed spend of every ANSWERED call, in USD. */
+  spentUsd: number;
+  /** Set once the observed spend crossed the ceiling; further calls are refused. */
+  crossed: boolean;
+}
+
+/**
  * Wraps a client so every call is measured.
  *
  * The batch's wall-clock and token counts are attributed to the images of that
  * batch. A retried call replaces the observation of the batch it belongs to:
  * the measurement of the call that actually produced the result is the one
  * that counts.
+ *
+ * With a {@link BudgetWatch}, every ANSWERED call also adds its priced tokens
+ * to the observed spend (a paid call is a paid call, including one whose text
+ * the analyzer later discards), and once the spend has crossed the ceiling no
+ * further provider call is made at all. The mid-run ABORT itself is raised by
+ * the run, not here: this wrapper sits inside the analyzer's retry-and-pad
+ * machinery, which would swallow or retry an ordinary error, so it only marks
+ * the watch and refuses later calls with the analyzer's non-retryable,
+ * non-paddable `QUOTA_EXCEEDED` marker.
  */
-function createRecordingClient(inner: LLMClient): {
+function createRecordingClient(
+  inner: LLMClient,
+  watch?: BudgetWatch,
+): {
   client: LLMClient;
   observations: Map<number, BatchObservation>;
 } {
@@ -426,6 +552,12 @@ function createRecordingClient(inner: LLMClient): {
       images: ImageInput[],
       opts: CompleteOptions,
     ): Promise<CompleteResult> {
+      if (watch?.crossed) {
+        throw new Error(
+          'QUOTA_EXCEEDED: the --max-usd-micro budget of this run was already crossed; ' +
+            'no further provider call is made.',
+        );
+      }
       const range = parseBatchRange(prompt);
       const startedAt = performance.now();
       const result = await inner.complete(prompt, images, opts);
@@ -438,6 +570,14 @@ function createRecordingClient(inner: LLMClient): {
           inputTokens: result.inputTokens,
           outputTokens: result.outputTokens,
         });
+      }
+      if (watch !== undefined && watch.pricing !== null) {
+        watch.spentUsd +=
+          (result.inputTokens / 1_000_000) * watch.pricing.inputPerMillion +
+          (result.outputTokens / 1_000_000) * watch.pricing.outputPerMillion;
+        if (watch.spentUsd > watch.budgetUsd + BUDGET_SLACK_USD) {
+          watch.crossed = true;
+        }
       }
       return result;
     },
@@ -550,21 +690,63 @@ export async function runPredict(options: PredictOptions): Promise<PredictReport
   let failed = false;
   try {
     const config = await buildConfig(options, taxonomyPath, workDir);
+    const pricing = resolvePricing(config.provider, config.model);
+
+    // The budget gate of --max-usd-micro. Optional: absent means exactly the
+    // behavior the script always had, with no ceiling. Present, it guards the
+    // run at two moments: BEFORE the first provider call (the pinned estimate
+    // of the whole run) and after every ANSWERED call (the observed spend). A
+    // ceiling of 0 refuses any run whose estimate is above 0: no paid calls.
+    let watch: BudgetWatch | undefined;
+    if (options.maxUsdMicro !== undefined) {
+      const budgetUsd = options.maxUsdMicro / 1_000_000;
+      const estimate = estimateCost(entries.length, config.batchSize, config.provider);
+      if (estimate.estimatedCostUsd > budgetUsd + BUDGET_SLACK_USD) {
+        throw new BudgetExceededError({
+          provider: config.provider,
+          model: config.model,
+          budgetUsdMicro: options.maxUsdMicro,
+          estimatedUsdMicro: Math.round(estimate.estimatedCostUsd * 1_000_000),
+          imageCount: entries.length,
+          batchCount: estimate.batchCount,
+        });
+      }
+      watch = {
+        pricing,
+        budgetUsdMicro: options.maxUsdMicro,
+        budgetUsd,
+        spentUsd: 0,
+        crossed: false,
+      };
+    }
+
     const client = options.client ?? (await createProviderClient(config));
-    const recorder = createRecordingClient(client);
+    const recorder = createRecordingClient(client, watch);
 
     const results = await analyzeBatch(
       entries.map((entry) => entry.file),
       config,
       recorder.client,
       (processed, batch, tokensUsed) => {
+        // The mid-run abort. The progress callback runs after every answered
+        // batch and OUTSIDE the analyzer's retry-and-pad machinery, so the
+        // typed refusal surfaces as the run's own failure instead of being
+        // retried or padded into an unknown. Like any failed batch, it writes
+        // NO prediction file: a partial prediction set is never published.
+        if (watch?.crossed) {
+          throw new BudgetExceededError({
+            provider: config.provider,
+            model: config.model,
+            budgetUsdMicro: watch.budgetUsdMicro,
+            spentUsdMicro: Math.round(watch.spentUsd * 1_000_000),
+          });
+        }
         logger.info(
           `  ${processed}/${entries.length} images analysed (batch ${batch}, ${tokensUsed} tokens)`,
         );
       },
     );
 
-    const pricing = resolvePricing(config.provider, config.model);
     const latencyMs: (number | undefined)[] = new Array(entries.length).fill(undefined);
     const costUsd: (number | undefined)[] = new Array(entries.length).fill(undefined);
     for (const observation of recorder.observations.values()) {
@@ -631,6 +813,14 @@ const USAGE = `Usage: predict-visa.ts --split <manifest> --root <dir> --out <fil
   --api-key <key>         the API key (or leave it to the environment)
   --batch-size <n>        images per LLM call (default: ${DEFAULT_BATCH_SIZE})
   --concurrency <n>       concurrent LLM calls (default: 1)
+  --max-usd-micro <n>     optional spending ceiling in micro-USD (750000 = 0.75 USD):
+                          refuses before the first provider call when the pinned
+                          estimate exceeds it, aborts when the observed spend crosses
+                          it; in both cases no prediction file is written. 0 means no
+                          paid calls; without the flag there is no ceiling. Mid-run
+                          tracking needs the run's model pinned in PROVIDER_PRICING;
+                          an unlisted model's ceiling is pre-flight only (priced at
+                          the provider's default model)
   --taxonomy-out <file>   keep the generated taxonomy at this path
   --verbose               verbose logging
   --quiet                 quiet logging
@@ -652,6 +842,7 @@ function parseCliArgs(argv: readonly string[]): {
       'api-key': { type: 'string' },
       'batch-size': { type: 'string', default: String(DEFAULT_BATCH_SIZE) },
       concurrency: { type: 'string', default: '1' },
+      'max-usd-micro': { type: 'string' },
       'taxonomy-out': { type: 'string' },
       verbose: { type: 'boolean', default: false },
       quiet: { type: 'boolean', default: false },
@@ -674,6 +865,24 @@ function numberOption(
   const parsed = Number.parseInt(String(raw), 10);
   if (!Number.isFinite(parsed) || parsed <= 0) {
     throw new Error(`--${name} must be a positive integer, got '${String(raw)}'`);
+  }
+  return parsed;
+}
+
+/**
+ * Reads `--max-usd-micro`, failing loudly when it is not a non-negative
+ * integer. `0` is valid: a zero ceiling means no paid calls.
+ */
+function usdMicroOption(
+  values: Record<string, string | boolean | undefined>,
+): number | undefined {
+  const raw = values['max-usd-micro'];
+  if (raw === undefined) return undefined;
+  const parsed = Number.parseInt(String(raw), 10);
+  if (!Number.isFinite(parsed) || parsed < 0) {
+    throw new Error(
+      `--max-usd-micro must be a non-negative integer of micro-USD, got '${String(raw)}'`,
+    );
   }
   return parsed;
 }
@@ -728,12 +937,18 @@ export async function main(argv: readonly string[], deps: MainDependencies = {})
   const model = typeof values['model'] === 'string' ? values['model'] : undefined;
   const modelVersion =
     typeof values['model-version'] === 'string' ? values['model-version'] : undefined;
+  const maxUsdMicro = usdMicroOption(values);
 
   logger.info(
     `[predict-visa] predicting ${path.basename(split)} with ${provider}${
       model === undefined ? '' : `/${model}`
     }…`,
   );
+  if (maxUsdMicro !== undefined) {
+    logger.info(
+      `  budget     : ${maxUsdMicro} usd-micro (${(maxUsdMicro / 1_000_000).toFixed(6)} USD)`,
+    );
+  }
 
   const report = await runPredict({
     splitPath: split,
@@ -743,6 +958,7 @@ export async function main(argv: readonly string[], deps: MainDependencies = {})
     ...(model === undefined ? {} : { model }),
     ...(modelVersion === undefined ? {} : { modelVersion }),
     ...(typeof values['api-key'] === 'string' ? { apiKey: values['api-key'] } : {}),
+    ...(maxUsdMicro === undefined ? {} : { maxUsdMicro }),
     batchSize: numberOption(values, 'batch-size', DEFAULT_BATCH_SIZE),
     concurrency: numberOption(values, 'concurrency', 1),
     ...(typeof values['taxonomy-out'] === 'string'

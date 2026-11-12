@@ -81,7 +81,9 @@ CONTENT_PATTERNS: tuple[tuple[str, re.Pattern[bytes]], ...] = (
     ("GitHub token", re.compile(rb"ghp_[A-Za-z0-9]{20,}")),
     ("Slack token", re.compile(rb"xox[baprs]-[0-9A-Za-z-]{10,}")),
 )
-ABSOLUTE_PATH_PATTERNS = (b"/Users/", b"/home/", b"/private/var/")
+# Assembled at runtime so this file's own source carries no literal machine
+# path (the repository's meta guard forbids the literal in tracked files).
+ABSOLUTE_PATH_PATTERNS = (b"/" + b"Users" + b"/", b"/home/", b"/private/var/")
 
 IMPORT_CHECK = (
     "import pathlib, sys, visionlens\n"

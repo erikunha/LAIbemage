@@ -482,6 +482,11 @@ class Worker:
             with self._lock:
                 state.finished = True
                 self._requests.pop(state.request_id, None)
+                # The terminal frame above was the counter's last reader, so
+                # the entry is dropped here under the same lock; seq stayed
+                # strictly increasing across the request's lifetime, and the
+                # counter no longer grows with every terminated request.
+                self._seq_counters.pop(state.request_id, None)
                 self._logger.info("request %s finished", state.request_id)
 
     def _checkpoint(self, state: _RequestState) -> None:

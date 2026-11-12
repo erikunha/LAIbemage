@@ -309,7 +309,16 @@ def test_deadline_stops_a_slow_operation():
     assert error["code"] == "DEADLINE_EXCEEDED"
     assert "maxSeconds" in error["message"]
     assert all(f["kind"] != "result" for f in frames_for(frames, "r-1"))
-    assert elapsed < 4.0, "the deadline must stop the operation well before it ends"
+    # Monotonic-budget property: the refusal can only be emitted once the
+    # full budget has elapsed, and the slow recipe sleeps 100 steps of 0.05s,
+    # so an unbudgeted run lasts at least 5.0s. The upper bound sits just
+    # under that natural end, generous for a loaded runner, while the step
+    # count below is the load-independent proof the loop was cut short.
+    assert elapsed >= 1.0
+    assert elapsed < 4.8, "the deadline must stop the operation before its natural end"
+    progress = [f for f in frames_for(frames, "r-1") if f["kind"] == "progress"]
+    assert progress, "the trainer reports its initial progress before any step"
+    assert progress[-1]["completed"] < progress[-1]["total"]
     assert_invariants(frames)
 
 
@@ -325,6 +334,31 @@ def test_seq_is_strictly_increasing_and_starts_at_zero():
     train = frames_for(frames, "r-1")
     assert train[-1]["kind"] == "result"
     assert train[-1]["seq"] == len(train) - 1
+
+
+def test_seq_counter_is_pruned_when_the_request_terminates():
+    import io
+    import json
+
+    from visionlens.worker import Worker
+
+    payload = b"".join(
+        (
+            encode(host_hello()),
+            encode(embed_request("r-1", ["a"])),
+            encode(request("r-2", "model.train", {"dataset": "ds", "recipe": "quick"})),
+        )
+    )
+    writer = io.BytesIO()
+    worker = Worker(reader=io.BytesIO(payload), writer=writer)
+    worker.run()
+    frames = [json.loads(line) for line in writer.getvalue().decode("utf-8").splitlines()]
+    assert terminal(frames, "r-1")["kind"] == "result"
+    assert terminal(frames, "r-2")["kind"] == "result"
+    assert_invariants(frames)
+    # The terminal frame was each counter's last reader, so a long-lived
+    # session does not accumulate one entry per terminated request.
+    assert worker._seq_counters == {}  # noqa: SLF001
 
 
 def test_negotiated_frame_limit_is_enforced():

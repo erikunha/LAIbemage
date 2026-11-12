@@ -139,8 +139,17 @@ def test_deadline_is_enforced_over_real_pipes():
         elapsed = time.monotonic() - started
         assert frames[-1]["kind"] == "error"
         assert frames[-1]["code"] == "DEADLINE_EXCEEDED"
+        # Monotonic-budget property: the refusal comes no earlier than the
+        # full budget (monotonic clock, so scheduling cannot shrink it), and
+        # the slow recipe sleeps 100 steps of 0.05s, so an unbudgeted run
+        # lasts at least 5.0s. The upper bound sits just under that natural
+        # end, generous for a loaded runner, while the step count below is
+        # the load-independent proof the loop was cut short.
         assert elapsed >= 1.0
-        assert elapsed < 4.0
+        assert elapsed < 4.8
+        progress = [f for f in frames if f["kind"] == "progress"]
+        assert progress, "the trainer reports its initial progress before any step"
+        assert progress[-1]["completed"] < progress[-1]["total"]
 
         worker.send(embed("r-2", ["a"]))
         assert worker.read_until_terminal("r-2")[-1]["kind"] == "result"

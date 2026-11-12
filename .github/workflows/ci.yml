@@ -49,9 +49,10 @@ jobs:
         run: pnpm audit --audit-level=high
         continue-on-error: true
 
-      # Services are stdlib-only Python; only pytest itself is needed (no sync).
+      # All Python suites (services smoke, visionlens worker, mock provider)
+      # are stdlib-only; only pytest itself is needed (no uv sync).
       # --break-system-packages is required on PEP 668-managed runner images.
-      - name: Set up Python (pytest for services)
+      - name: Set up Python (pytest for the Python suites)
         run: python3 -m pip install --user --break-system-packages pytest
 
       - name: Lint
@@ -81,8 +82,14 @@ jobs:
       - name: Agent surface is consistent
         run: pnpm agents:surface:check
 
-      - name: Test Python services
+      - name: Test Python (services + visionlens worker + mock provider)
         run: pnpm test:py
+
+      # docker/runtime/python/visionlens is a real-file vendor copy of the
+      # wheel source (BuildKit contexts cannot follow symlinks); this fails
+      # naming any file that drifted from python/visionlens.
+      - name: Docker vendor copy matches python/visionlens
+        run: pnpm docker:vendor:check
 
       - name: Build (required by the golden bin tests)
         run: pnpm build

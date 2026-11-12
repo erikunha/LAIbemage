@@ -117,7 +117,7 @@ vision-lens import-run ./output/analysis_results.json --db ./store.db
 The real output (dry run, against this repository's own historical run):
 
 ```
-legacy run:      /Users/erikhenriquealvescunha/Desktop/Projects/ai-image-labeling/output/analysis_results.json
+legacy run:      output/analysis_results.json
 store:           /tmp/mv-demo/store.db
 manifest id:     a9476b3cc301643357da6f8612262d282d4a974804248f56c0dfc38b549ad31e
 shape:           flat-cache

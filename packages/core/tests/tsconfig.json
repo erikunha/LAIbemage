@@ -24,6 +24,7 @@
     "./store/**/*.test.ts",
     "./store/helpers.ts",
     "./benchmark/**/*.test.ts",
-    "./config/**/*.test.ts"
+    "./config/**/*.test.ts",
+    "./meta/**/*.test.ts"
   ]
 }

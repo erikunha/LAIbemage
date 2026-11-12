@@ -1,3 +1,4 @@
+import os from 'node:os';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { describe, expect, it } from 'vitest';
@@ -126,7 +127,9 @@ describe('computeConfigFingerprint', () => {
     const result = computeConfigFingerprint({ ...baseInput, manifest });
     const serialized = JSON.stringify(result.components);
     expect(serialized).not.toMatch(/\d{4}-\d{2}-\d{2}T/);
-    expect(serialized).not.toContain('/Users/');
+    // Catches the actual home directory on any OS and keeps personal-path
+    // literals out of the tree.
+    expect(serialized).not.toContain(os.homedir());
   });
 });
 

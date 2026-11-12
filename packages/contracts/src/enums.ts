@@ -22,10 +22,19 @@ export const SurfaceSchema = z
   .describe('Tool surface a record was produced through (CLI / Studio / API / MCP / agent).');
 export type Surface = z.infer<typeof SurfaceSchema>;
 
-/** Lifecycle state of any long-running job (experiment, evaluation, agent run). */
+/**
+ * Lifecycle state of any long-running job (experiment, evaluation, agent run).
+ *
+ * `cancel_requested` is the intermediate cancellation state of the worker
+ * protocol (spec 018, FR-012): a running job marked for cancellation sits
+ * there until the stop is confirmed, then moves to the immutable terminal
+ * `cancelled`. Widening the shipped six-state vocabulary was migration 0003
+ * of the store (`packages/core/src/store/migrations/0003_job_cancel_requested.sql`).
+ */
 export const JOB_STATES = [
   'queued',
   'running',
+  'cancel_requested',
   'succeeded',
   'failed',
   'cancelled',

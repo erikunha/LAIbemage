@@ -182,6 +182,44 @@ describe('pure comparison function', () => {
     expect(diff.additive).toContain('Asset.path');
   });
 
+  it('classifies a WIDENED field enum as compatible, not a type change', () => {
+    // The JobState widening of spec 018 (migration 0003): a new value in a
+    // field's enum accepts every payload the base accepted. The guard's own
+    // rule for named enums ("a new enum value appeared: a payload that used
+    // to validate still does") must hold inside a field type too.
+    const current: ContractManifest = {
+      ...base,
+      entities: {
+        Asset: {
+          fields: {
+            ...base.entities.Asset.fields,
+            state: { required: true, type: 'enum("queued"|"running"|"cancel_requested")' },
+          },
+        },
+      },
+    };
+    const widened: ContractManifest = {
+      ...current,
+      entities: {
+        Asset: {
+          fields: {
+            ...current.entities.Asset.fields,
+            state: { required: true, type: 'enum("queued"|"running")' },
+          },
+        },
+      },
+    };
+
+    const diff = diffManifests(widened, current);
+
+    expect(diff.breaking).toEqual([]);
+    expect(diff.additive).toContain('Asset.state widened its value set');
+    // The same move in the OTHER direction (a value removed) stays breaking.
+    const narrowed = diffManifests(current, widened);
+    expect(narrowed.breaking.map((change) => change.kind)).toContain('field-type-changed');
+    expect(narrowed.breaking.map((change) => change.path)).toContain('Asset.state');
+  });
+
   it('classifies an added REQUIRED field as breaking', () => {
     const current: ContractManifest = {
       ...base,

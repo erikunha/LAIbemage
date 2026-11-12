@@ -7,7 +7,15 @@
 export { runCancellationLadder, waitFor } from './cancel.js';
 export type { CancellationOutcome } from './cancel.js';
 
-export { FrameSizeError, LineDecoder, encodeFrame } from './framing.js';
+export {
+  encodeFrame,
+  FrameSizeError,
+  LineDecoder,
+  redactSecrets,
+  REDACTED,
+  WorkerStderrLog,
+} from './framing.js';
+export type { WorkerLogRecord } from './framing.js';
 
 export {
   assertMajorsCompatible,
@@ -20,10 +28,27 @@ export type { HostHelloInput } from './handshake.js';
 export { WorkerDeadlineError, WorkerLaunchError, WorkerProtocolError } from './errors.js';
 export type { WorkerFailureKind } from './errors.js';
 
-export { WorkerClient, WORKER_INTERPRETER_ENV, WORKER_SCRIPT_ENV } from './client.js';
+export {
+  isAllowedWorkerInterpreter,
+  spawnWorkerProcess,
+  WORKER_INTERPRETER_ALLOWLIST,
+} from './host.js';
+export type { WorkerSpawnInput, WorkerSpawnOptions } from './host.js';
+
+export {
+  computeBackoffDelayMs,
+  DEFAULT_WORKER_RETRY_POLICY,
+  requestWithRetry,
+  WorkerClient,
+  WORKER_INTERPRETER_ENV,
+  WORKER_SCRIPT_ENV,
+} from './client.js';
 export type {
   WorkerClientOptions,
   WorkerClientState,
   WorkerRequestInput,
   WorkerRequestResult,
+  WorkerRetryOptions,
+  WorkerRetryPolicy,
 } from './client.js';
+export type { RetryRandom, RetryReconcile, RetryReconcileContext } from './client.js';

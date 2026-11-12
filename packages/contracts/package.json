@@ -19,7 +19,8 @@
     "test": "vitest run --root ../.. packages/contracts/tests",
     "manifest:generate": "tsx scripts/generate-manifest.ts",
     "openapi:generate": "tsx scripts/generate-openapi.ts",
-    "openapi:snapshot": "tsx scripts/generate-openapi.ts --snapshot"
+    "openapi:snapshot": "tsx scripts/generate-openapi.ts --snapshot",
+    "worker-schema:snapshot": "tsx scripts/generate-worker-schemas.ts"
   },
   "dependencies": {
     "zod": "^4.4.3"

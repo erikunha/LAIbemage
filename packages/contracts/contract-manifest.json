@@ -332,7 +332,7 @@
         },
         "status": {
           "required": true,
-          "type": "enum(\"queued\"|\"running\"|\"succeeded\"|\"failed\"|\"cancelled\"|\"abstained\")"
+          "type": "enum(\"queued\"|\"running\"|\"cancel_requested\"|\"succeeded\"|\"failed\"|\"cancelled\"|\"abstained\")"
         },
         "metricsSummaryJson": {
           "required": false,
@@ -513,7 +513,7 @@
         },
         "status": {
           "required": true,
-          "type": "enum(\"queued\"|\"running\"|\"succeeded\"|\"failed\"|\"cancelled\"|\"abstained\")"
+          "type": "enum(\"queued\"|\"running\"|\"cancel_requested\"|\"succeeded\"|\"failed\"|\"cancelled\"|\"abstained\")"
         },
         "budgetJson": {
           "required": true,
@@ -593,6 +593,7 @@
     ],
     "JobState": [
       "abstained",
+      "cancel_requested",
       "cancelled",
       "failed",
       "queued",

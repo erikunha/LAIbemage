@@ -1,4 +1,4 @@
-import { spawn, type ChildProcess } from 'node:child_process';
+import type { ChildProcess } from 'node:child_process';
 import { randomUUID } from 'node:crypto';
 import {
   CONTRACTS_VERSION,
@@ -18,18 +18,21 @@ import {
 } from '@vision-lens/contracts';
 import { runCancellationLadder, waitFor, type CancellationOutcome } from './cancel.js';
 import { WorkerDeadlineError, WorkerLaunchError, WorkerProtocolError } from './errors.js';
-import { encodeFrame, FrameSizeError, LineDecoder } from './framing.js';
+import { encodeFrame, FrameSizeError, LineDecoder, WorkerStderrLog } from './framing.js';
 import { assertMajorsCompatible, buildHostHello, parseWorkerHello } from './handshake.js';
+import { spawnWorkerProcess } from './host.js';
 
 /**
  * The host side of the `visionlens.worker.v1` channel.
  *
  * Frames in, frames out, nothing else on those channels: the child's stdout
- * carries frames only, its stderr is captured as diagnostics, and the host
- * writes hello, request and cancel frames to the child's stdin. The
- * interpreter and the worker script come from the environment (or explicit
- * options), never from a hardcoded absolute path: they are the seam for a
- * container runtime or a virtualenv.
+ * carries frames only, its stderr is captured as structured, redacted log
+ * records ({@link WorkerClient.workerLogs}), and the host writes hello,
+ * request and cancel frames to the child's stdin. The interpreter and the
+ * worker script come from the environment (or explicit options), never from
+ * a hardcoded absolute path: they are the seam for a container runtime or a
+ * virtualenv. The launch itself is owned by `host.ts`: a fixed interpreter
+ * allowlist, pipes only, no shell.
  */
 
 /** Environment variable carrying the interpreter executable (for example python3). */
@@ -112,9 +115,6 @@ const DEFAULTS = {
   terminateGraceMs: 1_500,
 } as const;
 
-/** How much worker stderr is kept for diagnostics. */
-const STDERR_TAIL_BYTES = 8 * 1024;
-
 export class WorkerClient {
   /**
    * Spawns the worker process and completes the handshake before returning.
@@ -132,12 +132,18 @@ export class WorkerClient {
 
     let child: ChildProcess;
     try {
-      child = spawn(interpreter, [scriptPath, ...(options.scriptArgs ?? [])], {
-        stdio: ['pipe', 'pipe', 'pipe'],
+      // Task 1.5 (FR-014): the launch lives in host.ts. The interpreter must
+      // pass the fixed allowlist, the child gets pipes only (nothing
+      // inherited), and the script path travels as argv, never through a
+      // shell.
+      child = spawnWorkerProcess({
+        interpreter,
+        scriptPath,
+        scriptArgs: options.scriptArgs,
         env: { ...process.env, ...options.env },
-        shell: false,
       });
     } catch (cause) {
+      if (cause instanceof WorkerLaunchError) throw cause;
       throw new WorkerLaunchError(
         'spawn-error',
         `the worker process could not be started: ${interpreter} ${scriptPath}`,
@@ -160,7 +166,7 @@ export class WorkerClient {
   private readonly terminatedIds = new Set<string>();
   private readonly cancelAcks = new Set<string>();
   private readonly decoder: LineDecoder;
-  private readonly stderrTail: Buffer[] = [];
+  private readonly stderrLog = new WorkerStderrLog();
   private readonly handshakePromise: Promise<void>;
   private handshakeResolvers: { resolve: () => void; reject: (error: Error) => void } | null = null;
   private workerHello: WorkerHelloFrame | null = null;
@@ -219,6 +225,17 @@ export class WorkerClient {
 
   get clientState(): WorkerClientState {
     return this.state;
+  }
+
+  /**
+   * The worker's stderr as structured, redacted log records (task 1.6).
+   *
+   * Bounded to the most recent lines; each record carries its capture
+   * timestamp and its already-redacted text, so a secret the worker printed
+   * never reaches a caller.
+   */
+  workerLogs(): readonly import('./framing.js').WorkerLogRecord[] {
+    return this.stderrLog.records();
   }
 
   supportsOperation(operation: WorkerOperation): boolean {
@@ -699,15 +716,11 @@ export class WorkerClient {
   // ---------------------------------------------------------------- teardown
 
   private captureStderr(chunk: Buffer): void {
-    this.stderrTail.push(chunk);
-    let total = this.stderrTail.reduce((sum, part) => sum + part.byteLength, 0);
-    while (total > STDERR_TAIL_BYTES && this.stderrTail.length > 1) {
-      total -= this.stderrTail.shift()!.byteLength;
-    }
+    this.stderrLog.push(chunk);
   }
 
   private stderrExcerpt(): string {
-    const text = Buffer.concat(this.stderrTail).toString('utf8').trim();
+    const text = this.stderrLog.excerpt().trim();
     return text ? `; worker stderr: ${text.slice(-512)}` : '';
   }
 
@@ -749,4 +762,171 @@ function describeZodIssue(error: unknown): string {
     if (first) return `${first.path.join('.') || '(root)'}: ${first.message}`;
   }
   return String(error);
+}
+
+// -------------------------------------------------------------------- retry
+
+/**
+ * The bounded backoff policy of the worker host (task 2.6, FR-011).
+ *
+ * Every attempt is spaced by an exponentially growing delay with FULL
+ * JITTER (a uniform roll over `[0, min(maxDelayMs, baseDelayMs * 2^attempt)]`),
+ * capped by `maxDelayMs`, for at most `maxAttempts` attempts in total.
+ */
+export interface WorkerRetryPolicy {
+  /** Total attempts, including the first one (default 3). */
+  readonly maxAttempts: number;
+  /** The delay base in milliseconds (default 100). */
+  readonly baseDelayMs: number;
+  /** The delay ceiling in milliseconds (default 2 000). */
+  readonly maxDelayMs: number;
+}
+
+/** The default policy: three attempts, 100 ms base, 2 s ceiling. */
+export const DEFAULT_WORKER_RETRY_POLICY: WorkerRetryPolicy = {
+  maxAttempts: 3,
+  baseDelayMs: 100,
+  maxDelayMs: 2_000,
+} as const;
+
+/** The random source of the jitter; injectable for determinism under test. */
+export type RetryRandom = () => number;
+
+/**
+ * The delay before attempt `attempt` (1 = the first retry), with full
+ * jitter: a uniform roll over `[0, min(maxDelayMs, baseDelayMs * 2^(attempt-1))]`.
+ */
+export function computeBackoffDelayMs(
+  attempt: number,
+  policy: WorkerRetryPolicy,
+  random: RetryRandom = Math.random,
+): number {
+  const exponentialCap = policy.baseDelayMs * 2 ** (attempt - 1);
+  const cap = Math.min(policy.maxDelayMs, exponentialCap);
+  return Math.floor(cap * Math.min(Math.max(random(), 0), 1));
+}
+
+/** What a {@link RetryReconcile} sees about the failed attempt. */
+export interface RetryReconcileContext {
+  /** Which attempt failed; 1 is the first attempt. */
+  readonly attempt: number;
+  /** The requestId that failed (a later attempt gets a fresh one). */
+  readonly requestId: string;
+  /** The failure the attempt ended with. */
+  readonly error: unknown;
+}
+
+/**
+ * Proves a failed NON-idempotent attempt had no external effect, so a retry
+ * cannot double-apply it. Returning false stops the retry.
+ */
+export type RetryReconcile = (context: RetryReconcileContext) => Promise<boolean> | boolean;
+
+/** The retry options of {@link requestWithRetry}. */
+export interface WorkerRetryOptions {
+  /** The backoff policy; defaults to {@link DEFAULT_WORKER_RETRY_POLICY}. */
+  readonly policy?: WorkerRetryPolicy;
+  /**
+   * True only when the caller KNOWS the operation is idempotent (a failed
+   * attempt provably left no external state). Default false: unknown is
+   * treated as NON-idempotent.
+   */
+  readonly idempotent?: boolean;
+  /**
+   * The reconciliation hook for a non-idempotent request: it must prove the
+   * failed attempt had no external effect before a retry is allowed
+   * (FR-011: never blind-retry a non-idempotent external action).
+   */
+  readonly reconcile?: RetryReconcile;
+  /** The jitter source; injectable for determinism under test. */
+  readonly random?: RetryRandom;
+}
+
+/** True when the failure is a transient one the policy may retry. */
+function isTransientFailure(error: unknown): boolean {
+  if (error instanceof WorkerProtocolError || error instanceof WorkerDeadlineError) {
+    return error.retryable;
+  }
+  if (error instanceof WorkerLaunchError) return error.retryable;
+  return false;
+}
+
+/**
+ * True when the failed attempt's EXTERNAL effects are unknown at the host:
+ * the worker crashed or died mid-operation, so a non-idempotent external
+ * action may or may not have been applied (FR-011). Such failures are never
+ * blind-retried.
+ *
+ * `PROVIDER_UNAVAILABLE` is the opposite: the worker reported the provider
+ * never executed the call, so the failure itself proves no external effect
+ * and the bounded backoff applies directly.
+ */
+function hasUnknownExternalEffects(error: unknown): boolean {
+  if (error instanceof WorkerProtocolError) return error.code === 'WORKER_CRASHED';
+  if (error instanceof WorkerLaunchError) return error.kind === 'worker-died';
+  return false;
+}
+
+/**
+ * Sends one request under the retry policy (task 2.6, FR-011).
+ *
+ * Three rules, in order:
+ *
+ *  1. **Deterministic failures are never retried.** The retryable flag of
+ *     the frozen error vocabulary decides (an invalid input, an unsupported
+ *     operation, a budget or deadline failure returns immediately).
+ *  2. **A failure with unknown external effects is never blind-retried.**
+ *     When the attempt died mid-operation (`WORKER_CRASHED`, a worker
+ *     death), a non-idempotent external action may have been applied: the
+ *     retry happens only when the caller declared `idempotent` or when
+ *     `reconcile` PROVED the failed attempt had no external effect.
+ *     `PROVIDER_UNAVAILABLE` proves by itself that no call executed, so it
+ *     backs off directly.
+ *  3. **Transient failures back off with jitter, boundedly.** At most
+ *     `policy.maxAttempts` attempts total, spaced by
+ *     {@link computeBackoffDelayMs}.
+ *
+ * Every attempt is a NEW request with a NEW requestId (FR-013): the client
+ * refuses to reuse a terminated request's id, and a resumed attempt is a new
+ * request by definition. The first attempt keeps the caller's id when one
+ * was given; later attempts derive `${id}-a${n}` from it.
+ */
+export async function requestWithRetry(
+  client: Pick<WorkerClient, 'request'>,
+  input: WorkerRequestInput,
+  options: WorkerRetryOptions = {},
+): Promise<WorkerRequestResult> {
+  const policy = options.policy ?? DEFAULT_WORKER_RETRY_POLICY;
+  const idempotent = options.idempotent ?? false;
+  let lastError: unknown;
+
+  for (let attempt = 1; attempt <= policy.maxAttempts; attempt += 1) {
+    const requestId =
+      input.requestId === undefined || attempt === 1
+        ? input.requestId
+        : `${input.requestId}-a${attempt}`;
+
+    try {
+      return await client.request(requestId === undefined ? input : { ...input, requestId });
+    } catch (error) {
+      lastError = error;
+
+      if (!isTransientFailure(error)) throw error;
+      if (attempt >= policy.maxAttempts) throw error;
+
+      if (hasUnknownExternalEffects(error) && !idempotent) {
+        if (!options.reconcile) throw error;
+        const provenEffectFree = await options.reconcile({
+          attempt,
+          requestId: requestId ?? '(generated)',
+          error,
+        });
+        if (!provenEffectFree) throw error;
+      }
+
+      const delayMs = computeBackoffDelayMs(attempt, policy, options.random);
+      if (delayMs > 0) await new Promise((resolve) => setTimeout(resolve, delayMs));
+    }
+  }
+  throw lastError;
 }

@@ -31,6 +31,10 @@ jobs:
           node-version: 24
           cache: pnpm
       - run: pnpm install --frozen-lockfile
+      # typedoc resolves the sdk's workspace imports (@vision-lens/cli,
+      # @vision-lens/core/*) through their built dist type declarations;
+      # without this build every import is TS2307.
+      - run: pnpm run build
       - run: pnpm run docs:generate
       - uses: actions/configure-pages@v5
       - uses: actions/upload-pages-artifact@v3

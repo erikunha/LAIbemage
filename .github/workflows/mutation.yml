@@ -20,6 +20,11 @@ on:
         required: false
         default: ''
 
+# Least privilege: read the code, comment the score on PRs. Nothing else.
+permissions:
+  contents: read
+  pull-requests: write
+
 jobs:
   mutation:
     name: Stryker Mutation Score
@@ -67,9 +72,16 @@ jobs:
             let body;
             try {
               const report = JSON.parse(fs.readFileSync('reports/mutation/mutation.json', 'utf8'));
-              const score = report.metrics?.mutationScore?.toFixed(1) ?? 'N/A';
-              const killed = report.metrics?.killed ?? '?';
-              const survived = report.metrics?.survived ?? '?';
+              // Stryker 10 writes the mutation-testing schema v2: no top-level
+              // metrics object, mutants live under files[<path>].mutants[].
+              const mutants = Object.values(report.files ?? {})
+                .flatMap((file) => file.mutants ?? []);
+              const by = (status) => mutants.filter((m) => m.status === status).length;
+              const killed = by('Killed') + by('Timeout');
+              const survived = by('Survived') + by('NoCoverage');
+              const score = survived + killed > 0
+                ? ((killed / (killed + survived)) * 100).toFixed(1)
+                : 'N/A';
               const threshold = 70;
               const status = parseFloat(score) >= threshold ? '✅' : '❌';
               body = `## ${status} Mutation Score: ${score}%\n\n| Metric | Count |\n|---|---|\n| Killed | ${killed} |\n| Survived | ${survived} |\n\nThreshold: ${threshold}% — [Full report](${context.serverUrl}/${context.repo.owner}/${context.repo.repo}/actions/runs/${context.runId})`;

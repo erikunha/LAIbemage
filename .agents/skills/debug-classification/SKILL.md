@@ -1,6 +1,6 @@
 ---
 name: debug-classification
-description: Diagnose poor LLM classification results, from too many unknown images and wrong categories to inconsistent runs and consensus overrides.
+description: Diagnose poor LLM classification results, from too many unknown images and wrong categories to inconsistent runs and consensus overrides, as well as the security review of the untrusted LLM-output path.
 ---
 
 The full procedure lives at docs/procedures/debug-classification.md.

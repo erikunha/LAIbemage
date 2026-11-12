@@ -115,6 +115,7 @@ vision-lens import-run ./output/analysis_results.json --db ./store.db
 | `--db <path>` | the target store; defaults to the store's `defaultStorePath()` |
 
 The real output (dry run, against this repository's own historical run):
+(paths under the repository are shortened to repo-relative form in this listing)
 
 ```
 legacy run:      output/analysis_results.json

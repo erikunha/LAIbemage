@@ -52,7 +52,11 @@ const FORBIDDEN_TERMS_PATTERN = new RegExp(
   'g',
 );
 
-const EXEMPT_PATH_PREFIXES = ['docs/adr/', 'docs/migration/'];
+const EXEMPT_PATH_PREFIXES = ['docs/migration/'];
+// An ADR is exempt only under its canonical numbered file shape: the ADRs
+// legitimately discuss the harness, but the prefix alone must not shelter any
+// other file that lands in the directory.
+const EXEMPT_ADR_PATH_PATTERN = /^docs\/adr\/\d{3}-[a-z0-9-]+\.md$/;
 const EXEMPT_PATHS = new Set(['CHANGELOG.md', SELF_PATH]);
 
 const FORBIDDEN_PATH_PREFIXES = [
@@ -73,6 +77,7 @@ const ADAPTER_PATH_PREFIX = '.claude/skills/';
 
 function isExemptPath(filePath: string): boolean {
   if (EXEMPT_PATHS.has(filePath)) return true;
+  if (EXEMPT_ADR_PATH_PATTERN.test(filePath)) return true;
   return EXEMPT_PATH_PREFIXES.some((prefix) => filePath.startsWith(prefix));
 }
 
@@ -148,6 +153,36 @@ function findAdapterViolations(
   for (const name of adaptersByName.keys()) {
     if (!wrapperNames.includes(name)) {
       violations.push(`.claude/skills/${name}: no matching wrapper`);
+    }
+  }
+  return violations;
+}
+
+// Assertion C (procedure/wrapper parity): the coupling holds in both
+// directions. Every tracked procedure document except the README index has a
+// wrapper with the same stem, and every wrapper maps back to one procedure:
+// the two sets are equal by stem.
+const PROCEDURE_PATH_PATTERN = /^docs\/procedures\/[A-Za-z0-9._-]+\.md$/;
+const PROCEDURE_README = 'docs/procedures/README.md';
+
+function findProcedureWrapperParityViolations(trackedFiles: string[]): string[] {
+  const procedureStems = trackedFiles
+    .filter((filePath) => PROCEDURE_PATH_PATTERN.test(filePath) && filePath !== PROCEDURE_README)
+    .map((filePath) => filePath.slice('docs/procedures/'.length, -'.md'.length));
+  const wrapperStems = trackedFiles
+    .filter((filePath) => WRAPPER_SKILL_PATH_PATTERN.test(filePath))
+    .map((filePath) => filePath.split('/')[2]);
+  const violations: string[] = [];
+  for (const stem of [...new Set(procedureStems)].sort()) {
+    if (!wrapperStems.includes(stem)) {
+      violations.push(`docs/procedures/${stem}.md: no wrapper at .agents/skills/${stem}/SKILL.md`);
+    }
+  }
+  for (const stem of [...new Set(wrapperStems)].sort()) {
+    if (!procedureStems.includes(stem)) {
+      violations.push(
+        `.agents/skills/${stem}/SKILL.md: no procedure at docs/procedures/${stem}.md`,
+      );
     }
   }
   return violations;
@@ -259,6 +294,14 @@ describe('tracked files carry no personal harness material', () => {
     ).toEqual([]);
   });
 
+  it('keeps the procedure and wrapper sets equal in both directions', () => {
+    const violations = findProcedureWrapperParityViolations(listTrackedFiles());
+    expect(
+      violations,
+      `procedures and wrappers not paired one-to-one:\n${violations.join('\n')}`,
+    ).toEqual([]);
+  });
+
   it('keeps CLAUDE.md as a pure pointer to AGENTS.md', () => {
     const content = fs.readFileSync(path.join(REPO_ROOT, 'CLAUDE.md'), 'utf-8');
     expect(content).toBe(EXPECTED_CLAUDE_MD);
@@ -289,6 +332,16 @@ describe('findViolations negative controls', () => {
       },
     ]);
     expect(violations).toEqual([]);
+  });
+
+  it('exempts an ADR only under its canonical numbered file shape', () => {
+    const content = 'const tool = "model-delegate";\n';
+    expect(findViolations([{ path: 'docs/adr/scratch.md', content }])).toEqual([
+      'docs/adr/scratch.md line 1: forbidden term "model-delegate"',
+    ]);
+    expect(
+      findViolations([{ path: 'docs/adr/019-provider-agnostic-agent-surface.md', content }]),
+    ).toEqual([]);
   });
 
   it('flags tracked paths under agent-harness directories', () => {
@@ -325,6 +378,33 @@ describe('findViolations negative controls', () => {
     );
     expect(violations).toEqual([
       '.agents/skills/foo/SKILL.md: points at untracked docs/procedures/foo.md',
+    ]);
+  });
+
+  it('flags a wrapper whose body points at no procedure file at all', () => {
+    const violations = findWrapperPointerViolations(
+      [
+        {
+          path: '.agents/skills/baz/SKILL.md',
+          content: 'A wrapper whose body forgot its pointer entirely.\n',
+        },
+      ],
+      ['docs/procedures/baz.md'],
+    );
+    expect(violations).toEqual(['.agents/skills/baz/SKILL.md: no docs/procedures/ pointer']);
+  });
+
+  it('flags a procedure without a wrapper and a wrapper without a procedure', () => {
+    const violations = findProcedureWrapperParityViolations([
+      'docs/procedures/README.md',
+      'docs/procedures/search.md',
+      'docs/procedures/foo.md',
+      '.agents/skills/search/SKILL.md',
+      '.agents/skills/orphan/SKILL.md',
+    ]);
+    expect(violations).toEqual([
+      'docs/procedures/foo.md: no wrapper at .agents/skills/foo/SKILL.md',
+      '.agents/skills/orphan/SKILL.md: no procedure at docs/procedures/orphan.md',
     ]);
   });
 

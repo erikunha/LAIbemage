@@ -5,8 +5,10 @@ procedure must satisfy and how to register it in the index. Use it when a repeat
 this codebase deserves a written, step-by-step procedure that any engineer (or agent) can
 follow.
 
-Procedures here are plain markdown documents. There is no packaging format, no frontmatter, no
-registration beyond the index: a file in this directory is the whole procedure.
+Procedures here are plain markdown documents. The procedure itself has no packaging format and
+no frontmatter: a file in this directory is the whole procedure. Registering one adds an index
+line (step 5) and a thin skill wrapper that only points back at the file (step 6); the wrapper
+is a pointer, not packaging of content.
 
 ## Steps
 
@@ -68,7 +70,16 @@ Every procedure in this directory must:
 Add one line to the index table in `docs/procedures/README.md`: the slug and a one-line
 description of when to use it.
 
-### 6. Verify
+### 6. Expose the procedure as a skill
+
+Create a thin wrapper at `.agents/skills/<name>/SKILL.md`, modeled on the existing ten: a
+frontmatter block (`name` and `description`) and a body that only points at
+`docs/procedures/<name>.md`. Add the relative symlink `.claude/skills/<name>` with target
+`../../.agents/skills/<name>`. The meta guard (`packages/core/tests/meta/ai-config.test.ts`)
+holds this surface 1:1 with `docs/procedures/` in both directions: a procedure without a
+wrapper, or a wrapper without a procedure, fails the suite.
+
+### 7. Verify
 
 - Walk the steps as if you were following them cold
 - Confirm every file reference exists in the codebase

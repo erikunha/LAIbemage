@@ -66,9 +66,10 @@ next to the plain docs, and nothing more.
 - Ten thin wrappers under `.agents/skills/`, one per procedure, each a `SKILL.md` whose body only
   points at its `docs/procedures/<name>.md`. The procedure file stays the single source of truth;
   the wrapper duplicates nothing.
-- Static relative symlinks under `.claude/skills/` serve as generic runtime adapters. There are no
-  generators, no checker scripts, no role agents and no rules adapters: the rules live in
-  `STANDARDS.md` chapter 10.
+- Static relative symlinks under `.claude/skills/` serve as generic runtime adapters, the one
+  deliberate, guard-enforced exception to decision 1's "nothing tracked assumes a particular
+  coding agent". There are no generators, no checker scripts, no role agents and no rules
+  adapters: the rules live in `STANDARDS.md` chapter 10.
 - The surface is project property only, and the no-cross-reference invariant holds in both
   directions: tracked files never name any developer's personal harness, and a personal harness
   never hardcodes this repository.
@@ -96,4 +97,5 @@ flowchart LR
 
 The guard test now enforces the refined shape instead of a blanket ban: wrapper and adapter
 integrity are proven on the tracked set, and every other path under the harness directories
-stays forbidden.
+stays forbidden. Removing the surface again is a plain revert of the ten wrappers, the ten
+symlinks and the guard allow-list.

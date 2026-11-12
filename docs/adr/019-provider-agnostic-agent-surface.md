@@ -2,7 +2,7 @@
 
 | Field    | Value                   |
 | -------- | ----------------------- |
-| Status   | Accepted                |
+| Status   | Superseded by ADR-020   |
 | Date     | 2026-11-11              |
 | Deciders | @erikunha |
 

@@ -71,8 +71,8 @@ boundary rule that stops firing fails the build.
 
 Every other edge in the table is **held by PR review only**. No lint rule reads the table, and no
 script walks the workspace to prove that, say, `packages/core/src/processor/` stayed free of
-analyzer imports. The review checklist in `.claude/agents/code-reviewer.md` and `.claude/commands/review.md`
-covers those edges, which is a real check performed by a reader, not a mechanical one. A rule
+analyzer imports. The review contract in `REVIEW.md` and the procedures in `docs/procedures/`
+cover those edges, which is a real check performed by a reader, not a mechanical one. A rule
 the table states and only review holds is a real rule with a real enforcement, but it is not the
 same kind of enforcement, and the difference is stated here so no one mistakes one for the other.
 
@@ -100,12 +100,13 @@ command CI runs, so a drop below the threshold fails the job. The `packages/core
 mirrors `packages/core/src/`, and the coverage configuration in the same file names the paths it
 excludes and why.
 
-Assertion quality, fixture completeness and the mocking seam are **held by review** and by the
-`test-author` agent. There is no meta-test that reads the test files and fails when one greps
-the source. The mutation run is the closest mechanical proxy: `stryker.config.mjs` scopes it to
-the pure logic modules, and the mutation workflow runs Stryker against them, so a surviving
-mutant is a behavior the suite does not actually pin down. It covers a slice of the suite, so it
-is a signal about the hardest part, not a proof about the rest.
+Assertion quality, fixture completeness and the mocking seam are **held by review** against the
+contract in `REVIEW.md` and the test-module checklist in chapter 10. There is no meta-test that
+reads the test files and fails when one greps the source. The mutation run is the closest
+mechanical proxy: `stryker.config.mjs` scopes it to the pure logic modules, and the mutation
+workflow runs Stryker against them, so a surviving mutant is a behavior the suite does not
+actually pin down. It covers a slice of the suite, so it is a signal about the hardest part,
+not a proof about the rest.
 
 ---
 
@@ -163,9 +164,9 @@ inspects a string is a caller that breaks when the message changes.
 store live in `packages/core/src/store/errors.ts` and are part of the public surface of that
 module, and the contract schemas in `packages/contracts/src` are the typed vocabulary shared
 across packages, so a payload crossing a package boundary is validated rather than trusted. The
-CLI's exit codes are a contract with the shell, and the `dx-engineer` agent audits them.
+CLI's exit codes are a contract with the shell, and a CLI UX review audits them.
 
-The logger rule itself is **held by review and by the `dx-engineer` audit**, not by lint: the
+The logger rule itself is **held by review**, not by lint: the
 ESLint configuration leaves `no-console` off, because the sink itself and the progress renderer
 need it. So the rule is real and enforced by a checklist, but it is not a compiler or a lint
 failure. This document states the gap so it is not mistaken for coverage.
@@ -288,32 +289,258 @@ does, and the blocking findings must be answered before the change lands.
 
 ---
 
-## 10. The agent surface
+## 10. Per-module boundary checklists
 
-**Rule.** The repository's own skills are canonical. A skill in the repository's skill directories
-supplies the method for a surface, and a skill that does not apply is not run. The maintainer's
-personal global skills are optional extras: they may add method, they never override a
-repository skill, and they never become a second source of truth about this codebase. An agent
-runs the gate before claiming a change is done, and cites what it ran. Spec material is not part
-of the repository: the tracked record of the same decisions is the ADR series and the roadmap,
-and an agent that receives spec material receives it through the dispatch channel, not through
-git.
+**Rule.** The boundary table in `AGENTS.md` is the contract; the checklists below are the
+working detail behind it, one section per module: the prohibitions and requirements that the
+mechanical boundary rule does not enforce. A reviewer walks the checklist of every module a
+change touches.
 
-**Rationale.** Two skills that both claim to describe how to add a provider will disagree, and
-the disagreement is discovered at the worst moment: halfway through a change, with the wrong one
-already applied. One canonical source per surface removes the ambiguity. The rule about global
-skills follows from the same place: a personal library is fine as a library, and a problem the
-moment it becomes the authority for a shared repository. The spec rule keeps the same property
-here: the durable decisions are tracked, the planning material is not, so a collaborator inherits
-the constraints without inheriting a tool lock-in.
+**Rationale.** Only the provider-SDK edge is mechanically enforced (chapter 2). The rest of the
+boundary knowledge lives in prose, and prose that lives nowhere is a rule nobody checks. A
+compact checklist per module keeps the review actionable without restating the table it
+summarizes.
 
-**How it is held.** Held by the **structure of the repository** and by review, not by a gate. The
-skill directories are the canonical registry, one directory per skill with its own entry file,
-and the repository's own skill-creation procedure documents the format. The agent roster is
-listed in `AGENTS.md` and mirrored for the other agent runtime, so a reader can see which agent
-owns which surface. The ADR series and the roadmap are the tracked mirrors of the planning work,
-as ADR-010 records.
+**How it is held.** Held by review: `REVIEW.md` is the contract for what blocks a merge, and
+these checklists are what the reviewer, human or agent, actually verifies module by module.
+Nothing mechanical reads this chapter; a checklist item violated is a review finding, not a
+build failure, and the difference is the same one chapter 2 states.
 
-That an agent reads a skill's trigger before running it, and that a global skill is used only
-when it fits the same surface, is **held by culture and review**. Nothing prevents a wrong skill
-from being loaded; the review catches the result.
+### `packages/core/src/analyzer/` (analyzer)
+
+- Owns all LLM API calls through the `LLMClient` abstraction in `client.ts`. Only
+  `providers/*.ts` may import an LLM SDK, one SDK per file; `client.ts` is a thin routing layer
+  that imports from `./providers/` and never an SDK directly.
+- Sharp may be imported only in `batch.ts` (resize before the API call), `dedup.ts` (perceptual
+  hash) and `async-batch.ts` (image encoding).
+- Batch calls use `detail: 'low'`; reclassification passes use `detail: 'high'`. Every LLM call
+  is wrapped in `withRetry()` from `../utils/retry.js`; quota or credit exhaustion throws
+  immediately, never retries.
+- Failed batch slots are filled with `unknown` placeholders; raw API errors never reach the
+  user.
+- Perceptual dedup: dHash 9x8, `config.dedupeThreshold` Hamming distance 0 to 64 (0 disables,
+  default 8), 60-second burst window, injectable `hashFn`. Temporal consensus:
+  `config.temporalWindowMinutes` (default 5) and `config.consensusThreshold` (default 0.6);
+  `immune` categories are never overridden.
+- Increment `CACHE_SCHEMA_VERSION` in `packages/core/src/types.ts` whenever `AnalysisCache`
+  fields change; the migration chain `migrateCache()` in `packages/core/src/store/migrate.ts`
+  runs on every cache read.
+- A new analysis pass: the function lives in `packages/core/src/analyzer/index.ts`, receives
+  `client: LLMClient` as a parameter (never creates clients), and its tests in
+  `packages/core/tests/analyzer/` mock `LLMClient`, not SDK constructors.
+
+### `packages/core/src/classifier/` (classifier)
+
+- Pure grouping, sorting and rule evaluation: zero I/O, zero external dependencies, zero side
+  effects, deterministic and synchronous on the same input.
+- Never import an LLM SDK, Sharp, `fs-extra` or `node:fs`; no `console.log`; return data and
+  let callers log.
+- Sorting: categories not in `pinnedLast` come first alphabetically; `pinnedLast` categories
+  come last in array order; `unknown` is config-driven, never special-cased; empty categories
+  are omitted.
+- Key functions: `groupByCategory()`, `getSortedCategories()`, `isImmune()`,
+  `classifyAndSort()`; all pure, tested without mocks.
+
+### `packages/cli/src/` (cli)
+
+- Commander.js wiring only: parse flags into `RawCliOptions`, call `loadConfig()`, delegate to
+  `runBatch`, `runReorder` or `runSingle` from `packages/core/src/index.ts`. No business logic,
+  no LLM calls, no image processing; logic that is not pure wiring moves to
+  `packages/core/src/index.ts` or `packages/core/src/config/`.
+- Never import `sharp`, an LLM SDK, `fs-extra` or any analyzer, processor or classifier module.
+  Allowed imports: `config/`, `index`, `utils/logger`.
+- Numeric flags (`--batch-size`, `--max-retries`, `--concurrency`) parse with
+  `parseInt(value, 10)`; booleans cast with `Boolean(...)`; validation errors log via
+  `logger.error()` then `process.exit(1)`; never override a `process.exitCode` set by business
+  logic (exit code 2 marks partial failures); the `reorder` subcommand uses
+  `REORDER_SENTINEL_KEY` from `packages/core/src/config/index.ts`.
+- `packages/cli/src/help.ts` mirrors every flag of `index.ts` in its OPTIONS table (flag, arg
+  placeholder, description, default) and carries at least one example per subcommand;
+  `console.log` appears only inside `printHelp()`; defaults live in `loadConfig()` and the
+  `.option()` call, never duplicated here.
+- `runBatch` / `runReorder` / `runSingle` are imported only by `packages/cli/src/index.ts`.
+
+### `packages/core/src/config/` (config)
+
+- Single source of truth for runtime configuration: CLI flags over env vars over `.env` over
+  defaults; `Config` is immutable after `loadConfig()` returns (every field `readonly`). No
+  business logic here, and no `sharp`, LLM SDK or `fs-extra` imports.
+- `categories.json` is validated at load time by `CategoryConfigSchema` (Zod); never bypass it
+  with `JSON.parse(...) as CategoryConfig`. Schema invariants: names match
+  `/^[a-z][a-z0-9_]*$/`; `pinnedLast`, `immune`, `overridable` entries are defined category
+  names or `"unknown"`; `timezone` is a valid IANA zone; at least one category exists. Keep the
+  `CategoryConfig` interface in sync with the schema.
+- New flag checklist: optional field in `RawCliOptions`, `readonly` field in `Config`, wiring in
+  `loadConfig()` (`cliOptions.foo ?? process.env['FOO'] ?? default`), `.option(...)` in
+  `packages/cli/src/index.ts`, a row in `packages/cli/src/help.ts`, and the field added to every
+  `makeConfig()` fixture in `packages/*/tests/` (never `as Config`). Commonly missed:
+  `concurrency: 1`, `estimate: false`, `temporalWindowMinutes: 5`, `consensusThreshold: 0.6`,
+  `dedupeThreshold: 0`.
+- Keys are validated in `loadConfig()` before it returns, failing fast with the billing URL;
+  `validateStartup()` in `packages/core/src/index.ts` rechecks presence; API keys are never
+  logged, even at verbose level.
+- `computeCategoriesHash()` (SHA-256, 12 hex chars, sorted names) is stored in
+  `AnalysisCache.categoriesHash` and `PartialAnalysisCache.categoriesHash` and compared on
+  `--skip-analysis` loads; a cache-breaking field change increments `CACHE_SCHEMA_VERSION`.
+- Zod `.default([])` returns mutable arrays: treat them as readonly in callers.
+
+### `packages/core/src/` (core modules)
+
+- The boundary table in `AGENTS.md` is the contract. The eslint `no-restricted-imports` rule in
+  `eslint.config.js` enforces the provider-SDK edge, and `scripts/check-boundaries.mjs` (run by
+  `packages/core/tests/boundaries.test.ts`) proves the rule fires by linting a violating fixture
+  and a clean one.
+- Only `packages/core/src/analyzer/providers/` may import an LLM SDK; a new module importing one
+  anywhere else is a boundary violation.
+- Every relative import ends in `.js`, even in a `.ts` file (NodeNext resolution; ADR-001).
+- `packages/core/src/utils/logger.ts` is the only sanctioned log sink: files under `packages/**`
+  call the logger, never `console.log` (held by review; the linter leaves `no-console` off).
+- TypeScript strict; no `any` without an `eslint-disable` comment saying why. The version
+  constants describing persisted shapes live once in `packages/core/src/types.ts`:
+  `CACHE_SCHEMA_VERSION` and `PLUGIN_API_VERSION`.
+- A new module needs its own directory under `packages/core/src/`, a matching test directory
+  under `packages/core/tests/` and a row in the `AGENTS.md` boundary table.
+
+### `packages/core/src/plugin/` (plugin)
+
+- The lifecycle hook dispatcher and the only module that loads external user-supplied `.mjs`
+  files at runtime; purely dispatch and isolation, no business logic, no LLM SDK or Sharp.
+- `loadPlugins()` resolves each path against `process.cwd()`, imports via
+  `pathToFileURL(resolved).href` (ESM-safe) and validates the default export is an object with a
+  `name: string`; a failed load is logged as a warning and skipped, never thrown.
+- Every `fire*` call wraps each plugin in try/catch, warns and continues; hooks run
+  fire-and-forget sequential in load order, all return `Promise<void>`; a failed hook is never
+  retried and never blocks the run.
+- Security: never pass `config.apiKey`, `config.anthropicApiKey` or `config.googleApiKey` to
+  hooks; validate plugin paths resolve to an absolute path before import; expose only
+  `AnalyzedImage`, `ProcessedResult` and `AnalysisCache`, never the internal `Config`; log the
+  resolved path at verbose level, never keys.
+- New lifecycle hook: optional method on `Plugin` in `packages/core/src/types.ts` (with JSDoc),
+  a matching `fire<HookName>()` in `packages/core/src/plugin/index.ts` following the
+  try/catch-per-plugin pattern, the call site in `packages/core/src/index.ts`, tests in
+  `packages/core/tests/plugin/index.test.ts` (hook called, hook absent, hook throws isolated,
+  multiple plugins all called), `PLUGIN_API_VERSION` bump if breaking, and a
+  `packages/cli/src/help.ts` update when user-facing.
+
+### `packages/core/src/processor/` (processor)
+
+- Owns all Sharp image processing; never imports an LLM SDK. The module has no knowledge of
+  category names: `skipOverlay: true` is a caller decision from `packages/core/src/index.ts`,
+  not a hardcoded category list.
+- Output JPEG: `quality: 100`, `chromaSubsampling: '4:4:4'`, `mozjpeg: false`, always
+  `.withMetadata()` so EXIF survives.
+- Timestamp overlay: red, bold Arial, centered horizontally, 3% gap from bottom; font size via
+  `calculateFontSize(height)` with base ratio 3.5%, XL boost x1.4, Large boost x1.25, clamped
+  56 to 320 px.
+- `calculateFontSize`, `formatTimestamp`, `buildTimestampSvg` and `calculateOverlayPosition`
+  are pure (no I/O); keep them that way.
+- Output filename `NNN. Photo of category name dated DD-MM-YYYY.jpeg`: numbers zero-padded to 3
+  digits, category underscores become spaces. Dry-run mode logs via `logger.verbose()` and
+  writes nothing to disk.
+
+### `packages/core/src/reporter/` (reporter)
+
+- Pure output module over `ProcessedResult[]` (HTML, CSV, XLSX): reads data and writes files,
+  never calls an LLM, never modifies the cache.
+- HTML escaping is mandatory: every embedded field (`category`, `shortDescription`, `elements`,
+  `condition`, `originalFile`) goes through a dedicated `escapeHtml()` replacing `&`, `<`, `>`,
+  `"`, `'`. No template literals with raw LLM data, no raw `innerHTML` or `document.write`, and
+  `originalFile` / `outputFile` paths never become `<a href>` links (path-traversal risk in LLM
+  output).
+- CSV is RFC 4180: every field double-quoted, internal `"` doubled, fixed header
+  `number,file,category,shortDescription,condition,elements,timestamp`, `elements`
+  semicolon-joined inside the quoted field.
+- Allowed imports: `fs-extra`, `exceljs` (XLSX only, in `xlsx.ts`), `ProcessedResult` from
+  `packages/core/src/types.ts`, and the logger. Never an LLM SDK, Sharp, `analyzer/` or
+  `classifier/`.
+- Tests in `packages/core/tests/reporter/`: XSS tests are mandatory (a result with
+  `category: '<script>alert(1)</script>'` must not produce `<script>` in the output); `csv.ts`
+  tests as a pure function without mocks.
+
+### `packages/core/src/reviewer/` (reviewer)
+
+- The interactive TTY review loop between the analysis pass and the processing pass in
+  `packages/core/src/index.ts`; zero filesystem side effects, mutates only in-memory
+  `AnalyzedImage` copies and never the input array.
+- TTY guard: when `!process.stdin.isTTY`, return
+  `{ images, overrides: [], skipped: [] }` immediately; a CI or piped run never blocks.
+- Ctrl-C in `@inquirer/select` or `@inquirer/input` throws; catch it and treat it as `quit`.
+  Actions: `accept`, `change` (category validated against `config.categoryConfig.categories`),
+  `skip`, `quit`. `ReviewResult` carries the images, the `ReviewOverride[]` audit trail
+  (`packages/core/src/types.ts`) and the skipped files.
+- Allowed imports: `@inquirer/select` and `@inquirer/input` for TTY interaction, types, the
+  `Config` type and the logger; never an LLM SDK, Sharp or `fs-extra`.
+- Tests mock the inquirer modules with `vi.mock` at module level, force the TTY guard via
+  `Object.defineProperty(process.stdin, 'isTTY', { value: false })`, simulate sessions with
+  chained `vi.fn().mockResolvedValueOnce(...)`, and assert a Ctrl-C error resolves rather than
+  rejects.
+
+### `scripts/` (scripts)
+
+- Developer-facing TypeScript utilities run with `tsx`; not compiled to `dist/`, never imported
+  from `packages/core/src/`, and never importing `packages/cli/src/` (Commander wiring is not
+  reusable). Imports from core go only through the public exports of
+  `packages/core/src/index.ts`, `packages/core/src/config/index.ts`,
+  `packages/core/src/utils/` and `packages/core/src/analyzer/index.ts`.
+- All relative imports end in `.js` (NodeNext applies repo-wide); argument parsing stays plain
+  `process.argv` (no Commander or yargs as script dependencies).
+- Read-only by default: a script that mutates `packages/*/src/` or `packages/*/tests/` prints a
+  `[dry-run]` preview first; `process.exit(0)` never appears in a happy path, only
+  `process.exit(1)` in error handlers.
+- Legacy synthetic benchmark (`scripts/benchmark-legacy.ts`): results in
+  `reports/benchmark/<provider>.json` (git-ignored), baseline in
+  `packages/core/tests/fixtures/benchmark/baseline.json` (git-tracked, updated with
+  `--update-baseline`), regression threshold 5% on precision, recall and unknown rate across
+  `openai`, `anthropic`, `google`, `--check-regression` exits 1 on regression. Its numbers are
+  synthetic colour swatches and never a product accuracy claim (ADR-008). Real-data artifacts
+  live under `benchmarks/` (`benchmarks/results/<runId>/`, `benchmarks/baselines/<suite>.json`,
+  `benchmarks/splits/*.gold.json`) behind `vision-lens benchmark run|gate|report`.
+- Fixture generators check `access()` before writing (never overwrite an existing fixture), log
+  `[fixtures] N images ready in <path>`, and create JPEGs with Sharp at quality 80 to 85 with
+  EXIF timestamps carried in the `Copyright` field of `IFD0` (a Sharp API limitation).
+
+### `packages/*/tests/` and `apps/*/tests/` (tests)
+
+- Vitest 4 with globals; tests mirror `src/` as `tests/[module]/[file].test.ts`
+  (e.g. `packages/core/tests/analyzer/batch.test.ts` for
+  `packages/core/src/analyzer/batch.ts`).
+- Mock the `LLMClient` interface from `packages/core/src/analyzer/client.ts` (and
+  `AsyncBatchClient` for async batch); never `vi.mock('openai')` or any SDK constructor. Pure
+  functions (`classifier/`, `processor/overlay.ts`) need no mocks at all. `packages/cli/src/`
+  and `packages/core/src/index.ts` are excluded from coverage and untested by design.
+- Every `makeConfig()` and inline Config carries all required fields, never `as Config`: the
+  full fixture includes `concurrency: 1`, `estimate: false`, `temporalWindowMinutes: 5`,
+  `consensusThreshold: 0.6`, `dedupeThreshold: 0`, `forceSkipAnalysis: false`, `asyncBatch:
+  false`, `resumeBatch: false`, `timing: false`, `watch: false`, `watchPoll: false`,
+  `interactive: false`, `plugins: []`, `linkImages: false`, `linkWindowDays: 7`. `AnalysisResult`
+  fixtures carry `fullDescription: ''`, `confidence: 0`, `extractedText: null`; cache fixtures
+  carry `schemaVersion: CACHE_SCHEMA_VERSION` and `categoriesHash`.
+- Fake timers only together with `runAllTimersAsync()` or `advanceTimersByTimeAsync()`;
+  otherwise pass `delayMs: 0`. Reset mocks with `vi.clearAllMocks()` in `beforeEach` or
+  `afterEach`.
+- Test the happy path, edge cases (empty input, single image, exact-threshold values), error
+  branches (API failure, quota exceeded, malformed JSON, wrong-shape JSON), Zod envelope
+  rejection (an object missing the `images` key logs a warning), and pure math exhaustively
+  (font clamping, timestamp formatting, SVG dimensions).
+- Coverage thresholds in `vitest.config.ts`: lines 75%, functions 85%, branches 75%; the
+  exclusion list (CLI wiring, top-level orchestration, the live SDK adapter, integration
+  orchestration, config I/O, exporter file I/O, terminal UI) is intentional.
+
+### `packages/core/src/utils/` (utils)
+
+- Pure helpers with no side effects, fully unit-testable without mocks; never import an LLM
+  SDK, Sharp or `fs-extra`; no direct `process.exit()` (callers are responsible for exiting).
+- `console.log` / `console.error` are allowed only in `logger.ts` and `progress.ts`; everything
+  else in the module is side-effect-free.
+- `logger.ts`: a single `logger` object (`info`, `success`, `warn`, `error`, `verbose`, `raw`)
+  with module-level `_quiet` and `_verbose` set once via `configureLogger()`; no new log levels
+  without updating the `LogLevel` type.
+- `retry.ts`: `withRetry()` retries with linear back-off; quota errors (OpenAI, Anthropic,
+  Google) are never retried; 429 rate-limit errors retry at constant delay; always throw
+  `new Error(...)`, never a string; `sleep(ms)` is exported for batch processing.
+- `exif.ts`: `getImageTimestamp()` priority EXIF DateTimeOriginal, then birthtime, then ctime;
+  dynamic `import('exifr')` keeps the module tree-shakeable; falls through on parse failure,
+  never throws.
+- `cost.ts`: `PROVIDER_PRICING`, `TOKENS_PER_IMAGE`, `PROMPT_OVERHEAD_TOKENS`,
+  `OUTPUT_TOKENS_PER_IMAGE` are module-level `const` exports; `estimateCost()` and
+  `formatCostRow()` are pure; `printCostEstimate()` is the only stdout writer here.

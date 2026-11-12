@@ -16,6 +16,7 @@ import { describe, expect, it } from 'vitest';
 import { readBaselineFile, type BaselineEntry, type BaselineFile } from '../../src/benchmark/gate.js';
 import type { PredictionItem } from '../../src/benchmark/metrics.js';
 import { findDataset, loadDatasetRegistry } from '../../src/benchmark/registry.js';
+import { DEFAULT_MIN_SAMPLES } from '../../src/benchmark/runner.js';
 import {
   computeManifestHash,
   computePartitionFingerprint,
@@ -174,7 +175,7 @@ describe('the scorecard over the tracked split (SC-001)', () => {
     expect(result.ok).toBe(true);
     if (!result.ok) return;
     expect(result.scorecard.supportRule).toBe(SCORECARD_DEFAULT_MIN_SUPPORT);
-    expect(SCORECARD_DEFAULT_MIN_SUPPORT).toBeLessThan(30);
+    expect(SCORECARD_DEFAULT_MIN_SUPPORT).toBeLessThan(DEFAULT_MIN_SAMPLES);
     // Every defect class (support 20) survives the rule.
     expect(result.scorecard.perClass).toHaveLength(5);
   });

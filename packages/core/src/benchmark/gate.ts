@@ -52,11 +52,23 @@
  * The gate never weakens itself to make an old number pass: a number measured
  * on a partition the platform no longer tracks is retired with an explicit
  * reason, not compared.
+ *
+ * ## A scorecard is a regime, not just a split
+ *
+ * A run that carries a scorecard is a test-partition number; a baseline
+ * recorded by the whole-set runner is a whole-set number, and the two SHARE a
+ * split fingerprint, so the split-identity checks alone cannot tell them
+ * apart. The gate therefore routes such a comparison through the scorecard's
+ * own guard (`checkScorecardBaseline`, spec 022) before any macro F1 is
+ * compared: a cross-regime, retired, other-split or partial baseline is
+ * refused with the scorecard's typed error codes (FR-014, FR-020). A run
+ * that carries no scorecard is compared exactly as before.
  */
 
 import { existsSync, mkdirSync, readFileSync, readdirSync, writeFileSync } from 'node:fs';
 import path from 'node:path';
 import type { MetricsResult } from './metrics.js';
+import { checkScorecardBaseline, type Scorecard } from './scorecard.js';
 
 /** Schema version of the baseline file. Bump on a breaking change. */
 export const BASELINE_SCHEMA_VERSION = 1;
@@ -122,6 +134,12 @@ export interface BaselineEntry {
   readonly splitFingerprint?: string;
   /** The config fingerprint of the recorded run. */
   readonly configFingerprint?: string;
+  /**
+   * The metric regime of the recorded number (spec 022, FR-014): the
+   * scorecard's own `regime` when the baseline is written from a scorecard
+   * run. An entry that carries none is a whole-set runner number.
+   */
+  readonly regime?: string;
   /**
    * The state of the entry.
    *
@@ -212,6 +230,20 @@ export interface GateOptions {
   readonly modelVersion?: string;
   /** The metrics of the run being gated. */
   readonly metrics: MetricsResult;
+  /**
+   * The scorecard of the run being gated, when the run produced one.
+   *
+   * A scorecard is a test-partition number (`regime: SCORECARD_REGIME`), while
+   * a baseline recorded by the whole-set runner is a whole-set number; the two
+   * share a split fingerprint, so the split-identity checks alone cannot tell
+   * them apart. When the run carries its scorecard, the gate routes the
+   * baseline comparison through the scorecard's own guard
+   * (`checkScorecardBaseline`, spec 022) before any number is compared: a
+   * cross-regime, retired, other-split or partial baseline is refused with the
+   * scorecard's typed error codes (FR-014, FR-020). A run that carries no
+   * scorecard is compared exactly as before.
+   */
+  readonly scorecard?: Scorecard;
   /**
    * The reproduction tuple of the run being gated.
    *
@@ -673,6 +705,11 @@ export function evaluateGate(options: GateOptions): GateResult {
       ...(options.attribution?.configFingerprint === undefined
         ? {}
         : { configFingerprint: options.attribution.configFingerprint }),
+      // A baseline recorded from a scorecard run carries the scorecard's own
+      // regime (spec 022, FR-014), so the next scorecard run reads it back as
+      // the same regime instead of a whole-set number. A whole-set rewrite
+      // adds no key and stays byte-identical to what it wrote before.
+      ...(options.scorecard === undefined ? {} : { regime: options.scorecard.regime }),
       generatedAt: now.toISOString(),
     };
 
@@ -711,6 +748,32 @@ export function evaluateGate(options: GateOptions): GateResult {
     };
   }
 
+  // 4. The regime check of the scorecard (spec 022, FR-014, FR-020): a run
+  //    that carries a scorecard is compared against the baseline only through
+  //    the scorecard's own guard, BEFORE any number is compared. The guard
+  //    refuses a partial scorecard, a retired baseline (evidence, never a
+  //    comparison), a baseline of another split (both digests named) and a
+  //    cross-regime baseline (a test-partition scorecard against a whole-set
+  //    number), each with its typed code. A RETIRED entry reaches the guard
+  //    here: against a scorecard it is REFUSED with its recorded reason, not
+  //    skipped, so a historical number can never silently bless a
+  //    test-partition run. Like the split-identity check below, this compares
+  //    against the baseline recorded NOW, so it is skipped when the caller
+  //    rewrites the baseline: recording a new baseline is how a suite migrates
+  //    from the whole-set regime to the scorecard regime.
+  if (options.scorecard !== undefined) {
+    const scorecardBaseline =
+      baseline ?? findRetiredBaselineEntry(file, options.suite, options.model, modelVersion);
+    if (scorecardBaseline !== undefined) {
+      const check = checkScorecardBaseline(options.scorecard, scorecardBaseline);
+      if (!check.ok) {
+        return failedGate(
+          `${check.error.message} (scorecard error code '${check.error.code}')`,
+        );
+      }
+    }
+  }
+
   if (baseline === undefined) {
     const retired = findRetiredBaselineEntry(file, options.suite, options.model, modelVersion);
     return {
@@ -729,7 +792,7 @@ export function evaluateGate(options: GateOptions): GateResult {
     };
   }
 
-  // 4. The split the tracked baseline was measured against must BE the split
+  // 5. The split the tracked baseline was measured against must BE the split
   //    that is tracked now. A number measured on a partition the platform no
   //    longer tracks must not bless a run.
   let splitIdentity: GateSplitIdentity | undefined;

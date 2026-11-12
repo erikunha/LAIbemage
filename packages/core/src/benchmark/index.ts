@@ -23,6 +23,10 @@ export {
 export * from './config-fingerprint.js';
 export * from './runner.js';
 export * from './gate.js';
+// The scorecard (spec 022) owns the regime vocabulary the gate's comparison
+// path consumes through `checkScorecardBaseline`; none of its export names
+// collides with the modules above.
+export * from './scorecard.js';
 export * from './registry.js';
 export * from './normalize.js';
 export * from './dataset-availability.js';

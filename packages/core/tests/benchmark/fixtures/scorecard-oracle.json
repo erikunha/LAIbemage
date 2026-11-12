@@ -1,0 +1,2045 @@
+{
+  "description": "Oracle fixture of the evaluation scorecard v2. The expected values were computed by an independent Python enumeration that shares no code with the TypeScript metric modules. The manifest carries no manifestHash: the test attaches the shipped computeManifestHash before building the scorecard.",
+  "manifest": {
+    "schemaVersion": 2,
+    "id": "scorecard-oracle.gold",
+    "datasetId": "scorecard-oracle",
+    "seed": 7,
+    "ratios": {
+      "train": 0.6,
+      "val": 0.2,
+      "test": 0.2
+    },
+    "strata": [
+      {
+        "class": "alpha",
+        "anomaly": "anomalous",
+        "total": 50,
+        "train": 30,
+        "val": 10,
+        "test": 10
+      },
+      {
+        "class": "beta",
+        "anomaly": "anomalous",
+        "total": 50,
+        "train": 30,
+        "val": 10,
+        "test": 10
+      },
+      {
+        "class": "gamma",
+        "anomaly": "normal",
+        "total": 55,
+        "train": 33,
+        "val": 11,
+        "test": 11
+      },
+      {
+        "class": "delta",
+        "anomaly": "anomalous",
+        "total": 25,
+        "train": 15,
+        "val": 5,
+        "test": 5
+      }
+    ],
+    "assignments": [
+      {
+        "id": "alpha/anomalous/000",
+        "class": "alpha",
+        "anomaly": "anomalous",
+        "split": "train",
+        "sha256": "f3d41c29780bce209726544e664297a6a689672c6bbf3a938d0158a6d072371d",
+        "path": "alpha/anomalous/000.jpg"
+      },
+      {
+        "id": "alpha/anomalous/001",
+        "class": "alpha",
+        "anomaly": "anomalous",
+        "split": "train",
+        "sha256": "1a0adad5e9db90585304864ce20c429b1da99f7dc70483e2622af1accd20ab15",
+        "path": "alpha/anomalous/001.jpg"
+      },
+      {
+        "id": "alpha/anomalous/002",
+        "class": "alpha",
+        "anomaly": "anomalous",
+        "split": "train",
+        "sha256": "24897ca41e3164d39bff006dca8bee53ac83607aee9314fc6dd2869a36051065",
+        "path": "alpha/anomalous/002.jpg"
+      },
+      {
+        "id": "alpha/anomalous/003",
+        "class": "alpha",
+        "anomaly": "anomalous",
+        "split": "train",
+        "sha256": "5836915effa32ae5f08b2b4feaf7a76f3a5343b56a2c574727530c9c171c8ab2",
+        "path": "alpha/anomalous/003.jpg"
+      },
+      {
+        "id": "alpha/anomalous/004",
+        "class": "alpha",
+        "anomaly": "anomalous",
+        "split": "train",
+        "sha256": "b1f78e9f072080868a039f02c0f65ce752cfa7a624c5c00d0b7ef1f912931e83",
+        "path": "alpha/anomalous/004.jpg"
+      },
+      {
+        "id": "alpha/anomalous/005",
+        "class": "alpha",
+        "anomaly": "anomalous",
+        "split": "train",
+        "sha256": "507c8d4f712b74b326755229fe638097c63fe3c1b89889d2fd420a994cfa599e",
+        "path": "alpha/anomalous/005.jpg"
+      },
+      {
+        "id": "alpha/anomalous/006",
+        "class": "alpha",
+        "anomaly": "anomalous",
+        "split": "train",
+        "sha256": "2dcd555f51c6ff9d3ab9c6e18466b4afbbf99a430c9d11e98534027aa9155b38",
+        "path": "alpha/anomalous/006.jpg"
+      },
+      {
+        "id": "alpha/anomalous/007",
+        "class": "alpha",
+        "anomaly": "anomalous",
+        "split": "train",
+        "sha256": "6a331963579dda3945868f44b2088ee94f26622f612d07da15af385f1bdf937b",
+        "path": "alpha/anomalous/007.jpg"
+      },
+      {
+        "id": "alpha/anomalous/008",
+        "class": "alpha",
+        "anomaly": "anomalous",
+        "split": "train",
+        "sha256": "7141e2503ed31c57f4f3d70860f07fc01ef41cd947d51a3df5bda4adc7a62981",
+        "path": "alpha/anomalous/008.jpg"
+      },
+      {
+        "id": "alpha/anomalous/009",
+        "class": "alpha",
+        "anomaly": "anomalous",
+        "split": "train",
+        "sha256": "f5caa9f950a9928d54c16015e2b12433aa49f89a214deba1118d2c68c4b69ab4",
+        "path": "alpha/anomalous/009.jpg"
+      },
+      {
+        "id": "alpha/anomalous/010",
+        "class": "alpha",
+        "anomaly": "anomalous",
+        "split": "train",
+        "sha256": "f768737c99626e5b73aa421b09c94304420c1abbee605a610c75e506af2110e2",
+        "path": "alpha/anomalous/010.jpg"
+      },
+      {
+        "id": "alpha/anomalous/011",
+        "class": "alpha",
+        "anomaly": "anomalous",
+        "split": "train",
+        "sha256": "18e8abe0a59a83638d03136f09ff2775e04adb51d9d09095041b79674f1e53fe",
+        "path": "alpha/anomalous/011.jpg"
+      },
+      {
+        "id": "alpha/anomalous/012",
+        "class": "alpha",
+        "anomaly": "anomalous",
+        "split": "train",
+        "sha256": "32894b3e26378772a6be7900717cace84f16626f55c1eea5b9903c04dd3630ed",
+        "path": "alpha/anomalous/012.jpg"
+      },
+      {
+        "id": "alpha/anomalous/013",
+        "class": "alpha",
+        "anomaly": "anomalous",
+        "split": "train",
+        "sha256": "601a20530ec5dd779a3aeae865f16284fb55b4a6b3cfef143135845a1de31c01",
+        "path": "alpha/anomalous/013.jpg"
+      },
+      {
+        "id": "alpha/anomalous/014",
+        "class": "alpha",
+        "anomaly": "anomalous",
+        "split": "train",
+        "sha256": "1e9124be95fc2f57a7afe5adbafbcb05359e6a0d52d6eac1d1746e21ae9836a2",
+        "path": "alpha/anomalous/014.jpg"
+      },
+      {
+        "id": "alpha/anomalous/015",
+        "class": "alpha",
+        "anomaly": "anomalous",
+        "split": "train",
+        "sha256": "e2beb125567f0578aeb9839542d33d9479ae36230f0ce1e21b27a234423fff09",
+        "path": "alpha/anomalous/015.jpg"
+      },
+      {
+        "id": "alpha/anomalous/016",
+        "class": "alpha",
+        "anomaly": "anomalous",
+        "split": "train",
+        "sha256": "c6454ec270d4397218289ba22cf5abaf85262a02df564185e8aecbaf205d09fb",
+        "path": "alpha/anomalous/016.jpg"
+      },
+      {
+        "id": "alpha/anomalous/017",
+        "class": "alpha",
+        "anomaly": "anomalous",
+        "split": "train",
+        "sha256": "8bdae7796610bd98182deaed6e8822c72bba5dd834a3d5e42336b684ef65ebe9",
+        "path": "alpha/anomalous/017.jpg"
+      },
+      {
+        "id": "alpha/anomalous/018",
+        "class": "alpha",
+        "anomaly": "anomalous",
+        "split": "train",
+        "sha256": "a29b0be3363882041913d1ec7bf92cfd00477a2480c45e0ad59dc8d3513d5dd5",
+        "path": "alpha/anomalous/018.jpg"
+      },
+      {
+        "id": "alpha/anomalous/019",
+        "class": "alpha",
+        "anomaly": "anomalous",
+        "split": "train",
+        "sha256": "3686b30e84d79414d03b94424e4f9d06c2a1d7d09892f05183e944777aeb70bd",
+        "path": "alpha/anomalous/019.jpg"
+      },
+      {
+        "id": "alpha/anomalous/020",
+        "class": "alpha",
+        "anomaly": "anomalous",
+        "split": "train",
+        "sha256": "056207105508ad2ecb5420adeb873deda2f0a687d2f2c81f0eade9d7303b835f",
+        "path": "alpha/anomalous/020.jpg"
+      },
+      {
+        "id": "alpha/anomalous/021",
+        "class": "alpha",
+        "anomaly": "anomalous",
+        "split": "train",
+        "sha256": "0c8834d70765d925c020f3916484c7a5c7b6bf9bfe934d44ab2b10312b342bd8",
+        "path": "alpha/anomalous/021.jpg"
+      },
+      {
+        "id": "alpha/anomalous/022",
+        "class": "alpha",
+        "anomaly": "anomalous",
+        "split": "train",
+        "sha256": "7eb7988cf357ef738f58813a809e07c665b93179655dfefbdcc362ea8602fb0e",
+        "path": "alpha/anomalous/022.jpg"
+      },
+      {
+        "id": "alpha/anomalous/023",
+        "class": "alpha",
+        "anomaly": "anomalous",
+        "split": "train",
+        "sha256": "a20016ad7284900f313c2ad3a1f824aca793d4da4470e522ac96a4b31161d544",
+        "path": "alpha/anomalous/023.jpg"
+      },
+      {
+        "id": "alpha/anomalous/024",
+        "class": "alpha",
+        "anomaly": "anomalous",
+        "split": "train",
+        "sha256": "65d5c43a5faa866f958f22ea1557190182c6d9d95c0b26b126a235d2e721114f",
+        "path": "alpha/anomalous/024.jpg"
+      },
+      {
+        "id": "alpha/anomalous/025",
+        "class": "alpha",
+        "anomaly": "anomalous",
+        "split": "train",
+        "sha256": "b27fb6283120d65cefe55c7c1c8c56061edf2bebf9e338e1822ad49cc7df8d73",
+        "path": "alpha/anomalous/025.jpg"
+      },
+      {
+        "id": "alpha/anomalous/026",
+        "class": "alpha",
+        "anomaly": "anomalous",
+        "split": "train",
+        "sha256": "32bbf8a0ec1e05f6c31fd55d4964dbf3371fb22036a7f803260b42723a5faea3",
+        "path": "alpha/anomalous/026.jpg"
+      },
+      {
+        "id": "alpha/anomalous/027",
+        "class": "alpha",
+        "anomaly": "anomalous",
+        "split": "train",
+        "sha256": "511a0458eeaebbbbe4af55d773f0e4c4329bc505e9adbbe2c37a7deafdc35e2e",
+        "path": "alpha/anomalous/027.jpg"
+      },
+      {
+        "id": "alpha/anomalous/028",
+        "class": "alpha",
+        "anomaly": "anomalous",
+        "split": "train",
+        "sha256": "2c14a143abc022a1ab4bb9b6aa1f4c4fb60464fa08e75b30f1b267ff88e4725e",
+        "path": "alpha/anomalous/028.jpg"
+      },
+      {
+        "id": "alpha/anomalous/029",
+        "class": "alpha",
+        "anomaly": "anomalous",
+        "split": "train",
+        "sha256": "9401f87fceb71364d67635c56fe464c544838f2bdd309b7ef62fefa7819fdc78",
+        "path": "alpha/anomalous/029.jpg"
+      },
+      {
+        "id": "alpha/anomalous/030",
+        "class": "alpha",
+        "anomaly": "anomalous",
+        "split": "val",
+        "sha256": "8f757564819210c25c63cab9f82eedfe36d860c939f3ddc9e892f8c7dd27183f",
+        "path": "alpha/anomalous/030.jpg"
+      },
+      {
+        "id": "alpha/anomalous/031",
+        "class": "alpha",
+        "anomaly": "anomalous",
+        "split": "val",
+        "sha256": "475ec57d11a10516287964bde83b6190c97309aa503099a377a6ce98d6ec4fb6",
+        "path": "alpha/anomalous/031.jpg"
+      },
+      {
+        "id": "alpha/anomalous/032",
+        "class": "alpha",
+        "anomaly": "anomalous",
+        "split": "val",
+        "sha256": "2a6149c6973b0ecda4b475250d481acf1ac07759e351a01af435afd363972f44",
+        "path": "alpha/anomalous/032.jpg"
+      },
+      {
+        "id": "alpha/anomalous/033",
+        "class": "alpha",
+        "anomaly": "anomalous",
+        "split": "val",
+        "sha256": "d9902421a4e256bcaddef06b087be52871b29111b4f701b5cdad7b804814b863",
+        "path": "alpha/anomalous/033.jpg"
+      },
+      {
+        "id": "alpha/anomalous/034",
+        "class": "alpha",
+        "anomaly": "anomalous",
+        "split": "val",
+        "sha256": "4653cbdc5e8c26802ee29766b02c9b5e7fd1680a854177d3ced51e018031eea9",
+        "path": "alpha/anomalous/034.jpg"
+      },
+      {
+        "id": "alpha/anomalous/035",
+        "class": "alpha",
+        "anomaly": "anomalous",
+        "split": "val",
+        "sha256": "fec9b1f8b22c0c9367e21dd81ec387dddcc242c533fe333ecc48030775de3e69",
+        "path": "alpha/anomalous/035.jpg"
+      },
+      {
+        "id": "alpha/anomalous/036",
+        "class": "alpha",
+        "anomaly": "anomalous",
+        "split": "val",
+        "sha256": "df5c1a095a437ab38bbb0cbed1d4da865e0ef4635fe4d6fbab4e465751fe2c39",
+        "path": "alpha/anomalous/036.jpg"
+      },
+      {
+        "id": "alpha/anomalous/037",
+        "class": "alpha",
+        "anomaly": "anomalous",
+        "split": "val",
+        "sha256": "59387fde1472c81f367b6101598a368cc6de89d86e60aa2bf90c76f0a43bff14",
+        "path": "alpha/anomalous/037.jpg"
+      },
+      {
+        "id": "alpha/anomalous/038",
+        "class": "alpha",
+        "anomaly": "anomalous",
+        "split": "val",
+        "sha256": "d7a49ef23142000496f03e581e63c80f9e95b86c7627a7d311920d83033e95a4",
+        "path": "alpha/anomalous/038.jpg"
+      },
+      {
+        "id": "alpha/anomalous/039",
+        "class": "alpha",
+        "anomaly": "anomalous",
+        "split": "val",
+        "sha256": "2bf684eddfb967eff7f5745151188c7c78a0cf066a3cacc43bde354720b067c6",
+        "path": "alpha/anomalous/039.jpg"
+      },
+      {
+        "id": "alpha/anomalous/040",
+        "class": "alpha",
+        "anomaly": "anomalous",
+        "split": "test",
+        "sha256": "9bbb34b48204290d25cc14a332ea8a22bbe49a47ebcc656b13e7bfe98f1b5a99",
+        "path": "alpha/anomalous/040.jpg"
+      },
+      {
+        "id": "alpha/anomalous/041",
+        "class": "alpha",
+        "anomaly": "anomalous",
+        "split": "test",
+        "sha256": "4e09aa8afa29506df78c56f350f8093a3d321b9decd2a585d55e3ff205a49d3c",
+        "path": "alpha/anomalous/041.jpg"
+      },
+      {
+        "id": "alpha/anomalous/042",
+        "class": "alpha",
+        "anomaly": "anomalous",
+        "split": "test",
+        "sha256": "6b25817d97867e05f5e3d68ccb7444395b095a7df3971615e7dfe9dece36f15e",
+        "path": "alpha/anomalous/042.jpg"
+      },
+      {
+        "id": "alpha/anomalous/043",
+        "class": "alpha",
+        "anomaly": "anomalous",
+        "split": "test",
+        "sha256": "580951e15c2dcf3858ece61b96858afdf1021210a4be7439afe3b5708b126454",
+        "path": "alpha/anomalous/043.jpg"
+      },
+      {
+        "id": "alpha/anomalous/044",
+        "class": "alpha",
+        "anomaly": "anomalous",
+        "split": "test",
+        "sha256": "c0515780bb97f25d59be851aaeb99c4a15962452c26b78f6bc36664703b681ad",
+        "path": "alpha/anomalous/044.jpg"
+      },
+      {
+        "id": "alpha/anomalous/045",
+        "class": "alpha",
+        "anomaly": "anomalous",
+        "split": "test",
+        "sha256": "9e621eddd80daa88fbbbaea2c5ac159f79a43c6b2eca7b06ed9e9f2d6af3efee",
+        "path": "alpha/anomalous/045.jpg"
+      },
+      {
+        "id": "alpha/anomalous/046",
+        "class": "alpha",
+        "anomaly": "anomalous",
+        "split": "test",
+        "sha256": "fa4ab0f6f37641a302ca335130ec1941d1db35e353da81a68cc4f84e46a15955",
+        "path": "alpha/anomalous/046.jpg"
+      },
+      {
+        "id": "alpha/anomalous/047",
+        "class": "alpha",
+        "anomaly": "anomalous",
+        "split": "test",
+        "sha256": "fcdb01263a4f7734bf49dd4d322b7fbd4f4b77ab994e3215e0bdf6032f337ecd",
+        "path": "alpha/anomalous/047.jpg"
+      },
+      {
+        "id": "alpha/anomalous/048",
+        "class": "alpha",
+        "anomaly": "anomalous",
+        "split": "test",
+        "sha256": "d4b9e1d613eb520f7aa8732f71c731343fd4364fcfdbc5615aa074ec78c33883",
+        "path": "alpha/anomalous/048.jpg"
+      },
+      {
+        "id": "alpha/anomalous/049",
+        "class": "alpha",
+        "anomaly": "anomalous",
+        "split": "test",
+        "sha256": "842cb0bb441ea429411f9680cc611fad84ca8a824b76ce21ac9a673b979a5c6a",
+        "path": "alpha/anomalous/049.jpg"
+      },
+      {
+        "id": "beta/anomalous/000",
+        "class": "beta",
+        "anomaly": "anomalous",
+        "split": "train",
+        "sha256": "7cccaa4c5a3cbe63adabfb05f189c204e9dbccf42c933a9ecda1b897128913f3",
+        "path": "beta/anomalous/000.jpg"
+      },
+      {
+        "id": "beta/anomalous/001",
+        "class": "beta",
+        "anomaly": "anomalous",
+        "split": "train",
+        "sha256": "1a86dcfb4878a2974126ab3a965af1fed108400c4d5d7d12fa41d5847ad9c9fb",
+        "path": "beta/anomalous/001.jpg"
+      },
+      {
+        "id": "beta/anomalous/002",
+        "class": "beta",
+        "anomaly": "anomalous",
+        "split": "train",
+        "sha256": "c73f338c2e1ce4aed0a21549e7783257a9ff9982889de934b9a316c9427080ba",
+        "path": "beta/anomalous/002.jpg"
+      },
+      {
+        "id": "beta/anomalous/003",
+        "class": "beta",
+        "anomaly": "anomalous",
+        "split": "train",
+        "sha256": "05bd64fe1b4a894b45b2bf7ef08b42cb6947e3892b74f5bc8ea2f6540ba17d3c",
+        "path": "beta/anomalous/003.jpg"
+      },
+      {
+        "id": "beta/anomalous/004",
+        "class": "beta",
+        "anomaly": "anomalous",
+        "split": "train",
+        "sha256": "983ae02026dba178145cf8872b392e1447c12928e9c624bd00aeb238a83e8969",
+        "path": "beta/anomalous/004.jpg"
+      },
+      {
+        "id": "beta/anomalous/005",
+        "class": "beta",
+        "anomaly": "anomalous",
+        "split": "train",
+        "sha256": "2c0f8d41ae5a6029d717ca3400da2228f91d56800abe8fa444c93de986b5968a",
+        "path": "beta/anomalous/005.jpg"
+      },
+      {
+        "id": "beta/anomalous/006",
+        "class": "beta",
+        "anomaly": "anomalous",
+        "split": "train",
+        "sha256": "8ce400813ce2d1a4d216904d3cca1e684abb7a0cb2844112d2dd64a7068da61a",
+        "path": "beta/anomalous/006.jpg"
+      },
+      {
+        "id": "beta/anomalous/007",
+        "class": "beta",
+        "anomaly": "anomalous",
+        "split": "train",
+        "sha256": "40c4c29de51d7f9458284dc41924060fcad82f57b03fa3e7db7fe46e65e28d93",
+        "path": "beta/anomalous/007.jpg"
+      },
+      {
+        "id": "beta/anomalous/008",
+        "class": "beta",
+        "anomaly": "anomalous",
+        "split": "train",
+        "sha256": "8f13078bb5b649c694615861781b3f3b29a14f45b60509b70ce2d4c4c7a4a203",
+        "path": "beta/anomalous/008.jpg"
+      },
+      {
+        "id": "beta/anomalous/009",
+        "class": "beta",
+        "anomaly": "anomalous",
+        "split": "train",
+        "sha256": "f9b861138f4ce8e1ea5ea6385f0fa317c946ecde043626518e49844faf63d9b0",
+        "path": "beta/anomalous/009.jpg"
+      },
+      {
+        "id": "beta/anomalous/010",
+        "class": "beta",
+        "anomaly": "anomalous",
+        "split": "train",
+        "sha256": "1cedb56e32eb8735c4fb07e44250eb973137c8fec506d8fafc3ed9026b0cd78d",
+        "path": "beta/anomalous/010.jpg"
+      },
+      {
+        "id": "beta/anomalous/011",
+        "class": "beta",
+        "anomaly": "anomalous",
+        "split": "train",
+        "sha256": "6a00c1e4339f0c860ef6741ff7af0242a051d1bebd11dc2ad0c8c3a5e1ba5edd",
+        "path": "beta/anomalous/011.jpg"
+      },
+      {
+        "id": "beta/anomalous/012",
+        "class": "beta",
+        "anomaly": "anomalous",
+        "split": "train",
+        "sha256": "8895901f25cdb1193a1d976efc7ce972ace5bf4156d6fca4e9936a81bdfd6de7",
+        "path": "beta/anomalous/012.jpg"
+      },
+      {
+        "id": "beta/anomalous/013",
+        "class": "beta",
+        "anomaly": "anomalous",
+        "split": "train",
+        "sha256": "6a9406847696e6d67ee7fbc1212b5ef293ac76bfcd03f889db53e2044bd7f15b",
+        "path": "beta/anomalous/013.jpg"
+      },
+      {
+        "id": "beta/anomalous/014",
+        "class": "beta",
+        "anomaly": "anomalous",
+        "split": "train",
+        "sha256": "07d64cdd2d39a44dcf746d82e02065477e14af58f63241a5811f20ceff55c2aa",
+        "path": "beta/anomalous/014.jpg"
+      },
+      {
+        "id": "beta/anomalous/015",
+        "class": "beta",
+        "anomaly": "anomalous",
+        "split": "train",
+        "sha256": "6983ad166e7f71566b19343693180c7c70ba73b1d581bc296cb1a288f2fb41da",
+        "path": "beta/anomalous/015.jpg"
+      },
+      {
+        "id": "beta/anomalous/016",
+        "class": "beta",
+        "anomaly": "anomalous",
+        "split": "train",
+        "sha256": "d616e39e42e73863149e4e6cfabf5a07f74956bd43b949a1d03926072360ba10",
+        "path": "beta/anomalous/016.jpg"
+      },
+      {
+        "id": "beta/anomalous/017",
+        "class": "beta",
+        "anomaly": "anomalous",
+        "split": "train",
+        "sha256": "dae1f00669479703ccdb4784a4a618b1b1d21f052a347be5a8c301db5684a27a",
+        "path": "beta/anomalous/017.jpg"
+      },
+      {
+        "id": "beta/anomalous/018",
+        "class": "beta",
+        "anomaly": "anomalous",
+        "split": "train",
+        "sha256": "98589afc4145ed4fefcb5ef4b80140040c2fefa68ebf4527c6ef6c8d788deddc",
+        "path": "beta/anomalous/018.jpg"
+      },
+      {
+        "id": "beta/anomalous/019",
+        "class": "beta",
+        "anomaly": "anomalous",
+        "split": "train",
+        "sha256": "c1d347dd7aec8c8b247853733d09189deaa934593a0210cee232b10cd19f5c0e",
+        "path": "beta/anomalous/019.jpg"
+      },
+      {
+        "id": "beta/anomalous/020",
+        "class": "beta",
+        "anomaly": "anomalous",
+        "split": "train",
+        "sha256": "86b203a04bbead72bfb73b71e720e30d391550eabadac54e65426bd0b6383101",
+        "path": "beta/anomalous/020.jpg"
+      },
+      {
+        "id": "beta/anomalous/021",
+        "class": "beta",
+        "anomaly": "anomalous",
+        "split": "train",
+        "sha256": "4153d07cc9b97808aad81f8ab297ed87bc7d293617879e46793ff65527fdf5f7",
+        "path": "beta/anomalous/021.jpg"
+      },
+      {
+        "id": "beta/anomalous/022",
+        "class": "beta",
+        "anomaly": "anomalous",
+        "split": "train",
+        "sha256": "18c381e2bc07103a0b8b660577fffc43a4c729800fd928cbd107f5f85e4dcf5c",
+        "path": "beta/anomalous/022.jpg"
+      },
+      {
+        "id": "beta/anomalous/023",
+        "class": "beta",
+        "anomaly": "anomalous",
+        "split": "train",
+        "sha256": "65baf23b991ac6dfcbc370304177322db7449824b4883f1e12e9932f0715d434",
+        "path": "beta/anomalous/023.jpg"
+      },
+      {
+        "id": "beta/anomalous/024",
+        "class": "beta",
+        "anomaly": "anomalous",
+        "split": "train",
+        "sha256": "919fd65c12b316575c6b1b0946d664b7eac39aec847ea31bbfdfd57a3d6e20f0",
+        "path": "beta/anomalous/024.jpg"
+      },
+      {
+        "id": "beta/anomalous/025",
+        "class": "beta",
+        "anomaly": "anomalous",
+        "split": "train",
+        "sha256": "396b9809b2ccb67bcf6d55547f51d3f12f46bf155ce3fbfe04793fc777825be0",
+        "path": "beta/anomalous/025.jpg"
+      },
+      {
+        "id": "beta/anomalous/026",
+        "class": "beta",
+        "anomaly": "anomalous",
+        "split": "train",
+        "sha256": "d3eebae54a3cc4a9181fe35e40b0cd916bf32c8c4510088c91fde6d86fd8e675",
+        "path": "beta/anomalous/026.jpg"
+      },
+      {
+        "id": "beta/anomalous/027",
+        "class": "beta",
+        "anomaly": "anomalous",
+        "split": "train",
+        "sha256": "6bf9e2d9239fea5557868893d8ac994a366246a465e425bb68048e4e0a360b6a",
+        "path": "beta/anomalous/027.jpg"
+      },
+      {
+        "id": "beta/anomalous/028",
+        "class": "beta",
+        "anomaly": "anomalous",
+        "split": "train",
+        "sha256": "b72f583a7d26df2fbf7102a1ecfb30ac5e7a0edb3a5dd2b21f97f07c172cf8dd",
+        "path": "beta/anomalous/028.jpg"
+      },
+      {
+        "id": "beta/anomalous/029",
+        "class": "beta",
+        "anomaly": "anomalous",
+        "split": "train",
+        "sha256": "d6e83126268eaf2830189414318e29fa868a0b9103aeec6f5b293dff86694840",
+        "path": "beta/anomalous/029.jpg"
+      },
+      {
+        "id": "beta/anomalous/030",
+        "class": "beta",
+        "anomaly": "anomalous",
+        "split": "val",
+        "sha256": "19455dd18e2d104249f78bda0c8c73273be15fb21bac49c12bef3ab98cc6bf5c",
+        "path": "beta/anomalous/030.jpg"
+      },
+      {
+        "id": "beta/anomalous/031",
+        "class": "beta",
+        "anomaly": "anomalous",
+        "split": "val",
+        "sha256": "dc2cce47dee318704bce5e770239a7ca01040c83e40b88cb966071b977fe6389",
+        "path": "beta/anomalous/031.jpg"
+      },
+      {
+        "id": "beta/anomalous/032",
+        "class": "beta",
+        "anomaly": "anomalous",
+        "split": "val",
+        "sha256": "20d1c745fe94adf8c4652eae373f17fd80357f8bb51564eabcdfca0a45dfb4e5",
+        "path": "beta/anomalous/032.jpg"
+      },
+      {
+        "id": "beta/anomalous/033",
+        "class": "beta",
+        "anomaly": "anomalous",
+        "split": "val",
+        "sha256": "ccbbce202bcad10eb9a901802c685f330ee5e9708e554006eff56ec92dcf8819",
+        "path": "beta/anomalous/033.jpg"
+      },
+      {
+        "id": "beta/anomalous/034",
+        "class": "beta",
+        "anomaly": "anomalous",
+        "split": "val",
+        "sha256": "bf842c458013f8b77094c8375cdd8de67f977caad21031a889b4b0cc3b81bff8",
+        "path": "beta/anomalous/034.jpg"
+      },
+      {
+        "id": "beta/anomalous/035",
+        "class": "beta",
+        "anomaly": "anomalous",
+        "split": "val",
+        "sha256": "277539aba21a8f9efdde6052f845fe05082123c6af8cacfac21e0614d6edc583",
+        "path": "beta/anomalous/035.jpg"
+      },
+      {
+        "id": "beta/anomalous/036",
+        "class": "beta",
+        "anomaly": "anomalous",
+        "split": "val",
+        "sha256": "72dc5ffc4e8877506fffb236a3312e1f464408912c4292c882a24ce11edd72a2",
+        "path": "beta/anomalous/036.jpg"
+      },
+      {
+        "id": "beta/anomalous/037",
+        "class": "beta",
+        "anomaly": "anomalous",
+        "split": "val",
+        "sha256": "7d78d96fc4752f4c36c1ed890d86602fa1475164fc6d040e4848b0dcaf92b2ea",
+        "path": "beta/anomalous/037.jpg"
+      },
+      {
+        "id": "beta/anomalous/038",
+        "class": "beta",
+        "anomaly": "anomalous",
+        "split": "val",
+        "sha256": "539ac5b247f6c4f8466e1440587bc701b4cd01416fad89ebbe9119d348733ba5",
+        "path": "beta/anomalous/038.jpg"
+      },
+      {
+        "id": "beta/anomalous/039",
+        "class": "beta",
+        "anomaly": "anomalous",
+        "split": "val",
+        "sha256": "644f8eabd8258712183f080f36a9fdae32ae42845d63ca687ac689cf351820e6",
+        "path": "beta/anomalous/039.jpg"
+      },
+      {
+        "id": "beta/anomalous/040",
+        "class": "beta",
+        "anomaly": "anomalous",
+        "split": "test",
+        "sha256": "ac1d4f8c62a375946d67adef85b45e12cd95bf4170de563273b7b45b7293bdcf",
+        "path": "beta/anomalous/040.jpg"
+      },
+      {
+        "id": "beta/anomalous/041",
+        "class": "beta",
+        "anomaly": "anomalous",
+        "split": "test",
+        "sha256": "9c023805fefa984de3c8f0e65f5115fa740a9a5f1b98b51b0dbb9244988bf3c1",
+        "path": "beta/anomalous/041.jpg"
+      },
+      {
+        "id": "beta/anomalous/042",
+        "class": "beta",
+        "anomaly": "anomalous",
+        "split": "test",
+        "sha256": "d107d7d96b6979d7963bbe48079155f8f4f7e997b770a2d61c2f533946b65c54",
+        "path": "beta/anomalous/042.jpg"
+      },
+      {
+        "id": "beta/anomalous/043",
+        "class": "beta",
+        "anomaly": "anomalous",
+        "split": "test",
+        "sha256": "5a2ab32959af782be87a93b8068853e415a992872e15264fa51fe04d45296c64",
+        "path": "beta/anomalous/043.jpg"
+      },
+      {
+        "id": "beta/anomalous/044",
+        "class": "beta",
+        "anomaly": "anomalous",
+        "split": "test",
+        "sha256": "f07c0641a791eb841055ffcd5eefdf9483edc06cb734f43eba694daa3489c006",
+        "path": "beta/anomalous/044.jpg"
+      },
+      {
+        "id": "beta/anomalous/045",
+        "class": "beta",
+        "anomaly": "anomalous",
+        "split": "test",
+        "sha256": "51bcda7ec927f88337125ebebf601a25ce82625fc696123a64da95fe8b880c22",
+        "path": "beta/anomalous/045.jpg"
+      },
+      {
+        "id": "beta/anomalous/046",
+        "class": "beta",
+        "anomaly": "anomalous",
+        "split": "test",
+        "sha256": "d7fe073dd8580d98ed375f9a8f999998b48de3be83ba28b37cdb0091dffb46a6",
+        "path": "beta/anomalous/046.jpg"
+      },
+      {
+        "id": "beta/anomalous/047",
+        "class": "beta",
+        "anomaly": "anomalous",
+        "split": "test",
+        "sha256": "3c7efb73b7ef46a3aa6f99d2a25fec4490006d743faebcfec847329e68408e22",
+        "path": "beta/anomalous/047.jpg"
+      },
+      {
+        "id": "beta/anomalous/048",
+        "class": "beta",
+        "anomaly": "anomalous",
+        "split": "test",
+        "sha256": "b613d03d6a19c87776c60c2951f38f40ce552e4e099b85ea7d472b269c63d1d8",
+        "path": "beta/anomalous/048.jpg"
+      },
+      {
+        "id": "beta/anomalous/049",
+        "class": "beta",
+        "anomaly": "anomalous",
+        "split": "test",
+        "sha256": "d7990979bae7dd7e2533b7bb5ccd5f403b10fd3811cf16a0d91a14bfa7750d8b",
+        "path": "beta/anomalous/049.jpg"
+      },
+      {
+        "id": "delta/anomalous/000",
+        "class": "delta",
+        "anomaly": "anomalous",
+        "split": "train",
+        "sha256": "c6ef6adeee6564b3abdcbead59ac2eb6cb8993988804d8bc3a802c7695d97101",
+        "path": "delta/anomalous/000.jpg"
+      },
+      {
+        "id": "delta/anomalous/001",
+        "class": "delta",
+        "anomaly": "anomalous",
+        "split": "train",
+        "sha256": "56d389686664fd2b13a7ed207ac5f7f99591557a944dff7987eae4ca6372747d",
+        "path": "delta/anomalous/001.jpg"
+      },
+      {
+        "id": "delta/anomalous/002",
+        "class": "delta",
+        "anomaly": "anomalous",
+        "split": "train",
+        "sha256": "169be49ff03cc45eae6f03eb625c7e5786d51a5986272270660e0c7b0273b3da",
+        "path": "delta/anomalous/002.jpg"
+      },
+      {
+        "id": "delta/anomalous/003",
+        "class": "delta",
+        "anomaly": "anomalous",
+        "split": "train",
+        "sha256": "d1dbfc22ba47a1baa1026262b955724128319678fe92ce637f8dd7c0c58d47d6",
+        "path": "delta/anomalous/003.jpg"
+      },
+      {
+        "id": "delta/anomalous/004",
+        "class": "delta",
+        "anomaly": "anomalous",
+        "split": "train",
+        "sha256": "79065ed3b538db3abc376191733ded76f65960ef3d6e7f1da4ab9e760f89842c",
+        "path": "delta/anomalous/004.jpg"
+      },
+      {
+        "id": "delta/anomalous/005",
+        "class": "delta",
+        "anomaly": "anomalous",
+        "split": "train",
+        "sha256": "94c42d72a7da3882ee52e3aa3983343b577408c3f9dec646c9a10a0fed30fbfc",
+        "path": "delta/anomalous/005.jpg"
+      },
+      {
+        "id": "delta/anomalous/006",
+        "class": "delta",
+        "anomaly": "anomalous",
+        "split": "train",
+        "sha256": "94ddc7864b2b4530a643c832f7cdb49feb1d80e71561345d05dad0a3c997f8be",
+        "path": "delta/anomalous/006.jpg"
+      },
+      {
+        "id": "delta/anomalous/007",
+        "class": "delta",
+        "anomaly": "anomalous",
+        "split": "train",
+        "sha256": "67369c9df2407d5279d9b7c377b92d22993651233cd799a5bfc8726fda74d171",
+        "path": "delta/anomalous/007.jpg"
+      },
+      {
+        "id": "delta/anomalous/008",
+        "class": "delta",
+        "anomaly": "anomalous",
+        "split": "train",
+        "sha256": "7b623c492606fce39e87b0a89c27f33484fed4f6b0a9b4ee660eaa8b67e2c73c",
+        "path": "delta/anomalous/008.jpg"
+      },
+      {
+        "id": "delta/anomalous/009",
+        "class": "delta",
+        "anomaly": "anomalous",
+        "split": "train",
+        "sha256": "c6acbd666894ed8f8d5008ab9fb39011022a6c9cfc69829b442fc9d6a572f5a8",
+        "path": "delta/anomalous/009.jpg"
+      },
+      {
+        "id": "delta/anomalous/010",
+        "class": "delta",
+        "anomaly": "anomalous",
+        "split": "train",
+        "sha256": "ffed0e47cb2916f0d16c54117d800694bc6a605ddbdb64b0b048495d84fabb5e",
+        "path": "delta/anomalous/010.jpg"
+      },
+      {
+        "id": "delta/anomalous/011",
+        "class": "delta",
+        "anomaly": "anomalous",
+        "split": "train",
+        "sha256": "84fb84f9b75b0f4c80b0c7491202c1ddd67d1a4da745f9366a95238bc210b4fa",
+        "path": "delta/anomalous/011.jpg"
+      },
+      {
+        "id": "delta/anomalous/012",
+        "class": "delta",
+        "anomaly": "anomalous",
+        "split": "train",
+        "sha256": "4821783049fd0fe3a0a486ac7d0a9c151be04f120d779a759d366970cc3b2e6f",
+        "path": "delta/anomalous/012.jpg"
+      },
+      {
+        "id": "delta/anomalous/013",
+        "class": "delta",
+        "anomaly": "anomalous",
+        "split": "train",
+        "sha256": "88fbbdcd45288d87c4960871052816bf2cbbe8e3575ae8040910c55035dc7519",
+        "path": "delta/anomalous/013.jpg"
+      },
+      {
+        "id": "delta/anomalous/014",
+        "class": "delta",
+        "anomaly": "anomalous",
+        "split": "train",
+        "sha256": "9413ad934c45a7ac2216ee3262946ed5284a96b9902cea1caad1cd254a555ed0",
+        "path": "delta/anomalous/014.jpg"
+      },
+      {
+        "id": "delta/anomalous/015",
+        "class": "delta",
+        "anomaly": "anomalous",
+        "split": "val",
+        "sha256": "338f72c904baf7ac464397a39f101528a5134769ebae6ec3c083edf8b4d42cc3",
+        "path": "delta/anomalous/015.jpg"
+      },
+      {
+        "id": "delta/anomalous/016",
+        "class": "delta",
+        "anomaly": "anomalous",
+        "split": "val",
+        "sha256": "a965fee9fdab8a5f7b2f172f2e57ca37ade47f709dff800173dbe16876a0a91a",
+        "path": "delta/anomalous/016.jpg"
+      },
+      {
+        "id": "delta/anomalous/017",
+        "class": "delta",
+        "anomaly": "anomalous",
+        "split": "val",
+        "sha256": "106832a6b1a656d5708ffcc90361b659cd7134d52610c0b1aef6fedfa41953b3",
+        "path": "delta/anomalous/017.jpg"
+      },
+      {
+        "id": "delta/anomalous/018",
+        "class": "delta",
+        "anomaly": "anomalous",
+        "split": "val",
+        "sha256": "0c1a5ccedf2ea73a0150c78e77dbb77a55940ed521f5b86d40074b8bd9709f02",
+        "path": "delta/anomalous/018.jpg"
+      },
+      {
+        "id": "delta/anomalous/019",
+        "class": "delta",
+        "anomaly": "anomalous",
+        "split": "val",
+        "sha256": "f3f9e6f2e99c939226a1161f001c4d54a698f635eca8b5348835aa4bcf4aef6a",
+        "path": "delta/anomalous/019.jpg"
+      },
+      {
+        "id": "delta/anomalous/020",
+        "class": "delta",
+        "anomaly": "anomalous",
+        "split": "test",
+        "sha256": "1a1aa592ec0aaa14fffb36f50fba6da9c1a257500757239fde3bde73adb04a93",
+        "path": "delta/anomalous/020.jpg"
+      },
+      {
+        "id": "delta/anomalous/021",
+        "class": "delta",
+        "anomaly": "anomalous",
+        "split": "test",
+        "sha256": "00b8cdc9488e82a7a650c2352e7505169ef1f29fda2e2125ccdebbaf845d3c31",
+        "path": "delta/anomalous/021.jpg"
+      },
+      {
+        "id": "delta/anomalous/022",
+        "class": "delta",
+        "anomaly": "anomalous",
+        "split": "test",
+        "sha256": "a9d310dd95690728d4b578adefa824146b67ee88fffeabea01eedd46ad51f2ee",
+        "path": "delta/anomalous/022.jpg"
+      },
+      {
+        "id": "delta/anomalous/023",
+        "class": "delta",
+        "anomaly": "anomalous",
+        "split": "test",
+        "sha256": "3fbad77be5220eb19561cf9787f344e44cc1742e0f821334ba061a571b2f1863",
+        "path": "delta/anomalous/023.jpg"
+      },
+      {
+        "id": "delta/anomalous/024",
+        "class": "delta",
+        "anomaly": "anomalous",
+        "split": "test",
+        "sha256": "689151229fa0bb368f9ae7a45ce6f0a41034b8936cbec5a8758d77a0e0d06b7c",
+        "path": "delta/anomalous/024.jpg"
+      },
+      {
+        "id": "gamma/normal/000",
+        "class": "gamma",
+        "anomaly": "normal",
+        "split": "train",
+        "sha256": "a842e4226d5d6d9a44bb1bc6816955b38a56250af8958ac70739b1cfa5f4d3ba",
+        "path": "gamma/normal/000.jpg"
+      },
+      {
+        "id": "gamma/normal/001",
+        "class": "gamma",
+        "anomaly": "normal",
+        "split": "train",
+        "sha256": "4740ebc6240470d3bf0e29f9716924732ae3f79ba66032371d7d02dd9ef7a748",
+        "path": "gamma/normal/001.jpg"
+      },
+      {
+        "id": "gamma/normal/002",
+        "class": "gamma",
+        "anomaly": "normal",
+        "split": "train",
+        "sha256": "44e3cbf7465bd4af49512768e6ea08439e23ccf122919e5c0a087ab57cf6ba76",
+        "path": "gamma/normal/002.jpg"
+      },
+      {
+        "id": "gamma/normal/003",
+        "class": "gamma",
+        "anomaly": "normal",
+        "split": "train",
+        "sha256": "e9284768d81f93e902fb5ddf16d3c747791e2636d636bb250d28c0c1eead4642",
+        "path": "gamma/normal/003.jpg"
+      },
+      {
+        "id": "gamma/normal/004",
+        "class": "gamma",
+        "anomaly": "normal",
+        "split": "train",
+        "sha256": "ec64d3c7a08fd7a2e0f881b7efa7b51bfc7ec2b9bfe38838dbcf5ef1e01ec90f",
+        "path": "gamma/normal/004.jpg"
+      },
+      {
+        "id": "gamma/normal/005",
+        "class": "gamma",
+        "anomaly": "normal",
+        "split": "train",
+        "sha256": "d5cc33e4586f87efa081b0a94e7a12c5e0c0fe63ea805816e5e039345142f459",
+        "path": "gamma/normal/005.jpg"
+      },
+      {
+        "id": "gamma/normal/006",
+        "class": "gamma",
+        "anomaly": "normal",
+        "split": "train",
+        "sha256": "b32750908689c2da917e482dc20aaad22a4b3be8b3d2fc6f4f078859ab2aa82c",
+        "path": "gamma/normal/006.jpg"
+      },
+      {
+        "id": "gamma/normal/007",
+        "class": "gamma",
+        "anomaly": "normal",
+        "split": "train",
+        "sha256": "24ec07cd6384778da099ef35831abd1cf7797d63b2d93dac6db888aba419a382",
+        "path": "gamma/normal/007.jpg"
+      },
+      {
+        "id": "gamma/normal/008",
+        "class": "gamma",
+        "anomaly": "normal",
+        "split": "train",
+        "sha256": "ad82ecf7b2bdad7c0e27997e6905ff7cd1a00f400cebbab55ef18d245d0690ba",
+        "path": "gamma/normal/008.jpg"
+      },
+      {
+        "id": "gamma/normal/009",
+        "class": "gamma",
+        "anomaly": "normal",
+        "split": "train",
+        "sha256": "b0aef8fbd4f427d135a15960ae3f2ce9a7db09bbf468377a3a0120f924f6557b",
+        "path": "gamma/normal/009.jpg"
+      },
+      {
+        "id": "gamma/normal/010",
+        "class": "gamma",
+        "anomaly": "normal",
+        "split": "train",
+        "sha256": "86ab5b622ddfc0a3b082ca6689c19cf1f61122f18021b75791402197378a67e8",
+        "path": "gamma/normal/010.jpg"
+      },
+      {
+        "id": "gamma/normal/011",
+        "class": "gamma",
+        "anomaly": "normal",
+        "split": "train",
+        "sha256": "20ed632e551cb40977bf2016b12e3223bc3c4f9f8cda0603eca8cbf22ea4d231",
+        "path": "gamma/normal/011.jpg"
+      },
+      {
+        "id": "gamma/normal/012",
+        "class": "gamma",
+        "anomaly": "normal",
+        "split": "train",
+        "sha256": "89116ca39bfe9d954467b689ae4a37a617e060f0d87befe7f828938ad307d1c1",
+        "path": "gamma/normal/012.jpg"
+      },
+      {
+        "id": "gamma/normal/013",
+        "class": "gamma",
+        "anomaly": "normal",
+        "split": "train",
+        "sha256": "1c6e1f4aed39b3037dd0259aad16ad311c516978a4f0b96a464a1ae821b15318",
+        "path": "gamma/normal/013.jpg"
+      },
+      {
+        "id": "gamma/normal/014",
+        "class": "gamma",
+        "anomaly": "normal",
+        "split": "train",
+        "sha256": "5e5238f9d888362a1d319b3f72accc12f2f1394925e3fc4c0b5283b517d12de9",
+        "path": "gamma/normal/014.jpg"
+      },
+      {
+        "id": "gamma/normal/015",
+        "class": "gamma",
+        "anomaly": "normal",
+        "split": "train",
+        "sha256": "a269d3f6f63ddddf7d4d9e3f46a59f69d909ddd7584a3b70f4de5ea233db1bee",
+        "path": "gamma/normal/015.jpg"
+      },
+      {
+        "id": "gamma/normal/016",
+        "class": "gamma",
+        "anomaly": "normal",
+        "split": "train",
+        "sha256": "804cd3af320b02ae74950720182d651e4e1a246a21b809fe755b827a3d01f279",
+        "path": "gamma/normal/016.jpg"
+      },
+      {
+        "id": "gamma/normal/017",
+        "class": "gamma",
+        "anomaly": "normal",
+        "split": "train",
+        "sha256": "3ac6061d72a9d847055ab424ab3156906256fe29841fe659b0cb7c11f49dce34",
+        "path": "gamma/normal/017.jpg"
+      },
+      {
+        "id": "gamma/normal/018",
+        "class": "gamma",
+        "anomaly": "normal",
+        "split": "train",
+        "sha256": "b5329f59243b0fa576c8a9f47b7b921e4ebf9d678d98f04e815f7d9741be61f0",
+        "path": "gamma/normal/018.jpg"
+      },
+      {
+        "id": "gamma/normal/019",
+        "class": "gamma",
+        "anomaly": "normal",
+        "split": "train",
+        "sha256": "178d1b9d3f73fc6cb0c937ef2f7dc73d5af6c8b7012b4c661f714862e1d7e729",
+        "path": "gamma/normal/019.jpg"
+      },
+      {
+        "id": "gamma/normal/020",
+        "class": "gamma",
+        "anomaly": "normal",
+        "split": "train",
+        "sha256": "3b4cbf8d67f0e07cb066ee44b7d5a8f49e2c1569ff7deda5711dcaf702f931ab",
+        "path": "gamma/normal/020.jpg"
+      },
+      {
+        "id": "gamma/normal/021",
+        "class": "gamma",
+        "anomaly": "normal",
+        "split": "train",
+        "sha256": "d149e840a548921b6c0768563bf7a4e9fce3df1dc8670e86814d3b0ee902f81e",
+        "path": "gamma/normal/021.jpg"
+      },
+      {
+        "id": "gamma/normal/022",
+        "class": "gamma",
+        "anomaly": "normal",
+        "split": "train",
+        "sha256": "6fd20ec918f4b079faaae3d16115708a649e0d3cb86b291d8981a98272b9f38d",
+        "path": "gamma/normal/022.jpg"
+      },
+      {
+        "id": "gamma/normal/023",
+        "class": "gamma",
+        "anomaly": "normal",
+        "split": "train",
+        "sha256": "be71700b7a26da6e74069babf36b274c7e879af16aabf134550f60a9680f4cdd",
+        "path": "gamma/normal/023.jpg"
+      },
+      {
+        "id": "gamma/normal/024",
+        "class": "gamma",
+        "anomaly": "normal",
+        "split": "train",
+        "sha256": "05f2e4aa8140b947f04ec43d44ec0c7b53ba137421f93985021225f393f7f53e",
+        "path": "gamma/normal/024.jpg"
+      },
+      {
+        "id": "gamma/normal/025",
+        "class": "gamma",
+        "anomaly": "normal",
+        "split": "train",
+        "sha256": "311ae4d87de8ab754b60ac52782f554e2ada74e9666b2edd8dce8aa4dc1ed373",
+        "path": "gamma/normal/025.jpg"
+      },
+      {
+        "id": "gamma/normal/026",
+        "class": "gamma",
+        "anomaly": "normal",
+        "split": "train",
+        "sha256": "1d6cd792ffcc4d95084654aee074e6cdb80a48437ae6da0801a49d22c82b0eb8",
+        "path": "gamma/normal/026.jpg"
+      },
+      {
+        "id": "gamma/normal/027",
+        "class": "gamma",
+        "anomaly": "normal",
+        "split": "train",
+        "sha256": "6b022397bd008eb75708aaa870631bd007e33c00e209f3c1ffb56b0691c9e3e7",
+        "path": "gamma/normal/027.jpg"
+      },
+      {
+        "id": "gamma/normal/028",
+        "class": "gamma",
+        "anomaly": "normal",
+        "split": "train",
+        "sha256": "204f928fb4df776258414c4911375fbf29c8a98d5454ea2c111a6b0710912035",
+        "path": "gamma/normal/028.jpg"
+      },
+      {
+        "id": "gamma/normal/029",
+        "class": "gamma",
+        "anomaly": "normal",
+        "split": "train",
+        "sha256": "9f7963fc505ebbf974077179eda01b7d87ee1df6362cc11fc2f4f5ab32e17bf7",
+        "path": "gamma/normal/029.jpg"
+      },
+      {
+        "id": "gamma/normal/030",
+        "class": "gamma",
+        "anomaly": "normal",
+        "split": "train",
+        "sha256": "1b785aa086b0f3eeac702c73b33d0bb8af569f6244e30329b89d774b149fa2a9",
+        "path": "gamma/normal/030.jpg"
+      },
+      {
+        "id": "gamma/normal/031",
+        "class": "gamma",
+        "anomaly": "normal",
+        "split": "train",
+        "sha256": "aa458502a1b6f7b77faefcc4a36c1a943a06a9ba3785458fd7ed078f96211866",
+        "path": "gamma/normal/031.jpg"
+      },
+      {
+        "id": "gamma/normal/032",
+        "class": "gamma",
+        "anomaly": "normal",
+        "split": "train",
+        "sha256": "3e9eb2ad50e33997deb20c177922f08e8f64ad6ba1ea77bc0729e0603d4a0a7d",
+        "path": "gamma/normal/032.jpg"
+      },
+      {
+        "id": "gamma/normal/033",
+        "class": "gamma",
+        "anomaly": "normal",
+        "split": "val",
+        "sha256": "4d87bffe8d25788ee5cbe92cf31a21a5d3ed4b756002b1292ff72be09e8b8001",
+        "path": "gamma/normal/033.jpg"
+      },
+      {
+        "id": "gamma/normal/034",
+        "class": "gamma",
+        "anomaly": "normal",
+        "split": "val",
+        "sha256": "2aae7c72c407b280a7ffa61cbc8f71e5e8283beeaeacc5ce38902eca7bdce085",
+        "path": "gamma/normal/034.jpg"
+      },
+      {
+        "id": "gamma/normal/035",
+        "class": "gamma",
+        "anomaly": "normal",
+        "split": "val",
+        "sha256": "60d5c27240805681abf8533d3f28f7ac13c09f735b3e5f4899a3eb1354b99e36",
+        "path": "gamma/normal/035.jpg"
+      },
+      {
+        "id": "gamma/normal/036",
+        "class": "gamma",
+        "anomaly": "normal",
+        "split": "val",
+        "sha256": "a0fd26df21300d5515e38458daabd64144e074110b504327114f5d356b3b8526",
+        "path": "gamma/normal/036.jpg"
+      },
+      {
+        "id": "gamma/normal/037",
+        "class": "gamma",
+        "anomaly": "normal",
+        "split": "val",
+        "sha256": "ec29f1dd2820d7fd515ce6b9309669c5a38fc9d02d43d58ba1e5a15a18f7a23d",
+        "path": "gamma/normal/037.jpg"
+      },
+      {
+        "id": "gamma/normal/038",
+        "class": "gamma",
+        "anomaly": "normal",
+        "split": "val",
+        "sha256": "5c6dd75f0599f1b539fbb3a1bb6d24fa7f02149e8241ee3c5d4f3657b896a394",
+        "path": "gamma/normal/038.jpg"
+      },
+      {
+        "id": "gamma/normal/039",
+        "class": "gamma",
+        "anomaly": "normal",
+        "split": "val",
+        "sha256": "d435f2a0e5fdbf266b9bfab55fbfa8af53f6bfbadbddeef1d06e19f92cf3adcf",
+        "path": "gamma/normal/039.jpg"
+      },
+      {
+        "id": "gamma/normal/040",
+        "class": "gamma",
+        "anomaly": "normal",
+        "split": "val",
+        "sha256": "c175be9a777352bbd333003e547058d6fc35208c189a645fa718a7d16e1f203c",
+        "path": "gamma/normal/040.jpg"
+      },
+      {
+        "id": "gamma/normal/041",
+        "class": "gamma",
+        "anomaly": "normal",
+        "split": "val",
+        "sha256": "87f5a0b8ceb0453199fd806828852de266ae1957ab65e94987bdcd913926cf5f",
+        "path": "gamma/normal/041.jpg"
+      },
+      {
+        "id": "gamma/normal/042",
+        "class": "gamma",
+        "anomaly": "normal",
+        "split": "val",
+        "sha256": "3acae5107fa8ae7cbd6e3218fb6c6271fa22181529b42d22bc85c5e318528c4a",
+        "path": "gamma/normal/042.jpg"
+      },
+      {
+        "id": "gamma/normal/043",
+        "class": "gamma",
+        "anomaly": "normal",
+        "split": "val",
+        "sha256": "b71c8e24d1f774cf3023ba3c9e7314e67b79c774f9c9abe2ceb7c69b2331c282",
+        "path": "gamma/normal/043.jpg"
+      },
+      {
+        "id": "gamma/normal/044",
+        "class": "gamma",
+        "anomaly": "normal",
+        "split": "test",
+        "sha256": "5312b493bf2162381cea9a7f74b42fce61f4607faa11a614efdb1c9d88113469",
+        "path": "gamma/normal/044.jpg"
+      },
+      {
+        "id": "gamma/normal/045",
+        "class": "gamma",
+        "anomaly": "normal",
+        "split": "test",
+        "sha256": "1623819285154055ad0065b08612c1a31cd6a03c8c7e7cc745a367e5432592c5",
+        "path": "gamma/normal/045.jpg"
+      },
+      {
+        "id": "gamma/normal/046",
+        "class": "gamma",
+        "anomaly": "normal",
+        "split": "test",
+        "sha256": "f1bb444244caddd38cde7c9262c7fb68bfeb1b7f82271f00cc6233392f735c22",
+        "path": "gamma/normal/046.jpg"
+      },
+      {
+        "id": "gamma/normal/047",
+        "class": "gamma",
+        "anomaly": "normal",
+        "split": "test",
+        "sha256": "754992b24fe5c68e7468e1e6058fb4ea129a4cd0140886213762ca039c9f3f37",
+        "path": "gamma/normal/047.jpg"
+      },
+      {
+        "id": "gamma/normal/048",
+        "class": "gamma",
+        "anomaly": "normal",
+        "split": "test",
+        "sha256": "d50471692543cb9f7dbb0923a2d796037779a5038f5495f85e404d4fffda4856",
+        "path": "gamma/normal/048.jpg"
+      },
+      {
+        "id": "gamma/normal/049",
+        "class": "gamma",
+        "anomaly": "normal",
+        "split": "test",
+        "sha256": "e19fe82a7d90def753ba260f1be4926153a317967ba1beb50b9b5001ab145a87",
+        "path": "gamma/normal/049.jpg"
+      },
+      {
+        "id": "gamma/normal/050",
+        "class": "gamma",
+        "anomaly": "normal",
+        "split": "test",
+        "sha256": "b8d067cfe4205228bff2f03bc98cbbc29fd82c6ec46a3019e2712610bd820161",
+        "path": "gamma/normal/050.jpg"
+      },
+      {
+        "id": "gamma/normal/051",
+        "class": "gamma",
+        "anomaly": "normal",
+        "split": "test",
+        "sha256": "fbb5606cd0bf5a265c60ab16f12be96ce6e3a89f474a595b717dc36577269eed",
+        "path": "gamma/normal/051.jpg"
+      },
+      {
+        "id": "gamma/normal/052",
+        "class": "gamma",
+        "anomaly": "normal",
+        "split": "test",
+        "sha256": "9198ece754b3854f329cf14b8d455a8cc69ceeb821a85e85b093e2922dadb4f3",
+        "path": "gamma/normal/052.jpg"
+      },
+      {
+        "id": "gamma/normal/053",
+        "class": "gamma",
+        "anomaly": "normal",
+        "split": "test",
+        "sha256": "db766fe9cae5db611e21c93c95bf3232719e5d05fe8d088db227a66eebccad94",
+        "path": "gamma/normal/053.jpg"
+      },
+      {
+        "id": "gamma/normal/054",
+        "class": "gamma",
+        "anomaly": "normal",
+        "split": "test",
+        "sha256": "87f635ac534b338b2e2c9d5dc7323286a42af792b7e097f6023db178238e86ef",
+        "path": "gamma/normal/054.jpg"
+      }
+    ],
+    "notes": [
+      {
+        "id": "strategy:item-level",
+        "reason": "item-level partition: the capture-group property is NOT enforced, so the items of one capture group may sit in different splits. The partition is stratified by class and anomaly instead; 4 capture group(s) were too large to be kept whole."
+      }
+    ],
+    "strategy": "stratified",
+    "partitionFingerprint": "b35b2b8fddf958a9455f7e8d5be41e42c89f6c8e282836a0a440b5add1f7424f",
+    "groupBasis": {
+      "captureGroupsEnforced": false,
+      "oversizedCaptureGroupCount": 4,
+      "statement": "This partition is ITEM-LEVEL: the capture-group property is NOT enforced, so the items of one capture group may sit in different splits. It is stratified by class and anomaly instead, and it cannot prove acquisition-level independence."
+    }
+  },
+  "predictions": [
+    {
+      "id": "alpha/anomalous/041",
+      "labelKey": "defect:beta",
+      "probability": 0.45,
+      "latencyMs": 940,
+      "costUsd": 0.00275
+    },
+    {
+      "id": "alpha/anomalous/042",
+      "labelKey": "defect:beta",
+      "probability": 0.5,
+      "latencyMs": 880,
+      "costUsd": 0.00275
+    },
+    {
+      "id": "alpha/anomalous/043",
+      "labelKey": "defect:alpha",
+      "probability": 0.92,
+      "latencyMs": 980
+    },
+    {
+      "id": "alpha/anomalous/044",
+      "labelKey": "defect:alpha",
+      "probability": 0.92,
+      "latencyMs": 1040,
+      "costUsd": 0.00275
+    },
+    {
+      "id": "alpha/anomalous/045",
+      "labelKey": "defect:alpha",
+      "probability": 0.92,
+      "latencyMs": 800,
+      "costUsd": 0.00275
+    },
+    {
+      "id": "alpha/anomalous/046",
+      "labelKey": "defect:alpha",
+      "probability": 0.92,
+      "latencyMs": 860,
+      "costUsd": 0.00275
+    },
+    {
+      "id": "alpha/anomalous/047",
+      "labelKey": "defect:alpha",
+      "probability": 0.92,
+      "latencyMs": 920,
+      "costUsd": 0.00275
+    },
+    {
+      "id": "alpha/anomalous/048",
+      "labelKey": "defect:alpha",
+      "probability": 0.92,
+      "latencyMs": 980,
+      "costUsd": 0.00275
+    },
+    {
+      "id": "alpha/anomalous/049",
+      "labelKey": "defect:alpha",
+      "probability": 0.92,
+      "latencyMs": 1040,
+      "costUsd": 0.00275
+    },
+    {
+      "id": "beta/anomalous/040",
+      "labelKey": "defect:alpha",
+      "probability": 0.55,
+      "latencyMs": 920,
+      "costUsd": 0.00275
+    },
+    {
+      "id": "beta/anomalous/041",
+      "labelKey": "defect:unknown",
+      "probability": 0.75,
+      "latencyMs": 860,
+      "costUsd": 0.00275
+    },
+    {
+      "id": "beta/anomalous/042",
+      "labelKey": "defect:beta",
+      "probability": 0.93,
+      "latencyMs": 920,
+      "costUsd": 0.00275
+    },
+    {
+      "id": "beta/anomalous/043",
+      "labelKey": "defect:beta",
+      "probability": 0.93,
+      "latencyMs": 980,
+      "costUsd": 0.00275
+    },
+    {
+      "id": "beta/anomalous/044",
+      "labelKey": "defect:beta",
+      "probability": 0.93,
+      "latencyMs": 1040,
+      "costUsd": 0.00275
+    },
+    {
+      "id": "beta/anomalous/045",
+      "labelKey": "defect:beta",
+      "probability": 0.93,
+      "latencyMs": 800,
+      "costUsd": 0.00275
+    },
+    {
+      "id": "beta/anomalous/046",
+      "labelKey": "defect:beta",
+      "probability": 0.93,
+      "latencyMs": 860,
+      "costUsd": 0.00275
+    },
+    {
+      "id": "beta/anomalous/047",
+      "labelKey": "defect:beta",
+      "probability": 0.93,
+      "latencyMs": 920,
+      "costUsd": 0.00275
+    },
+    {
+      "id": "beta/anomalous/048",
+      "labelKey": "defect:beta",
+      "probability": 0.93,
+      "latencyMs": 980,
+      "costUsd": 0.00275
+    },
+    {
+      "id": "beta/anomalous/049",
+      "labelKey": "defect:beta",
+      "probability": 0.93,
+      "costUsd": 0.00275
+    },
+    {
+      "id": "gamma/normal/044",
+      "labelKey": "defect:alpha",
+      "probability": 0.6,
+      "latencyMs": 900,
+      "costUsd": 0.00275
+    },
+    {
+      "id": "gamma/normal/045",
+      "labelKey": "normal",
+      "probability": 0.94,
+      "latencyMs": 800
+    },
+    {
+      "id": "gamma/normal/046",
+      "labelKey": "normal",
+      "probability": 0.94,
+      "latencyMs": 860,
+      "costUsd": 0.00275
+    },
+    {
+      "id": "gamma/normal/047",
+      "labelKey": "normal",
+      "probability": 0.94,
+      "latencyMs": 920,
+      "costUsd": 0.00275
+    },
+    {
+      "id": "gamma/normal/048",
+      "labelKey": "normal",
+      "probability": 0.94,
+      "latencyMs": 980,
+      "costUsd": 0.00275
+    },
+    {
+      "id": "gamma/normal/049",
+      "labelKey": "normal",
+      "probability": 0.94,
+      "latencyMs": 1040,
+      "costUsd": 0.00275
+    },
+    {
+      "id": "gamma/normal/050",
+      "labelKey": "normal",
+      "probability": 0.94,
+      "latencyMs": 800,
+      "costUsd": 0.00275
+    },
+    {
+      "id": "gamma/normal/051",
+      "labelKey": "normal",
+      "probability": 0.94,
+      "latencyMs": 860,
+      "costUsd": 0.00275
+    },
+    {
+      "id": "gamma/normal/052",
+      "labelKey": "normal",
+      "probability": 0.94,
+      "latencyMs": 920,
+      "costUsd": 0.00275
+    },
+    {
+      "id": "gamma/normal/053",
+      "labelKey": "normal",
+      "probability": 0.94,
+      "latencyMs": 980,
+      "costUsd": 0.00275
+    },
+    {
+      "id": "gamma/normal/054",
+      "labelKey": "normal",
+      "probability": 0.94,
+      "costUsd": 0.00275
+    },
+    {
+      "id": "delta/anomalous/020",
+      "labelKey": "normal",
+      "probability": 0.7,
+      "latencyMs": 820,
+      "costUsd": 0.00275
+    },
+    {
+      "id": "delta/anomalous/021",
+      "labelKey": "normal",
+      "probability": 0.7,
+      "latencyMs": 820,
+      "costUsd": 0.00275
+    },
+    {
+      "id": "delta/anomalous/022",
+      "labelKey": "normal",
+      "probability": 0.7,
+      "latencyMs": 820,
+      "costUsd": 0.00275
+    },
+    {
+      "id": "delta/anomalous/023",
+      "labelKey": "normal",
+      "probability": 0.7,
+      "latencyMs": 820,
+      "costUsd": 0.00275
+    },
+    {
+      "id": "delta/anomalous/024",
+      "labelKey": "normal",
+      "probability": 0.7,
+      "latencyMs": 820,
+      "costUsd": 0.00275
+    },
+    {
+      "id": "alpha/anomalous/030",
+      "labelKey": "defect:alpha",
+      "probability": 0.95,
+      "latencyMs": 800,
+      "costUsd": 0.0025
+    },
+    {
+      "id": "alpha/anomalous/031",
+      "labelKey": "defect:alpha",
+      "probability": 0.85,
+      "latencyMs": 850,
+      "costUsd": 0.0025
+    },
+    {
+      "id": "alpha/anomalous/032",
+      "labelKey": "defect:alpha",
+      "probability": 0.9,
+      "latencyMs": 700,
+      "costUsd": 0.0025
+    },
+    {
+      "id": "alpha/anomalous/033",
+      "labelKey": "defect:alpha",
+      "probability": 0.9,
+      "latencyMs": 750,
+      "costUsd": 0.0025
+    },
+    {
+      "id": "alpha/anomalous/034",
+      "labelKey": "defect:alpha",
+      "probability": 0.95,
+      "latencyMs": 800,
+      "costUsd": 0.0025
+    },
+    {
+      "id": "alpha/anomalous/035",
+      "labelKey": "defect:alpha",
+      "probability": 0.85,
+      "latencyMs": 850,
+      "costUsd": 0.0025
+    },
+    {
+      "id": "alpha/anomalous/036",
+      "labelKey": "defect:alpha",
+      "probability": 0.9,
+      "latencyMs": 700,
+      "costUsd": 0.0025
+    },
+    {
+      "id": "alpha/anomalous/037",
+      "labelKey": "defect:alpha",
+      "probability": 0.9,
+      "latencyMs": 750,
+      "costUsd": 0.0025
+    },
+    {
+      "id": "alpha/anomalous/038",
+      "labelKey": "defect:alpha",
+      "probability": 1.0,
+      "latencyMs": 800,
+      "costUsd": 0.0025
+    },
+    {
+      "id": "alpha/anomalous/039",
+      "labelKey": "defect:alpha",
+      "probability": 0.8,
+      "latencyMs": 850,
+      "costUsd": 0.0025
+    },
+    {
+      "id": "beta/anomalous/030",
+      "labelKey": "defect:beta",
+      "probability": 0.9,
+      "latencyMs": 800,
+      "costUsd": 0.0025
+    },
+    {
+      "id": "beta/anomalous/031",
+      "labelKey": "defect:beta",
+      "probability": 0.85,
+      "latencyMs": 850,
+      "costUsd": 0.0025
+    },
+    {
+      "id": "beta/anomalous/032",
+      "labelKey": "defect:beta",
+      "probability": 0.95,
+      "latencyMs": 700,
+      "costUsd": 0.0025
+    },
+    {
+      "id": "beta/anomalous/033",
+      "labelKey": "defect:beta",
+      "probability": 0.9,
+      "latencyMs": 750,
+      "costUsd": 0.0025
+    },
+    {
+      "id": "beta/anomalous/034",
+      "labelKey": "defect:beta",
+      "probability": 0.8,
+      "latencyMs": 800,
+      "costUsd": 0.0025
+    },
+    {
+      "id": "beta/anomalous/035",
+      "labelKey": "defect:beta",
+      "probability": 0.9,
+      "latencyMs": 850,
+      "costUsd": 0.0025
+    },
+    {
+      "id": "beta/anomalous/036",
+      "labelKey": "defect:beta",
+      "probability": 0.85,
+      "latencyMs": 700,
+      "costUsd": 0.0025
+    },
+    {
+      "id": "beta/anomalous/037",
+      "labelKey": "defect:beta",
+      "probability": 0.9,
+      "latencyMs": 750,
+      "costUsd": 0.0025
+    },
+    {
+      "id": "beta/anomalous/038",
+      "labelKey": "defect:alpha",
+      "probability": 0.65,
+      "latencyMs": 800,
+      "costUsd": 0.0025
+    },
+    {
+      "id": "beta/anomalous/039",
+      "labelKey": "defect:alpha",
+      "probability": 0.55,
+      "latencyMs": 850,
+      "costUsd": 0.0025
+    },
+    {
+      "id": "delta/anomalous/015",
+      "labelKey": "normal",
+      "probability": 0.6,
+      "latencyMs": 850,
+      "costUsd": 0.0025
+    },
+    {
+      "id": "delta/anomalous/016",
+      "labelKey": "normal",
+      "probability": 0.6,
+      "latencyMs": 700,
+      "costUsd": 0.0025
+    },
+    {
+      "id": "delta/anomalous/017",
+      "labelKey": "normal",
+      "probability": 0.55,
+      "latencyMs": 750,
+      "costUsd": 0.0025
+    },
+    {
+      "id": "delta/anomalous/018",
+      "labelKey": "normal",
+      "probability": 0.5,
+      "latencyMs": 800,
+      "costUsd": 0.0025
+    },
+    {
+      "id": "delta/anomalous/019",
+      "labelKey": "normal",
+      "probability": 0.45,
+      "latencyMs": 850,
+      "costUsd": 0.0025
+    },
+    {
+      "id": "gamma/normal/033",
+      "labelKey": "normal",
+      "probability": 0.9,
+      "latencyMs": 750,
+      "costUsd": 0.0025
+    },
+    {
+      "id": "gamma/normal/034",
+      "labelKey": "normal",
+      "probability": 0.9,
+      "latencyMs": 800,
+      "costUsd": 0.0025
+    },
+    {
+      "id": "gamma/normal/035",
+      "labelKey": "normal",
+      "probability": 0.9,
+      "latencyMs": 850,
+      "costUsd": 0.0025
+    },
+    {
+      "id": "gamma/normal/036",
+      "labelKey": "normal",
+      "probability": 0.9,
+      "latencyMs": 700,
+      "costUsd": 0.0025
+    },
+    {
+      "id": "gamma/normal/037",
+      "labelKey": "normal",
+      "probability": 0.9,
+      "latencyMs": 750,
+      "costUsd": 0.0025
+    },
+    {
+      "id": "gamma/normal/038",
+      "labelKey": "normal",
+      "probability": 0.95,
+      "latencyMs": 800,
+      "costUsd": 0.0025
+    },
+    {
+      "id": "gamma/normal/039",
+      "labelKey": "normal",
+      "probability": 0.95,
+      "latencyMs": 850,
+      "costUsd": 0.0025
+    },
+    {
+      "id": "gamma/normal/040",
+      "labelKey": "normal",
+      "probability": 0.95,
+      "latencyMs": 700,
+      "costUsd": 0.0025
+    },
+    {
+      "id": "gamma/normal/041",
+      "labelKey": "normal",
+      "probability": 0.85,
+      "latencyMs": 750,
+      "costUsd": 0.0025
+    },
+    {
+      "id": "gamma/normal/042",
+      "labelKey": "normal",
+      "probability": 0.85,
+      "latencyMs": 800,
+      "costUsd": 0.0025
+    },
+    {
+      "id": "gamma/normal/043",
+      "labelKey": "normal",
+      "probability": 0.99,
+      "latencyMs": 850,
+      "costUsd": 0.0025
+    },
+    {
+      "id": "alpha/anomalous/000",
+      "labelKey": "defect:alpha",
+      "probability": 0.9,
+      "latencyMs": 750,
+      "costUsd": 0.0025
+    },
+    {
+      "id": "beta/anomalous/001",
+      "labelKey": "defect:beta",
+      "probability": 0.91,
+      "latencyMs": 770,
+      "costUsd": 0.0025
+    },
+    {
+      "id": "orphan/not-in-manifest/000",
+      "labelKey": "normal",
+      "probability": 0.8,
+      "latencyMs": 810,
+      "costUsd": 0.0025
+    }
+  ],
+  "expected": {
+    "supportRule": 10,
+    "partitionSizes": {
+      "train": 108,
+      "val": 36,
+      "test": 36
+    },
+    "macroF1": 0.7686909581646423,
+    "balancedAccuracy": 0.8030303030303031,
+    "accuracy": 0.6944444444444444,
+    "perClassF1": {
+      "defect:alpha": 0.7368421052631577,
+      "defect:beta": 0.8000000000000002,
+      "normal": 0.7692307692307692
+    },
+    "excludedClasses": [
+      {
+        "labelKey": "defect:delta",
+        "support": 5
+      }
+    ],
+    "ece": 0.18916666666666665,
+    "calibrationN": 36,
+    "missingPredictions": 1,
+    "orphanPredictions": 1
+  }
+}

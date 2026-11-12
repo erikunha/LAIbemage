@@ -4,6 +4,9 @@ Step-by-step engineering procedures for Vision Lens: how to extend the tool, tun
 it and recover from failures. Each procedure is plain markdown, self-contained and names the
 real files it touches. To add one, see [contributing-procedures.md](./contributing-procedures.md).
 
+These procedures are also exposed as thin skill wrappers under `.agents/skills/`, pointers back to
+these files.
+
 | Procedure | Use when |
 | --------- | -------- |
 | [add-provider](./add-provider.md) | A new LLM vision provider is wired in end to end, a plain CLI flag is added, a new analysis pass is written, or docs must be re-checked after a provider change |

@@ -57,3 +57,43 @@ the maintainer's `portfolio` repository runs over its AI configuration.
 
 The knowledge migration is direction-neutral: plain docs serve any future harness too.
 Deleting the machinery is reversible by revert; re-vendoring would be deliberate new work.
+
+## Refinement (2026-11-12)
+
+The maintainer refined decision 1: the repository keeps a minimal project-owned skill surface
+next to the plain docs, and nothing more.
+
+- Ten thin wrappers under `.agents/skills/`, one per procedure, each a `SKILL.md` whose body only
+  points at its `docs/procedures/<name>.md`. The procedure file stays the single source of truth;
+  the wrapper duplicates nothing.
+- Static relative symlinks under `.claude/skills/` serve as generic runtime adapters. There are no
+  generators, no checker scripts, no role agents and no rules adapters: the rules live in
+  `STANDARDS.md` chapter 10.
+- The surface is project property only, and the no-cross-reference invariant holds in both
+  directions: tracked files never name any developer's personal harness, and a personal harness
+  never hardcodes this repository.
+
+```mermaid
+flowchart LR
+  subgraph removed["Removed machinery"]
+    A1[".agents roles, rules, vendored skills"]
+    A2[".claude adapters, commands, settings"]
+    A3[".github agent surfaces"]
+    A4["generators and checker scripts"]
+  end
+  subgraph current["Shape after the refinement"]
+    B1["docs/procedures/"]
+    B2["STANDARDS.md ch10"]
+    B3["ten wrapper skills"]
+    B4["relative symlinks"]
+    B5["the meta guard"]
+  end
+  A1 --> B1
+  A1 --> B3
+  A2 --> B4
+  A4 --> B5
+```
+
+The guard test now enforces the refined shape instead of a blanket ban: wrapper and adapter
+integrity are proven on the tracked set, and every other path under the harness directories
+stays forbidden.

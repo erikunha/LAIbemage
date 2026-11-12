@@ -10,6 +10,13 @@ Follow all of them.
 Everything a person reads in this repository is written in English: code, comments, commit messages,
 pull request bodies and documentation.
 
+## Skill surface
+
+The ten procedures in `docs/procedures/` are also exposed as skill wrappers under `.agents/skills/`:
+thin pointers, with the procedure files as the single source of truth. Relative symlinks under
+`.claude/skills/` let Claude-runtime tools pick them up with zero configuration. Any other runtime
+reads `docs/procedures/` directly. Nothing here is personal tooling.
+
 ## Project
 
 Vision Lens is a TypeScript ESM monorepo that uses LLM Vision APIs to classify, timestamp and

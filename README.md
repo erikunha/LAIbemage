@@ -2,11 +2,11 @@
 
 AI-powered image classification, timestamp overlay, and sequential organization — runs entirely from the terminal.
 
-[![CI](https://github.com/erikunha/LAIbemage/actions/workflows/ci.yml/badge.svg)](https://github.com/erikunha/LAIbemage/actions/workflows/ci.yml)
+[![CI](https://github.com/erikunha/VisionLens/actions/workflows/ci.yml/badge.svg)](https://github.com/erikunha/VisionLens/actions/workflows/ci.yml)
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
 
 > **Vision Lens evolution in progress** — this CLI is growing into a Visual Intelligence
-> Engineering Workbench (repo stays `erikunha/LAIbemage`): real-dataset benchmarks, visual
+> Engineering Workbench (repo `erikunha/VisionLens`, renamed from `LAIbemage`): real-dataset benchmarks, visual
 > embeddings and search, model training/evaluation with calibration, a Studio review UI, HTTP API
 > and an MCP server (ADR-005). The legacy `ai-image-labeling` CLI keeps working unchanged
 > throughout. See `docs/architecture/vision-lens.md`, `docs/architecture/baseline-audit.md` and
@@ -83,8 +83,8 @@ What it does **not** do:
 The `@vision-lens/*` packages are **not on npm yet**, so install from a clone:
 
 ```bash
-git clone https://github.com/erikunha/LAIbemage
-cd LAIbemage
+git clone https://github.com/erikunha/VisionLens.git
+cd VisionLens
 git checkout feat/visual-lens   # the monorepo layout lives on this branch, not on main
 pnpm install
 pnpm run build
@@ -522,8 +522,8 @@ root-level `src/` or `tests/` tree.
 ## Development
 
 ```bash
-git clone https://github.com/erikunha/LAIbemage
-cd LAIbemage
+git clone https://github.com/erikunha/VisionLens.git
+cd VisionLens
 git checkout feat/visual-lens   # the monorepo layout lives on this branch, not on main
 pnpm install
 cp .env.example .env  # add at least one provider API key

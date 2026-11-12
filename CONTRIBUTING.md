@@ -23,8 +23,8 @@ to a passing pull request.
 
 ```bash
 # 1. Fork and clone
-git clone https://github.com/erikunha/LAIbemage.git
-cd LAIbemage
+git clone https://github.com/erikunha/VisionLens.git
+cd VisionLens
 
 # 2. Install dependencies (includes dev deps)
 pnpm install

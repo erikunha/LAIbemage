@@ -1,6 +1,6 @@
 # Vision Lens — the vision evolution
 
-> Product name: **Vision Lens** (repo `erikunha/LAIbemage`, formerly the
+> Product name: **Vision Lens** (repo `erikunha/VisionLens`, formerly `LAIbemage` / the
 > `ai-image-labeling` CLI). Status: Active · Date: 2026-11-10 · Decisions: ADR-005…010 ·
 > Plan: `specs/001–014` (local, untracked per ADR-010) · Progress mirror: `ROADMAP.md`
 

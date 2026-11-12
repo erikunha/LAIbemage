@@ -26,6 +26,7 @@
     "test:watch": "vitest",
     "test:coverage": "vitest run --coverage",
     "check:boundaries": "node scripts/check-boundaries.mjs",
+    "check:owner-boundaries": "node scripts/check-owner-boundaries.mjs",
     "test:py": "python3 -m pytest services python/visionlens/tests docker/mock-provider/test_server.py -q",
     "docker:vendor:check": "node scripts/check-docker-vendor.mjs",
     "benchmark:legacy": "tsx scripts/benchmark-legacy.ts",

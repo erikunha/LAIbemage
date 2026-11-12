@@ -1,7 +1,7 @@
 name: Release
 
 # Trigger: push a semver tag (e.g. v1.1.0).
-# The Release Engineer agent bumps package.json and pushes the tag —
+# The Release Engineer agent bumps versions and pushes the tag —
 # this workflow takes it from there.
 on:
   push:
@@ -10,11 +10,12 @@ on:
 
 permissions:
   contents: write  # needed to create the GitHub Release
-  id-token: write  # needed for npm provenance
+  # id-token: write returns together with npm publish (provenance) — see the
+  # TODO(publishing-identity) block below.
 
 jobs:
   release:
-    name: Build, test & publish
+    name: Build, smoke & GitHub Release
     runs-on: ubuntu-latest
     timeout-minutes: 20
 
@@ -25,52 +26,57 @@ jobs:
 
       - name: Set up pnpm
         uses: pnpm/action-setup@v4
-        with:
-          version: 10
 
       - name: Set up Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: '22'
+          node-version: '24'
           cache: pnpm
-          # Configures npm registry auth for publish
-          registry-url: 'https://registry.npmjs.org'
 
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
 
-      # Full gate — same checks CI runs on every PR
+      # Full gate — same checks CI runs on every PR.
+      # (`pnpm typecheck` covers the workspace packages via turbo AND the root
+      # scripts/ project; the README flags check was removed — see ci.yml.)
       - name: Lint
-        run: pnpm run lint
+        run: pnpm lint
 
-      - name: Typecheck (src)
-        run: pnpm run typecheck
-
-      - name: Typecheck (scripts)
-        run: pnpm exec tsc -p scripts/tsconfig.json --noEmit
-
-      - name: Check README flags table
-        run: pnpm run readme:check
+      - name: Typecheck (workspace + scripts)
+        run: pnpm typecheck
 
       - name: Test with coverage
-        run: pnpm run test:coverage
+        run: pnpm test:coverage
 
+      # Turbo workspace build: packages/{core,cli,sdk,contracts} + apps/*
       - name: Build
-        run: pnpm run build
+        run: pnpm build
 
-      # Verify the built package can be imported (smoke test the dist/)
-      - name: Smoke test dist
-        run: node -e "import('./dist/sdk.js').then(m => { if (!m.loadConfig) throw new Error('loadConfig not exported'); console.log('dist/sdk.js OK'); })"
+      # Smoke test the built CLI bin (the old root ./dist/sdk.js import target
+      # no longer exists after the monorepo migration — spec 001).
+      - name: Smoke test CLI
+        run: node packages/cli/dist/index.js --version
 
       - name: Extract version from tag
         id: version
         run: echo "version=${GITHUB_REF_NAME#v}" >> "$GITHUB_OUTPUT"
 
-      # Publish to npm with provenance (links the package to this workflow run)
-      - name: Publish to npm
-        run: pnpm publish --no-git-checks --access public
-        env:
-          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+      # TODO(publishing-identity): npm publishing is intentionally disabled
+      # pending the publishing-identity decision (spec 001).
+      # - packages/cli is currently named @vision-lens/cli with private:true
+      #   — no workspace package is publishable as-is.
+      # - npm continuity for the published name "ai-image-labeling" requires
+      #   renaming packages/cli to that name when the identity is decided; the
+      #   rename is breaking and must land inside the spec 001 US2 deprecation
+      #   window (two minor versions of the `ai-image-labeling` compat bin,
+      #   documented in README + CHANGELOG).
+      # When decided, restore the publish step (and re-add id-token: write to
+      # the job permissions for npm provenance):
+      #
+      # - name: Publish to npm
+      #   run: pnpm --filter @vision-lens/cli publish --no-git-checks --access public
+      #   env:
+      #     NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
 
       # Create a GitHub Release with an auto-generated changelog from the tag range
       - name: Create GitHub Release
@@ -113,9 +119,9 @@ jobs:
               prerelease: tag.includes('-'),
             });
 
-      - name: Upload dist artifact
+      - name: Upload CLI dist artifact
         uses: actions/upload-artifact@v4
         with:
-          name: dist-${{ steps.version.outputs.version }}
-          path: dist/
+          name: cli-dist-${{ steps.version.outputs.version }}
+          path: packages/cli/dist/
           retention-days: 90

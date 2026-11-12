@@ -1,0 +1,268 @@
+name: Benchmark Gate
+
+# The real-data benchmark gate (spec 003, US4).
+#
+# Two rules govern this workflow:
+#
+#   1. It NEVER downloads a dataset. The VisA subset is 1.93 GB and its
+#      license (CC BY 4.0) and checksums live in datasets/registry.json; a CI
+#      runner fetches nothing.
+#   2. It NEVER invents a number. Without a dataset the job prints an explicit
+#      `dataset=absent` marker and PASSES — a missing dataset is a skip, not
+#      a failure, and certainly not a reason to report a score.
+#
+# What this job DOES prove, on every push, without any dataset: the whole
+# pipeline works and the gate actually catches a regression. The fixture-scale
+# end-to-end (split → score → artifact → gate) runs on the synthetic 30-image
+# fixture, then the same pipeline runs again with a PLANTED REGRESSION — 10% of
+# the predictions flipped to a wrong label — and the gate MUST fail naming the
+# regressed classes.
+#
+# The regression is a CONTROLLED delta: the baseline errors and the flipped
+# items come from two independent PRNG streams, and only items that are
+# correct in the baseline are flipped. The regressed run therefore differs
+# from the baseline by exactly the flipped items.
+#
+# The assertion is on the gate's OUTPUT, not only on its exit code: a gate that
+# crashes for an unrelated reason also exits non-zero, and reading that as
+# "the regression was caught" would be a false pass.
+
+on:
+  push:
+    branches: [main, develop, 'feat/**']
+  pull_request:
+    branches: [main]
+
+permissions:
+  contents: read
+
+jobs:
+  benchmark-gate:
+    name: Benchmark gate (fixture-scale end-to-end)
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up pnpm
+        uses: pnpm/action-setup@v4
+
+      - name: Set up Node.js 24
+        uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: pnpm
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Build (the CLI runs from dist)
+        run: pnpm build
+
+      # ---------------------------------------------------------------------
+      # 1. The real-data gate, when a dataset is available.
+      #
+      # The suite is `visa-subset.v2`: the tracked split of that suite is
+      # `benchmarks/splits/visa-subset.v2.gold.json`, which has a real
+      # held-out partition. The historical baseline of the v1 suite
+      # (`benchmarks/baselines/visa-subset.json`) was RETIRED: it is never
+      # compared and never rewritten, so it cannot fail this job.
+      # ---------------------------------------------------------------------
+      - name: Real-data gate (skipped without the dataset)
+        env:
+          VISION_LENS_DATASETS_DIR: ${{ vars.VISION_LENS_DATASETS_DIR }}
+        run: |
+          set -euo pipefail
+          SUITE=visa-subset.v2
+          MODEL="${VISION_LENS_BENCHMARK_MODEL:-gpt-4o}"
+          SPLIT=benchmarks/splits/visa-subset.v2.gold.json
+          BASELINE=benchmarks/baselines/visa-subset.v2.json
+          PREDICTIONS="benchmarks/predictions/${SUITE}.${MODEL}.json"
+          RESULTS_DIR=/tmp/benchmark-results-real
+          if [ -z "${VISION_LENS_DATASETS_DIR}" ] || [ ! -d "${VISION_LENS_DATASETS_DIR}" ]; then
+            echo "dataset=absent: the real-data benchmark gate is SKIPPED."
+            echo "No dataset is downloaded by CI (never auto-download)."
+            exit 0
+          fi
+          echo "dataset=present at ${VISION_LENS_DATASETS_DIR}"
+          if [ ! -f "${SPLIT}" ]; then
+            echo "split=absent: the tracked split ${SPLIT} is not in the repository."
+            echo "The gate would compare a number against an unknown partition, so it is skipped."
+            exit 0
+          fi
+          if [ ! -f "${PREDICTIONS}" ]; then
+            echo "predictions=absent: no prediction set is tracked for ${SUITE}/${MODEL}."
+            echo "There is no number to gate, so the gate is skipped (never a fabricated score)."
+            exit 0
+          fi
+          if [ ! -f "${BASELINE}" ]; then
+            echo "baseline=absent: no baseline is recorded for ${SUITE}/${MODEL}."
+            echo "Record one locally (vision-lens benchmark gate --update-baseline) and commit it."
+            echo "The historical baseline benchmarks/baselines/visa-subset.json was RETIRED and is never compared nor rewritten."
+            exit 0
+          fi
+          # The model VERSION is read from the tracked baseline, because the
+          # gate looks its entry up by the (suite, model, model version)
+          # triple (findBaselineEntry in packages/core/src/benchmark/gate.ts)
+          # and takes that version from the artifact it is given
+          # (packages/cli/src/commands/benchmark.ts). A version typed here
+          # would be a guess, and a guess that does not match the recorded
+          # baseline makes the gate skip instead of compare.
+          set +e
+          MODEL_VERSION="$(node -e '
+            const fs = require("node:fs");
+            const [baselinePath, splitPath, suite, model] = process.argv.slice(1);
+            const entries = (JSON.parse(fs.readFileSync(baselinePath, "utf8")).entries ?? [])
+              .filter((entry) => entry.status !== "retired"
+                && entry.suite === suite
+                && entry.model === model
+                && typeof entry.modelVersion === "string"
+                && entry.modelVersion !== "");
+            const manifestHash = JSON.parse(fs.readFileSync(splitPath, "utf8")).manifestHash;
+            const onTrackedSplit = entries.filter((entry) => entry.splitFingerprint === manifestHash);
+            const candidates = onTrackedSplit.length > 0 ? onTrackedSplit : entries;
+            if (candidates.length === 0) process.exit(3);
+            candidates.sort((a, b) => String(b.generatedAt).localeCompare(String(a.generatedAt)));
+            process.stdout.write(candidates[0].modelVersion);
+          ' "${BASELINE}" "${SPLIT}" "${SUITE}" "${MODEL}")"
+          MODEL_VERSION_STATUS=$?
+          set -e
+          if [ "${MODEL_VERSION_STATUS}" -eq 3 ]; then
+            echo "baseline=absent: no active baseline entry for ${SUITE}/${MODEL} in ${BASELINE}."
+            echo "The gate would compare against nothing, so it is skipped (never a fabricated score)."
+            exit 0
+          fi
+          if [ "${MODEL_VERSION_STATUS}" -ne 0 ]; then
+            echo "::error::the baseline file ${BASELINE} could not be read"
+            exit 1
+          fi
+          echo "baseline model version: ${MODEL_VERSION}"
+          # Score the tracked prediction set against the tracked split, so the
+          # gate compares a run of THIS job. The artifact is written outside
+          # the repository: benchmarks/results/ is gitignored and a fresh CI
+          # checkout holds no run artifact at all.
+          rm -rf "${RESULTS_DIR}"
+          node packages/cli/dist/index.js benchmark run \
+            --suite "${SUITE}" \
+            --model-id "${MODEL}" \
+            --split "${SPLIT}" \
+            --predictions "${PREDICTIONS}" \
+            --out "${RESULTS_DIR}" \
+            --min-samples 30 \
+            --config-fingerprint ci-real-data \
+            --model-version "${MODEL_VERSION}"
+          REPORT="$(find "${RESULTS_DIR}" -name report.json -print -quit)"
+          if [ -z "${REPORT}" ]; then
+            echo "::error::the benchmark run wrote no report under ${RESULTS_DIR}"
+            exit 1
+          fi
+          echo "artifact: ${REPORT}"
+          # The gate's exit code IS the verdict: a regression fails the job.
+          node packages/cli/dist/index.js benchmark gate \
+            --suite "${SUITE}" \
+            --model-id "${MODEL}" \
+            --split "${SPLIT}" \
+            --metrics "${REPORT}" \
+            --baseline "${BASELINE}"
+
+      # ---------------------------------------------------------------------
+      # 2. The fixture-scale end-to-end — always runs.
+      # ---------------------------------------------------------------------
+      - name: Generate the fixture dataset and the gold split
+        run: |
+          set -euo pipefail
+          pnpm exec tsx scripts/benchmarks/make-fixture-dataset.ts
+          pnpm exec tsx scripts/benchmarks/make-splits.ts \
+            --dataset synthetic-fixture \
+            --root benchmarks/fixtures/synthetic-fixture \
+            --seed 42 \
+            --id synthetic-30.gold \
+            --out benchmarks/splits/synthetic-30.gold.json
+
+      - name: Score the fixture run and record the baseline
+        run: |
+          set -euo pipefail
+          pnpm exec tsx scripts/benchmarks/make-fixture-predictions.ts \
+            --split benchmarks/splits/synthetic-30.gold.json \
+            --out /tmp/predictions.json
+          node packages/cli/dist/index.js benchmark run \
+            --suite synthetic-30 \
+            --model-id ci-demo \
+            --split benchmarks/splits/synthetic-30.gold.json \
+            --predictions /tmp/predictions.json \
+            --out /tmp/benchmark-results \
+            --min-samples 1 \
+            --config-fingerprint ci-fixture \
+            --model-version "model:ci-demo@1.0.0"
+          node packages/cli/dist/index.js benchmark gate \
+            --suite synthetic-30 \
+            --model-id ci-demo \
+            --metrics "$(find /tmp/benchmark-results -name report.json -print -quit)" \
+            --baseline /tmp/baseline.json \
+            --update-baseline
+
+      # The planted regression MUST fail the gate. If this step passes, the
+      # gate is not protecting anything and the job must fail.
+      #
+      # The assertion is on the OUTPUT, not only on the exit code: a gate that
+      # crashes for an unrelated reason also exits non-zero, and reading that
+      # as "the regression was caught" would be a false pass. The step therefore
+      # requires BOTH a non-zero exit AND the evidence — the failure message
+      # and the named regressed classes.
+      - name: Planted regression must fail the gate
+        run: |
+          set -uo pipefail
+          pnpm exec tsx scripts/benchmarks/make-fixture-predictions.ts \
+            --split benchmarks/splits/synthetic-30.gold.json \
+            --out /tmp/predictions-regressed.json \
+            --flip 0.1
+          node packages/cli/dist/index.js benchmark run \
+            --suite synthetic-30 \
+            --model-id ci-demo \
+            --split benchmarks/splits/synthetic-30.gold.json \
+            --predictions /tmp/predictions-regressed.json \
+            --out /tmp/benchmark-results-regressed \
+            --min-samples 1 \
+            --config-fingerprint ci-fixture \
+            --model-version "model:ci-demo@1.0.0"
+          REGRESSED="$(find /tmp/benchmark-results-regressed -name report.json -print -quit)"
+          set +e
+          GATE_OUTPUT="$(node packages/cli/dist/index.js benchmark gate \
+            --suite synthetic-30 \
+            --model-id ci-demo \
+            --metrics "${REGRESSED}" \
+            --baseline /tmp/baseline.json 2>&1)"
+          GATE_STATUS=$?
+          set -e
+          echo "${GATE_OUTPUT}"
+          if [ "${GATE_STATUS}" -eq 0 ]; then
+            echo "::error::the benchmark gate PASSED a planted 10% regression — the gate is not protecting anything"
+            exit 1
+          fi
+          if ! printf '%s' "${GATE_OUTPUT}" | grep -q 'gate failed'; then
+            echo "::error::the gate exited ${GATE_STATUS} without reporting a regression — it failed for another reason, so the regression was NOT proven to be caught"
+            exit 1
+          fi
+          if ! printf '%s' "${GATE_OUTPUT}" | grep -q 'Regressed classes:'; then
+            echo "::error::the gate failed but did not name the regressed classes — the report is not actionable"
+            exit 1
+          fi
+          echo "the planted regression was caught by the gate, with the regressed classes named"
+
+      - name: Job summary
+        if: always()
+        env:
+          VISION_LENS_DATASETS_DIR: ${{ vars.VISION_LENS_DATASETS_DIR }}
+        run: |
+          {
+            echo "### Benchmark gate"
+            if [ -n "${VISION_LENS_DATASETS_DIR}" ] && [ -d "${VISION_LENS_DATASETS_DIR}" ]; then
+              echo "- Real-data gate: RAN for the suite visa-subset.v2 (a dataset is present at ${VISION_LENS_DATASETS_DIR})."
+              echo "- The retired baseline of the v1 suite (benchmarks/baselines/visa-subset.json) is never compared nor rewritten."
+            else
+              echo "- Real-data gate: SKIPPED, no dataset is present, and CI never downloads one."
+            fi
+            echo "- Fixture-scale end-to-end: split → score → artifact → gate."
+            echo "- Planted regression: the step above asserts that the gate failed AND named the regressed classes."
+          } >> "$GITHUB_STEP_SUMMARY"

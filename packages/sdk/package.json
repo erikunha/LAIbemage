@@ -1,0 +1,23 @@
+{
+  "name": "@vision-lens/sdk",
+  "version": "0.0.1",
+  "description": "Vision Lens public SDK: stable library API re-exported from @vision-lens/core (evolved from the legacy `ai-image-labeling` package's sdk.ts; publishing identity decided in a later commit).",
+  "type": "module",
+  "main": "./dist/index.js",
+  "exports": {
+    ".": "./dist/index.js",
+    "./cli": "./dist/cli.js"
+  },
+  "engines": {
+    "node": ">=20"
+  },
+  "scripts": {
+    "build": "tsc --project tsconfig.json",
+    "typecheck": "tsc --project tsconfig.json --noEmit",
+    "lint": "eslint src"
+  },
+  "dependencies": {
+    "@vision-lens/cli": "workspace:*",
+    "@vision-lens/core": "workspace:*"
+  }
+}

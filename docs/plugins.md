@@ -1,6 +1,6 @@
 # Plugin System
 
-`ai-image-labeling` ships a lifecycle hook API that lets you run custom logic at three points in a run without modifying the CLI source or forking the project.
+Vision Lens ships a lifecycle hook API that lets you run custom logic at three points in a run without modifying the CLI source or forking the project.
 
 ---
 
@@ -12,7 +12,7 @@
 - A plugin that throws never aborts the run — the error is logged as a warning and the hook is skipped for that image.
 
 ```bash
-ai-image-labeling --plugin ./plugins/slack-notify.mjs --plugin ./plugins/db-write.mjs
+vision-lens --plugin ./plugins/slack-notify.mjs --plugin ./plugins/db-write.mjs
 ```
 
 ---
@@ -131,7 +131,7 @@ interface AnalysisCache {
 Plugins that depend on a specific API shape should assert this at load time:
 
 ```javascript
-import { PLUGIN_API_VERSION } from 'ai-image-labeling';
+import { PLUGIN_API_VERSION } from '@vision-lens/sdk';
 
 if (PLUGIN_API_VERSION !== 1) {
   throw new Error(`my-plugin requires PLUGIN_API_VERSION=1, got ${PLUGIN_API_VERSION}`);
@@ -156,7 +156,7 @@ export default {
 
     const unknown = cache.images.filter(i => i.category === 'unknown').length;
     const text = [
-      `*ai-image-labeling run complete*`,
+      `*Vision Lens run complete*`,
       `• ${cache.totalImages} images processed`,
       `• ${cache.totalImages - unknown} classified, ${unknown} unknown`,
       `• Categories: ${cache.categories.join(', ')}`,
@@ -173,7 +173,7 @@ export default {
 
 ```bash
 SLACK_WEBHOOK_URL=https://hooks.slack.com/... \
-  ai-image-labeling --plugin ./plugins/slack-notify.mjs
+  vision-lens --plugin ./plugins/slack-notify.mjs
 ```
 
 ---

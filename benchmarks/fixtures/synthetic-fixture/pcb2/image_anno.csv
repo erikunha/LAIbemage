@@ -1,0 +1,11 @@
+image,mask,label,defect_type,session
+Data/Images/Normal/0000.JPG,,normal,,s01
+Data/Images/Normal/0001.JPG,,normal,,s01
+Data/Images/Normal/0002.JPG,,normal,,s02
+Data/Images/Normal/0003.JPG,,normal,,s02
+Data/Images/Normal/0004.JPG,,normal,,s03
+Data/Images/Normal/0005.JPG,,normal,,s04
+Data/Images/Anomaly/0000.JPG,Data/Annotations/Anomaly/0000.JPG,anomaly,scratch,s01
+Data/Images/Anomaly/0001.JPG,Data/Annotations/Anomaly/0001.JPG,anomaly,bubble,s01
+Data/Images/Anomaly/0002.JPG,Data/Annotations/Anomaly/0002.JPG,anomaly,chip,s02
+Data/Images/Anomaly/0003.JPG,Data/Annotations/Anomaly/0003.JPG,anomaly,stain,s03

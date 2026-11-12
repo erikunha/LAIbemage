@@ -24,11 +24,17 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - uses: pnpm/action-setup@v4
+      # Node 24 to match ci.yml: the packageManager pin (pnpm 11.0.8)
+      # requires node >=22.13, so Node 20 cannot run the install.
       - uses: actions/setup-node@v4
         with:
-          node-version: 20
+          node-version: 24
           cache: pnpm
       - run: pnpm install --frozen-lockfile
+      # typedoc resolves the sdk's workspace imports (@vision-lens/cli,
+      # @vision-lens/core/*) through their built dist type declarations;
+      # without this build every import is TS2307.
+      - run: pnpm run build
       - run: pnpm run docs:generate
       - uses: actions/configure-pages@v5
       - uses: actions/upload-pages-artifact@v3

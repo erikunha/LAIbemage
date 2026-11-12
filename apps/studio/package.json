@@ -1,0 +1,16 @@
+{
+  "name": "@vision-lens/studio-placeholder",
+  "version": "0.0.1",
+  "description": "Vision Lens studio review app placeholder (spec 010); real app lands in a later spec.",
+  "type": "module",
+  "private": true,
+  "engines": {
+    "node": ">=20"
+  },
+  "scripts": {
+    "build": "node -e \"console.log('nothing to build')\"",
+    "typecheck": "tsc --noEmit -p .",
+    "lint": "eslint src tests",
+    "test": "vitest run --root ../.. apps/studio/tests"
+  }
+}

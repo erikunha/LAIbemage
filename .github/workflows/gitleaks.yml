@@ -1,0 +1,119 @@
+# ============================================================================
+# DRAFT: gitleaks secret scanning in CI (the "gitleaks CI (opcional)" queue item)
+# ============================================================================
+#
+# Status: DRAFT only. GitHub runs nothing from .memory/. To adopt, copy this
+# file verbatim to .github/workflows/gitleaks.yml and commit that one file.
+#
+# Context: ADR-020 made the repository harness-agnostic and deleted the
+# personal .github/hooks/secrets-scanner hook (its output went to logs/).
+# This workflow is the repo-native replacement: it runs on GitHub for every
+# contributor, stranger or agent, with zero local setup.
+#
+# ----------------------------------------------------------------------------
+# RECOMMENDATION
+# ----------------------------------------------------------------------------
+#
+# 1. What this catches that the deleted hook did not:
+#    The old scanner was a local pre-commit hook on one machine, so it only
+#    protected the maintainer's own commits and only while that person's hook
+#    setup was installed. This workflow scans every push and every PR on the
+#    exact commits that reach the remote, for every author, enforced centrally
+#    and fail-closed. Same detection class (regex rules over text), but the
+#    enforcement point moves from one laptop to the shared gate.
+#
+# 2. What it does NOT do (and why that is correct):
+#    - It does not scan untracked local files. CI only sees pushed content,
+#      so a real .env on a laptop never leaves the machine. Correct behavior.
+#    - It does not scan git history from before adoption. Diff scanning only
+#      looks at new commits (see the scan-mode note below). If the maintainer
+#      wants certainty about the past, run a one-off local audit:
+#      brew install gitleaks, then `gitleaks git .` from the repo root.
+#    - It cannot un-leak anything. A key that already reached a public remote
+#      must be rotated regardless of what any scanner reports.
+#
+# 3. Zero-config expectations:
+#    - gitleaks' built-in default rules already cover this repo's providers
+#      (OpenAI, Anthropic, Google keys), private keys and generic token
+#      shapes. No .gitleaks.toml is needed at start.
+#    - The placeholders in .env.example (sk-..., sk-ant-..., AIza...) are too
+#      short for the rule regexes and are not expected to trigger findings.
+#    - Real env files (.env, .env.local, .env.*.local) are gitignored and
+#      never reach CI at all.
+#    - If a false positive ever fires, gitleaks prints a fingerprint in the
+#      job log; add it to a .gitleaksignore file at the repo root. That is
+#      the baseline mechanism: add entries only when a real finding demands
+#      it, never upfront. No baseline file ships with this draft because
+#      there is nothing to baseline yet.
+#
+# 4. The ONE maintainer decision:
+#    Adopt or not: copy this file to .github/workflows/gitleaks.yml (then
+#    delete this draft), or discard the draft. Nothing needs excluding today;
+#    revisit only if the first live runs flag a test fixture. Side note for
+#    that decision: gitleaks-action is free for personal GitHub accounts; if
+#    this repository ever moves under a GitHub organization, a
+#    GITLEAKS_LICENSE secret becomes required or the action fails.
+#
+# ----------------------------------------------------------------------------
+# Design notes for the workflow below
+# ----------------------------------------------------------------------------
+#
+# Pin: gitleaks/gitleaks-action@v2, the major-version tag the gitleaks org
+# itself documents in the action README. It tracks the org's maintained
+# releases without churning on every patch. A stricter option exists (pin the
+# full commit SHA and bump deliberately); the draft keeps the org-documented
+# tag because the maintainer's other actions (checkout@v4, setup-node@v4) use
+# the same tag-level pinning convention.
+#
+# Scan mode: diff scanning, which is the action's default on push and
+# pull_request events. On push it scans the commits in that push; on
+# pull_request it scans the PR's commits against the base. For an existing
+# repository with history this is the standard low-noise choice: a full
+# history scan of an old repo produces a wall of historical findings that
+# belong to a one-time audit decision, not to every CI run, while blocking
+# NEW leaks before they land is exactly the job the deleted hook did.
+#
+# Fail-closed: no continue-on-error and no error tolerance anywhere in this
+# file. A finding makes the action exit non-zero, which fails the job, which
+# blocks the PR (or marks the push red). An action failure from infra also
+# shows red rather than silently passing.
+#
+# Triggers mirror ci.yml exactly, including the develop branch and the
+# feat/** pattern, so the secret gate covers the same pushes the CI gate does.
+#
+# ============================================================================
+
+name: Gitleaks
+
+on:
+  push:
+    branches: [main, develop, 'feat/**']
+  pull_request:
+    branches: [main]
+
+# Least privilege, same as ci.yml: the scanner only reads repo contents.
+permissions:
+  contents: read
+
+jobs:
+  gitleaks:
+    name: Secret scan (gitleaks)
+    runs-on: ubuntu-latest
+    # Fail-closed hygiene: a hung scan dies in minutes instead of burning the
+    # runner. gitleaks finishes in seconds on a repo this size.
+    timeout-minutes: 5
+
+    steps:
+      # fetch-depth: 0 is what the gitleaks action documents; the scanner
+      # needs the commit range of the push or PR available to diff against.
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      # Major-version tag published and documented by the gitleaks org.
+      # GITHUB_TOKEN is the built-in token; no extra secrets are needed
+      # for a personal-account repository.
+      - name: Scan commits for secrets
+        uses: gitleaks/gitleaks-action@v2
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

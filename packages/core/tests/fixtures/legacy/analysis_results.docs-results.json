@@ -1,0 +1,16 @@
+{
+  "processedDate": "2026-01-04T10:00:00.000Z",
+  "totalImages": 1,
+  "categories": ["kitchen"],
+  "results": [
+    {
+      "originalFile": "SYNTHETIC-201.jpg",
+      "outputFile": "201. Synthetic photo dated 05-01-2026.jpeg",
+      "category": "kitchen",
+      "number": 1,
+      "shortDescription": "synthetic docs-only result record",
+      "elements": ["sink"],
+      "timestamp": 1766292071829
+    }
+  ]
+}

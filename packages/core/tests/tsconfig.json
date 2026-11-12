@@ -1,0 +1,30 @@
+{
+  "extends": "../../../tsconfig.base.json",
+  "compilerOptions": {
+    "noEmit": true,
+    "types": ["node", "vitest/globals"]
+  },
+  // Scoped deliberately: the wider test suite has pre-existing fixture drift
+  // (removed serveLogRequests, added fullDescription) and was never part of
+  // the typecheck gate. Only the type-level tests are enforced for now;
+  // extend this list as older test files are brought under typecheck.
+  //
+  // The store suite (spec 002) and the legacy importer are now covered: the
+  // importer is new code, and new code lands under the gate.
+  //
+  // The benchmark suite (spec 003) is covered for the same reason: the metrics,
+  // calibration, split, registry, normalisation and runner/gate code is all new.
+  //
+  // The packaged default-taxonomy suite is covered because the copy it guards
+  // is new code shipped inside the package.
+  "include": [
+    "./types.test.ts",
+    "./index.test.ts",
+    "./reporter/sqlite-missing.test.ts",
+    "./store/**/*.test.ts",
+    "./store/helpers.ts",
+    "./benchmark/**/*.test.ts",
+    "./config/**/*.test.ts",
+    "./meta/**/*.test.ts"
+  ]
+}

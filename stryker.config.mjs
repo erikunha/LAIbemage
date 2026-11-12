@@ -3,17 +3,25 @@ export default {
   testRunner: 'vitest',
   testRunnerNodeArgs: ['--experimental-vm-modules'],
   // Scope mutations to the two pure logic modules with no external I/O
-  mutate: ['src/classifier/**/*.ts', 'src/analyzer/temporal.ts'],
+  mutate: ['packages/core/src/classifier/**/*.ts', 'packages/core/src/analyzer/temporal.ts'],
   // Use glob patterns so Stryker can find the relevant test files fast
   vitest: {
     configFile: 'vitest.config.ts',
   },
+  // Name the runner explicitly: the default '@stryker-mutator/*' glob scans
+  // @stryker-mutator/core's own pnpm package dir (only core + its deps, all
+  // ignored), so under pnpm it silently loads zero plugins.
+  plugins: ['@stryker-mutator/vitest-runner'],
+  // Keep sandbox copying off non-project tooling: .claude/skills holds
+  // git-tracked symlinks and .venv holds interpreter symlinks — fs.copyFile
+  // fails on them (ENOTSUP/EISDIR), so the sandbox could never be created.
+  ignorePatterns: ['.claude', '.venv'],
   thresholds: {
     high: 80,
     low: 70,
     break: 70, // fail the run if score drops below 70%
   },
-  reporters: ['progress', 'clear-text', 'html'],
+  reporters: ['progress', 'clear-text', 'html', 'json'],
   htmlReporter: {
     fileName: 'reports/mutation/index.html',
   },

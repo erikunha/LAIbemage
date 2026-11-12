@@ -2,7 +2,7 @@
  * Benchmark fixture generator.
  *
  * Creates 24 synthetic 200×200 JPEG images (8 categories × 3 variants) and
- * writes tests/fixtures/benchmark/labels.json with ground-truth category labels.
+ * writes packages/core/tests/fixtures/benchmark/labels.json with ground-truth category labels.
  *
  * Images are solid-colour JPEGs — sufficient for infrastructure testing; a real
  * accuracy benchmark requires real photos.
@@ -15,7 +15,7 @@ import { fileURLToPath } from 'node:url';
 import sharp from 'sharp';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
-const BENCHMARK_DIR = path.join(__dirname, '..', 'tests', 'fixtures', 'benchmark');
+const BENCHMARK_DIR = path.join(__dirname, '..', 'packages', 'core', 'tests', 'fixtures', 'benchmark');
 const IMAGES_DIR = path.join(BENCHMARK_DIR, 'images');
 
 // ---------------------------------------------------------------------------

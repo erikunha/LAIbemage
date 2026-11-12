@@ -1,0 +1,17 @@
+# Proposed quality gate; set numerical thresholds only after a real baseline is recorded.
+require:
+  license_provenance: true
+  dataset_snapshot_immutable: true
+  train_validation_test_disjoint: true
+  test_set_locked: true
+  predictor_fingerprint: true
+  model_revision_pinned: true
+  calibrated_confidence_or_explicit_uncalibrated: true
+  prediction_missing_cases_scored: true
+  security_scan: true
+  cli_api_sdk_parity: true
+policy:
+  regression_reference: same_protocol_and_split_only
+  require_human_approval_for_promotion: true
+  uncertain_result: abstain
+  allow_unrecorded_cloud_calls: false

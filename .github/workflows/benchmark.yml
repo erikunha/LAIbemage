@@ -1,4 +1,11 @@
-name: Accuracy Benchmark
+# NOTE: this job runs the SYNTHETIC unit-fixture harness
+# (`scripts/benchmark-legacy.ts` over colour-swatch fixtures). It is a plumbing
+# regression check on the harness itself and produces NO product accuracy claim.
+#
+# The real-data accuracy gate is a separate spec-003 job (`vision-lens benchmark gate`),
+# which skips with an explicit marker when the VisA dataset is absent and never
+# auto-downloads it. See docs/adr/008-evidence-policy.md.
+name: Legacy Synthetic Fixture Benchmark
 
 on:
   schedule:
@@ -16,9 +23,15 @@ on:
 
 jobs:
   benchmark:
-    name: Accuracy Regression — ${{ matrix.provider }}
+    name: Synthetic Fixture Regression — ${{ matrix.provider }}
     runs-on: ubuntu-latest
     timeout-minutes: 20
+
+    # The job commits a baseline and comments on a PR, so it needs write
+    # access to both — declared explicitly instead of inheriting the default.
+    permissions:
+      contents: write
+      pull-requests: write
 
     strategy:
       fail-fast: false
@@ -33,8 +46,6 @@ jobs:
 
       - name: Set up pnpm
         uses: pnpm/action-setup@v4
-        with:
-          version: 10
 
       - uses: actions/setup-node@v4
         with:
@@ -51,7 +62,7 @@ jobs:
         run: pnpm exec tsx scripts/generate-fixtures.ts
 
       - name: Run benchmark — ${{ matrix.provider }}
-        run: pnpm exec tsx scripts/benchmark.ts --provider ${{ matrix.provider }}
+        run: pnpm exec tsx scripts/benchmark-legacy.ts --provider ${{ matrix.provider }}
         env:
           OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
           ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
@@ -59,19 +70,19 @@ jobs:
           BENCHMARK_PROVIDER: ${{ matrix.provider }}
 
       - name: Check for regression vs baseline
-        run: pnpm exec tsx scripts/benchmark.ts --provider ${{ matrix.provider }} --check-regression
+        run: pnpm exec tsx scripts/benchmark-legacy.ts --provider ${{ matrix.provider }} --check-regression
         if: github.event.inputs.update_baseline != 'true'
 
       - name: Update baseline (manual trigger only)
         if: github.event.inputs.update_baseline == 'true'
-        run: pnpm exec tsx scripts/benchmark.ts --provider ${{ matrix.provider }} --update-baseline
+        run: pnpm exec tsx scripts/benchmark-legacy.ts --provider ${{ matrix.provider }} --update-baseline
 
       - name: Commit updated baseline
         if: github.event.inputs.update_baseline == 'true'
         uses: stefanzweifel/git-auto-commit-action@v5
         with:
           commit_message: 'chore: update benchmark baseline [${{ matrix.provider }}]'
-          file_pattern: tests/fixtures/benchmark/baseline.json
+          file_pattern: packages/core/tests/fixtures/benchmark/baseline.json
 
       - name: Upload benchmark results
         uses: actions/upload-artifact@v4
@@ -97,7 +108,8 @@ jobs:
               owner: context.repo.owner,
               repo: context.repo.repo,
               body: [
-                `## Benchmark — ${{ matrix.provider }}`,
+                `## Legacy Synthetic Fixture Benchmark — ${{ matrix.provider }}`,
+                `> Synthetic colour-swatch fixtures — a harness regression check, not a product accuracy claim. Real-data numbers come from \`vision-lens benchmark run\` artifacts.`,
                 `| Metric | Value |`,
                 `|--------|-------|`,
                 `| Precision | ${(precision * 100).toFixed(1)}% |`,

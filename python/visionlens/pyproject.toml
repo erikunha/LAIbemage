@@ -1,0 +1,30 @@
+[build-system]
+requires = ["hatchling>=1.26"]
+build-backend = "hatchling.build"
+
+[project]
+name = "visionlens"
+version = "0.1.0"
+description = "Local-first visual AI runtime: deterministic simulated encoder, model registry, and the frozen visionlens.worker.v1 JSONL worker protocol."
+readme = "README.md"
+requires-python = ">=3.11"
+license = "MIT"
+dependencies = []
+
+[project.optional-dependencies]
+# The extra names are frozen; the dependency sets stay empty while the whole
+# runtime is simulated with the standard library only.
+vision = []
+training = []
+agents = []
+server = []
+all = []
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/visionlens"]
+
+[tool.hatch.build.targets.sdist]
+include = ["src", "tests", "README.md", "pyproject.toml"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]

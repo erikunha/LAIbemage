@@ -1,0 +1,18 @@
+{
+  "protocol": "visionlens.worker.v1",
+  "kind": "request",
+  "requestId": "req_demo_001",
+  "operation": "vision.embed",
+  "contractVersion": "1.0.0",
+  "workspaceId": "local",
+  "params": {
+    "snapshotId": "snap_demo_001",
+    "encoder": "siglip2-base",
+    "assetsRef": "assetset_demo_001"
+  },
+  "budget": {
+    "maxSeconds": 120,
+    "maxUsdMicro": 0,
+    "maxTokens": 0
+  }
+}

@@ -1,0 +1,49 @@
+{
+  "description": "Property inspection image categories",
+  "timezone": "Europe/Malta",
+  "categories": [
+    {
+      "name": "kitchen",
+      "description": "Any view from inside a kitchen",
+      "examples": ["countertops", "appliances", "cabinets", "sink"]
+    },
+    {
+      "name": "bathroom",
+      "description": "Any view from inside a bathroom or WC",
+      "examples": ["toilet", "shower", "bathtub", "tiles", "sink"]
+    },
+    {
+      "name": "bedroom",
+      "description": "Any view from inside a bedroom",
+      "examples": ["bed", "wardrobe", "window", "ceiling"]
+    },
+    {
+      "name": "living_room",
+      "description": "Any view from inside a living or dining room",
+      "examples": ["sofa", "table", "TV", "dining chairs"]
+    },
+    {
+      "name": "common_area",
+      "description": "Hallway, stairs, corridor, utility cupboard, meters, fuse box — only if NOT inside a named room",
+      "examples": ["corridor", "staircase", "electric meter", "fuse box"]
+    },
+    {
+      "name": "exterior",
+      "description": "Outside the building, garden, facade",
+      "examples": ["facade", "garden", "roof", "entrance door"]
+    },
+    {
+      "name": "payment_receipt",
+      "description": "Bank transfers, payment confirmations, invoices, receipts",
+      "examples": ["bank transfer screenshot", "invoice", "receipt"]
+    },
+    {
+      "name": "conversation_screenshot",
+      "description": "Text messages, WhatsApp, email threads, chat conversations",
+      "examples": ["WhatsApp chat", "SMS thread", "email screenshot"]
+    }
+  ],
+  "pinnedLast": ["common_area", "conversation_screenshot", "payment_receipt", "unknown"],
+  "immune": ["payment_receipt", "conversation_screenshot"],
+  "overridable": ["unknown", "common_area"]
+}

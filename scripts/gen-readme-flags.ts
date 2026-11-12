@@ -14,7 +14,7 @@ import { fileURLToPath } from 'node:url';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const ROOT = path.join(__dirname, '..');
-const CLI_SRC = path.join(ROOT, 'src', 'cli', 'index.ts');
+const CLI_SRC = path.join(ROOT, 'packages', 'cli', 'src', 'index.ts');
 const README = path.join(ROOT, 'README.md');
 
 const MARKER_START = '<!-- flags-start -->';

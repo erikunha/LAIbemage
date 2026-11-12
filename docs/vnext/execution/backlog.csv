@@ -1,0 +1,13 @@
+id,phase,title,blocked_by,status,role
+VLN-001,R0,Reconcile current work,,proposed,architecture
+VLN-002,R0,Python-first ADR,VLN-001,proposed,architecture
+VLN-003,R1,Python public package,VLN-002,proposed,python
+VLN-004,R1,JSONL worker protocol,VLN-002,proposed,platform
+VLN-005,R1,Python CPU vision adapter,VLN-003|VLN-004,proposed,ml
+VLN-006,R1,TS Python worker facade,VLN-004|VLN-005,proposed,platform
+VLN-007,R2,Leakage-resistant split,VLN-001,proposed,data
+VLN-008,R2,Evaluation scorecard v2,VLN-007,proposed,ml
+VLN-009,R5,Encoder-probe training,VLN-005|VLN-007|VLN-008,proposed,ml
+VLN-010,R6,Lightweight npm client,VLN-004,proposed,typescript
+VLN-011,R6,Studio read-only Arena,VLN-008|VLN-010,proposed,frontend
+VLN-012,R7,MCP dataset investigator,VLN-004|VLN-008,proposed,agents

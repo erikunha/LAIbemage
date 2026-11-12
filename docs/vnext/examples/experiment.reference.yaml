@@ -1,0 +1,31 @@
+# PROPOSED CONFIG ONLY. Do not run without licensed data and user-approved model access.
+experiment_id: visa-linear-probe-v1
+dataset:
+  registry_id: visa-subset
+  snapshot_id: snap_example
+  split_manifest_sha256: REPLACE_WITH_REAL_HASH
+  license_check: required
+ontology:
+  version: ontology-v1
+model:
+  family: siglip2
+  revision: PIN_EXACT_REVISION
+  license_check: required
+preprocess:
+  resize: 224
+  color_space: RGB
+  fingerprint: GENERATED_NOT_MANUAL
+training:
+  recipe: frozen-encoder-logistic-regression
+  seed: 42
+  max_epochs: 1
+  device: cpu
+  max_seconds: 1800
+evaluation:
+  validation_split: val
+  final_test_split: test
+  metrics: [macro_f1, balanced_accuracy, ece, per_class_recall]
+  require_nonempty_holdout: true
+artifacts:
+  root: .visionlens/artifacts
+  hash_outputs: true

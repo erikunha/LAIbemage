@@ -1,16 +1,35 @@
-# ai-image-labeling
+# Vision Lens
 
 AI-powered image classification, timestamp overlay, and sequential organization — runs entirely from the terminal.
 
-[![CI](https://github.com/erikunha/ai-image-labeling/actions/workflows/ci.yml/badge.svg)](https://github.com/erikunha/ai-image-labeling/actions/workflows/ci.yml)
-[![npm version](https://badge.fury.io/js/ai-image-labeling.svg)](https://www.npmjs.com/package/ai-image-labeling)
+[![CI](https://github.com/erikunha/VisionLens/actions/workflows/ci.yml/badge.svg)](https://github.com/erikunha/VisionLens/actions/workflows/ci.yml)
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
+
+> **Vision Lens evolution in progress** — this CLI is growing into a Visual Intelligence
+> Engineering Workbench (repo `erikunha/VisionLens`, renamed from `LAIbemage`): real-dataset benchmarks, visual
+> embeddings and search, model training/evaluation with calibration, a Studio review UI, HTTP API
+> and an MCP server (ADR-005). The legacy `ai-image-labeling` CLI keeps working unchanged
+> throughout. See `docs/architecture/vision-lens.md`, `docs/architecture/baseline-audit.md` and
+> `ROADMAP.md`; work lands on the `feat/visual-lens` branch.
+>
+> **Binary names:** `vision-lens` is the canonical bin (`pnpm add -g @vision-lens/cli` → `vision-lens`).
+> The legacy `ai-image-labeling` bin is kept inside the CLI package as a compatibility alias that
+> points at `vision-lens` — it prints one stderr deprecation line per run, silenced with
+> `VISION_LENS_NO_DEPRECATION=1`. See CHANGELOG.md.
+>
+> **npm packages:** the new identity publishes from the `@vision-lens` scope (`@vision-lens/cli`,
+> `@vision-lens/sdk`, …). Those workspace packages are **not published yet** — until they are,
+> install from a clone (see [Development](#development)). The `ai-image-labeling` bin is kept inside
+> the CLI package as a deprecated alias that points at `vision-lens`.
+>
+> **Decisions:** the architecture decision records live in [`docs/adr/`](docs/adr/) (ADR-005+ cover
+> the Vision Lens evolution).
 
 ---
 
 ## What it does
 
-Given a folder of unorganized images, `ai-image-labeling`:
+Given a folder of unorganized images, `vision-lens`:
 
 1. Reads EXIF timestamps concurrently from every file
 2. Deduplicates burst frames with perceptual hashing (dHash, Hamming distance)
@@ -20,7 +39,7 @@ Given a folder of unorganized images, `ai-image-labeling`:
 6. Runs an optional self-critique pass to reclassify low-confidence results
 7. Optionally runs a cross-image linking pass to identify related image pairs
 8. Stamps a red timestamp (DD/MM/YYYY HH:MM) in the bottom-center of each photo
-9. Renames and exports as `NNN. Description dated DD-MM-YYYY.jpeg`
+9. Renames and exports as `NNN. Photo of <category> dated DD-MM-YYYY.jpeg`
 10. Writes `analysis_results.json` atomically so re-runs with `--skip-analysis` are free
 11. Generates HTML / CSV / XLSX / SQLite reports on request
 12. POSTs results to a webhook and/or uploads to cloud storage if configured
@@ -30,66 +49,114 @@ What it does **not** do:
 - Face recognition or biometric identification
 - Video files — JPEG, PNG, WebP, and TIFF only
 - Training or fine-tuning models — it uses hosted Vision APIs as-is
-- Guarantee classification accuracy — results depend on the LLM provider and your `categories.json` descriptions
+- Guarantee classification accuracy — accuracy is **measured, not guaranteed**. Results depend
+  on the LLM provider, the model, your `categories.json` descriptions and the dataset, so no
+  fixed percentage is promised here. Real accuracy numbers come from the benchmark artifacts
+  under `benchmarks/results/<runId>/` (real-data VisA ground truth, CC BY 4.0 — dataset
+  license, source and checksums are recorded in `datasets/registry.json`).
+  **Status: the real dataset is fetched and checksum-pinned, the gold manifest is committed,
+  and the first real measurement exists.** The VisA subset was fetched on 2026-11-11 (sha256
+  pinned in `datasets/registry.json`), the committed gold manifest holds 700 real images, and
+  `gpt-4o` scored **macro F1 0.9795 / balanced accuracy 0.9700** over all 700 of them. The
+  tracked evidence is the gold set (`benchmarks/splits/visa-subset.gold.json`), the raw
+  predictions (`benchmarks/predictions/visa-subset.gpt-4o.json`) and the baseline
+  (`benchmarks/baselines/visa-subset.json`); the run report itself
+  (`benchmarks/results/<runId>/`) is a LOCAL artifact — it is gitignored, and the documented
+  `vision-lens benchmark run` reproduces it from the tracked files.
+  **That number is not a model-performance figure and must not be quoted as one.** It was
+  measured on a split whose 700 assignments were ALL in `train`: the upstream release carries
+  no session information, so each class is one capture group, and a group larger than every
+  quota cannot be divided. There was no held-out set at all. The baseline entry is therefore
+  **retired** (the reason is recorded in `benchmarks/baselines/visa-subset.json`), and the
+  tracked split is now a real 60/20/20 partition
+  (`benchmarks/splits/visa-subset.v2.gold.json`, 420 train / 140 val / 140 test, item-level
+  and stratified by class and anomaly). The first measurement against that split is still to
+  be run ([`docs/architecture/benchmark.md`](docs/architecture/benchmark.md),
+  [`docs/datasets/visa.md`](docs/datasets/visa.md)). The `benchmark:legacy`
+  script is a **synthetic** unit-fixture harness over colour swatches; it is a plumbing
+  regression check, not an accuracy source (see [ADR-008](docs/adr/008-evidence-policy.md)).
 
 ---
 
 ## Quick start
 
+The `@vision-lens/*` packages are **not on npm yet**, so install from a clone:
+
 ```bash
-# Install globally
-pnpm add -g ai-image-labeling
+git clone https://github.com/erikunha/VisionLens.git
+cd VisionLens
+git checkout feat/visual-lens   # the monorepo layout lives on this branch, not on main
+pnpm install
+pnpm run build
 
 # Copy the environment template
 cp .env.example .env
 # Edit .env — set OPENAI_API_KEY (or the key for your chosen provider)
 
-# Run
-ai-image-labeling --input ./my-photos --output ./sorted
+# Run (from the repo root)
+node packages/cli/dist/index.js --input ./my-photos --output ./sorted
 ```
 
-If you prefer not to install globally:
+Once the packages are published, the global install becomes:
 
 ```bash
-pnpm dlx ai-image-labeling --input ./my-photos --output ./sorted
+# Install globally
+pnpm add -g @vision-lens/cli
+
+# Run
+vision-lens --input ./my-photos --output ./sorted
 ```
+
+And, once published, the same without installing:
+
+```bash
+pnpm dlx @vision-lens/cli --input ./my-photos --output ./sorted
+```
+
+Both forms need the `@vision-lens/*` packages on the npm registry first — until then, install from
+a clone as shown above.
 
 ### Provider-specific quick starts
 
 ```bash
 # OpenAI (default)
-ai-image-labeling --api-key sk-...
+vision-lens --api-key sk-...
 
 # Anthropic Claude
-ai-image-labeling --provider anthropic --anthropic-api-key sk-ant-...
+vision-lens --provider anthropic --anthropic-api-key sk-ant-...
 
 # Google Gemini
-ai-image-labeling --provider google --google-api-key AIza...
-
-# Ollama (local, no API key required)
-ai-image-labeling --provider ollama --ollama-url http://localhost:11434
+vision-lens --provider google --google-api-key AIza...
 
 # Hybrid: run Ollama locally, escalate low-confidence images to OpenAI
-ai-image-labeling --provider hybrid \
+vision-lens --provider hybrid \
   --local-model llava \
   --cloud-provider openai --api-key sk-... \
   --local-confidence-threshold 0.70
 
-# Azure OpenAI
-ai-image-labeling --provider azure \
-  --azure-endpoint https://my-resource.openai.azure.com \
-  --azure-api-key <key>
-
 # AWS Bedrock
-ai-image-labeling --provider bedrock \
+vision-lens --provider bedrock \
   --bedrock-region us-east-1 \
   --bedrock-access-key-id AKIA... \
   --bedrock-secret-access-key ...
 
 # Google Vertex AI
-ai-image-labeling --provider vertex \
+vision-lens --provider vertex \
   --vertex-project my-gcp-project \
   --vertex-location us-central1
+```
+
+Ollama and Azure accept their endpoint flags only on the `single` and `suggest-categories`
+subcommands, so use those when you need a custom URL or endpoint:
+
+```bash
+# Ollama (local, no API key required)
+vision-lens single 1 ./photo.jpg --provider ollama --ollama-url http://localhost:11434
+
+# Azure OpenAI
+vision-lens single 1 ./photo.jpg --provider azure \
+  --azure-endpoint https://my-resource.openai.azure.com \
+  --azure-api-key <key>
 ```
 
 ---
@@ -101,7 +168,7 @@ ai-image-labeling --provider vertex \
 | `openai` | Yes | `text-embedding-3-small` | Default provider |
 | `anthropic` | Yes | Falls back to OpenAI embeddings if `OPENAI_API_KEY` is set | |
 | `google` | No | `text-embedding-004` | |
-| `azure` | Yes | `text-embedding-3-small` via Azure endpoint | Requires `--azure-endpoint` |
+| `azure` | Yes | `text-embedding-3-small` via Azure endpoint | Requires an Azure endpoint (`AZURE_OPENAI_ENDPOINT`; `--azure-endpoint` on `single` / `suggest-categories`) |
 | `ollama` | No | `nomic-embed-text` | Runs fully locally |
 | `bedrock` | No | Falls back to OpenAI embeddings if key is set | AWS credentials required |
 | `vertex` | No | `text-embedding-004` | GCP project required |
@@ -114,13 +181,15 @@ Async batch (`--async` / `--resume`) reduces API cost by ~50% for supported prov
 ## Subcommands
 
 ```
-ai-image-labeling [OPTIONS]                         # main classification run
-ai-image-labeling reorder                           # re-number output after manual edits
-ai-image-labeling single <number> <file>            # process one image with a custom sequence number
-ai-image-labeling report                            # generate report from existing analysis_results.json
-ai-image-labeling suggest-categories               # sample N images and propose a categories.json taxonomy
-ai-image-labeling search <query>                    # search classified images by semantic query or keyword
-ai-image-labeling diff <before.json> <after.json>  # compare two analysis_results.json files
+vision-lens [OPTIONS]                           # main classification run
+vision-lens reorder                             # re-number output after manual edits
+vision-lens single <number> <file>              # process one image with a custom sequence number
+vision-lens report                              # generate report from existing analysis_results.json
+vision-lens suggest-categories                  # sample N images and propose a categories.json taxonomy
+vision-lens search --query <text>               # search classified images by semantic query or keyword
+vision-lens diff <before.json> <after.json>     # compare two analysis_results.json files
+vision-lens import-run <analysis_results.json>  # import a legacy run into the Vision Lens store
+vision-lens benchmark run|gate|report           # score a suite, gate it against a baseline, report an artifact
 ```
 
 ---
@@ -133,7 +202,7 @@ ai-image-labeling diff <before.json> <after.json>  # compare two analysis_result
 |---|---|---|---|
 | `-i, --input` | `<dir>` | Input directory with source images | `./input` |
 | `-o, --output` | `<dir>` | Output directory for processed files | `./output` |
-| `--categories` | `<file>` | Path to custom categories.json | `examples/categories.json` |
+| `--categories` | `<file>` | Path to custom categories.json | Built-in default taxonomy (bundled in `@vision-lens/core`) |
 | `--dry-run` | | Analyze without writing output files | `false` |
 | `--skip-analysis` | | Skip LLM analysis, use cached `analysis_results.json` | `false` |
 | `--force-skip-analysis` | | Skip analysis even if `categories.json` changed since last run | `false` |
@@ -146,16 +215,22 @@ ai-image-labeling diff <before.json> <after.json>  # compare two analysis_result
 | `--provider` | `<name>` | LLM provider: `openai` \| `anthropic` \| `google` \| `azure` \| `ollama` \| `bedrock` \| `vertex` \| `hybrid` | `openai` |
 | `--api-key` | `<key>` | OpenAI API key (overrides `OPENAI_API_KEY`) | — |
 | `--anthropic-api-key` | `<key>` | Anthropic API key (overrides `ANTHROPIC_API_KEY`) | — |
+| `--anthropic-workspace-id` | `<id>` | Anthropic workspace id sent as the `anthropic-workspace-id` header; required for API keys not scoped to a workspace (overrides `ANTHROPIC_WORKSPACE_ID`) | - |
 | `--google-api-key` | `<key>` | Google AI API key (overrides `GOOGLE_API_KEY`) | — |
-| `--azure-endpoint` | `<url>` | Azure OpenAI endpoint URL | — |
-| `--azure-api-key` | `<key>` | Azure OpenAI API key | — |
-| `--ollama-url` | `<url>` | Ollama server URL | `http://localhost:11434` |
+| `--azure-endpoint` | `<url>` | Azure OpenAI endpoint URL — `single` / `suggest-categories` only | — |
+| `--azure-api-key` | `<key>` | Azure OpenAI API key — `single` / `suggest-categories` only | — |
+| `--ollama-url` | `<url>` | Ollama server URL — `single` / `suggest-categories` only | `http://localhost:11434` |
 | `--bedrock-region` | `<region>` | AWS region for Bedrock | `us-east-1` |
 | `--bedrock-access-key-id` | `<key>` | AWS access key ID for Bedrock | — |
 | `--bedrock-secret-access-key` | `<key>` | AWS secret access key for Bedrock | — |
 | `--vertex-project` | `<id>` | Google Cloud project ID for Vertex AI | — |
 | `--vertex-location` | `<location>` | Vertex AI region | `us-central1` |
 | `--model` | `<model>` | Model name (defaults: `gpt-4o` / `claude-opus-4-7` / `gemini-2.0-flash`) | — |
+
+`--azure-endpoint`, `--azure-api-key` and `--ollama-url` are **not** accepted by the root
+`vision-lens` command — they exist only on the `single` and `suggest-categories` subcommands. On a
+full run, configure Azure and Ollama through the `AZURE_OPENAI_ENDPOINT`, `AZURE_OPENAI_API_KEY` and
+`OLLAMA_URL` environment variables instead.
 
 ### Hybrid routing
 
@@ -182,7 +257,7 @@ ai-image-labeling diff <before.json> <after.json>  # compare two analysis_result
 | `--concurrency` | `<n>` | Concurrent API batch calls in-flight | `3` |
 | `--temporal-window` | `<minutes>` | Cluster window for temporal consensus voting | `5` |
 | `--consensus-threshold` | `<n>` | Majority ratio required for temporal override (0.5–1.0) | `0.6` |
-| `--dedupe-threshold` | `<n>` | Hamming distance threshold for burst dedup (0 = off, max 64) | `0` |
+| `--dedupe-threshold` | `<n>` | Hamming distance threshold for burst dedup — burst dedup is ON by default at Hamming distance ≤ 8; `0` turns it off (max 64) | `8` |
 | `--session-gap` | `<minutes>` | Split images into sessions at timestamp gaps larger than N minutes | — |
 | `--self-critique` | | Run a second LLM pass to reclassify suspicious results | `false` |
 | `--link` | | Run cross-image linking pass to identify related pairs | `false` |
@@ -201,7 +276,7 @@ ai-image-labeling diff <before.json> <after.json>  # compare two analysis_result
 | Flag | Argument | Description | Default |
 |---|---|---|---|
 | `--output-format` | `<fmt>` | Output format: `pretty` \| `json` \| `none` \| `csv` \| `xlsx` \| `sqlite` | `pretty` |
-| `--filename-template` | `<pattern>` | Output filename template — see [Filename template tokens](#filename-template-tokens) | `{n}. {description} dated {date}.{ext}` |
+| `--filename-template` | `<pattern>` | Output filename template — see [Filename template tokens](#filename-template-tokens) | `{n}. Photo of {category} dated {date}` |
 | `--output-bucket` | `<uri>` | Upload output to cloud storage: `s3://bucket/prefix`, `gs://bucket/prefix`, `azblob://container/prefix` | — |
 
 ### Integrations
@@ -244,19 +319,20 @@ The `--filename-template` flag accepts a pattern string. All tokens are replaced
 | `{n}` | 3-digit padded sequence number | `001`, `042` |
 | `{n:4}` | N-digit padded sequence number | `0001`, `0042` |
 | `{category}` | Normalized category name | `kitchen` |
-| `{description}` | Short description from LLM | `Clean kitchen with modern appliances` |
+| `{description}` | Short description from the LLM, slugified | `clean-kitchen-with-modern-appliances` |
 | `{date}` | Date as DD-MM-YYYY | `09-05-2026` |
 | `{date:FORMAT}` | Custom date format using tokens: `YYYY` `YY` `MM` `DD` `M` `D` | `2026-05-09` |
 | `{datetime}` | Date and time as DD-MM-YYYY_HH-MM | `09-05-2026_14-30` |
 | `{datetime:FORMAT}` | Custom datetime format using tokens: `YYYY` `YY` `MM` `DD` `HH` `mm` `ss` `M` `D` `H` `m` `s` | `2026-05-09T14-30-00` |
-| `{ext}` | File extension | `jpeg` |
 
-Default template: `{n}. {description} dated {date}.{ext}`
+The `.jpeg` extension is always appended — there is no `{ext}` token.
+
+Default template: `{n}. Photo of {category} dated {date}`
 
 Example with custom template:
 
 ```bash
-ai-image-labeling --filename-template '{n:4}_{category}_{date:YYYY-MM-DD}.{ext}'
+vision-lens --filename-template '{n:4}_{category}_{date:YYYY-MM-DD}'
 # → 0001_kitchen_2026-05-09.jpeg
 ```
 
@@ -264,11 +340,11 @@ ai-image-labeling --filename-template '{n:4}_{category}_{date:YYYY-MM-DD}.{ext}'
 
 ## Custom categories
 
-`ai-image-labeling` is domain-agnostic — the classification taxonomy is entirely driven by `categories.json`. The default config is in `examples/categories.json`.
+`vision-lens` is domain-agnostic — the classification taxonomy is entirely driven by `categories.json`. A starter config lives in `examples/categories.json` and ships as the built-in default; pass `--categories` to point at your own taxonomy.
 
 ```bash
 cp examples/categories-ecommerce.json my-categories.json
-ai-image-labeling --categories my-categories.json
+vision-lens --categories my-categories.json
 ```
 
 Schema:
@@ -304,10 +380,10 @@ For supported providers (`openai`, `anthropic`, `azure`), you can submit images 
 
 ```bash
 # Step 1: submit and exit (writes analysis_job.json)
-ai-image-labeling --async --input ./photos
+vision-lens --async --input ./photos
 
 # Step 2: poll until complete, then process normally
-ai-image-labeling --resume --input ./photos --output ./sorted
+vision-lens --resume --input ./photos --output ./sorted
 ```
 
 If the batch job fails, delete `analysis_job.json` and re-run without `--async`.
@@ -330,7 +406,7 @@ Results are cached to `analysis_results.json`. Re-runs with `--skip-analysis` ma
 Use `--estimate` to print a cost projection before running:
 
 ```bash
-ai-image-labeling --estimate --input ./photos
+vision-lens --estimate --input ./photos
 ```
 
 ---
@@ -341,7 +417,7 @@ ai-image-labeling --estimate --input ./photos
 CLI flags
   └─ Config (Zod-validated)
        └─ EXIF timestamps (p-limit 32 concurrent) → FileWithStats[]
-            └─ Perceptual hash dedup (dHash, if --dedupe-threshold > 0)
+            └─ Perceptual hash dedup (dHash, on by default — --dedupe-threshold, 0 disables)
                  └─ LLM Vision batch analysis → AnalysisResult[]
                  │    (or: --async → analysis_job.json → exit)
                  │    (or: --resume → poll → collect results)
@@ -363,22 +439,29 @@ Key modules:
 
 | Module | Role |
 |---|---|
-| `src/cli/` | Commander.js flag parsing only — no business logic |
-| `src/config/` | Single source of truth: CLI flags > env vars > `.env` > defaults |
-| `src/analyzer/` | LLM Vision calls, temporal consensus, dedup, async batch, self-critique, linking |
-| `src/analyzer/providers/` | One file per LLM provider — the only files that import provider SDKs |
-| `src/processor/` | Sharp: image resize, timestamp overlay, JPEG export |
-| `src/classifier/` | Pure, synchronous: category grouping, sorting, rules — no I/O |
-| `src/reviewer/` | Interactive TTY review loop |
-| `src/reporter/` | HTML, CSV, XLSX, SQLite report writers |
-| `src/plugin/` | Lifecycle hook dispatcher |
-| `src/utils/` | Logger, retry with backoff, progress bar, EXIF reader, cost calculator |
+| `packages/cli/src/index.ts` | Commander.js entry point and help text — the `vision-lens` bin and every subcommand |
+| `packages/core/src/config/` | Single source of truth: CLI flags > env vars > `.env` > defaults |
+| `packages/core/src/analyzer/` | LLM Vision calls, temporal consensus, dedup, async batch, self-critique, linking |
+| `packages/core/src/analyzer/providers/` | One file per LLM provider — the only files that import provider SDKs |
+| `packages/core/src/processor/` | Sharp: image resize, timestamp overlay, JPEG export |
+| `packages/core/src/classifier/` | Pure, synchronous: category grouping, sorting, rules — no I/O |
+| `packages/core/src/reviewer/` | Interactive TTY review loop |
+| `packages/core/src/reporter/` | HTML, CSV, XLSX, SQLite report writers |
+| `packages/core/src/plugin/` | Lifecycle hook dispatcher |
+| `packages/core/src/search/` | Semantic and keyword search over an analysed run |
+| `packages/core/src/benchmark/` | Benchmark runner, metrics, calibration and the release gate |
+| `packages/core/src/store/` | SQLite entity store, migrations and repositories |
+| `packages/core/src/utils/` | Logger, retry with backoff, progress bar, EXIF reader, cost calculator |
+| `packages/contracts/src/` | Zod domain entities, enums and the generated OpenAPI seed |
+| `packages/sdk/src/index.ts` | Public SDK exports (`@vision-lens/sdk`) |
+| `apps/api/`, `apps/studio/` | HTTP API and Studio surfaces (placeholders) |
+| `services/vision/`, `services/training/`, `services/agents/` | Python services: encoders + LanceDB, training recipes + MLflow, agent runtime |
 
 ---
 
 ## SDK usage
 
-`ai-image-labeling` exports a TypeScript SDK for programmatic use:
+`@vision-lens/sdk` exports a TypeScript SDK for programmatic use:
 
 ```typescript
 import {
@@ -397,7 +480,7 @@ import {
   MemoryFileRepository,
   CACHE_SCHEMA_VERSION,
   PLUGIN_API_VERSION,
-} from 'ai-image-labeling';
+} from '@vision-lens/sdk';
 
 const config = await loadConfig({ inputDir: './photos', outputDir: './sorted' });
 await runBatch(config);
@@ -410,33 +493,38 @@ await runBatch(config);
 ## Project structure
 
 ```
-src/
-  cli/             Commander.js entry point and help text
-  analyzer/        LLM Vision analysis, temporal consensus, dedup, async batch
-    providers/     One file per LLM provider (the only files that import LLM SDKs)
-  processor/       Sharp image processing: overlay + JPEG export
-  classifier/      Category grouping, sorting, and rules (pure, no I/O)
-  config/          Config loading and Zod schema validation
-  plugin/          Plugin loader and lifecycle hook dispatcher
-  reviewer/        Interactive review loop (--interactive)
-  reporter/        HTML, CSV, XLSX, SQLite report generation
-  utils/           Logger, retry, progress bar, EXIF reader, cost calculator
-  sdk.ts           Public SDK exports
-  index.ts         Top-level orchestration (runBatch, runReorder, runSingle)
-
-tests/             Vitest unit tests (mirrors src/ structure)
-scripts/           Fixture generation, benchmark runner
-examples/          Starter category configs (property, e-commerce, etc.)
-docs/              Plugin API reference, architecture notes
+packages/
+  core/             Domain logic: config, analyzer, processor, classifier, reviewer,
+                    reporter, plugin, search, benchmark, store, fs
+  cli/              Commander.js CLI — the `vision-lens` bin plus the deprecated
+                    `ai-image-labeling` compatibility bin
+  sdk/              Public TypeScript SDK (@vision-lens/sdk)
+  contracts/        Zod domain entities and the OpenAPI seed
+apps/
+  api/              HTTP API surface (placeholder)
+  studio/           Studio review surface (placeholder)
+services/
+  vision/           Python skeleton: encoders + LanceDB
+  training/         Python skeleton: training recipes + MLflow
+  agents/           Python skeleton: agent runtime
+benchmarks/         Benchmark fixtures and gold splits
+datasets/           Dataset registry (license, source, checksums)
+docs/               Architecture notes, ADRs, plugin API reference
+examples/           Starter category configs (property, e-commerce, etc.)
+scripts/            Fixture generation, benchmark harnesses, dataset tooling
 ```
+
+Tests live next to the code they cover — `packages/*/tests/` and `apps/*/tests/`. There is no
+root-level `src/` or `tests/` tree.
 
 ---
 
 ## Development
 
 ```bash
-git clone https://github.com/erikunha/ai-image-labeling
-cd ai-image-labeling
+git clone https://github.com/erikunha/VisionLens.git
+cd VisionLens
+git checkout feat/visual-lens   # the monorepo layout lives on this branch, not on main
 pnpm install
 cp .env.example .env  # add at least one provider API key
 

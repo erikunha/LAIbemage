@@ -1,0 +1,842 @@
+{
+  "contractsVersion": "1.0.0",
+  "entities": {
+    "Asset": {
+      "fields": {
+        "id": {
+          "required": true,
+          "type": "uuid",
+          "constraint": "pattern=^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-7[0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12})$"
+        },
+        "sha256": {
+          "required": false,
+          "type": "string",
+          "constraint": "pattern=^[0-9a-f]{64}$"
+        },
+        "kind": {
+          "required": true,
+          "type": "enum(\"image\"|\"video\"|\"audio\"|\"other\")"
+        },
+        "bytes": {
+          "required": false,
+          "type": "integer",
+          "constraint": "minimum=0"
+        },
+        "width": {
+          "required": false,
+          "type": "integer",
+          "constraint": "minimum=0"
+        },
+        "height": {
+          "required": false,
+          "type": "integer",
+          "constraint": "minimum=0"
+        },
+        "exifSanitizedJson": {
+          "required": false,
+          "type": "json"
+        },
+        "captureSessionId": {
+          "required": false,
+          "type": "uuid",
+          "constraint": "pattern=^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-7[0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12})$"
+        },
+        "unhashed": {
+          "required": true,
+          "type": "boolean"
+        },
+        "path": {
+          "required": false,
+          "type": "string",
+          "constraint": "minLength=1"
+        },
+        "createdAt": {
+          "required": true,
+          "type": "date-time",
+          "constraint": "pattern=^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d(?::[0-5]\\d(?:\\.\\d+)?)?(?:Z|([+-](?:[01]\\d|2[0-3]):[0-5]\\d)))$"
+        }
+      }
+    },
+    "CaptureSession": {
+      "fields": {
+        "id": {
+          "required": true,
+          "type": "uuid",
+          "constraint": "pattern=^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-7[0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12})$"
+        },
+        "startedAt": {
+          "required": true,
+          "type": "date-time",
+          "constraint": "pattern=^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d(?::[0-5]\\d(?:\\.\\d+)?)?(?:Z|([+-](?:[01]\\d|2[0-3]):[0-5]\\d)))$"
+        },
+        "endedAt": {
+          "required": false,
+          "type": "date-time",
+          "constraint": "pattern=^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d(?::[0-5]\\d(?:\\.\\d+)?)?(?:Z|([+-](?:[01]\\d|2[0-3]):[0-5]\\d)))$"
+        },
+        "source": {
+          "required": true,
+          "type": "string",
+          "constraint": "minLength=1"
+        },
+        "contextJson": {
+          "required": false,
+          "type": "json"
+        }
+      }
+    },
+    "Sample": {
+      "fields": {
+        "id": {
+          "required": true,
+          "type": "uuid",
+          "constraint": "pattern=^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-7[0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12})$"
+        },
+        "assetId": {
+          "required": true,
+          "type": "uuid",
+          "constraint": "pattern=^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-7[0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12})$"
+        },
+        "region": {
+          "required": false,
+          "type": "object{height,width,x,y}"
+        },
+        "split": {
+          "required": false,
+          "type": "enum(\"train\"|\"val\"|\"test\"|\"holdout\"|\"unassigned\")"
+        },
+        "snapshotIds": {
+          "required": false,
+          "type": "array<uuid>"
+        },
+        "sourceCaptureFrame": {
+          "required": false,
+          "type": "string",
+          "constraint": "minLength=1"
+        },
+        "createdAt": {
+          "required": true,
+          "type": "date-time",
+          "constraint": "pattern=^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d(?::[0-5]\\d(?:\\.\\d+)?)?(?:Z|([+-](?:[01]\\d|2[0-3]):[0-5]\\d)))$"
+        }
+      }
+    },
+    "OntologyVersion": {
+      "fields": {
+        "id": {
+          "required": true,
+          "type": "uuid",
+          "constraint": "pattern=^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-7[0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12})$"
+        },
+        "version": {
+          "required": true,
+          "type": "string",
+          "constraint": "minLength=1"
+        },
+        "categories": {
+          "required": true,
+          "type": "array<object{description,key,name}>"
+        },
+        "fingerprint": {
+          "required": true,
+          "type": "string",
+          "constraint": "pattern=^fp2:[0-9a-f]{16}$"
+        },
+        "parentId": {
+          "required": false,
+          "type": "uuid",
+          "constraint": "pattern=^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-7[0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12})$"
+        },
+        "createdAt": {
+          "required": true,
+          "type": "date-time",
+          "constraint": "pattern=^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d(?::[0-5]\\d(?:\\.\\d+)?)?(?:Z|([+-](?:[01]\\d|2[0-3]):[0-5]\\d)))$"
+        }
+      }
+    },
+    "Annotation": {
+      "fields": {
+        "id": {
+          "required": true,
+          "type": "uuid",
+          "constraint": "pattern=^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-7[0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12})$"
+        },
+        "sampleId": {
+          "required": true,
+          "type": "uuid",
+          "constraint": "pattern=^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-7[0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12})$"
+        },
+        "ontologyVersionId": {
+          "required": true,
+          "type": "uuid",
+          "constraint": "pattern=^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-7[0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12})$"
+        },
+        "labelKey": {
+          "required": true,
+          "type": "string",
+          "constraint": "minLength=1"
+        },
+        "geometry": {
+          "required": false,
+          "type": "object{height,width,x,y}"
+        },
+        "actor": {
+          "required": true,
+          "type": "union(object{displayName,kind=\"human\",ref}|object{agentRunId,kind=\"agent\",ref})"
+        },
+        "surface": {
+          "required": true,
+          "type": "enum(\"cli\"|\"studio\"|\"api\"|\"mcp\"|\"agent\")"
+        },
+        "sessionId": {
+          "required": false,
+          "type": "string",
+          "constraint": "minLength=1"
+        },
+        "createdAt": {
+          "required": true,
+          "type": "date-time",
+          "constraint": "pattern=^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d(?::[0-5]\\d(?:\\.\\d+)?)?(?:Z|([+-](?:[01]\\d|2[0-3]):[0-5]\\d)))$"
+        },
+        "supersededBy": {
+          "required": false,
+          "type": "uuid",
+          "constraint": "pattern=^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-7[0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12})$"
+        }
+      }
+    },
+    "Prediction": {
+      "fields": {
+        "id": {
+          "required": true,
+          "type": "uuid",
+          "constraint": "pattern=^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-7[0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12})$"
+        },
+        "sampleId": {
+          "required": true,
+          "type": "uuid",
+          "constraint": "pattern=^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-7[0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12})$"
+        },
+        "modelVersionId": {
+          "required": true,
+          "type": "uuid",
+          "constraint": "pattern=^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-7[0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12})$"
+        },
+        "labelKey": {
+          "required": true,
+          "type": "string",
+          "constraint": "minLength=1"
+        },
+        "probabilityRaw": {
+          "required": true,
+          "type": "number",
+          "constraint": "minimum=0;maximum=1"
+        },
+        "probabilityCalibrated": {
+          "required": false,
+          "type": "number",
+          "constraint": "minimum=0;maximum=1"
+        },
+        "latencyMs": {
+          "required": false,
+          "type": "number",
+          "constraint": "minimum=0"
+        },
+        "costMicroUsd": {
+          "required": false,
+          "type": "number",
+          "constraint": "minimum=0"
+        },
+        "agreementJson": {
+          "required": false,
+          "type": "json"
+        },
+        "actor": {
+          "required": true,
+          "type": "union(object{kind=\"model\",ref,version})"
+        },
+        "surface": {
+          "required": true,
+          "type": "enum(\"cli\"|\"studio\"|\"api\"|\"mcp\"|\"agent\")"
+        },
+        "sessionId": {
+          "required": false,
+          "type": "string",
+          "constraint": "minLength=1"
+        },
+        "createdAt": {
+          "required": true,
+          "type": "date-time",
+          "constraint": "pattern=^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d(?::[0-5]\\d(?:\\.\\d+)?)?(?:Z|([+-](?:[01]\\d|2[0-3]):[0-5]\\d)))$"
+        }
+      }
+    },
+    "DatasetSnapshot": {
+      "fields": {
+        "id": {
+          "required": true,
+          "type": "uuid",
+          "constraint": "pattern=^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-7[0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12})$"
+        },
+        "manifestHash": {
+          "required": true,
+          "type": "string",
+          "constraint": "pattern=^[0-9a-f]{64}$"
+        },
+        "splitAssignments": {
+          "required": true,
+          "type": "string",
+          "constraint": "pattern=^[0-9a-f]{64}$"
+        },
+        "ontologyVersionId": {
+          "required": true,
+          "type": "uuid",
+          "constraint": "pattern=^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-7[0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12})$"
+        },
+        "parentSnapshotId": {
+          "required": false,
+          "type": "uuid",
+          "constraint": "pattern=^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-7[0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12})$"
+        },
+        "createdAt": {
+          "required": true,
+          "type": "date-time",
+          "constraint": "pattern=^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d(?::[0-5]\\d(?:\\.\\d+)?)?(?:Z|([+-](?:[01]\\d|2[0-3]):[0-5]\\d)))$"
+        },
+        "lineageJson": {
+          "required": false,
+          "type": "json"
+        }
+      }
+    },
+    "ExperimentRun": {
+      "fields": {
+        "id": {
+          "required": true,
+          "type": "uuid",
+          "constraint": "pattern=^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-7[0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12})$"
+        },
+        "kind": {
+          "required": true,
+          "type": "enum(\"classify\"|\"train\"|\"eval\"|\"arena\"|\"al\"|\"agent\")"
+        },
+        "inputSnapshotId": {
+          "required": false,
+          "type": "uuid",
+          "constraint": "pattern=^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-7[0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12})$"
+        },
+        "configFingerprint": {
+          "required": true,
+          "type": "string",
+          "constraint": "pattern=^fp2:[0-9a-f]{16}$"
+        },
+        "status": {
+          "required": true,
+          "type": "enum(\"queued\"|\"running\"|\"succeeded\"|\"failed\"|\"cancelled\"|\"abstained\")"
+        },
+        "metricsSummaryJson": {
+          "required": false,
+          "type": "json"
+        },
+        "startedAt": {
+          "required": true,
+          "type": "date-time",
+          "constraint": "pattern=^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d(?::[0-5]\\d(?:\\.\\d+)?)?(?:Z|([+-](?:[01]\\d|2[0-3]):[0-5]\\d)))$"
+        },
+        "endedAt": {
+          "required": false,
+          "type": "date-time",
+          "constraint": "pattern=^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d(?::[0-5]\\d(?:\\.\\d+)?)?(?:Z|([+-](?:[01]\\d|2[0-3]):[0-5]\\d)))$"
+        }
+      }
+    },
+    "ModelVersion": {
+      "fields": {
+        "id": {
+          "required": true,
+          "type": "uuid",
+          "constraint": "pattern=^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-7[0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12})$"
+        },
+        "name": {
+          "required": true,
+          "type": "string",
+          "constraint": "minLength=1"
+        },
+        "version": {
+          "required": true,
+          "type": "string",
+          "constraint": "minLength=1"
+        },
+        "registryState": {
+          "required": true,
+          "type": "enum(\"draft\"|\"candidate\"|\"registered\"|\"deprecated\"|\"legacy\")"
+        },
+        "recipe": {
+          "required": false,
+          "type": "json"
+        },
+        "artifactPath": {
+          "required": false,
+          "type": "string",
+          "constraint": "minLength=1"
+        },
+        "calibrationRef": {
+          "required": false,
+          "type": "string",
+          "constraint": "minLength=1"
+        },
+        "modelCardPath": {
+          "required": false,
+          "type": "string",
+          "constraint": "minLength=1"
+        },
+        "createdAt": {
+          "required": true,
+          "type": "date-time",
+          "constraint": "pattern=^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d(?::[0-5]\\d(?:\\.\\d+)?)?(?:Z|([+-](?:[01]\\d|2[0-3]):[0-5]\\d)))$"
+        }
+      }
+    },
+    "EvaluationRun": {
+      "fields": {
+        "id": {
+          "required": true,
+          "type": "uuid",
+          "constraint": "pattern=^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-7[0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12})$"
+        },
+        "experimentRunId": {
+          "required": true,
+          "type": "uuid",
+          "constraint": "pattern=^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-7[0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12})$"
+        },
+        "protocol": {
+          "required": true,
+          "type": "string",
+          "constraint": "minLength=1"
+        },
+        "resultsJson": {
+          "required": true,
+          "type": "json"
+        },
+        "reportPath": {
+          "required": false,
+          "type": "string",
+          "constraint": "minLength=1"
+        },
+        "createdAt": {
+          "required": true,
+          "type": "date-time",
+          "constraint": "pattern=^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d(?::[0-5]\\d(?:\\.\\d+)?)?(?:Z|([+-](?:[01]\\d|2[0-3]):[0-5]\\d)))$"
+        }
+      }
+    },
+    "Deployment": {
+      "fields": {
+        "id": {
+          "required": true,
+          "type": "uuid",
+          "constraint": "pattern=^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-7[0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12})$"
+        },
+        "modelVersionId": {
+          "required": true,
+          "type": "uuid",
+          "constraint": "pattern=^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-7[0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12})$"
+        },
+        "target": {
+          "required": true,
+          "type": "string",
+          "constraint": "minLength=1"
+        },
+        "configJson": {
+          "required": true,
+          "type": "json"
+        },
+        "active": {
+          "required": true,
+          "type": "boolean"
+        },
+        "promotedAt": {
+          "required": false,
+          "type": "date-time",
+          "constraint": "pattern=^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d(?::[0-5]\\d(?:\\.\\d+)?)?(?:Z|([+-](?:[01]\\d|2[0-3]):[0-5]\\d)))$"
+        },
+        "pinnedFromId": {
+          "required": false,
+          "type": "uuid",
+          "constraint": "pattern=^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-7[0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12})$"
+        },
+        "createdAt": {
+          "required": true,
+          "type": "date-time",
+          "constraint": "pattern=^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d(?::[0-5]\\d(?:\\.\\d+)?)?(?:Z|([+-](?:[01]\\d|2[0-3]):[0-5]\\d)))$"
+        }
+      }
+    },
+    "FeedbackEvent": {
+      "fields": {
+        "id": {
+          "required": true,
+          "type": "uuid",
+          "constraint": "pattern=^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-7[0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12})$"
+        },
+        "sampleId": {
+          "required": true,
+          "type": "uuid",
+          "constraint": "pattern=^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-7[0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12})$"
+        },
+        "kind": {
+          "required": true,
+          "type": "enum(\"correction\"|\"flag\"|\"production\")"
+        },
+        "payloadJson": {
+          "required": true,
+          "type": "json"
+        },
+        "createdAt": {
+          "required": true,
+          "type": "date-time",
+          "constraint": "pattern=^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d(?::[0-5]\\d(?:\\.\\d+)?)?(?:Z|([+-](?:[01]\\d|2[0-3]):[0-5]\\d)))$"
+        }
+      }
+    },
+    "AgentRun": {
+      "fields": {
+        "id": {
+          "required": true,
+          "type": "uuid",
+          "constraint": "pattern=^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-7[0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12})$"
+        },
+        "goal": {
+          "required": true,
+          "type": "string",
+          "constraint": "minLength=1"
+        },
+        "status": {
+          "required": true,
+          "type": "enum(\"queued\"|\"running\"|\"succeeded\"|\"failed\"|\"cancelled\"|\"abstained\")"
+        },
+        "budgetJson": {
+          "required": true,
+          "type": "json"
+        },
+        "toolCalls": {
+          "required": true,
+          "type": "array<object{args,at,ok,tier,tool}>"
+        },
+        "approvals": {
+          "required": true,
+          "type": "array<object{at,decidedBy,decision,tier,tool}>"
+        },
+        "reportPath": {
+          "required": false,
+          "type": "string",
+          "constraint": "minLength=1"
+        },
+        "createdAt": {
+          "required": true,
+          "type": "date-time",
+          "constraint": "pattern=^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d(?::[0-5]\\d(?:\\.\\d+)?)?(?:Z|([+-](?:[01]\\d|2[0-3]):[0-5]\\d)))$"
+        }
+      }
+    },
+    "DerivedArtifact": {
+      "fields": {
+        "id": {
+          "required": true,
+          "type": "uuid",
+          "constraint": "pattern=^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-7[0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12})$"
+        },
+        "kind": {
+          "required": true,
+          "type": "enum(\"thumbnail\"|\"embedding\"|\"report\"|\"mask\"|\"crop\")"
+        },
+        "sourceAssetIds": {
+          "required": true,
+          "type": "array<uuid>",
+          "constraint": "minItems=1"
+        },
+        "sourceSnapshotId": {
+          "required": false,
+          "type": "uuid",
+          "constraint": "pattern=^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-7[0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12})$"
+        },
+        "transform": {
+          "required": true,
+          "type": "string",
+          "constraint": "minLength=1"
+        },
+        "transformFingerprint": {
+          "required": true,
+          "type": "string",
+          "constraint": "pattern=^fp2:[0-9a-f]{16}$"
+        },
+        "createdAt": {
+          "required": true,
+          "type": "date-time",
+          "constraint": "pattern=^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d(?::[0-5]\\d(?:\\.\\d+)?)?(?:Z|([+-](?:[01]\\d|2[0-3]):[0-5]\\d)))$"
+        }
+      }
+    }
+  },
+  "enums": {
+    "ActorKind": [
+      "agent",
+      "human",
+      "model"
+    ],
+    "Surface": [
+      "agent",
+      "api",
+      "cli",
+      "mcp",
+      "studio"
+    ],
+    "JobState": [
+      "abstained",
+      "cancelled",
+      "failed",
+      "queued",
+      "running",
+      "succeeded"
+    ],
+    "SplitKind": [
+      "holdout",
+      "test",
+      "train",
+      "unassigned",
+      "val"
+    ],
+    "RegistryState": [
+      "candidate",
+      "deprecated",
+      "draft",
+      "legacy",
+      "registered"
+    ],
+    "AgentToolTier": [
+      "analyze",
+      "approval-required",
+      "gated-execute",
+      "propose",
+      "read"
+    ],
+    "RunKind": [
+      "agent",
+      "al",
+      "arena",
+      "classify",
+      "eval",
+      "train"
+    ],
+    "FeedbackKind": [
+      "correction",
+      "flag",
+      "production"
+    ],
+    "WorkerOperation": [
+      "dataset.audit",
+      "eval.run",
+      "model.train",
+      "vision.embed",
+      "vision.predict"
+    ],
+    "WorkerErrorCode": [
+      "BUDGET_EXCEEDED",
+      "CANCELLED",
+      "DEADLINE_EXCEEDED",
+      "MALFORMED_FRAME",
+      "MISSING_EXTRA",
+      "PROTOCOL_MISMATCH",
+      "PROVIDER_UNAVAILABLE",
+      "UNSUPPORTED_OPERATION",
+      "UNSUPPORTED_PROTOCOL",
+      "WORKER_CRASHED"
+    ]
+  },
+  "frames": {
+    "WorkerHelloFrame": {
+      "fields": {
+        "protocol": {
+          "required": true,
+          "type": "literal(\"visionlens.worker.v1\")"
+        },
+        "kind": {
+          "required": true,
+          "type": "literal(\"hello\")"
+        },
+        "protocolVersion": {
+          "required": true,
+          "type": "string",
+          "constraint": "pattern=^\\d+\\.\\d+\\.\\d+$"
+        },
+        "contractVersion": {
+          "required": true,
+          "type": "string",
+          "constraint": "pattern=^\\d+\\.\\d+\\.\\d+$"
+        },
+        "supportedOperations": {
+          "required": true,
+          "type": "array<enum(\"vision.embed\"|\"vision.predict\"|\"dataset.audit\"|\"eval.run\"|\"model.train\")>"
+        },
+        "capabilities": {
+          "required": true,
+          "type": "object{device,extras,models}"
+        },
+        "maxFrameBytes": {
+          "required": true,
+          "type": "integer",
+          "constraint": "exclusiveMinimum=0"
+        }
+      }
+    },
+    "WorkerRequestFrame": {
+      "fields": {
+        "protocol": {
+          "required": true,
+          "type": "literal(\"visionlens.worker.v1\")"
+        },
+        "kind": {
+          "required": true,
+          "type": "literal(\"request\")"
+        },
+        "requestId": {
+          "required": true,
+          "type": "string",
+          "constraint": "minLength=1;maxLength=128"
+        },
+        "operation": {
+          "required": true,
+          "type": "enum(\"vision.embed\"|\"vision.predict\"|\"dataset.audit\"|\"eval.run\"|\"model.train\")"
+        },
+        "contractVersion": {
+          "required": true,
+          "type": "string",
+          "constraint": "pattern=^\\d+\\.\\d+\\.\\d+$"
+        },
+        "workspaceId": {
+          "required": true,
+          "type": "string",
+          "constraint": "minLength=1"
+        },
+        "params": {
+          "required": true,
+          "type": "map<string,json>"
+        },
+        "budget": {
+          "required": true,
+          "type": "object{maxSeconds,maxTokens,maxUsdMicro}"
+        }
+      }
+    },
+    "WorkerProgressFrame": {
+      "fields": {
+        "protocol": {
+          "required": true,
+          "type": "literal(\"visionlens.worker.v1\")"
+        },
+        "kind": {
+          "required": true,
+          "type": "literal(\"progress\")"
+        },
+        "requestId": {
+          "required": true,
+          "type": "string",
+          "constraint": "minLength=1"
+        },
+        "seq": {
+          "required": true,
+          "type": "integer",
+          "constraint": "minimum=0"
+        },
+        "completed": {
+          "required": true,
+          "type": "integer",
+          "constraint": "minimum=0"
+        },
+        "total": {
+          "required": true,
+          "type": "integer",
+          "constraint": "minimum=0"
+        }
+      }
+    },
+    "WorkerResultFrame": {
+      "fields": {
+        "protocol": {
+          "required": true,
+          "type": "literal(\"visionlens.worker.v1\")"
+        },
+        "kind": {
+          "required": true,
+          "type": "literal(\"result\")"
+        },
+        "requestId": {
+          "required": true,
+          "type": "string",
+          "constraint": "minLength=1"
+        },
+        "seq": {
+          "required": true,
+          "type": "integer",
+          "constraint": "minimum=0"
+        },
+        "result": {
+          "required": true,
+          "type": "json"
+        }
+      }
+    },
+    "WorkerErrorFrame": {
+      "fields": {
+        "protocol": {
+          "required": true,
+          "type": "literal(\"visionlens.worker.v1\")"
+        },
+        "kind": {
+          "required": true,
+          "type": "literal(\"error\")"
+        },
+        "requestId": {
+          "required": false,
+          "type": "string",
+          "constraint": "minLength=1"
+        },
+        "seq": {
+          "required": false,
+          "type": "integer",
+          "constraint": "minimum=0"
+        },
+        "code": {
+          "required": true,
+          "type": "enum(\"UNSUPPORTED_PROTOCOL\"|\"MISSING_EXTRA\"|\"MALFORMED_FRAME\"|\"PROTOCOL_MISMATCH\"|\"UNSUPPORTED_OPERATION\"|\"CANCELLED\"|\"DEADLINE_EXCEEDED\"|\"BUDGET_EXCEEDED\"|\"WORKER_CRASHED\"|\"PROVIDER_UNAVAILABLE\")"
+        },
+        "message": {
+          "required": true,
+          "type": "string",
+          "constraint": "minLength=1"
+        },
+        "retryable": {
+          "required": true,
+          "type": "boolean"
+        }
+      }
+    },
+    "WorkerCancelFrame": {
+      "fields": {
+        "protocol": {
+          "required": true,
+          "type": "literal(\"visionlens.worker.v1\")"
+        },
+        "kind": {
+          "required": true,
+          "type": "literal(\"cancel\")"
+        },
+        "requestId": {
+          "required": true,
+          "type": "string",
+          "constraint": "minLength=1"
+        }
+      }
+    }
+  }
+}

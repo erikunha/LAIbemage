@@ -1,7 +1,8 @@
 {
-  "entryPoints": ["src/sdk.ts"],
+  "entryPoints": ["packages/sdk/src/index.ts"],
+  "tsconfig": "packages/sdk/tsconfig.json",
   "out": "docs/api",
-  "name": "ai-image-labeling SDK",
+  "name": "Vision Lens SDK",
   "readme": "none",
   "excludePrivate": true,
   "excludeInternal": true,

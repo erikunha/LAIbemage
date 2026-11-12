@@ -1,0 +1,3 @@
+image,label,mask
+Data/Images/Normal/0000.JPG,normal,
+Data/Images/Anomaly/000.JPG,bubble,Data/Masks/Anomaly/000.png

@@ -17,8 +17,13 @@ output/
 !output/.gitkeep
 !examples/
 
-# Generated test fixtures — reproducible via `npm run fixtures`
-tests/fixtures/images/
+# Staged benchmark datasets — fetched locally, never committed.
+# `datasets/*/` covers EVERY dataset directory (visa-subset/, cache/, and any
+# other dataset id a future entry may add), while datasets/registry.json —
+# the tracked license registry — stays outside it.
+datasets/*/
+benchmarks/results/
+
 
 # OS / editor
 .DS_Store
@@ -29,6 +34,10 @@ Thumbs.db
 # Coverage
 coverage/
 .nyc_output/
+
+# Legacy harness reports — provider outputs of the synthetic unit-fixture run.
+# They are run artifacts, never source.
+reports/
 
 # Generated API docs
 docs/api/
@@ -41,3 +50,17 @@ logs/
 
 # Claude Code local overrides (machine-specific permissions)
 .claude/settings.local.json
+CLAUDE.local.md
+
+# Turbo local cache
+.turbo/
+
+# Python (services/*)
+.venv/
+__pycache__/
+*.pyc
+.pytest_cache/
+
+# The vNext specification pack is tracked; keep it re-included in case a future `specs` ignore
+# pattern ever matches it.
+!docs/vnext/specs/

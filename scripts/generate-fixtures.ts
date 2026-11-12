@@ -2,8 +2,8 @@
  * Fixture image generator — creates minimal 100×100 JPEG files for testing.
  * Each fixture has a distinct solid colour and an embedded EXIF DateTimeOriginal.
  *
- * Run: npx tsx scripts/generate-fixtures.ts
- * Output: tests/fixtures/images/ (git-ignored)
+ * Run: npx tsx scripts/generate-fixtures.ts (also runs via the root `pretest` hook)
+ * Output: packages/core/tests/fixtures/images/ (committed so CI skips generation)
  */
 import { access, mkdir } from 'node:fs/promises';
 import path from 'node:path';
@@ -11,7 +11,7 @@ import { fileURLToPath } from 'node:url';
 import sharp from 'sharp';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
-const OUTPUT_DIR = path.join(__dirname, '..', 'tests', 'fixtures', 'images');
+const OUTPUT_DIR = path.join(__dirname, '..', 'packages', 'core', 'tests', 'fixtures', 'images');
 
 interface FixtureSpec {
   name: string;

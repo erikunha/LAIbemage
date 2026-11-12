@@ -1,0 +1,4902 @@
+[
+  {
+    "id": "candle/Data/Images/Anomaly/000.JPG",
+    "labelKey": "normal",
+    "probability": 0.9,
+    "latencyMs": 11194.667375,
+    "costUsd": 0.0007565
+  },
+  {
+    "id": "candle/Data/Images/Anomaly/001.JPG",
+    "labelKey": "defect:candle",
+    "probability": 0.9,
+    "latencyMs": 11194.667375,
+    "costUsd": 0.0007565
+  },
+  {
+    "id": "candle/Data/Images/Anomaly/002.JPG",
+    "labelKey": "defect:candle",
+    "probability": 0.9,
+    "latencyMs": 11194.667375,
+    "costUsd": 0.0007565
+  },
+  {
+    "id": "candle/Data/Images/Anomaly/003.JPG",
+    "labelKey": "defect:candle",
+    "probability": 0.9,
+    "latencyMs": 11194.667375,
+    "costUsd": 0.0007565
+  },
+  {
+    "id": "candle/Data/Images/Anomaly/004.JPG",
+    "labelKey": "defect:candle",
+    "probability": 0.9,
+    "latencyMs": 11194.667375,
+    "costUsd": 0.0007565
+  },
+  {
+    "id": "candle/Data/Images/Anomaly/005.JPG",
+    "labelKey": "defect:candle",
+    "probability": 0.9,
+    "latencyMs": 11194.667375,
+    "costUsd": 0.0007565
+  },
+  {
+    "id": "candle/Data/Images/Anomaly/006.JPG",
+    "labelKey": "defect:candle",
+    "probability": 0.9,
+    "latencyMs": 11194.667375,
+    "costUsd": 0.0007565
+  },
+  {
+    "id": "candle/Data/Images/Anomaly/007.JPG",
+    "labelKey": "defect:candle",
+    "probability": 0.9,
+    "latencyMs": 11194.667375,
+    "costUsd": 0.0007565
+  },
+  {
+    "id": "candle/Data/Images/Anomaly/008.JPG",
+    "labelKey": "defect:candle",
+    "probability": 0.9,
+    "latencyMs": 11194.667375,
+    "costUsd": 0.0007565
+  },
+  {
+    "id": "candle/Data/Images/Anomaly/009.JPG",
+    "labelKey": "defect:candle",
+    "probability": 0.9,
+    "latencyMs": 11194.667375,
+    "costUsd": 0.0007565
+  },
+  {
+    "id": "candle/Data/Images/Anomaly/010.JPG",
+    "labelKey": "normal",
+    "probability": 0.9,
+    "latencyMs": 11194.667375,
+    "costUsd": 0.0007565
+  },
+  {
+    "id": "candle/Data/Images/Anomaly/011.JPG",
+    "labelKey": "normal",
+    "probability": 0.9,
+    "latencyMs": 11194.667375,
+    "costUsd": 0.0007565
+  },
+  {
+    "id": "candle/Data/Images/Anomaly/012.JPG",
+    "labelKey": "defect:candle",
+    "probability": 0.9,
+    "latencyMs": 11194.667375,
+    "costUsd": 0.0007565
+  },
+  {
+    "id": "candle/Data/Images/Anomaly/013.JPG",
+    "labelKey": "defect:candle",
+    "probability": 0.9,
+    "latencyMs": 11194.667375,
+    "costUsd": 0.0007565
+  },
+  {
+    "id": "candle/Data/Images/Anomaly/014.JPG",
+    "labelKey": "defect:candle",
+    "probability": 0.9,
+    "latencyMs": 11194.667375,
+    "costUsd": 0.0007565
+  },
+  {
+    "id": "candle/Data/Images/Anomaly/015.JPG",
+    "labelKey": "normal",
+    "probability": 0.9,
+    "latencyMs": 11194.667375,
+    "costUsd": 0.0007565
+  },
+  {
+    "id": "candle/Data/Images/Anomaly/016.JPG",
+    "labelKey": "normal",
+    "probability": 0.9,
+    "latencyMs": 11194.667375,
+    "costUsd": 0.0007565
+  },
+  {
+    "id": "candle/Data/Images/Anomaly/017.JPG",
+    "labelKey": "normal",
+    "probability": 0.9,
+    "latencyMs": 11194.667375,
+    "costUsd": 0.0007565
+  },
+  {
+    "id": "candle/Data/Images/Anomaly/018.JPG",
+    "labelKey": "defect:candle",
+    "probability": 0.9,
+    "latencyMs": 11194.667375,
+    "costUsd": 0.0007565
+  },
+  {
+    "id": "candle/Data/Images/Anomaly/019.JPG",
+    "labelKey": "normal",
+    "probability": 0.9,
+    "latencyMs": 11194.667375,
+    "costUsd": 0.0007565
+  },
+  {
+    "id": "candle/Data/Images/Anomaly/020.JPG",
+    "labelKey": "defect:candle",
+    "probability": 0.9,
+    "latencyMs": 10702.31825,
+    "costUsd": 0.000741
+  },
+  {
+    "id": "candle/Data/Images/Anomaly/021.JPG",
+    "labelKey": "defect:candle",
+    "probability": 0.9,
+    "latencyMs": 10702.31825,
+    "costUsd": 0.000741
+  },
+  {
+    "id": "candle/Data/Images/Anomaly/022.JPG",
+    "labelKey": "defect:candle",
+    "probability": 0.9,
+    "latencyMs": 10702.31825,
+    "costUsd": 0.000741
+  },
+  {
+    "id": "candle/Data/Images/Anomaly/023.JPG",
+    "labelKey": "defect:candle",
+    "probability": 0.9,
+    "latencyMs": 10702.31825,
+    "costUsd": 0.000741
+  },
+  {
+    "id": "candle/Data/Images/Anomaly/024.JPG",
+    "labelKey": "defect:candle",
+    "probability": 0.9,
+    "latencyMs": 10702.31825,
+    "costUsd": 0.000741
+  },
+  {
+    "id": "candle/Data/Images/Anomaly/025.JPG",
+    "labelKey": "defect:candle",
+    "probability": 0.9,
+    "latencyMs": 10702.31825,
+    "costUsd": 0.000741
+  },
+  {
+    "id": "candle/Data/Images/Anomaly/026.JPG",
+    "labelKey": "defect:candle",
+    "probability": 0.9,
+    "latencyMs": 10702.31825,
+    "costUsd": 0.000741
+  },
+  {
+    "id": "candle/Data/Images/Anomaly/027.JPG",
+    "labelKey": "defect:candle",
+    "probability": 0.9,
+    "latencyMs": 10702.31825,
+    "costUsd": 0.000741
+  },
+  {
+    "id": "candle/Data/Images/Anomaly/028.JPG",
+    "labelKey": "defect:candle",
+    "probability": 0.9,
+    "latencyMs": 10702.31825,
+    "costUsd": 0.000741
+  },
+  {
+    "id": "candle/Data/Images/Anomaly/029.JPG",
+    "labelKey": "defect:candle",
+    "probability": 0.9,
+    "latencyMs": 10702.31825,
+    "costUsd": 0.000741
+  },
+  {
+    "id": "candle/Data/Images/Anomaly/030.JPG",
+    "labelKey": "defect:candle",
+    "probability": 0.9,
+    "latencyMs": 10702.31825,
+    "costUsd": 0.000741
+  },
+  {
+    "id": "candle/Data/Images/Anomaly/031.JPG",
+    "labelKey": "normal",
+    "probability": 0.9,
+    "latencyMs": 10702.31825,
+    "costUsd": 0.000741
+  },
+  {
+    "id": "candle/Data/Images/Anomaly/032.JPG",
+    "labelKey": "defect:candle",
+    "probability": 0.9,
+    "latencyMs": 10702.31825,
+    "costUsd": 0.000741
+  },
+  {
+    "id": "candle/Data/Images/Anomaly/033.JPG",
+    "labelKey": "normal",
+    "probability": 0.9,
+    "latencyMs": 10702.31825,
+    "costUsd": 0.000741
+  },
+  {
+    "id": "candle/Data/Images/Anomaly/034.JPG",
+    "labelKey": "defect:candle",
+    "probability": 0.9,
+    "latencyMs": 10702.31825,
+    "costUsd": 0.000741
+  },
+  {
+    "id": "candle/Data/Images/Anomaly/035.JPG",
+    "labelKey": "normal",
+    "probability": 0.9,
+    "latencyMs": 10702.31825,
+    "costUsd": 0.000741
+  },
+  {
+    "id": "candle/Data/Images/Anomaly/036.JPG",
+    "labelKey": "defect:candle",
+    "probability": 0.9,
+    "latencyMs": 10702.31825,
+    "costUsd": 0.000741
+  },
+  {
+    "id": "candle/Data/Images/Anomaly/037.JPG",
+    "labelKey": "normal",
+    "probability": 0.9,
+    "latencyMs": 10702.31825,
+    "costUsd": 0.000741
+  },
+  {
+    "id": "candle/Data/Images/Anomaly/038.JPG",
+    "labelKey": "normal",
+    "probability": 0.9,
+    "latencyMs": 10702.31825,
+    "costUsd": 0.000741
+  },
+  {
+    "id": "candle/Data/Images/Anomaly/039.JPG",
+    "labelKey": "normal",
+    "probability": 0.9,
+    "latencyMs": 10702.31825,
+    "costUsd": 0.000741
+  },
+  {
+    "id": "candle/Data/Images/Anomaly/040.JPG",
+    "labelKey": "defect:candle",
+    "probability": 0.9,
+    "latencyMs": 9231.287625,
+    "costUsd": 0.0007740000000000001
+  },
+  {
+    "id": "candle/Data/Images/Anomaly/041.JPG",
+    "labelKey": "defect:candle",
+    "probability": 0.9,
+    "latencyMs": 9231.287625,
+    "costUsd": 0.0007740000000000001
+  },
+  {
+    "id": "candle/Data/Images/Anomaly/042.JPG",
+    "labelKey": "defect:candle",
+    "probability": 0.9,
+    "latencyMs": 9231.287625,
+    "costUsd": 0.0007740000000000001
+  },
+  {
+    "id": "candle/Data/Images/Anomaly/043.JPG",
+    "labelKey": "defect:candle",
+    "probability": 0.9,
+    "latencyMs": 9231.287625,
+    "costUsd": 0.0007740000000000001
+  },
+  {
+    "id": "candle/Data/Images/Anomaly/044.JPG",
+    "labelKey": "defect:candle",
+    "probability": 0.9,
+    "latencyMs": 9231.287625,
+    "costUsd": 0.0007740000000000001
+  },
+  {
+    "id": "candle/Data/Images/Anomaly/045.JPG",
+    "labelKey": "defect:candle",
+    "probability": 0.9,
+    "latencyMs": 9231.287625,
+    "costUsd": 0.0007740000000000001
+  },
+  {
+    "id": "candle/Data/Images/Anomaly/046.JPG",
+    "labelKey": "defect:candle",
+    "probability": 0.9,
+    "latencyMs": 9231.287625,
+    "costUsd": 0.0007740000000000001
+  },
+  {
+    "id": "candle/Data/Images/Anomaly/047.JPG",
+    "labelKey": "defect:candle",
+    "probability": 0.9,
+    "latencyMs": 9231.287625,
+    "costUsd": 0.0007740000000000001
+  },
+  {
+    "id": "candle/Data/Images/Anomaly/048.JPG",
+    "labelKey": "defect:candle",
+    "probability": 0.9,
+    "latencyMs": 9231.287625,
+    "costUsd": 0.0007740000000000001
+  },
+  {
+    "id": "candle/Data/Images/Anomaly/049.JPG",
+    "labelKey": "defect:candle",
+    "probability": 0.9,
+    "latencyMs": 9231.287625,
+    "costUsd": 0.0007740000000000001
+  },
+  {
+    "id": "candle/Data/Images/Anomaly/050.JPG",
+    "labelKey": "defect:candle",
+    "probability": 0.9,
+    "latencyMs": 9231.287625,
+    "costUsd": 0.0007740000000000001
+  },
+  {
+    "id": "candle/Data/Images/Anomaly/051.JPG",
+    "labelKey": "defect:candle",
+    "probability": 0.9,
+    "latencyMs": 9231.287625,
+    "costUsd": 0.0007740000000000001
+  },
+  {
+    "id": "candle/Data/Images/Anomaly/052.JPG",
+    "labelKey": "defect:candle",
+    "probability": 0.9,
+    "latencyMs": 9231.287625,
+    "costUsd": 0.0007740000000000001
+  },
+  {
+    "id": "candle/Data/Images/Anomaly/053.JPG",
+    "labelKey": "defect:candle",
+    "probability": 0.9,
+    "latencyMs": 9231.287625,
+    "costUsd": 0.0007740000000000001
+  },
+  {
+    "id": "candle/Data/Images/Anomaly/054.JPG",
+    "labelKey": "defect:candle",
+    "probability": 0.9,
+    "latencyMs": 9231.287625,
+    "costUsd": 0.0007740000000000001
+  },
+  {
+    "id": "candle/Data/Images/Anomaly/055.JPG",
+    "labelKey": "defect:candle",
+    "probability": 0.9,
+    "latencyMs": 9231.287625,
+    "costUsd": 0.0007740000000000001
+  },
+  {
+    "id": "candle/Data/Images/Anomaly/056.JPG",
+    "labelKey": "defect:candle",
+    "probability": 0.9,
+    "latencyMs": 9231.287625,
+    "costUsd": 0.0007740000000000001
+  },
+  {
+    "id": "candle/Data/Images/Anomaly/057.JPG",
+    "labelKey": "defect:candle",
+    "probability": 0.9,
+    "latencyMs": 9231.287625,
+    "costUsd": 0.0007740000000000001
+  },
+  {
+    "id": "candle/Data/Images/Anomaly/058.JPG",
+    "labelKey": "defect:candle",
+    "probability": 0.9,
+    "latencyMs": 9231.287625,
+    "costUsd": 0.0007740000000000001
+  },
+  {
+    "id": "candle/Data/Images/Anomaly/059.JPG",
+    "labelKey": "defect:candle",
+    "probability": 0.9,
+    "latencyMs": 9231.287625,
+    "costUsd": 0.0007740000000000001
+  },
+  {
+    "id": "candle/Data/Images/Anomaly/060.JPG",
+    "labelKey": "normal",
+    "probability": 0.9,
+    "latencyMs": 9356.783333,
+    "costUsd": 0.0007465
+  },
+  {
+    "id": "candle/Data/Images/Anomaly/061.JPG",
+    "labelKey": "defect:candle",
+    "probability": 0.9,
+    "latencyMs": 9356.783333,
+    "costUsd": 0.0007465
+  },
+  {
+    "id": "candle/Data/Images/Anomaly/062.JPG",
+    "labelKey": "normal",
+    "probability": 0.9,
+    "latencyMs": 9356.783333,
+    "costUsd": 0.0007465
+  },
+  {
+    "id": "candle/Data/Images/Anomaly/063.JPG",
+    "labelKey": "defect:candle",
+    "probability": 0.9,
+    "latencyMs": 9356.783333,
+    "costUsd": 0.0007465
+  },
+  {
+    "id": "candle/Data/Images/Anomaly/064.JPG",
+    "labelKey": "defect:candle",
+    "probability": 0.9,
+    "latencyMs": 9356.783333,
+    "costUsd": 0.0007465
+  },
+  {
+    "id": "candle/Data/Images/Anomaly/065.JPG",
+    "labelKey": "defect:candle",
+    "probability": 0.9,
+    "latencyMs": 9356.783333,
+    "costUsd": 0.0007465
+  },
+  {
+    "id": "candle/Data/Images/Anomaly/066.JPG",
+    "labelKey": "defect:candle",
+    "probability": 0.9,
+    "latencyMs": 9356.783333,
+    "costUsd": 0.0007465
+  },
+  {
+    "id": "candle/Data/Images/Anomaly/067.JPG",
+    "labelKey": "defect:candle",
+    "probability": 0.9,
+    "latencyMs": 9356.783333,
+    "costUsd": 0.0007465
+  },
+  {
+    "id": "candle/Data/Images/Anomaly/068.JPG",
+    "labelKey": "defect:candle",
+    "probability": 0.9,
+    "latencyMs": 9356.783333,
+    "costUsd": 0.0007465
+  },
+  {
+    "id": "candle/Data/Images/Anomaly/069.JPG",
+    "labelKey": "normal",
+    "probability": 0.9,
+    "latencyMs": 9356.783333,
+    "costUsd": 0.0007465
+  },
+  {
+    "id": "candle/Data/Images/Anomaly/070.JPG",
+    "labelKey": "defect:candle",
+    "probability": 0.9,
+    "latencyMs": 9356.783333,
+    "costUsd": 0.0007465
+  },
+  {
+    "id": "candle/Data/Images/Anomaly/071.JPG",
+    "labelKey": "defect:candle",
+    "probability": 0.9,
+    "latencyMs": 9356.783333,
+    "costUsd": 0.0007465
+  },
+  {
+    "id": "candle/Data/Images/Anomaly/072.JPG",
+    "labelKey": "defect:candle",
+    "probability": 0.9,
+    "latencyMs": 9356.783333,
+    "costUsd": 0.0007465
+  },
+  {
+    "id": "candle/Data/Images/Anomaly/073.JPG",
+    "labelKey": "defect:candle",
+    "probability": 0.9,
+    "latencyMs": 9356.783333,
+    "costUsd": 0.0007465
+  },
+  {
+    "id": "candle/Data/Images/Anomaly/074.JPG",
+    "labelKey": "defect:candle",
+    "probability": 0.9,
+    "latencyMs": 9356.783333,
+    "costUsd": 0.0007465
+  },
+  {
+    "id": "candle/Data/Images/Anomaly/075.JPG",
+    "labelKey": "defect:candle",
+    "probability": 0.9,
+    "latencyMs": 9356.783333,
+    "costUsd": 0.0007465
+  },
+  {
+    "id": "candle/Data/Images/Anomaly/076.JPG",
+    "labelKey": "defect:candle",
+    "probability": 0.9,
+    "latencyMs": 9356.783333,
+    "costUsd": 0.0007465
+  },
+  {
+    "id": "candle/Data/Images/Anomaly/077.JPG",
+    "labelKey": "defect:candle",
+    "probability": 0.9,
+    "latencyMs": 9356.783333,
+    "costUsd": 0.0007465
+  },
+  {
+    "id": "candle/Data/Images/Anomaly/078.JPG",
+    "labelKey": "defect:candle",
+    "probability": 0.9,
+    "latencyMs": 9356.783333,
+    "costUsd": 0.0007465
+  },
+  {
+    "id": "candle/Data/Images/Anomaly/079.JPG",
+    "labelKey": "defect:candle",
+    "probability": 0.9,
+    "latencyMs": 9356.783333,
+    "costUsd": 0.0007465
+  },
+  {
+    "id": "candle/Data/Images/Anomaly/080.JPG",
+    "labelKey": "defect:candle",
+    "probability": 0.95,
+    "latencyMs": 8344.926291999996,
+    "costUsd": 0.0007340000000000001
+  },
+  {
+    "id": "candle/Data/Images/Anomaly/081.JPG",
+    "labelKey": "defect:candle",
+    "probability": 0.95,
+    "latencyMs": 8344.926291999996,
+    "costUsd": 0.0007340000000000001
+  },
+  {
+    "id": "candle/Data/Images/Anomaly/082.JPG",
+    "labelKey": "defect:candle",
+    "probability": 0.95,
+    "latencyMs": 8344.926291999996,
+    "costUsd": 0.0007340000000000001
+  },
+  {
+    "id": "candle/Data/Images/Anomaly/083.JPG",
+    "labelKey": "defect:candle",
+    "probability": 0.95,
+    "latencyMs": 8344.926291999996,
+    "costUsd": 0.0007340000000000001
+  },
+  {
+    "id": "candle/Data/Images/Anomaly/084.JPG",
+    "labelKey": "defect:candle",
+    "probability": 0.95,
+    "latencyMs": 8344.926291999996,
+    "costUsd": 0.0007340000000000001
+  },
+  {
+    "id": "candle/Data/Images/Anomaly/085.JPG",
+    "labelKey": "defect:candle",
+    "probability": 0.95,
+    "latencyMs": 8344.926291999996,
+    "costUsd": 0.0007340000000000001
+  },
+  {
+    "id": "candle/Data/Images/Anomaly/086.JPG",
+    "labelKey": "defect:candle",
+    "probability": 0.95,
+    "latencyMs": 8344.926291999996,
+    "costUsd": 0.0007340000000000001
+  },
+  {
+    "id": "candle/Data/Images/Anomaly/087.JPG",
+    "labelKey": "defect:candle",
+    "probability": 0.95,
+    "latencyMs": 8344.926291999996,
+    "costUsd": 0.0007340000000000001
+  },
+  {
+    "id": "candle/Data/Images/Anomaly/088.JPG",
+    "labelKey": "defect:candle",
+    "probability": 0.95,
+    "latencyMs": 8344.926291999996,
+    "costUsd": 0.0007340000000000001
+  },
+  {
+    "id": "candle/Data/Images/Anomaly/089.JPG",
+    "labelKey": "defect:candle",
+    "probability": 0.95,
+    "latencyMs": 8344.926291999996,
+    "costUsd": 0.0007340000000000001
+  },
+  {
+    "id": "candle/Data/Images/Anomaly/090.JPG",
+    "labelKey": "defect:candle",
+    "probability": 0.95,
+    "latencyMs": 8344.926291999996,
+    "costUsd": 0.0007340000000000001
+  },
+  {
+    "id": "candle/Data/Images/Anomaly/091.JPG",
+    "labelKey": "defect:candle",
+    "probability": 0.95,
+    "latencyMs": 8344.926291999996,
+    "costUsd": 0.0007340000000000001
+  },
+  {
+    "id": "candle/Data/Images/Anomaly/092.JPG",
+    "labelKey": "defect:candle",
+    "probability": 0.95,
+    "latencyMs": 8344.926291999996,
+    "costUsd": 0.0007340000000000001
+  },
+  {
+    "id": "candle/Data/Images/Anomaly/093.JPG",
+    "labelKey": "defect:candle",
+    "probability": 0.95,
+    "latencyMs": 8344.926291999996,
+    "costUsd": 0.0007340000000000001
+  },
+  {
+    "id": "candle/Data/Images/Anomaly/094.JPG",
+    "labelKey": "defect:candle",
+    "probability": 0.95,
+    "latencyMs": 8344.926291999996,
+    "costUsd": 0.0007340000000000001
+  },
+  {
+    "id": "candle/Data/Images/Anomaly/095.JPG",
+    "labelKey": "defect:candle",
+    "probability": 0.95,
+    "latencyMs": 8344.926291999996,
+    "costUsd": 0.0007340000000000001
+  },
+  {
+    "id": "candle/Data/Images/Anomaly/096.JPG",
+    "labelKey": "defect:candle",
+    "probability": 0.95,
+    "latencyMs": 8344.926291999996,
+    "costUsd": 0.0007340000000000001
+  },
+  {
+    "id": "candle/Data/Images/Anomaly/097.JPG",
+    "labelKey": "defect:candle",
+    "probability": 0.95,
+    "latencyMs": 8344.926291999996,
+    "costUsd": 0.0007340000000000001
+  },
+  {
+    "id": "candle/Data/Images/Anomaly/098.JPG",
+    "labelKey": "defect:candle",
+    "probability": 0.95,
+    "latencyMs": 8344.926291999996,
+    "costUsd": 0.0007340000000000001
+  },
+  {
+    "id": "candle/Data/Images/Anomaly/099.JPG",
+    "labelKey": "defect:candle",
+    "probability": 0.95,
+    "latencyMs": 8344.926291999996,
+    "costUsd": 0.0007340000000000001
+  },
+  {
+    "id": "candle/Data/Images/Normal/0000.JPG",
+    "labelKey": "normal",
+    "probability": 1,
+    "latencyMs": 6917.746084000006,
+    "costUsd": 0.000696
+  },
+  {
+    "id": "candle/Data/Images/Normal/0014.JPG",
+    "labelKey": "normal",
+    "probability": 1,
+    "latencyMs": 6917.746084000006,
+    "costUsd": 0.000696
+  },
+  {
+    "id": "candle/Data/Images/Normal/0027.JPG",
+    "labelKey": "normal",
+    "probability": 1,
+    "latencyMs": 6917.746084000006,
+    "costUsd": 0.000696
+  },
+  {
+    "id": "candle/Data/Images/Normal/0041.JPG",
+    "labelKey": "normal",
+    "probability": 1,
+    "latencyMs": 6917.746084000006,
+    "costUsd": 0.000696
+  },
+  {
+    "id": "candle/Data/Images/Normal/0054.JPG",
+    "labelKey": "normal",
+    "probability": 1,
+    "latencyMs": 6917.746084000006,
+    "costUsd": 0.000696
+  },
+  {
+    "id": "candle/Data/Images/Normal/0068.JPG",
+    "labelKey": "normal",
+    "probability": 1,
+    "latencyMs": 6917.746084000006,
+    "costUsd": 0.000696
+  },
+  {
+    "id": "candle/Data/Images/Normal/0081.JPG",
+    "labelKey": "normal",
+    "probability": 1,
+    "latencyMs": 6917.746084000006,
+    "costUsd": 0.000696
+  },
+  {
+    "id": "candle/Data/Images/Normal/0095.JPG",
+    "labelKey": "normal",
+    "probability": 1,
+    "latencyMs": 6917.746084000006,
+    "costUsd": 0.000696
+  },
+  {
+    "id": "candle/Data/Images/Normal/0108.JPG",
+    "labelKey": "normal",
+    "probability": 1,
+    "latencyMs": 6917.746084000006,
+    "costUsd": 0.000696
+  },
+  {
+    "id": "candle/Data/Images/Normal/0122.JPG",
+    "labelKey": "normal",
+    "probability": 1,
+    "latencyMs": 6917.746084000006,
+    "costUsd": 0.000696
+  },
+  {
+    "id": "candle/Data/Images/Normal/0135.JPG",
+    "labelKey": "normal",
+    "probability": 1,
+    "latencyMs": 6917.746084000006,
+    "costUsd": 0.000696
+  },
+  {
+    "id": "candle/Data/Images/Normal/0149.JPG",
+    "labelKey": "normal",
+    "probability": 1,
+    "latencyMs": 6917.746084000006,
+    "costUsd": 0.000696
+  },
+  {
+    "id": "candle/Data/Images/Normal/0162.JPG",
+    "labelKey": "normal",
+    "probability": 1,
+    "latencyMs": 6917.746084000006,
+    "costUsd": 0.000696
+  },
+  {
+    "id": "candle/Data/Images/Normal/0176.JPG",
+    "labelKey": "normal",
+    "probability": 1,
+    "latencyMs": 6917.746084000006,
+    "costUsd": 0.000696
+  },
+  {
+    "id": "candle/Data/Images/Normal/0189.JPG",
+    "labelKey": "normal",
+    "probability": 1,
+    "latencyMs": 6917.746084000006,
+    "costUsd": 0.000696
+  },
+  {
+    "id": "candle/Data/Images/Normal/0203.JPG",
+    "labelKey": "normal",
+    "probability": 1,
+    "latencyMs": 6917.746084000006,
+    "costUsd": 0.000696
+  },
+  {
+    "id": "candle/Data/Images/Normal/0216.JPG",
+    "labelKey": "normal",
+    "probability": 1,
+    "latencyMs": 6917.746084000006,
+    "costUsd": 0.000696
+  },
+  {
+    "id": "candle/Data/Images/Normal/0230.JPG",
+    "labelKey": "normal",
+    "probability": 1,
+    "latencyMs": 6917.746084000006,
+    "costUsd": 0.000696
+  },
+  {
+    "id": "candle/Data/Images/Normal/0243.JPG",
+    "labelKey": "normal",
+    "probability": 1,
+    "latencyMs": 6917.746084000006,
+    "costUsd": 0.000696
+  },
+  {
+    "id": "candle/Data/Images/Normal/0257.JPG",
+    "labelKey": "normal",
+    "probability": 1,
+    "latencyMs": 6917.746084000006,
+    "costUsd": 0.000696
+  },
+  {
+    "id": "candle/Data/Images/Normal/0270.JPG",
+    "labelKey": "normal",
+    "probability": 1,
+    "latencyMs": 10272.726874999993,
+    "costUsd": 0.0006760000000000001
+  },
+  {
+    "id": "candle/Data/Images/Normal/0284.JPG",
+    "labelKey": "normal",
+    "probability": 1,
+    "latencyMs": 10272.726874999993,
+    "costUsd": 0.0006760000000000001
+  },
+  {
+    "id": "candle/Data/Images/Normal/0297.JPG",
+    "labelKey": "normal",
+    "probability": 1,
+    "latencyMs": 10272.726874999993,
+    "costUsd": 0.0006760000000000001
+  },
+  {
+    "id": "candle/Data/Images/Normal/0311.JPG",
+    "labelKey": "normal",
+    "probability": 1,
+    "latencyMs": 10272.726874999993,
+    "costUsd": 0.0006760000000000001
+  },
+  {
+    "id": "candle/Data/Images/Normal/0324.JPG",
+    "labelKey": "normal",
+    "probability": 1,
+    "latencyMs": 10272.726874999993,
+    "costUsd": 0.0006760000000000001
+  },
+  {
+    "id": "candle/Data/Images/Normal/0338.JPG",
+    "labelKey": "normal",
+    "probability": 1,
+    "latencyMs": 10272.726874999993,
+    "costUsd": 0.0006760000000000001
+  },
+  {
+    "id": "candle/Data/Images/Normal/0351.JPG",
+    "labelKey": "normal",
+    "probability": 1,
+    "latencyMs": 10272.726874999993,
+    "costUsd": 0.0006760000000000001
+  },
+  {
+    "id": "candle/Data/Images/Normal/0365.JPG",
+    "labelKey": "normal",
+    "probability": 1,
+    "latencyMs": 10272.726874999993,
+    "costUsd": 0.0006760000000000001
+  },
+  {
+    "id": "candle/Data/Images/Normal/0378.JPG",
+    "labelKey": "normal",
+    "probability": 1,
+    "latencyMs": 10272.726874999993,
+    "costUsd": 0.0006760000000000001
+  },
+  {
+    "id": "candle/Data/Images/Normal/0392.JPG",
+    "labelKey": "normal",
+    "probability": 1,
+    "latencyMs": 10272.726874999993,
+    "costUsd": 0.0006760000000000001
+  },
+  {
+    "id": "candle/Data/Images/Normal/0405.JPG",
+    "labelKey": "normal",
+    "probability": 1,
+    "latencyMs": 10272.726874999993,
+    "costUsd": 0.0006760000000000001
+  },
+  {
+    "id": "candle/Data/Images/Normal/0419.JPG",
+    "labelKey": "normal",
+    "probability": 1,
+    "latencyMs": 10272.726874999993,
+    "costUsd": 0.0006760000000000001
+  },
+  {
+    "id": "candle/Data/Images/Normal/0432.JPG",
+    "labelKey": "normal",
+    "probability": 1,
+    "latencyMs": 10272.726874999993,
+    "costUsd": 0.0006760000000000001
+  },
+  {
+    "id": "candle/Data/Images/Normal/0446.JPG",
+    "labelKey": "normal",
+    "probability": 1,
+    "latencyMs": 10272.726874999993,
+    "costUsd": 0.0006760000000000001
+  },
+  {
+    "id": "candle/Data/Images/Normal/0459.JPG",
+    "labelKey": "normal",
+    "probability": 1,
+    "latencyMs": 10272.726874999993,
+    "costUsd": 0.0006760000000000001
+  },
+  {
+    "id": "candle/Data/Images/Normal/0473.JPG",
+    "labelKey": "normal",
+    "probability": 1,
+    "latencyMs": 10272.726874999993,
+    "costUsd": 0.0006760000000000001
+  },
+  {
+    "id": "candle/Data/Images/Normal/0486.JPG",
+    "labelKey": "normal",
+    "probability": 1,
+    "latencyMs": 10272.726874999993,
+    "costUsd": 0.0006760000000000001
+  },
+  {
+    "id": "candle/Data/Images/Normal/0500.JPG",
+    "labelKey": "normal",
+    "probability": 1,
+    "latencyMs": 10272.726874999993,
+    "costUsd": 0.0006760000000000001
+  },
+  {
+    "id": "candle/Data/Images/Normal/0513.JPG",
+    "labelKey": "normal",
+    "probability": 1,
+    "latencyMs": 10272.726874999993,
+    "costUsd": 0.0006760000000000001
+  },
+  {
+    "id": "candle/Data/Images/Normal/0527.JPG",
+    "labelKey": "normal",
+    "probability": 1,
+    "latencyMs": 10272.726874999993,
+    "costUsd": 0.0006760000000000001
+  },
+  {
+    "id": "candle/Data/Images/Normal/0540.JPG",
+    "labelKey": "normal",
+    "probability": 1,
+    "latencyMs": 10630.925707999995,
+    "costUsd": 0.000736
+  },
+  {
+    "id": "candle/Data/Images/Normal/0554.JPG",
+    "labelKey": "normal",
+    "probability": 1,
+    "latencyMs": 10630.925707999995,
+    "costUsd": 0.000736
+  },
+  {
+    "id": "candle/Data/Images/Normal/0567.JPG",
+    "labelKey": "normal",
+    "probability": 1,
+    "latencyMs": 10630.925707999995,
+    "costUsd": 0.000736
+  },
+  {
+    "id": "candle/Data/Images/Normal/0581.JPG",
+    "labelKey": "normal",
+    "probability": 1,
+    "latencyMs": 10630.925707999995,
+    "costUsd": 0.000736
+  },
+  {
+    "id": "candle/Data/Images/Normal/0594.JPG",
+    "labelKey": "normal",
+    "probability": 1,
+    "latencyMs": 10630.925707999995,
+    "costUsd": 0.000736
+  },
+  {
+    "id": "candle/Data/Images/Normal/0608.JPG",
+    "labelKey": "normal",
+    "probability": 1,
+    "latencyMs": 10630.925707999995,
+    "costUsd": 0.000736
+  },
+  {
+    "id": "candle/Data/Images/Normal/0621.JPG",
+    "labelKey": "normal",
+    "probability": 1,
+    "latencyMs": 10630.925707999995,
+    "costUsd": 0.000736
+  },
+  {
+    "id": "candle/Data/Images/Normal/0635.JPG",
+    "labelKey": "normal",
+    "probability": 1,
+    "latencyMs": 10630.925707999995,
+    "costUsd": 0.000736
+  },
+  {
+    "id": "candle/Data/Images/Normal/0648.JPG",
+    "labelKey": "normal",
+    "probability": 1,
+    "latencyMs": 10630.925707999995,
+    "costUsd": 0.000736
+  },
+  {
+    "id": "candle/Data/Images/Normal/0662.JPG",
+    "labelKey": "normal",
+    "probability": 1,
+    "latencyMs": 10630.925707999995,
+    "costUsd": 0.000736
+  },
+  {
+    "id": "candle/Data/Images/Normal/0675.JPG",
+    "labelKey": "normal",
+    "probability": 1,
+    "latencyMs": 10630.925707999995,
+    "costUsd": 0.000736
+  },
+  {
+    "id": "candle/Data/Images/Normal/0689.JPG",
+    "labelKey": "normal",
+    "probability": 1,
+    "latencyMs": 10630.925707999995,
+    "costUsd": 0.000736
+  },
+  {
+    "id": "candle/Data/Images/Normal/0702.JPG",
+    "labelKey": "normal",
+    "probability": 1,
+    "latencyMs": 10630.925707999995,
+    "costUsd": 0.000736
+  },
+  {
+    "id": "candle/Data/Images/Normal/0716.JPG",
+    "labelKey": "normal",
+    "probability": 1,
+    "latencyMs": 10630.925707999995,
+    "costUsd": 0.000736
+  },
+  {
+    "id": "candle/Data/Images/Normal/0729.JPG",
+    "labelKey": "normal",
+    "probability": 1,
+    "latencyMs": 10630.925707999995,
+    "costUsd": 0.000736
+  },
+  {
+    "id": "candle/Data/Images/Normal/0743.JPG",
+    "labelKey": "normal",
+    "probability": 1,
+    "latencyMs": 10630.925707999995,
+    "costUsd": 0.000736
+  },
+  {
+    "id": "candle/Data/Images/Normal/0756.JPG",
+    "labelKey": "normal",
+    "probability": 1,
+    "latencyMs": 10630.925707999995,
+    "costUsd": 0.000736
+  },
+  {
+    "id": "candle/Data/Images/Normal/0770.JPG",
+    "labelKey": "normal",
+    "probability": 1,
+    "latencyMs": 10630.925707999995,
+    "costUsd": 0.000736
+  },
+  {
+    "id": "candle/Data/Images/Normal/0783.JPG",
+    "labelKey": "normal",
+    "probability": 1,
+    "latencyMs": 10630.925707999995,
+    "costUsd": 0.000736
+  },
+  {
+    "id": "candle/Data/Images/Normal/0797.JPG",
+    "labelKey": "normal",
+    "probability": 1,
+    "latencyMs": 10630.925707999995,
+    "costUsd": 0.000736
+  },
+  {
+    "id": "candle/Data/Images/Normal/0810.JPG",
+    "labelKey": "normal",
+    "probability": 1,
+    "latencyMs": 7870.64566699999,
+    "costUsd": 0.0007310000000000001
+  },
+  {
+    "id": "candle/Data/Images/Normal/0824.JPG",
+    "labelKey": "normal",
+    "probability": 1,
+    "latencyMs": 7870.64566699999,
+    "costUsd": 0.0007310000000000001
+  },
+  {
+    "id": "candle/Data/Images/Normal/0837.JPG",
+    "labelKey": "normal",
+    "probability": 1,
+    "latencyMs": 7870.64566699999,
+    "costUsd": 0.0007310000000000001
+  },
+  {
+    "id": "candle/Data/Images/Normal/0851.JPG",
+    "labelKey": "normal",
+    "probability": 1,
+    "latencyMs": 7870.64566699999,
+    "costUsd": 0.0007310000000000001
+  },
+  {
+    "id": "candle/Data/Images/Normal/0864.JPG",
+    "labelKey": "normal",
+    "probability": 1,
+    "latencyMs": 7870.64566699999,
+    "costUsd": 0.0007310000000000001
+  },
+  {
+    "id": "candle/Data/Images/Normal/0878.JPG",
+    "labelKey": "normal",
+    "probability": 1,
+    "latencyMs": 7870.64566699999,
+    "costUsd": 0.0007310000000000001
+  },
+  {
+    "id": "candle/Data/Images/Normal/0891.JPG",
+    "labelKey": "normal",
+    "probability": 1,
+    "latencyMs": 7870.64566699999,
+    "costUsd": 0.0007310000000000001
+  },
+  {
+    "id": "candle/Data/Images/Normal/0905.JPG",
+    "labelKey": "normal",
+    "probability": 1,
+    "latencyMs": 7870.64566699999,
+    "costUsd": 0.0007310000000000001
+  },
+  {
+    "id": "candle/Data/Images/Normal/0918.JPG",
+    "labelKey": "normal",
+    "probability": 1,
+    "latencyMs": 7870.64566699999,
+    "costUsd": 0.0007310000000000001
+  },
+  {
+    "id": "candle/Data/Images/Normal/0932.JPG",
+    "labelKey": "normal",
+    "probability": 1,
+    "latencyMs": 7870.64566699999,
+    "costUsd": 0.0007310000000000001
+  },
+  {
+    "id": "candle/Data/Images/Normal/0945.JPG",
+    "labelKey": "normal",
+    "probability": 1,
+    "latencyMs": 7870.64566699999,
+    "costUsd": 0.0007310000000000001
+  },
+  {
+    "id": "candle/Data/Images/Normal/0959.JPG",
+    "labelKey": "normal",
+    "probability": 1,
+    "latencyMs": 7870.64566699999,
+    "costUsd": 0.0007310000000000001
+  },
+  {
+    "id": "candle/Data/Images/Normal/0972.JPG",
+    "labelKey": "normal",
+    "probability": 1,
+    "latencyMs": 7870.64566699999,
+    "costUsd": 0.0007310000000000001
+  },
+  {
+    "id": "candle/Data/Images/Normal/0986.JPG",
+    "labelKey": "normal",
+    "probability": 1,
+    "latencyMs": 7870.64566699999,
+    "costUsd": 0.0007310000000000001
+  },
+  {
+    "id": "candle/Data/Images/Normal/0999.JPG",
+    "labelKey": "normal",
+    "probability": 1,
+    "latencyMs": 7870.64566699999,
+    "costUsd": 0.0007310000000000001
+  },
+  {
+    "id": "capsules/Data/Images/Anomaly/000.JPG",
+    "labelKey": "defect:capsules",
+    "probability": 0.9,
+    "latencyMs": 7870.64566699999,
+    "costUsd": 0.0007310000000000001
+  },
+  {
+    "id": "capsules/Data/Images/Anomaly/001.JPG",
+    "labelKey": "defect:capsules",
+    "probability": 0.9,
+    "latencyMs": 7870.64566699999,
+    "costUsd": 0.0007310000000000001
+  },
+  {
+    "id": "capsules/Data/Images/Anomaly/002.JPG",
+    "labelKey": "defect:capsules",
+    "probability": 0.9,
+    "latencyMs": 7870.64566699999,
+    "costUsd": 0.0007310000000000001
+  },
+  {
+    "id": "capsules/Data/Images/Anomaly/003.JPG",
+    "labelKey": "defect:capsules",
+    "probability": 0.9,
+    "latencyMs": 7870.64566699999,
+    "costUsd": 0.0007310000000000001
+  },
+  {
+    "id": "capsules/Data/Images/Anomaly/004.JPG",
+    "labelKey": "defect:capsules",
+    "probability": 0.9,
+    "latencyMs": 7870.64566699999,
+    "costUsd": 0.0007310000000000001
+  },
+  {
+    "id": "capsules/Data/Images/Anomaly/005.JPG",
+    "labelKey": "defect:capsules",
+    "probability": 0.95,
+    "latencyMs": 9009.143041999996,
+    "costUsd": 0.000724
+  },
+  {
+    "id": "capsules/Data/Images/Anomaly/006.JPG",
+    "labelKey": "defect:capsules",
+    "probability": 0.95,
+    "latencyMs": 9009.143041999996,
+    "costUsd": 0.000724
+  },
+  {
+    "id": "capsules/Data/Images/Anomaly/007.JPG",
+    "labelKey": "defect:capsules",
+    "probability": 0.95,
+    "latencyMs": 9009.143041999996,
+    "costUsd": 0.000724
+  },
+  {
+    "id": "capsules/Data/Images/Anomaly/008.JPG",
+    "labelKey": "defect:capsules",
+    "probability": 0.95,
+    "latencyMs": 9009.143041999996,
+    "costUsd": 0.000724
+  },
+  {
+    "id": "capsules/Data/Images/Anomaly/009.JPG",
+    "labelKey": "defect:capsules",
+    "probability": 0.95,
+    "latencyMs": 9009.143041999996,
+    "costUsd": 0.000724
+  },
+  {
+    "id": "capsules/Data/Images/Anomaly/010.JPG",
+    "labelKey": "defect:capsules",
+    "probability": 0.95,
+    "latencyMs": 9009.143041999996,
+    "costUsd": 0.000724
+  },
+  {
+    "id": "capsules/Data/Images/Anomaly/011.JPG",
+    "labelKey": "defect:capsules",
+    "probability": 0.95,
+    "latencyMs": 9009.143041999996,
+    "costUsd": 0.000724
+  },
+  {
+    "id": "capsules/Data/Images/Anomaly/012.JPG",
+    "labelKey": "defect:capsules",
+    "probability": 0.95,
+    "latencyMs": 9009.143041999996,
+    "costUsd": 0.000724
+  },
+  {
+    "id": "capsules/Data/Images/Anomaly/013.JPG",
+    "labelKey": "defect:capsules",
+    "probability": 0.95,
+    "latencyMs": 9009.143041999996,
+    "costUsd": 0.000724
+  },
+  {
+    "id": "capsules/Data/Images/Anomaly/014.JPG",
+    "labelKey": "defect:capsules",
+    "probability": 0.95,
+    "latencyMs": 9009.143041999996,
+    "costUsd": 0.000724
+  },
+  {
+    "id": "capsules/Data/Images/Anomaly/015.JPG",
+    "labelKey": "defect:capsules",
+    "probability": 0.95,
+    "latencyMs": 9009.143041999996,
+    "costUsd": 0.000724
+  },
+  {
+    "id": "capsules/Data/Images/Anomaly/016.JPG",
+    "labelKey": "defect:capsules",
+    "probability": 0.95,
+    "latencyMs": 9009.143041999996,
+    "costUsd": 0.000724
+  },
+  {
+    "id": "capsules/Data/Images/Anomaly/017.JPG",
+    "labelKey": "defect:capsules",
+    "probability": 0.95,
+    "latencyMs": 9009.143041999996,
+    "costUsd": 0.000724
+  },
+  {
+    "id": "capsules/Data/Images/Anomaly/018.JPG",
+    "labelKey": "defect:capsules",
+    "probability": 0.95,
+    "latencyMs": 9009.143041999996,
+    "costUsd": 0.000724
+  },
+  {
+    "id": "capsules/Data/Images/Anomaly/019.JPG",
+    "labelKey": "defect:capsules",
+    "probability": 0.95,
+    "latencyMs": 9009.143041999996,
+    "costUsd": 0.000724
+  },
+  {
+    "id": "capsules/Data/Images/Anomaly/020.JPG",
+    "labelKey": "defect:capsules",
+    "probability": 0.95,
+    "latencyMs": 9009.143041999996,
+    "costUsd": 0.000724
+  },
+  {
+    "id": "capsules/Data/Images/Anomaly/021.JPG",
+    "labelKey": "defect:capsules",
+    "probability": 0.95,
+    "latencyMs": 9009.143041999996,
+    "costUsd": 0.000724
+  },
+  {
+    "id": "capsules/Data/Images/Anomaly/022.JPG",
+    "labelKey": "defect:capsules",
+    "probability": 0.95,
+    "latencyMs": 9009.143041999996,
+    "costUsd": 0.000724
+  },
+  {
+    "id": "capsules/Data/Images/Anomaly/023.JPG",
+    "labelKey": "defect:capsules",
+    "probability": 0.95,
+    "latencyMs": 9009.143041999996,
+    "costUsd": 0.000724
+  },
+  {
+    "id": "capsules/Data/Images/Anomaly/024.JPG",
+    "labelKey": "defect:capsules",
+    "probability": 0.95,
+    "latencyMs": 9009.143041999996,
+    "costUsd": 0.000724
+  },
+  {
+    "id": "capsules/Data/Images/Anomaly/025.JPG",
+    "labelKey": "defect:capsules",
+    "probability": 0.95,
+    "latencyMs": 10008.815917,
+    "costUsd": 0.000754
+  },
+  {
+    "id": "capsules/Data/Images/Anomaly/026.JPG",
+    "labelKey": "defect:capsules",
+    "probability": 0.95,
+    "latencyMs": 10008.815917,
+    "costUsd": 0.000754
+  },
+  {
+    "id": "capsules/Data/Images/Anomaly/027.JPG",
+    "labelKey": "defect:capsules",
+    "probability": 0.95,
+    "latencyMs": 10008.815917,
+    "costUsd": 0.000754
+  },
+  {
+    "id": "capsules/Data/Images/Anomaly/028.JPG",
+    "labelKey": "defect:capsules",
+    "probability": 0.95,
+    "latencyMs": 10008.815917,
+    "costUsd": 0.000754
+  },
+  {
+    "id": "capsules/Data/Images/Anomaly/029.JPG",
+    "labelKey": "defect:capsules",
+    "probability": 0.95,
+    "latencyMs": 10008.815917,
+    "costUsd": 0.000754
+  },
+  {
+    "id": "capsules/Data/Images/Anomaly/030.JPG",
+    "labelKey": "defect:capsules",
+    "probability": 0.95,
+    "latencyMs": 10008.815917,
+    "costUsd": 0.000754
+  },
+  {
+    "id": "capsules/Data/Images/Anomaly/031.JPG",
+    "labelKey": "defect:capsules",
+    "probability": 0.95,
+    "latencyMs": 10008.815917,
+    "costUsd": 0.000754
+  },
+  {
+    "id": "capsules/Data/Images/Anomaly/032.JPG",
+    "labelKey": "defect:capsules",
+    "probability": 0.95,
+    "latencyMs": 10008.815917,
+    "costUsd": 0.000754
+  },
+  {
+    "id": "capsules/Data/Images/Anomaly/033.JPG",
+    "labelKey": "defect:capsules",
+    "probability": 0.95,
+    "latencyMs": 10008.815917,
+    "costUsd": 0.000754
+  },
+  {
+    "id": "capsules/Data/Images/Anomaly/034.JPG",
+    "labelKey": "defect:capsules",
+    "probability": 0.95,
+    "latencyMs": 10008.815917,
+    "costUsd": 0.000754
+  },
+  {
+    "id": "capsules/Data/Images/Anomaly/035.JPG",
+    "labelKey": "defect:capsules",
+    "probability": 0.95,
+    "latencyMs": 10008.815917,
+    "costUsd": 0.000754
+  },
+  {
+    "id": "capsules/Data/Images/Anomaly/036.JPG",
+    "labelKey": "defect:capsules",
+    "probability": 0.95,
+    "latencyMs": 10008.815917,
+    "costUsd": 0.000754
+  },
+  {
+    "id": "capsules/Data/Images/Anomaly/037.JPG",
+    "labelKey": "defect:capsules",
+    "probability": 0.95,
+    "latencyMs": 10008.815917,
+    "costUsd": 0.000754
+  },
+  {
+    "id": "capsules/Data/Images/Anomaly/038.JPG",
+    "labelKey": "defect:capsules",
+    "probability": 0.95,
+    "latencyMs": 10008.815917,
+    "costUsd": 0.000754
+  },
+  {
+    "id": "capsules/Data/Images/Anomaly/039.JPG",
+    "labelKey": "defect:capsules",
+    "probability": 0.95,
+    "latencyMs": 10008.815917,
+    "costUsd": 0.000754
+  },
+  {
+    "id": "capsules/Data/Images/Anomaly/040.JPG",
+    "labelKey": "defect:capsules",
+    "probability": 0.95,
+    "latencyMs": 10008.815917,
+    "costUsd": 0.000754
+  },
+  {
+    "id": "capsules/Data/Images/Anomaly/041.JPG",
+    "labelKey": "defect:capsules",
+    "probability": 0.95,
+    "latencyMs": 10008.815917,
+    "costUsd": 0.000754
+  },
+  {
+    "id": "capsules/Data/Images/Anomaly/042.JPG",
+    "labelKey": "defect:capsules",
+    "probability": 0.95,
+    "latencyMs": 10008.815917,
+    "costUsd": 0.000754
+  },
+  {
+    "id": "capsules/Data/Images/Anomaly/043.JPG",
+    "labelKey": "defect:capsules",
+    "probability": 0.95,
+    "latencyMs": 10008.815917,
+    "costUsd": 0.000754
+  },
+  {
+    "id": "capsules/Data/Images/Anomaly/044.JPG",
+    "labelKey": "defect:capsules",
+    "probability": 0.95,
+    "latencyMs": 10008.815917,
+    "costUsd": 0.000754
+  },
+  {
+    "id": "capsules/Data/Images/Anomaly/045.JPG",
+    "labelKey": "defect:capsules",
+    "probability": 0.9,
+    "latencyMs": 8460.800749999995,
+    "costUsd": 0.000756
+  },
+  {
+    "id": "capsules/Data/Images/Anomaly/046.JPG",
+    "labelKey": "defect:capsules",
+    "probability": 0.9,
+    "latencyMs": 8460.800749999995,
+    "costUsd": 0.000756
+  },
+  {
+    "id": "capsules/Data/Images/Anomaly/047.JPG",
+    "labelKey": "defect:capsules",
+    "probability": 0.9,
+    "latencyMs": 8460.800749999995,
+    "costUsd": 0.000756
+  },
+  {
+    "id": "capsules/Data/Images/Anomaly/048.JPG",
+    "labelKey": "defect:capsules",
+    "probability": 0.9,
+    "latencyMs": 8460.800749999995,
+    "costUsd": 0.000756
+  },
+  {
+    "id": "capsules/Data/Images/Anomaly/049.JPG",
+    "labelKey": "defect:capsules",
+    "probability": 0.9,
+    "latencyMs": 8460.800749999995,
+    "costUsd": 0.000756
+  },
+  {
+    "id": "capsules/Data/Images/Anomaly/050.JPG",
+    "labelKey": "defect:capsules",
+    "probability": 0.9,
+    "latencyMs": 8460.800749999995,
+    "costUsd": 0.000756
+  },
+  {
+    "id": "capsules/Data/Images/Anomaly/051.JPG",
+    "labelKey": "defect:capsules",
+    "probability": 0.9,
+    "latencyMs": 8460.800749999995,
+    "costUsd": 0.000756
+  },
+  {
+    "id": "capsules/Data/Images/Anomaly/052.JPG",
+    "labelKey": "defect:capsules",
+    "probability": 0.9,
+    "latencyMs": 8460.800749999995,
+    "costUsd": 0.000756
+  },
+  {
+    "id": "capsules/Data/Images/Anomaly/053.JPG",
+    "labelKey": "defect:capsules",
+    "probability": 0.9,
+    "latencyMs": 8460.800749999995,
+    "costUsd": 0.000756
+  },
+  {
+    "id": "capsules/Data/Images/Anomaly/054.JPG",
+    "labelKey": "defect:capsules",
+    "probability": 0.9,
+    "latencyMs": 8460.800749999995,
+    "costUsd": 0.000756
+  },
+  {
+    "id": "capsules/Data/Images/Anomaly/055.JPG",
+    "labelKey": "defect:capsules",
+    "probability": 0.9,
+    "latencyMs": 8460.800749999995,
+    "costUsd": 0.000756
+  },
+  {
+    "id": "capsules/Data/Images/Anomaly/056.JPG",
+    "labelKey": "defect:capsules",
+    "probability": 0.9,
+    "latencyMs": 8460.800749999995,
+    "costUsd": 0.000756
+  },
+  {
+    "id": "capsules/Data/Images/Anomaly/057.JPG",
+    "labelKey": "defect:capsules",
+    "probability": 0.9,
+    "latencyMs": 8460.800749999995,
+    "costUsd": 0.000756
+  },
+  {
+    "id": "capsules/Data/Images/Anomaly/058.JPG",
+    "labelKey": "defect:capsules",
+    "probability": 0.9,
+    "latencyMs": 8460.800749999995,
+    "costUsd": 0.000756
+  },
+  {
+    "id": "capsules/Data/Images/Anomaly/059.JPG",
+    "labelKey": "defect:capsules",
+    "probability": 0.9,
+    "latencyMs": 8460.800749999995,
+    "costUsd": 0.000756
+  },
+  {
+    "id": "capsules/Data/Images/Anomaly/060.JPG",
+    "labelKey": "defect:capsules",
+    "probability": 0.9,
+    "latencyMs": 8460.800749999995,
+    "costUsd": 0.000756
+  },
+  {
+    "id": "capsules/Data/Images/Anomaly/061.JPG",
+    "labelKey": "defect:capsules",
+    "probability": 0.9,
+    "latencyMs": 8460.800749999995,
+    "costUsd": 0.000756
+  },
+  {
+    "id": "capsules/Data/Images/Anomaly/062.JPG",
+    "labelKey": "defect:capsules",
+    "probability": 0.9,
+    "latencyMs": 8460.800749999995,
+    "costUsd": 0.000756
+  },
+  {
+    "id": "capsules/Data/Images/Anomaly/063.JPG",
+    "labelKey": "defect:capsules",
+    "probability": 0.9,
+    "latencyMs": 8460.800749999995,
+    "costUsd": 0.000756
+  },
+  {
+    "id": "capsules/Data/Images/Anomaly/064.JPG",
+    "labelKey": "defect:capsules",
+    "probability": 0.9,
+    "latencyMs": 8460.800749999995,
+    "costUsd": 0.000756
+  },
+  {
+    "id": "capsules/Data/Images/Anomaly/065.JPG",
+    "labelKey": "defect:capsules",
+    "probability": 0.9,
+    "latencyMs": 8919.222000000009,
+    "costUsd": 0.0007445
+  },
+  {
+    "id": "capsules/Data/Images/Anomaly/066.JPG",
+    "labelKey": "defect:capsules",
+    "probability": 0.9,
+    "latencyMs": 8919.222000000009,
+    "costUsd": 0.0007445
+  },
+  {
+    "id": "capsules/Data/Images/Anomaly/067.JPG",
+    "labelKey": "defect:capsules",
+    "probability": 0.9,
+    "latencyMs": 8919.222000000009,
+    "costUsd": 0.0007445
+  },
+  {
+    "id": "capsules/Data/Images/Anomaly/068.JPG",
+    "labelKey": "defect:capsules",
+    "probability": 0.9,
+    "latencyMs": 8919.222000000009,
+    "costUsd": 0.0007445
+  },
+  {
+    "id": "capsules/Data/Images/Anomaly/069.JPG",
+    "labelKey": "defect:capsules",
+    "probability": 0.9,
+    "latencyMs": 8919.222000000009,
+    "costUsd": 0.0007445
+  },
+  {
+    "id": "capsules/Data/Images/Anomaly/070.JPG",
+    "labelKey": "defect:capsules",
+    "probability": 0.9,
+    "latencyMs": 8919.222000000009,
+    "costUsd": 0.0007445
+  },
+  {
+    "id": "capsules/Data/Images/Anomaly/071.JPG",
+    "labelKey": "defect:capsules",
+    "probability": 0.9,
+    "latencyMs": 8919.222000000009,
+    "costUsd": 0.0007445
+  },
+  {
+    "id": "capsules/Data/Images/Anomaly/072.JPG",
+    "labelKey": "defect:capsules",
+    "probability": 0.9,
+    "latencyMs": 8919.222000000009,
+    "costUsd": 0.0007445
+  },
+  {
+    "id": "capsules/Data/Images/Anomaly/073.JPG",
+    "labelKey": "defect:capsules",
+    "probability": 0.9,
+    "latencyMs": 8919.222000000009,
+    "costUsd": 0.0007445
+  },
+  {
+    "id": "capsules/Data/Images/Anomaly/074.JPG",
+    "labelKey": "defect:capsules",
+    "probability": 0.9,
+    "latencyMs": 8919.222000000009,
+    "costUsd": 0.0007445
+  },
+  {
+    "id": "capsules/Data/Images/Anomaly/075.JPG",
+    "labelKey": "defect:capsules",
+    "probability": 0.9,
+    "latencyMs": 8919.222000000009,
+    "costUsd": 0.0007445
+  },
+  {
+    "id": "capsules/Data/Images/Anomaly/076.JPG",
+    "labelKey": "defect:capsules",
+    "probability": 0.9,
+    "latencyMs": 8919.222000000009,
+    "costUsd": 0.0007445
+  },
+  {
+    "id": "capsules/Data/Images/Anomaly/077.JPG",
+    "labelKey": "defect:capsules",
+    "probability": 0.9,
+    "latencyMs": 8919.222000000009,
+    "costUsd": 0.0007445
+  },
+  {
+    "id": "capsules/Data/Images/Anomaly/078.JPG",
+    "labelKey": "defect:capsules",
+    "probability": 0.9,
+    "latencyMs": 8919.222000000009,
+    "costUsd": 0.0007445
+  },
+  {
+    "id": "capsules/Data/Images/Anomaly/079.JPG",
+    "labelKey": "defect:capsules",
+    "probability": 0.9,
+    "latencyMs": 8919.222000000009,
+    "costUsd": 0.0007445
+  },
+  {
+    "id": "capsules/Data/Images/Anomaly/080.JPG",
+    "labelKey": "defect:capsules",
+    "probability": 0.9,
+    "latencyMs": 8919.222000000009,
+    "costUsd": 0.0007445
+  },
+  {
+    "id": "capsules/Data/Images/Anomaly/081.JPG",
+    "labelKey": "defect:capsules",
+    "probability": 0.9,
+    "latencyMs": 8919.222000000009,
+    "costUsd": 0.0007445
+  },
+  {
+    "id": "capsules/Data/Images/Anomaly/082.JPG",
+    "labelKey": "defect:capsules",
+    "probability": 0.9,
+    "latencyMs": 8919.222000000009,
+    "costUsd": 0.0007445
+  },
+  {
+    "id": "capsules/Data/Images/Anomaly/083.JPG",
+    "labelKey": "defect:capsules",
+    "probability": 0.9,
+    "latencyMs": 8919.222000000009,
+    "costUsd": 0.0007445
+  },
+  {
+    "id": "capsules/Data/Images/Anomaly/084.JPG",
+    "labelKey": "defect:capsules",
+    "probability": 0.9,
+    "latencyMs": 8919.222000000009,
+    "costUsd": 0.0007445
+  },
+  {
+    "id": "capsules/Data/Images/Anomaly/085.JPG",
+    "labelKey": "defect:capsules",
+    "probability": 0.9,
+    "latencyMs": 11047.66533399999,
+    "costUsd": 0.0007578750000000001
+  },
+  {
+    "id": "capsules/Data/Images/Anomaly/086.JPG",
+    "labelKey": "defect:capsules",
+    "probability": 0.9,
+    "latencyMs": 11047.66533399999,
+    "costUsd": 0.0007578750000000001
+  },
+  {
+    "id": "capsules/Data/Images/Anomaly/087.JPG",
+    "labelKey": "defect:capsules",
+    "probability": 0.9,
+    "latencyMs": 11047.66533399999,
+    "costUsd": 0.0007578750000000001
+  },
+  {
+    "id": "capsules/Data/Images/Anomaly/088.JPG",
+    "labelKey": "defect:capsules",
+    "probability": 0.9,
+    "latencyMs": 11047.66533399999,
+    "costUsd": 0.0007578750000000001
+  },
+  {
+    "id": "capsules/Data/Images/Anomaly/089.JPG",
+    "labelKey": "defect:capsules",
+    "probability": 0.9,
+    "latencyMs": 11047.66533399999,
+    "costUsd": 0.0007578750000000001
+  },
+  {
+    "id": "capsules/Data/Images/Anomaly/090.JPG",
+    "labelKey": "defect:capsules",
+    "probability": 0.9,
+    "latencyMs": 11047.66533399999,
+    "costUsd": 0.0007578750000000001
+  },
+  {
+    "id": "capsules/Data/Images/Anomaly/091.JPG",
+    "labelKey": "defect:capsules",
+    "probability": 0.9,
+    "latencyMs": 11047.66533399999,
+    "costUsd": 0.0007578750000000001
+  },
+  {
+    "id": "capsules/Data/Images/Anomaly/092.JPG",
+    "labelKey": "defect:capsules",
+    "probability": 0.9,
+    "latencyMs": 11047.66533399999,
+    "costUsd": 0.0007578750000000001
+  },
+  {
+    "id": "capsules/Data/Images/Anomaly/093.JPG",
+    "labelKey": "defect:capsules",
+    "probability": 0.9,
+    "latencyMs": 11047.66533399999,
+    "costUsd": 0.0007578750000000001
+  },
+  {
+    "id": "capsules/Data/Images/Anomaly/094.JPG",
+    "labelKey": "defect:capsules",
+    "probability": 0.9,
+    "latencyMs": 11047.66533399999,
+    "costUsd": 0.0007578750000000001
+  },
+  {
+    "id": "capsules/Data/Images/Anomaly/095.JPG",
+    "labelKey": "defect:capsules",
+    "probability": 0.9,
+    "latencyMs": 11047.66533399999,
+    "costUsd": 0.0007578750000000001
+  },
+  {
+    "id": "capsules/Data/Images/Anomaly/096.JPG",
+    "labelKey": "defect:capsules",
+    "probability": 0.9,
+    "latencyMs": 11047.66533399999,
+    "costUsd": 0.0007578750000000001
+  },
+  {
+    "id": "capsules/Data/Images/Anomaly/097.JPG",
+    "labelKey": "defect:capsules",
+    "probability": 0.9,
+    "latencyMs": 11047.66533399999,
+    "costUsd": 0.0007578750000000001
+  },
+  {
+    "id": "capsules/Data/Images/Anomaly/098.JPG",
+    "labelKey": "defect:capsules",
+    "probability": 0.9,
+    "latencyMs": 11047.66533399999,
+    "costUsd": 0.0007578750000000001
+  },
+  {
+    "id": "capsules/Data/Images/Anomaly/099.JPG",
+    "labelKey": "defect:capsules",
+    "probability": 0.9,
+    "latencyMs": 11047.66533399999,
+    "costUsd": 0.0007578750000000001
+  },
+  {
+    "id": "capsules/Data/Images/Normal/000.JPG",
+    "labelKey": "normal",
+    "probability": 0.9,
+    "latencyMs": 11047.66533399999,
+    "costUsd": 0.0007578750000000001
+  },
+  {
+    "id": "capsules/Data/Images/Normal/008.JPG",
+    "labelKey": "normal",
+    "probability": 0.9,
+    "latencyMs": 11047.66533399999,
+    "costUsd": 0.0007578750000000001
+  },
+  {
+    "id": "capsules/Data/Images/Normal/016.JPG",
+    "labelKey": "normal",
+    "probability": 0.9,
+    "latencyMs": 11047.66533399999,
+    "costUsd": 0.0007578750000000001
+  },
+  {
+    "id": "capsules/Data/Images/Normal/024.JPG",
+    "labelKey": "normal",
+    "probability": 0.9,
+    "latencyMs": 11047.66533399999,
+    "costUsd": 0.0007578750000000001
+  },
+  {
+    "id": "capsules/Data/Images/Normal/032.JPG",
+    "labelKey": "normal",
+    "probability": 0.9,
+    "latencyMs": 11047.66533399999,
+    "costUsd": 0.0007578750000000001
+  },
+  {
+    "id": "capsules/Data/Images/Normal/041.JPG",
+    "labelKey": "normal",
+    "probability": 0.95,
+    "latencyMs": 8479.350166999997,
+    "costUsd": 0.0006999999999999999
+  },
+  {
+    "id": "capsules/Data/Images/Normal/049.JPG",
+    "labelKey": "normal",
+    "probability": 0.95,
+    "latencyMs": 8479.350166999997,
+    "costUsd": 0.0006999999999999999
+  },
+  {
+    "id": "capsules/Data/Images/Normal/057.JPG",
+    "labelKey": "normal",
+    "probability": 0.95,
+    "latencyMs": 8479.350166999997,
+    "costUsd": 0.0006999999999999999
+  },
+  {
+    "id": "capsules/Data/Images/Normal/065.JPG",
+    "labelKey": "normal",
+    "probability": 0.95,
+    "latencyMs": 8479.350166999997,
+    "costUsd": 0.0006999999999999999
+  },
+  {
+    "id": "capsules/Data/Images/Normal/073.JPG",
+    "labelKey": "normal",
+    "probability": 0.95,
+    "latencyMs": 8479.350166999997,
+    "costUsd": 0.0006999999999999999
+  },
+  {
+    "id": "capsules/Data/Images/Normal/081.JPG",
+    "labelKey": "normal",
+    "probability": 0.95,
+    "latencyMs": 8479.350166999997,
+    "costUsd": 0.0006999999999999999
+  },
+  {
+    "id": "capsules/Data/Images/Normal/089.JPG",
+    "labelKey": "normal",
+    "probability": 0.95,
+    "latencyMs": 8479.350166999997,
+    "costUsd": 0.0006999999999999999
+  },
+  {
+    "id": "capsules/Data/Images/Normal/097.JPG",
+    "labelKey": "normal",
+    "probability": 0.95,
+    "latencyMs": 8479.350166999997,
+    "costUsd": 0.0006999999999999999
+  },
+  {
+    "id": "capsules/Data/Images/Normal/106.JPG",
+    "labelKey": "normal",
+    "probability": 0.95,
+    "latencyMs": 8479.350166999997,
+    "costUsd": 0.0006999999999999999
+  },
+  {
+    "id": "capsules/Data/Images/Normal/114.JPG",
+    "labelKey": "normal",
+    "probability": 0.95,
+    "latencyMs": 8479.350166999997,
+    "costUsd": 0.0006999999999999999
+  },
+  {
+    "id": "capsules/Data/Images/Normal/122.JPG",
+    "labelKey": "normal",
+    "probability": 0.95,
+    "latencyMs": 8479.350166999997,
+    "costUsd": 0.0006999999999999999
+  },
+  {
+    "id": "capsules/Data/Images/Normal/130.JPG",
+    "labelKey": "normal",
+    "probability": 0.95,
+    "latencyMs": 8479.350166999997,
+    "costUsd": 0.0006999999999999999
+  },
+  {
+    "id": "capsules/Data/Images/Normal/138.JPG",
+    "labelKey": "normal",
+    "probability": 0.95,
+    "latencyMs": 8479.350166999997,
+    "costUsd": 0.0006999999999999999
+  },
+  {
+    "id": "capsules/Data/Images/Normal/146.JPG",
+    "labelKey": "normal",
+    "probability": 0.95,
+    "latencyMs": 8479.350166999997,
+    "costUsd": 0.0006999999999999999
+  },
+  {
+    "id": "capsules/Data/Images/Normal/154.JPG",
+    "labelKey": "normal",
+    "probability": 0.95,
+    "latencyMs": 8479.350166999997,
+    "costUsd": 0.0006999999999999999
+  },
+  {
+    "id": "capsules/Data/Images/Normal/162.JPG",
+    "labelKey": "normal",
+    "probability": 0.95,
+    "latencyMs": 8479.350166999997,
+    "costUsd": 0.0006999999999999999
+  },
+  {
+    "id": "capsules/Data/Images/Normal/171.JPG",
+    "labelKey": "normal",
+    "probability": 0.95,
+    "latencyMs": 8479.350166999997,
+    "costUsd": 0.0006999999999999999
+  },
+  {
+    "id": "capsules/Data/Images/Normal/179.JPG",
+    "labelKey": "normal",
+    "probability": 0.95,
+    "latencyMs": 8479.350166999997,
+    "costUsd": 0.0006999999999999999
+  },
+  {
+    "id": "capsules/Data/Images/Normal/187.JPG",
+    "labelKey": "normal",
+    "probability": 0.95,
+    "latencyMs": 8479.350166999997,
+    "costUsd": 0.0006999999999999999
+  },
+  {
+    "id": "capsules/Data/Images/Normal/195.JPG",
+    "labelKey": "normal",
+    "probability": 0.95,
+    "latencyMs": 8479.350166999997,
+    "costUsd": 0.0006999999999999999
+  },
+  {
+    "id": "capsules/Data/Images/Normal/203.JPG",
+    "labelKey": "normal",
+    "probability": 0.9,
+    "latencyMs": 7906.747917000001,
+    "costUsd": 0.000718
+  },
+  {
+    "id": "capsules/Data/Images/Normal/211.JPG",
+    "labelKey": "normal",
+    "probability": 0.9,
+    "latencyMs": 7906.747917000001,
+    "costUsd": 0.000718
+  },
+  {
+    "id": "capsules/Data/Images/Normal/219.JPG",
+    "labelKey": "normal",
+    "probability": 0.9,
+    "latencyMs": 7906.747917000001,
+    "costUsd": 0.000718
+  },
+  {
+    "id": "capsules/Data/Images/Normal/227.JPG",
+    "labelKey": "normal",
+    "probability": 0.9,
+    "latencyMs": 7906.747917000001,
+    "costUsd": 0.000718
+  },
+  {
+    "id": "capsules/Data/Images/Normal/236.JPG",
+    "labelKey": "normal",
+    "probability": 0.9,
+    "latencyMs": 7906.747917000001,
+    "costUsd": 0.000718
+  },
+  {
+    "id": "capsules/Data/Images/Normal/244.JPG",
+    "labelKey": "normal",
+    "probability": 0.9,
+    "latencyMs": 7906.747917000001,
+    "costUsd": 0.000718
+  },
+  {
+    "id": "capsules/Data/Images/Normal/252.JPG",
+    "labelKey": "normal",
+    "probability": 0.9,
+    "latencyMs": 7906.747917000001,
+    "costUsd": 0.000718
+  },
+  {
+    "id": "capsules/Data/Images/Normal/260.JPG",
+    "labelKey": "normal",
+    "probability": 0.9,
+    "latencyMs": 7906.747917000001,
+    "costUsd": 0.000718
+  },
+  {
+    "id": "capsules/Data/Images/Normal/268.JPG",
+    "labelKey": "normal",
+    "probability": 0.9,
+    "latencyMs": 7906.747917000001,
+    "costUsd": 0.000718
+  },
+  {
+    "id": "capsules/Data/Images/Normal/276.JPG",
+    "labelKey": "normal",
+    "probability": 0.9,
+    "latencyMs": 7906.747917000001,
+    "costUsd": 0.000718
+  },
+  {
+    "id": "capsules/Data/Images/Normal/284.JPG",
+    "labelKey": "normal",
+    "probability": 0.9,
+    "latencyMs": 7906.747917000001,
+    "costUsd": 0.000718
+  },
+  {
+    "id": "capsules/Data/Images/Normal/292.JPG",
+    "labelKey": "normal",
+    "probability": 0.9,
+    "latencyMs": 7906.747917000001,
+    "costUsd": 0.000718
+  },
+  {
+    "id": "capsules/Data/Images/Normal/301.JPG",
+    "labelKey": "normal",
+    "probability": 0.9,
+    "latencyMs": 7906.747917000001,
+    "costUsd": 0.000718
+  },
+  {
+    "id": "capsules/Data/Images/Normal/309.JPG",
+    "labelKey": "normal",
+    "probability": 0.9,
+    "latencyMs": 7906.747917000001,
+    "costUsd": 0.000718
+  },
+  {
+    "id": "capsules/Data/Images/Normal/317.JPG",
+    "labelKey": "normal",
+    "probability": 0.9,
+    "latencyMs": 7906.747917000001,
+    "costUsd": 0.000718
+  },
+  {
+    "id": "capsules/Data/Images/Normal/325.JPG",
+    "labelKey": "normal",
+    "probability": 0.9,
+    "latencyMs": 7906.747917000001,
+    "costUsd": 0.000718
+  },
+  {
+    "id": "capsules/Data/Images/Normal/333.JPG",
+    "labelKey": "normal",
+    "probability": 0.9,
+    "latencyMs": 7906.747917000001,
+    "costUsd": 0.000718
+  },
+  {
+    "id": "capsules/Data/Images/Normal/341.JPG",
+    "labelKey": "normal",
+    "probability": 0.9,
+    "latencyMs": 7906.747917000001,
+    "costUsd": 0.000718
+  },
+  {
+    "id": "capsules/Data/Images/Normal/349.JPG",
+    "labelKey": "normal",
+    "probability": 0.9,
+    "latencyMs": 7906.747917000001,
+    "costUsd": 0.000718
+  },
+  {
+    "id": "capsules/Data/Images/Normal/357.JPG",
+    "labelKey": "normal",
+    "probability": 0.9,
+    "latencyMs": 7906.747917000001,
+    "costUsd": 0.000718
+  },
+  {
+    "id": "capsules/Data/Images/Normal/365.JPG",
+    "labelKey": "normal",
+    "probability": 0.9,
+    "latencyMs": 7326.97329200001,
+    "costUsd": 0.0006834999999999999
+  },
+  {
+    "id": "capsules/Data/Images/Normal/374.JPG",
+    "labelKey": "normal",
+    "probability": 0.9,
+    "latencyMs": 7326.97329200001,
+    "costUsd": 0.0006834999999999999
+  },
+  {
+    "id": "capsules/Data/Images/Normal/382.JPG",
+    "labelKey": "normal",
+    "probability": 0.9,
+    "latencyMs": 7326.97329200001,
+    "costUsd": 0.0006834999999999999
+  },
+  {
+    "id": "capsules/Data/Images/Normal/390.JPG",
+    "labelKey": "normal",
+    "probability": 0.9,
+    "latencyMs": 7326.97329200001,
+    "costUsd": 0.0006834999999999999
+  },
+  {
+    "id": "capsules/Data/Images/Normal/398.JPG",
+    "labelKey": "normal",
+    "probability": 0.9,
+    "latencyMs": 7326.97329200001,
+    "costUsd": 0.0006834999999999999
+  },
+  {
+    "id": "capsules/Data/Images/Normal/406.JPG",
+    "labelKey": "normal",
+    "probability": 0.9,
+    "latencyMs": 7326.97329200001,
+    "costUsd": 0.0006834999999999999
+  },
+  {
+    "id": "capsules/Data/Images/Normal/414.JPG",
+    "labelKey": "normal",
+    "probability": 0.9,
+    "latencyMs": 7326.97329200001,
+    "costUsd": 0.0006834999999999999
+  },
+  {
+    "id": "capsules/Data/Images/Normal/422.JPG",
+    "labelKey": "normal",
+    "probability": 0.9,
+    "latencyMs": 7326.97329200001,
+    "costUsd": 0.0006834999999999999
+  },
+  {
+    "id": "capsules/Data/Images/Normal/430.JPG",
+    "labelKey": "normal",
+    "probability": 0.9,
+    "latencyMs": 7326.97329200001,
+    "costUsd": 0.0006834999999999999
+  },
+  {
+    "id": "capsules/Data/Images/Normal/439.JPG",
+    "labelKey": "normal",
+    "probability": 0.9,
+    "latencyMs": 7326.97329200001,
+    "costUsd": 0.0006834999999999999
+  },
+  {
+    "id": "capsules/Data/Images/Normal/447.JPG",
+    "labelKey": "normal",
+    "probability": 0.9,
+    "latencyMs": 7326.97329200001,
+    "costUsd": 0.0006834999999999999
+  },
+  {
+    "id": "capsules/Data/Images/Normal/455.JPG",
+    "labelKey": "normal",
+    "probability": 0.9,
+    "latencyMs": 7326.97329200001,
+    "costUsd": 0.0006834999999999999
+  },
+  {
+    "id": "capsules/Data/Images/Normal/463.JPG",
+    "labelKey": "normal",
+    "probability": 0.9,
+    "latencyMs": 7326.97329200001,
+    "costUsd": 0.0006834999999999999
+  },
+  {
+    "id": "capsules/Data/Images/Normal/471.JPG",
+    "labelKey": "normal",
+    "probability": 0.9,
+    "latencyMs": 7326.97329200001,
+    "costUsd": 0.0006834999999999999
+  },
+  {
+    "id": "capsules/Data/Images/Normal/479.JPG",
+    "labelKey": "normal",
+    "probability": 0.9,
+    "latencyMs": 7326.97329200001,
+    "costUsd": 0.0006834999999999999
+  },
+  {
+    "id": "capsules/Data/Images/Normal/487.JPG",
+    "labelKey": "normal",
+    "probability": 0.9,
+    "latencyMs": 7326.97329200001,
+    "costUsd": 0.0006834999999999999
+  },
+  {
+    "id": "capsules/Data/Images/Normal/495.JPG",
+    "labelKey": "normal",
+    "probability": 0.9,
+    "latencyMs": 7326.97329200001,
+    "costUsd": 0.0006834999999999999
+  },
+  {
+    "id": "capsules/Data/Images/Normal/504.JPG",
+    "labelKey": "normal",
+    "probability": 0.9,
+    "latencyMs": 7326.97329200001,
+    "costUsd": 0.0006834999999999999
+  },
+  {
+    "id": "capsules/Data/Images/Normal/512.JPG",
+    "labelKey": "normal",
+    "probability": 0.9,
+    "latencyMs": 7326.97329200001,
+    "costUsd": 0.0006834999999999999
+  },
+  {
+    "id": "capsules/Data/Images/Normal/520.JPG",
+    "labelKey": "normal",
+    "probability": 0.9,
+    "latencyMs": 7326.97329200001,
+    "costUsd": 0.0006834999999999999
+  },
+  {
+    "id": "capsules/Data/Images/Normal/528.JPG",
+    "labelKey": "normal",
+    "probability": 0.9,
+    "latencyMs": 8277.728459000005,
+    "costUsd": 0.0007475000000000001
+  },
+  {
+    "id": "capsules/Data/Images/Normal/536.JPG",
+    "labelKey": "normal",
+    "probability": 0.9,
+    "latencyMs": 8277.728459000005,
+    "costUsd": 0.0007475000000000001
+  },
+  {
+    "id": "capsules/Data/Images/Normal/544.JPG",
+    "labelKey": "normal",
+    "probability": 0.9,
+    "latencyMs": 8277.728459000005,
+    "costUsd": 0.0007475000000000001
+  },
+  {
+    "id": "capsules/Data/Images/Normal/552.JPG",
+    "labelKey": "normal",
+    "probability": 0.9,
+    "latencyMs": 8277.728459000005,
+    "costUsd": 0.0007475000000000001
+  },
+  {
+    "id": "capsules/Data/Images/Normal/560.JPG",
+    "labelKey": "normal",
+    "probability": 0.9,
+    "latencyMs": 8277.728459000005,
+    "costUsd": 0.0007475000000000001
+  },
+  {
+    "id": "capsules/Data/Images/Normal/569.JPG",
+    "labelKey": "normal",
+    "probability": 0.9,
+    "latencyMs": 8277.728459000005,
+    "costUsd": 0.0007475000000000001
+  },
+  {
+    "id": "capsules/Data/Images/Normal/577.JPG",
+    "labelKey": "normal",
+    "probability": 0.9,
+    "latencyMs": 8277.728459000005,
+    "costUsd": 0.0007475000000000001
+  },
+  {
+    "id": "capsules/Data/Images/Normal/585.JPG",
+    "labelKey": "normal",
+    "probability": 0.9,
+    "latencyMs": 8277.728459000005,
+    "costUsd": 0.0007475000000000001
+  },
+  {
+    "id": "capsules/Data/Images/Normal/593.JPG",
+    "labelKey": "normal",
+    "probability": 0.9,
+    "latencyMs": 8277.728459000005,
+    "costUsd": 0.0007475000000000001
+  },
+  {
+    "id": "capsules/Data/Images/Normal/601.JPG",
+    "labelKey": "normal",
+    "probability": 0.9,
+    "latencyMs": 8277.728459000005,
+    "costUsd": 0.0007475000000000001
+  },
+  {
+    "id": "fryum/Data/Images/Anomaly/000.JPG",
+    "labelKey": "defect:fryum",
+    "probability": 0.9,
+    "latencyMs": 8277.728459000005,
+    "costUsd": 0.0007475000000000001
+  },
+  {
+    "id": "fryum/Data/Images/Anomaly/001.JPG",
+    "labelKey": "defect:fryum",
+    "probability": 0.9,
+    "latencyMs": 8277.728459000005,
+    "costUsd": 0.0007475000000000001
+  },
+  {
+    "id": "fryum/Data/Images/Anomaly/002.JPG",
+    "labelKey": "defect:fryum",
+    "probability": 0.9,
+    "latencyMs": 8277.728459000005,
+    "costUsd": 0.0007475000000000001
+  },
+  {
+    "id": "fryum/Data/Images/Anomaly/003.JPG",
+    "labelKey": "defect:fryum",
+    "probability": 0.9,
+    "latencyMs": 8277.728459000005,
+    "costUsd": 0.0007475000000000001
+  },
+  {
+    "id": "fryum/Data/Images/Anomaly/004.JPG",
+    "labelKey": "defect:fryum",
+    "probability": 0.9,
+    "latencyMs": 8277.728459000005,
+    "costUsd": 0.0007475000000000001
+  },
+  {
+    "id": "fryum/Data/Images/Anomaly/005.JPG",
+    "labelKey": "defect:fryum",
+    "probability": 0.9,
+    "latencyMs": 8277.728459000005,
+    "costUsd": 0.0007475000000000001
+  },
+  {
+    "id": "fryum/Data/Images/Anomaly/006.JPG",
+    "labelKey": "defect:fryum",
+    "probability": 0.9,
+    "latencyMs": 8277.728459000005,
+    "costUsd": 0.0007475000000000001
+  },
+  {
+    "id": "fryum/Data/Images/Anomaly/007.JPG",
+    "labelKey": "defect:fryum",
+    "probability": 0.9,
+    "latencyMs": 8277.728459000005,
+    "costUsd": 0.0007475000000000001
+  },
+  {
+    "id": "fryum/Data/Images/Anomaly/008.JPG",
+    "labelKey": "defect:fryum",
+    "probability": 0.9,
+    "latencyMs": 8277.728459000005,
+    "costUsd": 0.0007475000000000001
+  },
+  {
+    "id": "fryum/Data/Images/Anomaly/009.JPG",
+    "labelKey": "defect:fryum",
+    "probability": 0.9,
+    "latencyMs": 8277.728459000005,
+    "costUsd": 0.0007475000000000001
+  },
+  {
+    "id": "fryum/Data/Images/Anomaly/010.JPG",
+    "labelKey": "defect:fryum",
+    "probability": 0.9,
+    "latencyMs": 8727.87170800002,
+    "costUsd": 0.0007559999999999999
+  },
+  {
+    "id": "fryum/Data/Images/Anomaly/011.JPG",
+    "labelKey": "defect:fryum",
+    "probability": 0.9,
+    "latencyMs": 8727.87170800002,
+    "costUsd": 0.0007559999999999999
+  },
+  {
+    "id": "fryum/Data/Images/Anomaly/012.JPG",
+    "labelKey": "defect:fryum",
+    "probability": 0.9,
+    "latencyMs": 8727.87170800002,
+    "costUsd": 0.0007559999999999999
+  },
+  {
+    "id": "fryum/Data/Images/Anomaly/013.JPG",
+    "labelKey": "defect:fryum",
+    "probability": 0.9,
+    "latencyMs": 8727.87170800002,
+    "costUsd": 0.0007559999999999999
+  },
+  {
+    "id": "fryum/Data/Images/Anomaly/014.JPG",
+    "labelKey": "defect:fryum",
+    "probability": 0.9,
+    "latencyMs": 8727.87170800002,
+    "costUsd": 0.0007559999999999999
+  },
+  {
+    "id": "fryum/Data/Images/Anomaly/015.JPG",
+    "labelKey": "defect:fryum",
+    "probability": 0.9,
+    "latencyMs": 8727.87170800002,
+    "costUsd": 0.0007559999999999999
+  },
+  {
+    "id": "fryum/Data/Images/Anomaly/016.JPG",
+    "labelKey": "defect:fryum",
+    "probability": 0.9,
+    "latencyMs": 8727.87170800002,
+    "costUsd": 0.0007559999999999999
+  },
+  {
+    "id": "fryum/Data/Images/Anomaly/017.JPG",
+    "labelKey": "defect:fryum",
+    "probability": 0.9,
+    "latencyMs": 8727.87170800002,
+    "costUsd": 0.0007559999999999999
+  },
+  {
+    "id": "fryum/Data/Images/Anomaly/018.JPG",
+    "labelKey": "defect:fryum",
+    "probability": 0.9,
+    "latencyMs": 8727.87170800002,
+    "costUsd": 0.0007559999999999999
+  },
+  {
+    "id": "fryum/Data/Images/Anomaly/019.JPG",
+    "labelKey": "defect:fryum",
+    "probability": 0.9,
+    "latencyMs": 8727.87170800002,
+    "costUsd": 0.0007559999999999999
+  },
+  {
+    "id": "fryum/Data/Images/Anomaly/020.JPG",
+    "labelKey": "defect:fryum",
+    "probability": 0.9,
+    "latencyMs": 8727.87170800002,
+    "costUsd": 0.0007559999999999999
+  },
+  {
+    "id": "fryum/Data/Images/Anomaly/021.JPG",
+    "labelKey": "defect:fryum",
+    "probability": 0.9,
+    "latencyMs": 8727.87170800002,
+    "costUsd": 0.0007559999999999999
+  },
+  {
+    "id": "fryum/Data/Images/Anomaly/022.JPG",
+    "labelKey": "defect:fryum",
+    "probability": 0.9,
+    "latencyMs": 8727.87170800002,
+    "costUsd": 0.0007559999999999999
+  },
+  {
+    "id": "fryum/Data/Images/Anomaly/023.JPG",
+    "labelKey": "defect:fryum",
+    "probability": 0.9,
+    "latencyMs": 8727.87170800002,
+    "costUsd": 0.0007559999999999999
+  },
+  {
+    "id": "fryum/Data/Images/Anomaly/024.JPG",
+    "labelKey": "defect:fryum",
+    "probability": 0.9,
+    "latencyMs": 8727.87170800002,
+    "costUsd": 0.0007559999999999999
+  },
+  {
+    "id": "fryum/Data/Images/Anomaly/025.JPG",
+    "labelKey": "defect:fryum",
+    "probability": 0.9,
+    "latencyMs": 8727.87170800002,
+    "costUsd": 0.0007559999999999999
+  },
+  {
+    "id": "fryum/Data/Images/Anomaly/026.JPG",
+    "labelKey": "defect:fryum",
+    "probability": 0.9,
+    "latencyMs": 8727.87170800002,
+    "costUsd": 0.0007559999999999999
+  },
+  {
+    "id": "fryum/Data/Images/Anomaly/027.JPG",
+    "labelKey": "defect:fryum",
+    "probability": 0.9,
+    "latencyMs": 8727.87170800002,
+    "costUsd": 0.0007559999999999999
+  },
+  {
+    "id": "fryum/Data/Images/Anomaly/028.JPG",
+    "labelKey": "defect:fryum",
+    "probability": 0.9,
+    "latencyMs": 8727.87170800002,
+    "costUsd": 0.0007559999999999999
+  },
+  {
+    "id": "fryum/Data/Images/Anomaly/029.JPG",
+    "labelKey": "defect:fryum",
+    "probability": 0.9,
+    "latencyMs": 8727.87170800002,
+    "costUsd": 0.0007559999999999999
+  },
+  {
+    "id": "fryum/Data/Images/Anomaly/030.JPG",
+    "labelKey": "defect:fryum",
+    "probability": 0.9,
+    "latencyMs": 11958.361249999987,
+    "costUsd": 0.0007844999999999999
+  },
+  {
+    "id": "fryum/Data/Images/Anomaly/031.JPG",
+    "labelKey": "defect:fryum",
+    "probability": 0.9,
+    "latencyMs": 11958.361249999987,
+    "costUsd": 0.0007844999999999999
+  },
+  {
+    "id": "fryum/Data/Images/Anomaly/032.JPG",
+    "labelKey": "defect:fryum",
+    "probability": 0.9,
+    "latencyMs": 11958.361249999987,
+    "costUsd": 0.0007844999999999999
+  },
+  {
+    "id": "fryum/Data/Images/Anomaly/033.JPG",
+    "labelKey": "defect:fryum",
+    "probability": 0.9,
+    "latencyMs": 11958.361249999987,
+    "costUsd": 0.0007844999999999999
+  },
+  {
+    "id": "fryum/Data/Images/Anomaly/034.JPG",
+    "labelKey": "defect:fryum",
+    "probability": 0.9,
+    "latencyMs": 11958.361249999987,
+    "costUsd": 0.0007844999999999999
+  },
+  {
+    "id": "fryum/Data/Images/Anomaly/035.JPG",
+    "labelKey": "defect:fryum",
+    "probability": 0.9,
+    "latencyMs": 11958.361249999987,
+    "costUsd": 0.0007844999999999999
+  },
+  {
+    "id": "fryum/Data/Images/Anomaly/036.JPG",
+    "labelKey": "defect:fryum",
+    "probability": 0.9,
+    "latencyMs": 11958.361249999987,
+    "costUsd": 0.0007844999999999999
+  },
+  {
+    "id": "fryum/Data/Images/Anomaly/037.JPG",
+    "labelKey": "defect:fryum",
+    "probability": 0.9,
+    "latencyMs": 11958.361249999987,
+    "costUsd": 0.0007844999999999999
+  },
+  {
+    "id": "fryum/Data/Images/Anomaly/038.JPG",
+    "labelKey": "defect:fryum",
+    "probability": 0.9,
+    "latencyMs": 11958.361249999987,
+    "costUsd": 0.0007844999999999999
+  },
+  {
+    "id": "fryum/Data/Images/Anomaly/039.JPG",
+    "labelKey": "defect:fryum",
+    "probability": 0.9,
+    "latencyMs": 11958.361249999987,
+    "costUsd": 0.0007844999999999999
+  },
+  {
+    "id": "fryum/Data/Images/Anomaly/040.JPG",
+    "labelKey": "defect:fryum",
+    "probability": 0.9,
+    "latencyMs": 11958.361249999987,
+    "costUsd": 0.0007844999999999999
+  },
+  {
+    "id": "fryum/Data/Images/Anomaly/041.JPG",
+    "labelKey": "defect:fryum",
+    "probability": 0.9,
+    "latencyMs": 11958.361249999987,
+    "costUsd": 0.0007844999999999999
+  },
+  {
+    "id": "fryum/Data/Images/Anomaly/042.JPG",
+    "labelKey": "defect:fryum",
+    "probability": 0.9,
+    "latencyMs": 11958.361249999987,
+    "costUsd": 0.0007844999999999999
+  },
+  {
+    "id": "fryum/Data/Images/Anomaly/043.JPG",
+    "labelKey": "defect:fryum",
+    "probability": 0.9,
+    "latencyMs": 11958.361249999987,
+    "costUsd": 0.0007844999999999999
+  },
+  {
+    "id": "fryum/Data/Images/Anomaly/044.JPG",
+    "labelKey": "defect:fryum",
+    "probability": 0.9,
+    "latencyMs": 11958.361249999987,
+    "costUsd": 0.0007844999999999999
+  },
+  {
+    "id": "fryum/Data/Images/Anomaly/045.JPG",
+    "labelKey": "defect:fryum",
+    "probability": 0.9,
+    "latencyMs": 11958.361249999987,
+    "costUsd": 0.0007844999999999999
+  },
+  {
+    "id": "fryum/Data/Images/Anomaly/046.JPG",
+    "labelKey": "defect:fryum",
+    "probability": 0.9,
+    "latencyMs": 11958.361249999987,
+    "costUsd": 0.0007844999999999999
+  },
+  {
+    "id": "fryum/Data/Images/Anomaly/047.JPG",
+    "labelKey": "defect:fryum",
+    "probability": 0.9,
+    "latencyMs": 11958.361249999987,
+    "costUsd": 0.0007844999999999999
+  },
+  {
+    "id": "fryum/Data/Images/Anomaly/048.JPG",
+    "labelKey": "defect:fryum",
+    "probability": 0.9,
+    "latencyMs": 11958.361249999987,
+    "costUsd": 0.0007844999999999999
+  },
+  {
+    "id": "fryum/Data/Images/Anomaly/049.JPG",
+    "labelKey": "defect:fryum",
+    "probability": 0.9,
+    "latencyMs": 11958.361249999987,
+    "costUsd": 0.0007844999999999999
+  },
+  {
+    "id": "fryum/Data/Images/Anomaly/050.JPG",
+    "labelKey": "defect:fryum",
+    "probability": 0.9,
+    "latencyMs": 9424.91070800001,
+    "costUsd": 0.0008399999999999999
+  },
+  {
+    "id": "fryum/Data/Images/Anomaly/051.JPG",
+    "labelKey": "defect:fryum",
+    "probability": 0.95,
+    "latencyMs": 9424.91070800001,
+    "costUsd": 0.0008399999999999999
+  },
+  {
+    "id": "fryum/Data/Images/Anomaly/052.JPG",
+    "labelKey": "defect:fryum",
+    "probability": 0.95,
+    "latencyMs": 9424.91070800001,
+    "costUsd": 0.0008399999999999999
+  },
+  {
+    "id": "fryum/Data/Images/Anomaly/053.JPG",
+    "labelKey": "defect:fryum",
+    "probability": 0.95,
+    "latencyMs": 9424.91070800001,
+    "costUsd": 0.0008399999999999999
+  },
+  {
+    "id": "fryum/Data/Images/Anomaly/054.JPG",
+    "labelKey": "defect:fryum",
+    "probability": 0.95,
+    "latencyMs": 9424.91070800001,
+    "costUsd": 0.0008399999999999999
+  },
+  {
+    "id": "fryum/Data/Images/Anomaly/055.JPG",
+    "labelKey": "defect:fryum",
+    "probability": 0.95,
+    "latencyMs": 9424.91070800001,
+    "costUsd": 0.0008399999999999999
+  },
+  {
+    "id": "fryum/Data/Images/Anomaly/056.JPG",
+    "labelKey": "defect:fryum",
+    "probability": 0.95,
+    "latencyMs": 9424.91070800001,
+    "costUsd": 0.0008399999999999999
+  },
+  {
+    "id": "fryum/Data/Images/Anomaly/057.JPG",
+    "labelKey": "defect:fryum",
+    "probability": 0.95,
+    "latencyMs": 9424.91070800001,
+    "costUsd": 0.0008399999999999999
+  },
+  {
+    "id": "fryum/Data/Images/Anomaly/058.JPG",
+    "labelKey": "defect:fryum",
+    "probability": 0.95,
+    "latencyMs": 9424.91070800001,
+    "costUsd": 0.0008399999999999999
+  },
+  {
+    "id": "fryum/Data/Images/Anomaly/059.JPG",
+    "labelKey": "defect:fryum",
+    "probability": 0.95,
+    "latencyMs": 9424.91070800001,
+    "costUsd": 0.0008399999999999999
+  },
+  {
+    "id": "fryum/Data/Images/Anomaly/060.JPG",
+    "labelKey": "defect:fryum",
+    "probability": 0.95,
+    "latencyMs": 9424.91070800001,
+    "costUsd": 0.0008399999999999999
+  },
+  {
+    "id": "fryum/Data/Images/Anomaly/061.JPG",
+    "labelKey": "defect:fryum",
+    "probability": 0.95,
+    "latencyMs": 9424.91070800001,
+    "costUsd": 0.0008399999999999999
+  },
+  {
+    "id": "fryum/Data/Images/Anomaly/062.JPG",
+    "labelKey": "defect:fryum",
+    "probability": 0.95,
+    "latencyMs": 9424.91070800001,
+    "costUsd": 0.0008399999999999999
+  },
+  {
+    "id": "fryum/Data/Images/Anomaly/063.JPG",
+    "labelKey": "defect:fryum",
+    "probability": 0.95,
+    "latencyMs": 9424.91070800001,
+    "costUsd": 0.0008399999999999999
+  },
+  {
+    "id": "fryum/Data/Images/Anomaly/064.JPG",
+    "labelKey": "defect:fryum",
+    "probability": 0.95,
+    "latencyMs": 9424.91070800001,
+    "costUsd": 0.0008399999999999999
+  },
+  {
+    "id": "fryum/Data/Images/Anomaly/065.JPG",
+    "labelKey": "defect:fryum",
+    "probability": 0.95,
+    "latencyMs": 9424.91070800001,
+    "costUsd": 0.0008399999999999999
+  },
+  {
+    "id": "fryum/Data/Images/Anomaly/066.JPG",
+    "labelKey": "defect:fryum",
+    "probability": 0.95,
+    "latencyMs": 9424.91070800001,
+    "costUsd": 0.0008399999999999999
+  },
+  {
+    "id": "fryum/Data/Images/Anomaly/067.JPG",
+    "labelKey": "defect:fryum",
+    "probability": 0.95,
+    "latencyMs": 9424.91070800001,
+    "costUsd": 0.0008399999999999999
+  },
+  {
+    "id": "fryum/Data/Images/Anomaly/068.JPG",
+    "labelKey": "defect:fryum",
+    "probability": 0.95,
+    "latencyMs": 9424.91070800001,
+    "costUsd": 0.0008399999999999999
+  },
+  {
+    "id": "fryum/Data/Images/Anomaly/069.JPG",
+    "labelKey": "defect:fryum",
+    "probability": 0.95,
+    "latencyMs": 9424.91070800001,
+    "costUsd": 0.0008399999999999999
+  },
+  {
+    "id": "fryum/Data/Images/Anomaly/070.JPG",
+    "labelKey": "defect:fryum",
+    "probability": 0.9,
+    "latencyMs": 9348.672208000004,
+    "costUsd": 0.0007785
+  },
+  {
+    "id": "fryum/Data/Images/Anomaly/071.JPG",
+    "labelKey": "defect:fryum",
+    "probability": 0.9,
+    "latencyMs": 9348.672208000004,
+    "costUsd": 0.0007785
+  },
+  {
+    "id": "fryum/Data/Images/Anomaly/072.JPG",
+    "labelKey": "defect:fryum",
+    "probability": 0.9,
+    "latencyMs": 9348.672208000004,
+    "costUsd": 0.0007785
+  },
+  {
+    "id": "fryum/Data/Images/Anomaly/073.JPG",
+    "labelKey": "defect:fryum",
+    "probability": 0.9,
+    "latencyMs": 9348.672208000004,
+    "costUsd": 0.0007785
+  },
+  {
+    "id": "fryum/Data/Images/Anomaly/074.JPG",
+    "labelKey": "defect:fryum",
+    "probability": 0.9,
+    "latencyMs": 9348.672208000004,
+    "costUsd": 0.0007785
+  },
+  {
+    "id": "fryum/Data/Images/Anomaly/075.JPG",
+    "labelKey": "defect:fryum",
+    "probability": 0.9,
+    "latencyMs": 9348.672208000004,
+    "costUsd": 0.0007785
+  },
+  {
+    "id": "fryum/Data/Images/Anomaly/076.JPG",
+    "labelKey": "defect:fryum",
+    "probability": 0.9,
+    "latencyMs": 9348.672208000004,
+    "costUsd": 0.0007785
+  },
+  {
+    "id": "fryum/Data/Images/Anomaly/077.JPG",
+    "labelKey": "defect:fryum",
+    "probability": 0.9,
+    "latencyMs": 9348.672208000004,
+    "costUsd": 0.0007785
+  },
+  {
+    "id": "fryum/Data/Images/Anomaly/078.JPG",
+    "labelKey": "defect:fryum",
+    "probability": 0.9,
+    "latencyMs": 9348.672208000004,
+    "costUsd": 0.0007785
+  },
+  {
+    "id": "fryum/Data/Images/Anomaly/079.JPG",
+    "labelKey": "defect:fryum",
+    "probability": 0.9,
+    "latencyMs": 9348.672208000004,
+    "costUsd": 0.0007785
+  },
+  {
+    "id": "fryum/Data/Images/Anomaly/080.JPG",
+    "labelKey": "defect:fryum",
+    "probability": 0.9,
+    "latencyMs": 9348.672208000004,
+    "costUsd": 0.0007785
+  },
+  {
+    "id": "fryum/Data/Images/Anomaly/081.JPG",
+    "labelKey": "defect:fryum",
+    "probability": 0.9,
+    "latencyMs": 9348.672208000004,
+    "costUsd": 0.0007785
+  },
+  {
+    "id": "fryum/Data/Images/Anomaly/082.JPG",
+    "labelKey": "defect:fryum",
+    "probability": 0.9,
+    "latencyMs": 9348.672208000004,
+    "costUsd": 0.0007785
+  },
+  {
+    "id": "fryum/Data/Images/Anomaly/083.JPG",
+    "labelKey": "defect:fryum",
+    "probability": 0.9,
+    "latencyMs": 9348.672208000004,
+    "costUsd": 0.0007785
+  },
+  {
+    "id": "fryum/Data/Images/Anomaly/084.JPG",
+    "labelKey": "defect:fryum",
+    "probability": 0.9,
+    "latencyMs": 9348.672208000004,
+    "costUsd": 0.0007785
+  },
+  {
+    "id": "fryum/Data/Images/Anomaly/085.JPG",
+    "labelKey": "defect:fryum",
+    "probability": 0.9,
+    "latencyMs": 9348.672208000004,
+    "costUsd": 0.0007785
+  },
+  {
+    "id": "fryum/Data/Images/Anomaly/086.JPG",
+    "labelKey": "defect:fryum",
+    "probability": 0.9,
+    "latencyMs": 9348.672208000004,
+    "costUsd": 0.0007785
+  },
+  {
+    "id": "fryum/Data/Images/Anomaly/087.JPG",
+    "labelKey": "defect:fryum",
+    "probability": 0.9,
+    "latencyMs": 9348.672208000004,
+    "costUsd": 0.0007785
+  },
+  {
+    "id": "fryum/Data/Images/Anomaly/088.JPG",
+    "labelKey": "defect:fryum",
+    "probability": 0.9,
+    "latencyMs": 9348.672208000004,
+    "costUsd": 0.0007785
+  },
+  {
+    "id": "fryum/Data/Images/Anomaly/089.JPG",
+    "labelKey": "defect:fryum",
+    "probability": 0.9,
+    "latencyMs": 9348.672208000004,
+    "costUsd": 0.0007785
+  },
+  {
+    "id": "fryum/Data/Images/Anomaly/090.JPG",
+    "labelKey": "defect:fryum",
+    "probability": 0.9,
+    "latencyMs": 8716.041834000003,
+    "costUsd": 0.00077225
+  },
+  {
+    "id": "fryum/Data/Images/Anomaly/091.JPG",
+    "labelKey": "defect:fryum",
+    "probability": 0.9,
+    "latencyMs": 8716.041834000003,
+    "costUsd": 0.00077225
+  },
+  {
+    "id": "fryum/Data/Images/Anomaly/092.JPG",
+    "labelKey": "defect:fryum",
+    "probability": 0.9,
+    "latencyMs": 8716.041834000003,
+    "costUsd": 0.00077225
+  },
+  {
+    "id": "fryum/Data/Images/Anomaly/093.JPG",
+    "labelKey": "defect:fryum",
+    "probability": 0.9,
+    "latencyMs": 8716.041834000003,
+    "costUsd": 0.00077225
+  },
+  {
+    "id": "fryum/Data/Images/Anomaly/094.JPG",
+    "labelKey": "defect:fryum",
+    "probability": 0.9,
+    "latencyMs": 8716.041834000003,
+    "costUsd": 0.00077225
+  },
+  {
+    "id": "fryum/Data/Images/Anomaly/095.JPG",
+    "labelKey": "defect:fryum",
+    "probability": 0.9,
+    "latencyMs": 8716.041834000003,
+    "costUsd": 0.00077225
+  },
+  {
+    "id": "fryum/Data/Images/Anomaly/096.JPG",
+    "labelKey": "defect:fryum",
+    "probability": 0.9,
+    "latencyMs": 8716.041834000003,
+    "costUsd": 0.00077225
+  },
+  {
+    "id": "fryum/Data/Images/Anomaly/097.JPG",
+    "labelKey": "defect:fryum",
+    "probability": 0.9,
+    "latencyMs": 8716.041834000003,
+    "costUsd": 0.00077225
+  },
+  {
+    "id": "fryum/Data/Images/Anomaly/098.JPG",
+    "labelKey": "defect:fryum",
+    "probability": 0.9,
+    "latencyMs": 8716.041834000003,
+    "costUsd": 0.00077225
+  },
+  {
+    "id": "fryum/Data/Images/Anomaly/099.JPG",
+    "labelKey": "defect:fryum",
+    "probability": 0.9,
+    "latencyMs": 8716.041834000003,
+    "costUsd": 0.00077225
+  },
+  {
+    "id": "fryum/Data/Images/Normal/000.JPG",
+    "labelKey": "normal",
+    "probability": 0.9,
+    "latencyMs": 8716.041834000003,
+    "costUsd": 0.00077225
+  },
+  {
+    "id": "fryum/Data/Images/Normal/007.JPG",
+    "labelKey": "normal",
+    "probability": 0.9,
+    "latencyMs": 8716.041834000003,
+    "costUsd": 0.00077225
+  },
+  {
+    "id": "fryum/Data/Images/Normal/013.JPG",
+    "labelKey": "normal",
+    "probability": 0.9,
+    "latencyMs": 8716.041834000003,
+    "costUsd": 0.00077225
+  },
+  {
+    "id": "fryum/Data/Images/Normal/020.JPG",
+    "labelKey": "normal",
+    "probability": 0.9,
+    "latencyMs": 8716.041834000003,
+    "costUsd": 0.00077225
+  },
+  {
+    "id": "fryum/Data/Images/Normal/027.JPG",
+    "labelKey": "normal",
+    "probability": 0.9,
+    "latencyMs": 8716.041834000003,
+    "costUsd": 0.00077225
+  },
+  {
+    "id": "fryum/Data/Images/Normal/034.JPG",
+    "labelKey": "normal",
+    "probability": 0.9,
+    "latencyMs": 8716.041834000003,
+    "costUsd": 0.00077225
+  },
+  {
+    "id": "fryum/Data/Images/Normal/040.JPG",
+    "labelKey": "normal",
+    "probability": 0.9,
+    "latencyMs": 8716.041834000003,
+    "costUsd": 0.00077225
+  },
+  {
+    "id": "fryum/Data/Images/Normal/047.JPG",
+    "labelKey": "normal",
+    "probability": 0.9,
+    "latencyMs": 8716.041834000003,
+    "costUsd": 0.00077225
+  },
+  {
+    "id": "fryum/Data/Images/Normal/054.JPG",
+    "labelKey": "normal",
+    "probability": 0.9,
+    "latencyMs": 8716.041834000003,
+    "costUsd": 0.00077225
+  },
+  {
+    "id": "fryum/Data/Images/Normal/061.JPG",
+    "labelKey": "normal",
+    "probability": 0.9,
+    "latencyMs": 8716.041834000003,
+    "costUsd": 0.00077225
+  },
+  {
+    "id": "fryum/Data/Images/Normal/067.JPG",
+    "labelKey": "normal",
+    "probability": 1,
+    "latencyMs": 10619.197208000027,
+    "costUsd": 0.0007459999999999999
+  },
+  {
+    "id": "fryum/Data/Images/Normal/074.JPG",
+    "labelKey": "normal",
+    "probability": 1,
+    "latencyMs": 10619.197208000027,
+    "costUsd": 0.0007459999999999999
+  },
+  {
+    "id": "fryum/Data/Images/Normal/081.JPG",
+    "labelKey": "normal",
+    "probability": 1,
+    "latencyMs": 10619.197208000027,
+    "costUsd": 0.0007459999999999999
+  },
+  {
+    "id": "fryum/Data/Images/Normal/088.JPG",
+    "labelKey": "normal",
+    "probability": 1,
+    "latencyMs": 10619.197208000027,
+    "costUsd": 0.0007459999999999999
+  },
+  {
+    "id": "fryum/Data/Images/Normal/094.JPG",
+    "labelKey": "normal",
+    "probability": 1,
+    "latencyMs": 10619.197208000027,
+    "costUsd": 0.0007459999999999999
+  },
+  {
+    "id": "fryum/Data/Images/Normal/101.JPG",
+    "labelKey": "normal",
+    "probability": 1,
+    "latencyMs": 10619.197208000027,
+    "costUsd": 0.0007459999999999999
+  },
+  {
+    "id": "fryum/Data/Images/Normal/108.JPG",
+    "labelKey": "normal",
+    "probability": 1,
+    "latencyMs": 10619.197208000027,
+    "costUsd": 0.0007459999999999999
+  },
+  {
+    "id": "fryum/Data/Images/Normal/115.JPG",
+    "labelKey": "normal",
+    "probability": 1,
+    "latencyMs": 10619.197208000027,
+    "costUsd": 0.0007459999999999999
+  },
+  {
+    "id": "fryum/Data/Images/Normal/121.JPG",
+    "labelKey": "normal",
+    "probability": 1,
+    "latencyMs": 10619.197208000027,
+    "costUsd": 0.0007459999999999999
+  },
+  {
+    "id": "fryum/Data/Images/Normal/128.JPG",
+    "labelKey": "normal",
+    "probability": 1,
+    "latencyMs": 10619.197208000027,
+    "costUsd": 0.0007459999999999999
+  },
+  {
+    "id": "fryum/Data/Images/Normal/135.JPG",
+    "labelKey": "normal",
+    "probability": 1,
+    "latencyMs": 10619.197208000027,
+    "costUsd": 0.0007459999999999999
+  },
+  {
+    "id": "fryum/Data/Images/Normal/142.JPG",
+    "labelKey": "normal",
+    "probability": 1,
+    "latencyMs": 10619.197208000027,
+    "costUsd": 0.0007459999999999999
+  },
+  {
+    "id": "fryum/Data/Images/Normal/148.JPG",
+    "labelKey": "normal",
+    "probability": 1,
+    "latencyMs": 10619.197208000027,
+    "costUsd": 0.0007459999999999999
+  },
+  {
+    "id": "fryum/Data/Images/Normal/155.JPG",
+    "labelKey": "normal",
+    "probability": 1,
+    "latencyMs": 10619.197208000027,
+    "costUsd": 0.0007459999999999999
+  },
+  {
+    "id": "fryum/Data/Images/Normal/162.JPG",
+    "labelKey": "normal",
+    "probability": 1,
+    "latencyMs": 10619.197208000027,
+    "costUsd": 0.0007459999999999999
+  },
+  {
+    "id": "fryum/Data/Images/Normal/169.JPG",
+    "labelKey": "normal",
+    "probability": 1,
+    "latencyMs": 10619.197208000027,
+    "costUsd": 0.0007459999999999999
+  },
+  {
+    "id": "fryum/Data/Images/Normal/175.JPG",
+    "labelKey": "normal",
+    "probability": 1,
+    "latencyMs": 10619.197208000027,
+    "costUsd": 0.0007459999999999999
+  },
+  {
+    "id": "fryum/Data/Images/Normal/182.JPG",
+    "labelKey": "normal",
+    "probability": 1,
+    "latencyMs": 10619.197208000027,
+    "costUsd": 0.0007459999999999999
+  },
+  {
+    "id": "fryum/Data/Images/Normal/189.JPG",
+    "labelKey": "normal",
+    "probability": 1,
+    "latencyMs": 10619.197208000027,
+    "costUsd": 0.0007459999999999999
+  },
+  {
+    "id": "fryum/Data/Images/Normal/196.JPG",
+    "labelKey": "normal",
+    "probability": 1,
+    "latencyMs": 10619.197208000027,
+    "costUsd": 0.0007459999999999999
+  },
+  {
+    "id": "fryum/Data/Images/Normal/202.JPG",
+    "labelKey": "normal",
+    "probability": 1,
+    "latencyMs": 8451.639291999978,
+    "costUsd": 0.000736
+  },
+  {
+    "id": "fryum/Data/Images/Normal/209.JPG",
+    "labelKey": "normal",
+    "probability": 1,
+    "latencyMs": 8451.639291999978,
+    "costUsd": 0.000736
+  },
+  {
+    "id": "fryum/Data/Images/Normal/216.JPG",
+    "labelKey": "normal",
+    "probability": 1,
+    "latencyMs": 8451.639291999978,
+    "costUsd": 0.000736
+  },
+  {
+    "id": "fryum/Data/Images/Normal/223.JPG",
+    "labelKey": "normal",
+    "probability": 1,
+    "latencyMs": 8451.639291999978,
+    "costUsd": 0.000736
+  },
+  {
+    "id": "fryum/Data/Images/Normal/229.JPG",
+    "labelKey": "normal",
+    "probability": 1,
+    "latencyMs": 8451.639291999978,
+    "costUsd": 0.000736
+  },
+  {
+    "id": "fryum/Data/Images/Normal/236.JPG",
+    "labelKey": "normal",
+    "probability": 1,
+    "latencyMs": 8451.639291999978,
+    "costUsd": 0.000736
+  },
+  {
+    "id": "fryum/Data/Images/Normal/243.JPG",
+    "labelKey": "normal",
+    "probability": 1,
+    "latencyMs": 8451.639291999978,
+    "costUsd": 0.000736
+  },
+  {
+    "id": "fryum/Data/Images/Normal/250.JPG",
+    "labelKey": "normal",
+    "probability": 1,
+    "latencyMs": 8451.639291999978,
+    "costUsd": 0.000736
+  },
+  {
+    "id": "fryum/Data/Images/Normal/256.JPG",
+    "labelKey": "normal",
+    "probability": 1,
+    "latencyMs": 8451.639291999978,
+    "costUsd": 0.000736
+  },
+  {
+    "id": "fryum/Data/Images/Normal/263.JPG",
+    "labelKey": "normal",
+    "probability": 1,
+    "latencyMs": 8451.639291999978,
+    "costUsd": 0.000736
+  },
+  {
+    "id": "fryum/Data/Images/Normal/270.JPG",
+    "labelKey": "normal",
+    "probability": 1,
+    "latencyMs": 8451.639291999978,
+    "costUsd": 0.000736
+  },
+  {
+    "id": "fryum/Data/Images/Normal/276.JPG",
+    "labelKey": "normal",
+    "probability": 1,
+    "latencyMs": 8451.639291999978,
+    "costUsd": 0.000736
+  },
+  {
+    "id": "fryum/Data/Images/Normal/283.JPG",
+    "labelKey": "normal",
+    "probability": 1,
+    "latencyMs": 8451.639291999978,
+    "costUsd": 0.000736
+  },
+  {
+    "id": "fryum/Data/Images/Normal/290.JPG",
+    "labelKey": "normal",
+    "probability": 1,
+    "latencyMs": 8451.639291999978,
+    "costUsd": 0.000736
+  },
+  {
+    "id": "fryum/Data/Images/Normal/297.JPG",
+    "labelKey": "normal",
+    "probability": 1,
+    "latencyMs": 8451.639291999978,
+    "costUsd": 0.000736
+  },
+  {
+    "id": "fryum/Data/Images/Normal/303.JPG",
+    "labelKey": "normal",
+    "probability": 1,
+    "latencyMs": 8451.639291999978,
+    "costUsd": 0.000736
+  },
+  {
+    "id": "fryum/Data/Images/Normal/310.JPG",
+    "labelKey": "normal",
+    "probability": 1,
+    "latencyMs": 8451.639291999978,
+    "costUsd": 0.000736
+  },
+  {
+    "id": "fryum/Data/Images/Normal/317.JPG",
+    "labelKey": "normal",
+    "probability": 1,
+    "latencyMs": 8451.639291999978,
+    "costUsd": 0.000736
+  },
+  {
+    "id": "fryum/Data/Images/Normal/324.JPG",
+    "labelKey": "normal",
+    "probability": 1,
+    "latencyMs": 8451.639291999978,
+    "costUsd": 0.000736
+  },
+  {
+    "id": "fryum/Data/Images/Normal/330.JPG",
+    "labelKey": "normal",
+    "probability": 1,
+    "latencyMs": 8451.639291999978,
+    "costUsd": 0.000736
+  },
+  {
+    "id": "fryum/Data/Images/Normal/337.JPG",
+    "labelKey": "normal",
+    "probability": 0.95,
+    "latencyMs": 8511.110333000019,
+    "costUsd": 0.000756
+  },
+  {
+    "id": "fryum/Data/Images/Normal/344.JPG",
+    "labelKey": "normal",
+    "probability": 0.95,
+    "latencyMs": 8511.110333000019,
+    "costUsd": 0.000756
+  },
+  {
+    "id": "fryum/Data/Images/Normal/351.JPG",
+    "labelKey": "normal",
+    "probability": 0.95,
+    "latencyMs": 8511.110333000019,
+    "costUsd": 0.000756
+  },
+  {
+    "id": "fryum/Data/Images/Normal/357.JPG",
+    "labelKey": "normal",
+    "probability": 0.95,
+    "latencyMs": 8511.110333000019,
+    "costUsd": 0.000756
+  },
+  {
+    "id": "fryum/Data/Images/Normal/364.JPG",
+    "labelKey": "normal",
+    "probability": 0.95,
+    "latencyMs": 8511.110333000019,
+    "costUsd": 0.000756
+  },
+  {
+    "id": "fryum/Data/Images/Normal/371.JPG",
+    "labelKey": "normal",
+    "probability": 0.95,
+    "latencyMs": 8511.110333000019,
+    "costUsd": 0.000756
+  },
+  {
+    "id": "fryum/Data/Images/Normal/378.JPG",
+    "labelKey": "normal",
+    "probability": 0.95,
+    "latencyMs": 8511.110333000019,
+    "costUsd": 0.000756
+  },
+  {
+    "id": "fryum/Data/Images/Normal/384.JPG",
+    "labelKey": "normal",
+    "probability": 0.95,
+    "latencyMs": 8511.110333000019,
+    "costUsd": 0.000756
+  },
+  {
+    "id": "fryum/Data/Images/Normal/391.JPG",
+    "labelKey": "normal",
+    "probability": 0.95,
+    "latencyMs": 8511.110333000019,
+    "costUsd": 0.000756
+  },
+  {
+    "id": "fryum/Data/Images/Normal/398.JPG",
+    "labelKey": "normal",
+    "probability": 0.95,
+    "latencyMs": 8511.110333000019,
+    "costUsd": 0.000756
+  },
+  {
+    "id": "fryum/Data/Images/Normal/405.JPG",
+    "labelKey": "normal",
+    "probability": 0.95,
+    "latencyMs": 8511.110333000019,
+    "costUsd": 0.000756
+  },
+  {
+    "id": "fryum/Data/Images/Normal/411.JPG",
+    "labelKey": "normal",
+    "probability": 0.95,
+    "latencyMs": 8511.110333000019,
+    "costUsd": 0.000756
+  },
+  {
+    "id": "fryum/Data/Images/Normal/418.JPG",
+    "labelKey": "normal",
+    "probability": 0.95,
+    "latencyMs": 8511.110333000019,
+    "costUsd": 0.000756
+  },
+  {
+    "id": "fryum/Data/Images/Normal/425.JPG",
+    "labelKey": "normal",
+    "probability": 0.95,
+    "latencyMs": 8511.110333000019,
+    "costUsd": 0.000756
+  },
+  {
+    "id": "fryum/Data/Images/Normal/432.JPG",
+    "labelKey": "normal",
+    "probability": 0.95,
+    "latencyMs": 8511.110333000019,
+    "costUsd": 0.000756
+  },
+  {
+    "id": "fryum/Data/Images/Normal/438.JPG",
+    "labelKey": "normal",
+    "probability": 0.95,
+    "latencyMs": 8511.110333000019,
+    "costUsd": 0.000756
+  },
+  {
+    "id": "fryum/Data/Images/Normal/445.JPG",
+    "labelKey": "normal",
+    "probability": 0.95,
+    "latencyMs": 8511.110333000019,
+    "costUsd": 0.000756
+  },
+  {
+    "id": "fryum/Data/Images/Normal/452.JPG",
+    "labelKey": "normal",
+    "probability": 0.95,
+    "latencyMs": 8511.110333000019,
+    "costUsd": 0.000756
+  },
+  {
+    "id": "fryum/Data/Images/Normal/459.JPG",
+    "labelKey": "normal",
+    "probability": 0.95,
+    "latencyMs": 8511.110333000019,
+    "costUsd": 0.000756
+  },
+  {
+    "id": "fryum/Data/Images/Normal/465.JPG",
+    "labelKey": "normal",
+    "probability": 0.95,
+    "latencyMs": 8511.110333000019,
+    "costUsd": 0.000756
+  },
+  {
+    "id": "fryum/Data/Images/Normal/472.JPG",
+    "labelKey": "normal",
+    "probability": 1,
+    "latencyMs": 10159.903791999968,
+    "costUsd": 0.000791
+  },
+  {
+    "id": "fryum/Data/Images/Normal/479.JPG",
+    "labelKey": "normal",
+    "probability": 1,
+    "latencyMs": 10159.903791999968,
+    "costUsd": 0.000791
+  },
+  {
+    "id": "fryum/Data/Images/Normal/486.JPG",
+    "labelKey": "normal",
+    "probability": 1,
+    "latencyMs": 10159.903791999968,
+    "costUsd": 0.000791
+  },
+  {
+    "id": "fryum/Data/Images/Normal/492.JPG",
+    "labelKey": "normal",
+    "probability": 1,
+    "latencyMs": 10159.903791999968,
+    "costUsd": 0.000791
+  },
+  {
+    "id": "fryum/Data/Images/Normal/499.JPG",
+    "labelKey": "normal",
+    "probability": 1,
+    "latencyMs": 10159.903791999968,
+    "costUsd": 0.000791
+  },
+  {
+    "id": "pcb1/Data/Images/Anomaly/000.JPG",
+    "labelKey": "defect:pcb1",
+    "probability": 1,
+    "latencyMs": 10159.903791999968,
+    "costUsd": 0.000791
+  },
+  {
+    "id": "pcb1/Data/Images/Anomaly/001.JPG",
+    "labelKey": "defect:pcb1",
+    "probability": 1,
+    "latencyMs": 10159.903791999968,
+    "costUsd": 0.000791
+  },
+  {
+    "id": "pcb1/Data/Images/Anomaly/002.JPG",
+    "labelKey": "defect:pcb1",
+    "probability": 1,
+    "latencyMs": 10159.903791999968,
+    "costUsd": 0.000791
+  },
+  {
+    "id": "pcb1/Data/Images/Anomaly/003.JPG",
+    "labelKey": "defect:pcb1",
+    "probability": 1,
+    "latencyMs": 10159.903791999968,
+    "costUsd": 0.000791
+  },
+  {
+    "id": "pcb1/Data/Images/Anomaly/004.JPG",
+    "labelKey": "defect:pcb1",
+    "probability": 1,
+    "latencyMs": 10159.903791999968,
+    "costUsd": 0.000791
+  },
+  {
+    "id": "pcb1/Data/Images/Anomaly/005.JPG",
+    "labelKey": "defect:pcb1",
+    "probability": 1,
+    "latencyMs": 10159.903791999968,
+    "costUsd": 0.000791
+  },
+  {
+    "id": "pcb1/Data/Images/Anomaly/006.JPG",
+    "labelKey": "defect:pcb1",
+    "probability": 1,
+    "latencyMs": 10159.903791999968,
+    "costUsd": 0.000791
+  },
+  {
+    "id": "pcb1/Data/Images/Anomaly/007.JPG",
+    "labelKey": "defect:pcb1",
+    "probability": 1,
+    "latencyMs": 10159.903791999968,
+    "costUsd": 0.000791
+  },
+  {
+    "id": "pcb1/Data/Images/Anomaly/008.JPG",
+    "labelKey": "defect:pcb1",
+    "probability": 1,
+    "latencyMs": 10159.903791999968,
+    "costUsd": 0.000791
+  },
+  {
+    "id": "pcb1/Data/Images/Anomaly/009.JPG",
+    "labelKey": "defect:pcb1",
+    "probability": 1,
+    "latencyMs": 10159.903791999968,
+    "costUsd": 0.000791
+  },
+  {
+    "id": "pcb1/Data/Images/Anomaly/010.JPG",
+    "labelKey": "defect:pcb1",
+    "probability": 1,
+    "latencyMs": 10159.903791999968,
+    "costUsd": 0.000791
+  },
+  {
+    "id": "pcb1/Data/Images/Anomaly/011.JPG",
+    "labelKey": "defect:pcb1",
+    "probability": 1,
+    "latencyMs": 10159.903791999968,
+    "costUsd": 0.000791
+  },
+  {
+    "id": "pcb1/Data/Images/Anomaly/012.JPG",
+    "labelKey": "defect:pcb1",
+    "probability": 1,
+    "latencyMs": 10159.903791999968,
+    "costUsd": 0.000791
+  },
+  {
+    "id": "pcb1/Data/Images/Anomaly/013.JPG",
+    "labelKey": "defect:pcb1",
+    "probability": 1,
+    "latencyMs": 10159.903791999968,
+    "costUsd": 0.000791
+  },
+  {
+    "id": "pcb1/Data/Images/Anomaly/014.JPG",
+    "labelKey": "defect:pcb1",
+    "probability": 1,
+    "latencyMs": 10159.903791999968,
+    "costUsd": 0.000791
+  },
+  {
+    "id": "pcb1/Data/Images/Anomaly/015.JPG",
+    "labelKey": "defect:pcb1",
+    "probability": 0.9,
+    "latencyMs": 9985.156791999994,
+    "costUsd": 0.000906
+  },
+  {
+    "id": "pcb1/Data/Images/Anomaly/016.JPG",
+    "labelKey": "defect:pcb1",
+    "probability": 0.9,
+    "latencyMs": 9985.156791999994,
+    "costUsd": 0.000906
+  },
+  {
+    "id": "pcb1/Data/Images/Anomaly/017.JPG",
+    "labelKey": "defect:pcb1",
+    "probability": 0.9,
+    "latencyMs": 9985.156791999994,
+    "costUsd": 0.000906
+  },
+  {
+    "id": "pcb1/Data/Images/Anomaly/018.JPG",
+    "labelKey": "defect:pcb1",
+    "probability": 0.9,
+    "latencyMs": 9985.156791999994,
+    "costUsd": 0.000906
+  },
+  {
+    "id": "pcb1/Data/Images/Anomaly/019.JPG",
+    "labelKey": "defect:pcb1",
+    "probability": 0.9,
+    "latencyMs": 9985.156791999994,
+    "costUsd": 0.000906
+  },
+  {
+    "id": "pcb1/Data/Images/Anomaly/020.JPG",
+    "labelKey": "defect:pcb1",
+    "probability": 0.9,
+    "latencyMs": 9985.156791999994,
+    "costUsd": 0.000906
+  },
+  {
+    "id": "pcb1/Data/Images/Anomaly/021.JPG",
+    "labelKey": "defect:pcb1",
+    "probability": 0.9,
+    "latencyMs": 9985.156791999994,
+    "costUsd": 0.000906
+  },
+  {
+    "id": "pcb1/Data/Images/Anomaly/022.JPG",
+    "labelKey": "defect:pcb1",
+    "probability": 0.9,
+    "latencyMs": 9985.156791999994,
+    "costUsd": 0.000906
+  },
+  {
+    "id": "pcb1/Data/Images/Anomaly/023.JPG",
+    "labelKey": "defect:pcb1",
+    "probability": 0.9,
+    "latencyMs": 9985.156791999994,
+    "costUsd": 0.000906
+  },
+  {
+    "id": "pcb1/Data/Images/Anomaly/024.JPG",
+    "labelKey": "defect:pcb1",
+    "probability": 0.9,
+    "latencyMs": 9985.156791999994,
+    "costUsd": 0.000906
+  },
+  {
+    "id": "pcb1/Data/Images/Anomaly/025.JPG",
+    "labelKey": "defect:pcb1",
+    "probability": 0.9,
+    "latencyMs": 9985.156791999994,
+    "costUsd": 0.000906
+  },
+  {
+    "id": "pcb1/Data/Images/Anomaly/026.JPG",
+    "labelKey": "defect:pcb1",
+    "probability": 0.9,
+    "latencyMs": 9985.156791999994,
+    "costUsd": 0.000906
+  },
+  {
+    "id": "pcb1/Data/Images/Anomaly/027.JPG",
+    "labelKey": "defect:pcb1",
+    "probability": 0.9,
+    "latencyMs": 9985.156791999994,
+    "costUsd": 0.000906
+  },
+  {
+    "id": "pcb1/Data/Images/Anomaly/028.JPG",
+    "labelKey": "defect:pcb1",
+    "probability": 0.9,
+    "latencyMs": 9985.156791999994,
+    "costUsd": 0.000906
+  },
+  {
+    "id": "pcb1/Data/Images/Anomaly/029.JPG",
+    "labelKey": "defect:pcb1",
+    "probability": 0.9,
+    "latencyMs": 9985.156791999994,
+    "costUsd": 0.000906
+  },
+  {
+    "id": "pcb1/Data/Images/Anomaly/030.JPG",
+    "labelKey": "defect:pcb1",
+    "probability": 0.9,
+    "latencyMs": 9985.156791999994,
+    "costUsd": 0.000906
+  },
+  {
+    "id": "pcb1/Data/Images/Anomaly/031.JPG",
+    "labelKey": "defect:pcb1",
+    "probability": 0.9,
+    "latencyMs": 9985.156791999994,
+    "costUsd": 0.000906
+  },
+  {
+    "id": "pcb1/Data/Images/Anomaly/032.JPG",
+    "labelKey": "defect:pcb1",
+    "probability": 0.9,
+    "latencyMs": 9985.156791999994,
+    "costUsd": 0.000906
+  },
+  {
+    "id": "pcb1/Data/Images/Anomaly/033.JPG",
+    "labelKey": "defect:pcb1",
+    "probability": 0.9,
+    "latencyMs": 9985.156791999994,
+    "costUsd": 0.000906
+  },
+  {
+    "id": "pcb1/Data/Images/Anomaly/034.JPG",
+    "labelKey": "defect:pcb1",
+    "probability": 0.9,
+    "latencyMs": 9985.156791999994,
+    "costUsd": 0.000906
+  },
+  {
+    "id": "pcb1/Data/Images/Anomaly/035.JPG",
+    "labelKey": "defect:pcb1",
+    "probability": 0.9,
+    "latencyMs": 13505.154125000001,
+    "costUsd": 0.000894
+  },
+  {
+    "id": "pcb1/Data/Images/Anomaly/036.JPG",
+    "labelKey": "defect:pcb1",
+    "probability": 0.9,
+    "latencyMs": 13505.154125000001,
+    "costUsd": 0.000894
+  },
+  {
+    "id": "pcb1/Data/Images/Anomaly/037.JPG",
+    "labelKey": "defect:pcb1",
+    "probability": 0.9,
+    "latencyMs": 13505.154125000001,
+    "costUsd": 0.000894
+  },
+  {
+    "id": "pcb1/Data/Images/Anomaly/038.JPG",
+    "labelKey": "defect:pcb1",
+    "probability": 0.95,
+    "latencyMs": 13505.154125000001,
+    "costUsd": 0.000894
+  },
+  {
+    "id": "pcb1/Data/Images/Anomaly/039.JPG",
+    "labelKey": "defect:pcb1",
+    "probability": 0.95,
+    "latencyMs": 13505.154125000001,
+    "costUsd": 0.000894
+  },
+  {
+    "id": "pcb1/Data/Images/Anomaly/040.JPG",
+    "labelKey": "defect:pcb1",
+    "probability": 0.98,
+    "latencyMs": 13505.154125000001,
+    "costUsd": 0.000894
+  },
+  {
+    "id": "pcb1/Data/Images/Anomaly/041.JPG",
+    "labelKey": "defect:pcb1",
+    "probability": 0.98,
+    "latencyMs": 13505.154125000001,
+    "costUsd": 0.000894
+  },
+  {
+    "id": "pcb1/Data/Images/Anomaly/042.JPG",
+    "labelKey": "defect:pcb1",
+    "probability": 0.98,
+    "latencyMs": 13505.154125000001,
+    "costUsd": 0.000894
+  },
+  {
+    "id": "pcb1/Data/Images/Anomaly/043.JPG",
+    "labelKey": "defect:pcb1",
+    "probability": 0.98,
+    "latencyMs": 13505.154125000001,
+    "costUsd": 0.000894
+  },
+  {
+    "id": "pcb1/Data/Images/Anomaly/044.JPG",
+    "labelKey": "defect:pcb1",
+    "probability": 0.98,
+    "latencyMs": 13505.154125000001,
+    "costUsd": 0.000894
+  },
+  {
+    "id": "pcb1/Data/Images/Anomaly/045.JPG",
+    "labelKey": "defect:pcb1",
+    "probability": 0.98,
+    "latencyMs": 13505.154125000001,
+    "costUsd": 0.000894
+  },
+  {
+    "id": "pcb1/Data/Images/Anomaly/046.JPG",
+    "labelKey": "defect:pcb1",
+    "probability": 0.98,
+    "latencyMs": 13505.154125000001,
+    "costUsd": 0.000894
+  },
+  {
+    "id": "pcb1/Data/Images/Anomaly/047.JPG",
+    "labelKey": "normal",
+    "probability": 0.95,
+    "latencyMs": 13505.154125000001,
+    "costUsd": 0.000894
+  },
+  {
+    "id": "pcb1/Data/Images/Anomaly/048.JPG",
+    "labelKey": "normal",
+    "probability": 0.95,
+    "latencyMs": 13505.154125000001,
+    "costUsd": 0.000894
+  },
+  {
+    "id": "pcb1/Data/Images/Anomaly/049.JPG",
+    "labelKey": "normal",
+    "probability": 0.95,
+    "latencyMs": 13505.154125000001,
+    "costUsd": 0.000894
+  },
+  {
+    "id": "pcb1/Data/Images/Anomaly/050.JPG",
+    "labelKey": "defect:pcb1",
+    "probability": 0.98,
+    "latencyMs": 13505.154125000001,
+    "costUsd": 0.000894
+  },
+  {
+    "id": "pcb1/Data/Images/Anomaly/051.JPG",
+    "labelKey": "defect:pcb1",
+    "probability": 0.98,
+    "latencyMs": 13505.154125000001,
+    "costUsd": 0.000894
+  },
+  {
+    "id": "pcb1/Data/Images/Anomaly/052.JPG",
+    "labelKey": "defect:pcb1",
+    "probability": 0.98,
+    "latencyMs": 13505.154125000001,
+    "costUsd": 0.000894
+  },
+  {
+    "id": "pcb1/Data/Images/Anomaly/053.JPG",
+    "labelKey": "defect:pcb1",
+    "probability": 0.98,
+    "latencyMs": 13505.154125000001,
+    "costUsd": 0.000894
+  },
+  {
+    "id": "pcb1/Data/Images/Anomaly/054.JPG",
+    "labelKey": "defect:pcb1",
+    "probability": 0.98,
+    "latencyMs": 13505.154125000001,
+    "costUsd": 0.000894
+  },
+  {
+    "id": "pcb1/Data/Images/Anomaly/055.JPG",
+    "labelKey": "defect:pcb1",
+    "probability": 0.9,
+    "latencyMs": 11957.253417,
+    "costUsd": 0.0008025
+  },
+  {
+    "id": "pcb1/Data/Images/Anomaly/056.JPG",
+    "labelKey": "defect:pcb1",
+    "probability": 0.9,
+    "latencyMs": 11957.253417,
+    "costUsd": 0.0008025
+  },
+  {
+    "id": "pcb1/Data/Images/Anomaly/057.JPG",
+    "labelKey": "defect:pcb1",
+    "probability": 0.9,
+    "latencyMs": 11957.253417,
+    "costUsd": 0.0008025
+  },
+  {
+    "id": "pcb1/Data/Images/Anomaly/058.JPG",
+    "labelKey": "defect:pcb1",
+    "probability": 0.9,
+    "latencyMs": 11957.253417,
+    "costUsd": 0.0008025
+  },
+  {
+    "id": "pcb1/Data/Images/Anomaly/059.JPG",
+    "labelKey": "defect:pcb1",
+    "probability": 0.9,
+    "latencyMs": 11957.253417,
+    "costUsd": 0.0008025
+  },
+  {
+    "id": "pcb1/Data/Images/Anomaly/060.JPG",
+    "labelKey": "defect:pcb1",
+    "probability": 0.9,
+    "latencyMs": 11957.253417,
+    "costUsd": 0.0008025
+  },
+  {
+    "id": "pcb1/Data/Images/Anomaly/061.JPG",
+    "labelKey": "defect:pcb1",
+    "probability": 0.9,
+    "latencyMs": 11957.253417,
+    "costUsd": 0.0008025
+  },
+  {
+    "id": "pcb1/Data/Images/Anomaly/062.JPG",
+    "labelKey": "defect:pcb1",
+    "probability": 0.9,
+    "latencyMs": 11957.253417,
+    "costUsd": 0.0008025
+  },
+  {
+    "id": "pcb1/Data/Images/Anomaly/063.JPG",
+    "labelKey": "defect:pcb1",
+    "probability": 0.9,
+    "latencyMs": 11957.253417,
+    "costUsd": 0.0008025
+  },
+  {
+    "id": "pcb1/Data/Images/Anomaly/064.JPG",
+    "labelKey": "defect:pcb1",
+    "probability": 0.9,
+    "latencyMs": 11957.253417,
+    "costUsd": 0.0008025
+  },
+  {
+    "id": "pcb1/Data/Images/Anomaly/065.JPG",
+    "labelKey": "defect:pcb1",
+    "probability": 0.9,
+    "latencyMs": 11957.253417,
+    "costUsd": 0.0008025
+  },
+  {
+    "id": "pcb1/Data/Images/Anomaly/066.JPG",
+    "labelKey": "defect:pcb1",
+    "probability": 0.9,
+    "latencyMs": 11957.253417,
+    "costUsd": 0.0008025
+  },
+  {
+    "id": "pcb1/Data/Images/Anomaly/067.JPG",
+    "labelKey": "defect:pcb1",
+    "probability": 0.9,
+    "latencyMs": 11957.253417,
+    "costUsd": 0.0008025
+  },
+  {
+    "id": "pcb1/Data/Images/Anomaly/068.JPG",
+    "labelKey": "defect:pcb1",
+    "probability": 0.9,
+    "latencyMs": 11957.253417,
+    "costUsd": 0.0008025
+  },
+  {
+    "id": "pcb1/Data/Images/Anomaly/069.JPG",
+    "labelKey": "defect:pcb1",
+    "probability": 0.9,
+    "latencyMs": 11957.253417,
+    "costUsd": 0.0008025
+  },
+  {
+    "id": "pcb1/Data/Images/Anomaly/070.JPG",
+    "labelKey": "defect:pcb1",
+    "probability": 0.9,
+    "latencyMs": 11957.253417,
+    "costUsd": 0.0008025
+  },
+  {
+    "id": "pcb1/Data/Images/Anomaly/071.JPG",
+    "labelKey": "defect:pcb1",
+    "probability": 0.9,
+    "latencyMs": 11957.253417,
+    "costUsd": 0.0008025
+  },
+  {
+    "id": "pcb1/Data/Images/Anomaly/072.JPG",
+    "labelKey": "defect:pcb1",
+    "probability": 0.9,
+    "latencyMs": 11957.253417,
+    "costUsd": 0.0008025
+  },
+  {
+    "id": "pcb1/Data/Images/Anomaly/073.JPG",
+    "labelKey": "defect:pcb1",
+    "probability": 0.9,
+    "latencyMs": 11957.253417,
+    "costUsd": 0.0008025
+  },
+  {
+    "id": "pcb1/Data/Images/Anomaly/074.JPG",
+    "labelKey": "defect:pcb1",
+    "probability": 0.9,
+    "latencyMs": 11957.253417,
+    "costUsd": 0.0008025
+  },
+  {
+    "id": "pcb1/Data/Images/Anomaly/075.JPG",
+    "labelKey": "defect:pcb1",
+    "probability": 0.9,
+    "latencyMs": 11587.789500000014,
+    "costUsd": 0.0008765
+  },
+  {
+    "id": "pcb1/Data/Images/Anomaly/076.JPG",
+    "labelKey": "defect:pcb1",
+    "probability": 0.9,
+    "latencyMs": 11587.789500000014,
+    "costUsd": 0.0008765
+  },
+  {
+    "id": "pcb1/Data/Images/Anomaly/077.JPG",
+    "labelKey": "defect:pcb1",
+    "probability": 0.9,
+    "latencyMs": 11587.789500000014,
+    "costUsd": 0.0008765
+  },
+  {
+    "id": "pcb1/Data/Images/Anomaly/078.JPG",
+    "labelKey": "defect:pcb1",
+    "probability": 0.9,
+    "latencyMs": 11587.789500000014,
+    "costUsd": 0.0008765
+  },
+  {
+    "id": "pcb1/Data/Images/Anomaly/079.JPG",
+    "labelKey": "defect:pcb1",
+    "probability": 0.9,
+    "latencyMs": 11587.789500000014,
+    "costUsd": 0.0008765
+  },
+  {
+    "id": "pcb1/Data/Images/Anomaly/080.JPG",
+    "labelKey": "defect:pcb1",
+    "probability": 0.9,
+    "latencyMs": 11587.789500000014,
+    "costUsd": 0.0008765
+  },
+  {
+    "id": "pcb1/Data/Images/Anomaly/081.JPG",
+    "labelKey": "defect:pcb1",
+    "probability": 0.9,
+    "latencyMs": 11587.789500000014,
+    "costUsd": 0.0008765
+  },
+  {
+    "id": "pcb1/Data/Images/Anomaly/082.JPG",
+    "labelKey": "defect:pcb1",
+    "probability": 0.9,
+    "latencyMs": 11587.789500000014,
+    "costUsd": 0.0008765
+  },
+  {
+    "id": "pcb1/Data/Images/Anomaly/083.JPG",
+    "labelKey": "defect:pcb1",
+    "probability": 0.9,
+    "latencyMs": 11587.789500000014,
+    "costUsd": 0.0008765
+  },
+  {
+    "id": "pcb1/Data/Images/Anomaly/084.JPG",
+    "labelKey": "defect:pcb1",
+    "probability": 0.9,
+    "latencyMs": 11587.789500000014,
+    "costUsd": 0.0008765
+  },
+  {
+    "id": "pcb1/Data/Images/Anomaly/085.JPG",
+    "labelKey": "defect:pcb1",
+    "probability": 0.9,
+    "latencyMs": 11587.789500000014,
+    "costUsd": 0.0008765
+  },
+  {
+    "id": "pcb1/Data/Images/Anomaly/086.JPG",
+    "labelKey": "defect:pcb1",
+    "probability": 0.9,
+    "latencyMs": 11587.789500000014,
+    "costUsd": 0.0008765
+  },
+  {
+    "id": "pcb1/Data/Images/Anomaly/087.JPG",
+    "labelKey": "defect:pcb1",
+    "probability": 0.9,
+    "latencyMs": 11587.789500000014,
+    "costUsd": 0.0008765
+  },
+  {
+    "id": "pcb1/Data/Images/Anomaly/088.JPG",
+    "labelKey": "defect:pcb1",
+    "probability": 0.9,
+    "latencyMs": 11587.789500000014,
+    "costUsd": 0.0008765
+  },
+  {
+    "id": "pcb1/Data/Images/Anomaly/089.JPG",
+    "labelKey": "defect:pcb1",
+    "probability": 0.9,
+    "latencyMs": 11587.789500000014,
+    "costUsd": 0.0008765
+  },
+  {
+    "id": "pcb1/Data/Images/Anomaly/090.JPG",
+    "labelKey": "defect:pcb1",
+    "probability": 0.9,
+    "latencyMs": 11587.789500000014,
+    "costUsd": 0.0008765
+  },
+  {
+    "id": "pcb1/Data/Images/Anomaly/091.JPG",
+    "labelKey": "defect:pcb1",
+    "probability": 0.9,
+    "latencyMs": 11587.789500000014,
+    "costUsd": 0.0008765
+  },
+  {
+    "id": "pcb1/Data/Images/Anomaly/092.JPG",
+    "labelKey": "defect:pcb1",
+    "probability": 0.9,
+    "latencyMs": 11587.789500000014,
+    "costUsd": 0.0008765
+  },
+  {
+    "id": "pcb1/Data/Images/Anomaly/093.JPG",
+    "labelKey": "defect:pcb1",
+    "probability": 0.9,
+    "latencyMs": 11587.789500000014,
+    "costUsd": 0.0008765
+  },
+  {
+    "id": "pcb1/Data/Images/Anomaly/094.JPG",
+    "labelKey": "defect:pcb1",
+    "probability": 0.9,
+    "latencyMs": 11587.789500000014,
+    "costUsd": 0.0008765
+  },
+  {
+    "id": "pcb1/Data/Images/Anomaly/095.JPG",
+    "labelKey": "defect:pcb1",
+    "probability": 0.9,
+    "latencyMs": 10794.816792000027,
+    "costUsd": 0.000871
+  },
+  {
+    "id": "pcb1/Data/Images/Anomaly/096.JPG",
+    "labelKey": "defect:pcb1",
+    "probability": 0.9,
+    "latencyMs": 10794.816792000027,
+    "costUsd": 0.000871
+  },
+  {
+    "id": "pcb1/Data/Images/Anomaly/097.JPG",
+    "labelKey": "defect:pcb1",
+    "probability": 0.9,
+    "latencyMs": 10794.816792000027,
+    "costUsd": 0.000871
+  },
+  {
+    "id": "pcb1/Data/Images/Anomaly/098.JPG",
+    "labelKey": "defect:pcb1",
+    "probability": 0.9,
+    "latencyMs": 10794.816792000027,
+    "costUsd": 0.000871
+  },
+  {
+    "id": "pcb1/Data/Images/Anomaly/099.JPG",
+    "labelKey": "defect:pcb1",
+    "probability": 0.9,
+    "latencyMs": 10794.816792000027,
+    "costUsd": 0.000871
+  },
+  {
+    "id": "pcb1/Data/Images/Normal/0000.JPG",
+    "labelKey": "normal",
+    "probability": 0.9,
+    "latencyMs": 10794.816792000027,
+    "costUsd": 0.000871
+  },
+  {
+    "id": "pcb1/Data/Images/Normal/0014.JPG",
+    "labelKey": "normal",
+    "probability": 0.9,
+    "latencyMs": 10794.816792000027,
+    "costUsd": 0.000871
+  },
+  {
+    "id": "pcb1/Data/Images/Normal/0027.JPG",
+    "labelKey": "normal",
+    "probability": 0.9,
+    "latencyMs": 10794.816792000027,
+    "costUsd": 0.000871
+  },
+  {
+    "id": "pcb1/Data/Images/Normal/0041.JPG",
+    "labelKey": "normal",
+    "probability": 0.9,
+    "latencyMs": 10794.816792000027,
+    "costUsd": 0.000871
+  },
+  {
+    "id": "pcb1/Data/Images/Normal/0054.JPG",
+    "labelKey": "normal",
+    "probability": 0.9,
+    "latencyMs": 10794.816792000027,
+    "costUsd": 0.000871
+  },
+  {
+    "id": "pcb1/Data/Images/Normal/0068.JPG",
+    "labelKey": "normal",
+    "probability": 0.9,
+    "latencyMs": 10794.816792000027,
+    "costUsd": 0.000871
+  },
+  {
+    "id": "pcb1/Data/Images/Normal/0081.JPG",
+    "labelKey": "normal",
+    "probability": 0.9,
+    "latencyMs": 10794.816792000027,
+    "costUsd": 0.000871
+  },
+  {
+    "id": "pcb1/Data/Images/Normal/0095.JPG",
+    "labelKey": "normal",
+    "probability": 0.9,
+    "latencyMs": 10794.816792000027,
+    "costUsd": 0.000871
+  },
+  {
+    "id": "pcb1/Data/Images/Normal/0108.JPG",
+    "labelKey": "normal",
+    "probability": 0.9,
+    "latencyMs": 10794.816792000027,
+    "costUsd": 0.000871
+  },
+  {
+    "id": "pcb1/Data/Images/Normal/0122.JPG",
+    "labelKey": "normal",
+    "probability": 0.9,
+    "latencyMs": 10794.816792000027,
+    "costUsd": 0.000871
+  },
+  {
+    "id": "pcb1/Data/Images/Normal/0136.JPG",
+    "labelKey": "normal",
+    "probability": 0.9,
+    "latencyMs": 10794.816792000027,
+    "costUsd": 0.000871
+  },
+  {
+    "id": "pcb1/Data/Images/Normal/0149.JPG",
+    "labelKey": "normal",
+    "probability": 0.9,
+    "latencyMs": 10794.816792000027,
+    "costUsd": 0.000871
+  },
+  {
+    "id": "pcb1/Data/Images/Normal/0163.JPG",
+    "labelKey": "normal",
+    "probability": 0.9,
+    "latencyMs": 10794.816792000027,
+    "costUsd": 0.000871
+  },
+  {
+    "id": "pcb1/Data/Images/Normal/0176.JPG",
+    "labelKey": "normal",
+    "probability": 0.9,
+    "latencyMs": 10794.816792000027,
+    "costUsd": 0.000871
+  },
+  {
+    "id": "pcb1/Data/Images/Normal/0190.JPG",
+    "labelKey": "normal",
+    "probability": 0.9,
+    "latencyMs": 10794.816792000027,
+    "costUsd": 0.000871
+  },
+  {
+    "id": "pcb1/Data/Images/Normal/0203.JPG",
+    "labelKey": "normal",
+    "probability": 1,
+    "latencyMs": 11910.490957999951,
+    "costUsd": 0.000906
+  },
+  {
+    "id": "pcb1/Data/Images/Normal/0217.JPG",
+    "labelKey": "normal",
+    "probability": 1,
+    "latencyMs": 11910.490957999951,
+    "costUsd": 0.000906
+  },
+  {
+    "id": "pcb1/Data/Images/Normal/0230.JPG",
+    "labelKey": "normal",
+    "probability": 1,
+    "latencyMs": 11910.490957999951,
+    "costUsd": 0.000906
+  },
+  {
+    "id": "pcb1/Data/Images/Normal/0244.JPG",
+    "labelKey": "normal",
+    "probability": 1,
+    "latencyMs": 11910.490957999951,
+    "costUsd": 0.000906
+  },
+  {
+    "id": "pcb1/Data/Images/Normal/0258.JPG",
+    "labelKey": "normal",
+    "probability": 1,
+    "latencyMs": 11910.490957999951,
+    "costUsd": 0.000906
+  },
+  {
+    "id": "pcb1/Data/Images/Normal/0271.JPG",
+    "labelKey": "normal",
+    "probability": 1,
+    "latencyMs": 11910.490957999951,
+    "costUsd": 0.000906
+  },
+  {
+    "id": "pcb1/Data/Images/Normal/0285.JPG",
+    "labelKey": "normal",
+    "probability": 1,
+    "latencyMs": 11910.490957999951,
+    "costUsd": 0.000906
+  },
+  {
+    "id": "pcb1/Data/Images/Normal/0298.JPG",
+    "labelKey": "normal",
+    "probability": 1,
+    "latencyMs": 11910.490957999951,
+    "costUsd": 0.000906
+  },
+  {
+    "id": "pcb1/Data/Images/Normal/0312.JPG",
+    "labelKey": "normal",
+    "probability": 1,
+    "latencyMs": 11910.490957999951,
+    "costUsd": 0.000906
+  },
+  {
+    "id": "pcb1/Data/Images/Normal/0325.JPG",
+    "labelKey": "normal",
+    "probability": 1,
+    "latencyMs": 11910.490957999951,
+    "costUsd": 0.000906
+  },
+  {
+    "id": "pcb1/Data/Images/Normal/0339.JPG",
+    "labelKey": "normal",
+    "probability": 1,
+    "latencyMs": 11910.490957999951,
+    "costUsd": 0.000906
+  },
+  {
+    "id": "pcb1/Data/Images/Normal/0352.JPG",
+    "labelKey": "normal",
+    "probability": 1,
+    "latencyMs": 11910.490957999951,
+    "costUsd": 0.000906
+  },
+  {
+    "id": "pcb1/Data/Images/Normal/0366.JPG",
+    "labelKey": "normal",
+    "probability": 1,
+    "latencyMs": 11910.490957999951,
+    "costUsd": 0.000906
+  },
+  {
+    "id": "pcb1/Data/Images/Normal/0380.JPG",
+    "labelKey": "normal",
+    "probability": 1,
+    "latencyMs": 11910.490957999951,
+    "costUsd": 0.000906
+  },
+  {
+    "id": "pcb1/Data/Images/Normal/0393.JPG",
+    "labelKey": "normal",
+    "probability": 1,
+    "latencyMs": 11910.490957999951,
+    "costUsd": 0.000906
+  },
+  {
+    "id": "pcb1/Data/Images/Normal/0407.JPG",
+    "labelKey": "normal",
+    "probability": 1,
+    "latencyMs": 11910.490957999951,
+    "costUsd": 0.000906
+  },
+  {
+    "id": "pcb1/Data/Images/Normal/0420.JPG",
+    "labelKey": "normal",
+    "probability": 1,
+    "latencyMs": 11910.490957999951,
+    "costUsd": 0.000906
+  },
+  {
+    "id": "pcb1/Data/Images/Normal/0434.JPG",
+    "labelKey": "normal",
+    "probability": 1,
+    "latencyMs": 11910.490957999951,
+    "costUsd": 0.000906
+  },
+  {
+    "id": "pcb1/Data/Images/Normal/0447.JPG",
+    "labelKey": "normal",
+    "probability": 1,
+    "latencyMs": 11910.490957999951,
+    "costUsd": 0.000906
+  },
+  {
+    "id": "pcb1/Data/Images/Normal/0461.JPG",
+    "labelKey": "normal",
+    "probability": 1,
+    "latencyMs": 11910.490957999951,
+    "costUsd": 0.000906
+  },
+  {
+    "id": "pcb1/Data/Images/Normal/0474.JPG",
+    "labelKey": "normal",
+    "probability": 0.95,
+    "latencyMs": 12875.459124999994,
+    "costUsd": 0.000911
+  },
+  {
+    "id": "pcb1/Data/Images/Normal/0488.JPG",
+    "labelKey": "normal",
+    "probability": 0.95,
+    "latencyMs": 12875.459124999994,
+    "costUsd": 0.000911
+  },
+  {
+    "id": "pcb1/Data/Images/Normal/0502.JPG",
+    "labelKey": "normal",
+    "probability": 0.95,
+    "latencyMs": 12875.459124999994,
+    "costUsd": 0.000911
+  },
+  {
+    "id": "pcb1/Data/Images/Normal/0515.JPG",
+    "labelKey": "normal",
+    "probability": 0.95,
+    "latencyMs": 12875.459124999994,
+    "costUsd": 0.000911
+  },
+  {
+    "id": "pcb1/Data/Images/Normal/0529.JPG",
+    "labelKey": "normal",
+    "probability": 0.95,
+    "latencyMs": 12875.459124999994,
+    "costUsd": 0.000911
+  },
+  {
+    "id": "pcb1/Data/Images/Normal/0542.JPG",
+    "labelKey": "normal",
+    "probability": 0.95,
+    "latencyMs": 12875.459124999994,
+    "costUsd": 0.000911
+  },
+  {
+    "id": "pcb1/Data/Images/Normal/0556.JPG",
+    "labelKey": "normal",
+    "probability": 0.95,
+    "latencyMs": 12875.459124999994,
+    "costUsd": 0.000911
+  },
+  {
+    "id": "pcb1/Data/Images/Normal/0569.JPG",
+    "labelKey": "normal",
+    "probability": 0.95,
+    "latencyMs": 12875.459124999994,
+    "costUsd": 0.000911
+  },
+  {
+    "id": "pcb1/Data/Images/Normal/0583.JPG",
+    "labelKey": "normal",
+    "probability": 0.95,
+    "latencyMs": 12875.459124999994,
+    "costUsd": 0.000911
+  },
+  {
+    "id": "pcb1/Data/Images/Normal/0596.JPG",
+    "labelKey": "normal",
+    "probability": 0.95,
+    "latencyMs": 12875.459124999994,
+    "costUsd": 0.000911
+  },
+  {
+    "id": "pcb1/Data/Images/Normal/0610.JPG",
+    "labelKey": "normal",
+    "probability": 0.95,
+    "latencyMs": 12875.459124999994,
+    "costUsd": 0.000911
+  },
+  {
+    "id": "pcb1/Data/Images/Normal/0623.JPG",
+    "labelKey": "normal",
+    "probability": 0.95,
+    "latencyMs": 12875.459124999994,
+    "costUsd": 0.000911
+  },
+  {
+    "id": "pcb1/Data/Images/Normal/0637.JPG",
+    "labelKey": "normal",
+    "probability": 0.95,
+    "latencyMs": 12875.459124999994,
+    "costUsd": 0.000911
+  },
+  {
+    "id": "pcb1/Data/Images/Normal/0651.JPG",
+    "labelKey": "normal",
+    "probability": 0.95,
+    "latencyMs": 12875.459124999994,
+    "costUsd": 0.000911
+  },
+  {
+    "id": "pcb1/Data/Images/Normal/0664.JPG",
+    "labelKey": "normal",
+    "probability": 0.95,
+    "latencyMs": 12875.459124999994,
+    "costUsd": 0.000911
+  },
+  {
+    "id": "pcb1/Data/Images/Normal/0678.JPG",
+    "labelKey": "normal",
+    "probability": 0.95,
+    "latencyMs": 12875.459124999994,
+    "costUsd": 0.000911
+  },
+  {
+    "id": "pcb1/Data/Images/Normal/0691.JPG",
+    "labelKey": "normal",
+    "probability": 0.95,
+    "latencyMs": 12875.459124999994,
+    "costUsd": 0.000911
+  },
+  {
+    "id": "pcb1/Data/Images/Normal/0705.JPG",
+    "labelKey": "normal",
+    "probability": 0.95,
+    "latencyMs": 12875.459124999994,
+    "costUsd": 0.000911
+  },
+  {
+    "id": "pcb1/Data/Images/Normal/0718.JPG",
+    "labelKey": "normal",
+    "probability": 0.95,
+    "latencyMs": 12875.459124999994,
+    "costUsd": 0.000911
+  },
+  {
+    "id": "pcb1/Data/Images/Normal/0732.JPG",
+    "labelKey": "normal",
+    "probability": 0.95,
+    "latencyMs": 12875.459124999994,
+    "costUsd": 0.000911
+  },
+  {
+    "id": "pcb1/Data/Images/Normal/0745.JPG",
+    "labelKey": "normal",
+    "probability": 1,
+    "latencyMs": 12128.479416999966,
+    "costUsd": 0.000886
+  },
+  {
+    "id": "pcb1/Data/Images/Normal/0759.JPG",
+    "labelKey": "normal",
+    "probability": 1,
+    "latencyMs": 12128.479416999966,
+    "costUsd": 0.000886
+  },
+  {
+    "id": "pcb1/Data/Images/Normal/0773.JPG",
+    "labelKey": "normal",
+    "probability": 1,
+    "latencyMs": 12128.479416999966,
+    "costUsd": 0.000886
+  },
+  {
+    "id": "pcb1/Data/Images/Normal/0786.JPG",
+    "labelKey": "normal",
+    "probability": 1,
+    "latencyMs": 12128.479416999966,
+    "costUsd": 0.000886
+  },
+  {
+    "id": "pcb1/Data/Images/Normal/0800.JPG",
+    "labelKey": "normal",
+    "probability": 1,
+    "latencyMs": 12128.479416999966,
+    "costUsd": 0.000886
+  },
+  {
+    "id": "pcb1/Data/Images/Normal/0813.JPG",
+    "labelKey": "normal",
+    "probability": 1,
+    "latencyMs": 12128.479416999966,
+    "costUsd": 0.000886
+  },
+  {
+    "id": "pcb1/Data/Images/Normal/0827.JPG",
+    "labelKey": "normal",
+    "probability": 1,
+    "latencyMs": 12128.479416999966,
+    "costUsd": 0.000886
+  },
+  {
+    "id": "pcb1/Data/Images/Normal/0840.JPG",
+    "labelKey": "normal",
+    "probability": 1,
+    "latencyMs": 12128.479416999966,
+    "costUsd": 0.000886
+  },
+  {
+    "id": "pcb1/Data/Images/Normal/0854.JPG",
+    "labelKey": "normal",
+    "probability": 1,
+    "latencyMs": 12128.479416999966,
+    "costUsd": 0.000886
+  },
+  {
+    "id": "pcb1/Data/Images/Normal/0867.JPG",
+    "labelKey": "normal",
+    "probability": 1,
+    "latencyMs": 12128.479416999966,
+    "costUsd": 0.000886
+  },
+  {
+    "id": "pcb1/Data/Images/Normal/0881.JPG",
+    "labelKey": "normal",
+    "probability": 1,
+    "latencyMs": 12128.479416999966,
+    "costUsd": 0.000886
+  },
+  {
+    "id": "pcb1/Data/Images/Normal/0895.JPG",
+    "labelKey": "normal",
+    "probability": 1,
+    "latencyMs": 12128.479416999966,
+    "costUsd": 0.000886
+  },
+  {
+    "id": "pcb1/Data/Images/Normal/0908.JPG",
+    "labelKey": "normal",
+    "probability": 1,
+    "latencyMs": 12128.479416999966,
+    "costUsd": 0.000886
+  },
+  {
+    "id": "pcb1/Data/Images/Normal/0922.JPG",
+    "labelKey": "normal",
+    "probability": 1,
+    "latencyMs": 12128.479416999966,
+    "costUsd": 0.000886
+  },
+  {
+    "id": "pcb1/Data/Images/Normal/0935.JPG",
+    "labelKey": "normal",
+    "probability": 1,
+    "latencyMs": 12128.479416999966,
+    "costUsd": 0.000886
+  },
+  {
+    "id": "pcb1/Data/Images/Normal/0949.JPG",
+    "labelKey": "normal",
+    "probability": 1,
+    "latencyMs": 12128.479416999966,
+    "costUsd": 0.000886
+  },
+  {
+    "id": "pcb1/Data/Images/Normal/0962.JPG",
+    "labelKey": "normal",
+    "probability": 1,
+    "latencyMs": 12128.479416999966,
+    "costUsd": 0.000886
+  },
+  {
+    "id": "pcb1/Data/Images/Normal/0976.JPG",
+    "labelKey": "normal",
+    "probability": 1,
+    "latencyMs": 12128.479416999966,
+    "costUsd": 0.000886
+  },
+  {
+    "id": "pcb1/Data/Images/Normal/0989.JPG",
+    "labelKey": "normal",
+    "probability": 1,
+    "latencyMs": 12128.479416999966,
+    "costUsd": 0.000886
+  },
+  {
+    "id": "pcb1/Data/Images/Normal/1003.JPG",
+    "labelKey": "normal",
+    "probability": 1,
+    "latencyMs": 12128.479416999966,
+    "costUsd": 0.000886
+  }
+]

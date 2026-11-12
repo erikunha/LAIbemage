@@ -9,6 +9,13 @@
  *   - violating.ts imports the `openai` SDK  → eslint MUST fail (exit 1)
  *   - clean.ts       imports only node:path  → eslint MUST pass (exit 0)
  *
+ * A second proof pair covers the worker boundary rule scoped to
+ * `packages/core/src/worker/` (the boundary-table row in AGENTS.md), so its
+ * fixtures live under that directory where the scoped rule matches:
+ *
+ *   - worker-violating.ts imports `sharp`      → eslint MUST fail (exit 1)
+ *   - worker-clean.ts     stdlib + contracts   → eslint MUST pass (exit 0)
+ *
  * Any other outcome (config errors = exit 2, crashes) fails the check.
  * Run: `pnpm run check:boundaries` (repo root). Wired into CI later.
  */
@@ -24,6 +31,16 @@ const eslintBin = path.join(repoRoot, 'node_modules', 'eslint', 'bin', 'eslint.j
 // NOT under packages/core/src/analyzer/providers/ (the SDK carve-out).
 const tmpDir = path.join(repoRoot, 'packages', 'core', 'tests', `boundary-check-tmp-${process.pid}`);
 
+// Under packages/core/src/worker/ so the worker-scoped boundary rule matches.
+const workerTmpDir = path.join(
+  repoRoot,
+  'packages',
+  'core',
+  'src',
+  'worker',
+  `boundary-check-tmp-${process.pid}`,
+);
+
 const VIOLATING = `import OpenAI from 'openai';
 // Deliberate boundary violation fixture — must trip no-restricted-imports.
 export const client = OpenAI;
@@ -32,6 +49,19 @@ export const client = OpenAI;
 const CLEAN = `import path from 'node:path';
 // Clean fixture — no LLM SDK import, must lint green.
 export const joined = path.join('a', 'b');
+`;
+
+const WORKER_VIOLATING = `import sharp from 'sharp';
+// Deliberate worker boundary violation fixture: Sharp inside the process
+// spawning module must trip the scoped no-restricted-imports rule.
+export const imaging = sharp;
+`;
+
+const WORKER_CLEAN = `import { spawn } from 'node:child_process';
+import { WORKER_PROTOCOL_ID } from '@vision-lens/contracts';
+// Clean worker fixture: node stdlib plus contracts, must lint green.
+export const protocol = WORKER_PROTOCOL_ID;
+export const spawnWorker = spawn;
 `;
 
 function runEslint(file) {
@@ -74,15 +104,50 @@ try {
   } else {
     console.log('ok: clean fixture (node:path only) lints green');
   }
+
+  mkdirSync(workerTmpDir);
+  const workerViolatingFile = path.join(workerTmpDir, 'worker-violating.ts');
+  const workerCleanFile = path.join(workerTmpDir, 'worker-clean.ts');
+  writeFileSync(workerViolatingFile, WORKER_VIOLATING);
+  writeFileSync(workerCleanFile, WORKER_CLEAN);
+
+  const workerViolating = runEslint(workerViolatingFile);
+  if (workerViolating.status !== 1) {
+    failed = true;
+    console.error(
+      `FAIL: worker violating fixture should exit 1 (Sharp inside worker/), got ${workerViolating.status}\n${workerViolating.stdout}${workerViolating.stderr}`,
+    );
+  } else if (
+    !workerViolating.stdout.includes('no-restricted-imports') ||
+    !workerViolating.stdout.includes('packages/core/src/worker')
+  ) {
+    failed = true;
+    console.error(
+      `FAIL: worker violation reported, but not by the worker boundary rule:\n${workerViolating.stdout}`,
+    );
+  } else {
+    console.log('ok: Sharp import inside worker/ is rejected (no-restricted-imports)');
+  }
+
+  const workerClean = runEslint(workerCleanFile);
+  if (workerClean.status !== 0) {
+    failed = true;
+    console.error(
+      `FAIL: worker clean fixture should exit 0, got ${workerClean.status}\n${workerClean.stdout}${workerClean.stderr}`,
+    );
+  } else {
+    console.log('ok: worker clean fixture (node:child_process + contracts) lints green');
+  }
 } catch (error) {
   failed = true;
   console.error(`FAIL: unexpected error: ${String(error)}`);
 } finally {
   rmSync(tmpDir, { recursive: true, force: true });
+  rmSync(workerTmpDir, { recursive: true, force: true });
 }
 
 if (failed) {
   console.error('boundary check FAILED');
   process.exit(1);
 }
-console.log('boundary check passed: violating fixture caught, clean fixture green');
+console.log('boundary check passed: LLM SDK and worker violating fixtures caught, clean fixtures green');

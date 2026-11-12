@@ -92,6 +92,7 @@ The lockfile is the source of truth and CI installs with the frozen lockfile.
 | `packages/core/src/diff/` | config/, types | any LLM SDK, Sharp, I/O |
 | `packages/core/src/store/` | utils/, config/, types, drizzle-orm + better-sqlite3 | any LLM SDK, Sharp |
 | `packages/core/src/benchmark/` | utils/, config/, types | any LLM SDK, Sharp |
+| `packages/core/src/worker/` | Node stdlib (incl. child_process), `@vision-lens/contracts`, utils/ | any LLM SDK, Sharp, direct store access, benchmark internals |
 | `packages/core/src/plugin/` | utils/, types | any LLM SDK, Sharp, fs-extra, analyzer/, processor/ |
 | `packages/core/src/fs/` | Node stdlib, cloud SDKs (per adapter) | LLM SDKs, Sharp, analyzer/ |
 | `packages/core/src/index.ts` | all `packages/core/src/` modules, plus the utility packages it orchestrates (chokidar, p-limit, @vision-lens/contracts) | any LLM SDK, Sharp |

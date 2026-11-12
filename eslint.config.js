@@ -25,6 +25,14 @@ const llmSdkRestriction = {
   patterns: LLM_SDKS.map((name) => ({ group: [`${name}/*`], message: LLM_SDK_MESSAGE })),
 };
 
+/**
+ * Boundary message for `packages/core/src/worker/` (the boundary-table row in
+ * AGENTS.md): no LLM SDK, no Sharp, no direct store access, no benchmark
+ * internals inside the process-spawning module.
+ */
+const WORKER_BOUNDARY_MESSAGE =
+  'packages/core/src/worker/ may import the Node stdlib (child_process included), @vision-lens/contracts and packages/core/src/utils/ only: no LLM SDK, no Sharp, no direct store access, no benchmark internals (see the module boundary table in AGENTS.md).';
+
 export default [
   js.configs.recommended,
   {
@@ -87,6 +95,38 @@ export default [
             '@google-cloud/vertexai/*',
             '@aws-sdk/client-bedrock-runtime/*',
           ].map((group) => ({ group: [group], message: LLM_SDK_MESSAGE })),
+        },
+      ],
+    },
+  },
+  // Worker boundary rule (the packages/core/src/worker/ row of the boundary
+  // table in AGENTS.md): the module that spawns processes may import the Node
+  // stdlib (child_process included), @vision-lens/contracts and utils/ only.
+  // The LLM SDK entries are restated because this block replaces the
+  // workspace-wide restriction for these files; `pnpm run check:boundaries`
+  // proves the rule fires with a violating fixture and passes a clean one.
+  {
+    files: ['packages/core/src/worker/**/*.ts'],
+    rules: {
+      'no-restricted-imports': [
+        'error',
+        {
+          paths: [
+            ...LLM_SDKS.map((name) => ({ name, message: LLM_SDK_MESSAGE })),
+            { name: 'sharp', message: WORKER_BOUNDARY_MESSAGE },
+          ],
+          patterns: [
+            ...LLM_SDKS.map((name) => ({ group: [`${name}/*`], message: LLM_SDK_MESSAGE })),
+            { group: ['sharp', 'sharp/*'], message: WORKER_BOUNDARY_MESSAGE },
+            {
+              group: ['../store', '../store.js', '../store/*', '../store/**'],
+              message: WORKER_BOUNDARY_MESSAGE,
+            },
+            {
+              group: ['../benchmark', '../benchmark.js', '../benchmark/*', '../benchmark/**'],
+              message: WORKER_BOUNDARY_MESSAGE,
+            },
+          ],
         },
       ],
     },

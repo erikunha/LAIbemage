@@ -1764,18 +1764,17 @@ name = "visionlens"
 version = "0.1.0"
 source = { editable = "." }
 dependencies = [
+    { name = "pillow" },
     { name = "pydantic" },
 ]
 
 [package.optional-dependencies]
 all = [
-    { name = "pillow" },
     { name = "safetensors" },
     { name = "torch" },
     { name = "transformers" },
 ]
 vision = [
-    { name = "pillow" },
     { name = "safetensors" },
     { name = "torch" },
     { name = "transformers" },
@@ -1789,7 +1788,7 @@ dev = [
 
 [package.metadata]
 requires-dist = [
-    { name = "pillow", marker = "extra == 'vision'", specifier = ">=11,<13" },
+    { name = "pillow", specifier = ">=11,<13" },
     { name = "pydantic", specifier = ">=2.12,<3" },
     { name = "safetensors", marker = "extra == 'vision'", specifier = ">=0.6,<1" },
     { name = "torch", marker = "extra == 'vision'", specifier = ">=2.9,<3" },

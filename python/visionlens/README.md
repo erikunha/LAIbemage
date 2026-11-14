@@ -39,14 +39,15 @@ claim is made today.
 ## Extras
 
 One distribution, heavy capabilities only through extras. The extra names
-are frozen. The base install carries Pydantic and nothing else, so it
-never pulls a PyTorch or a Transformers download, and every heavy stack
-lives behind the extra that needs it.
+are frozen. The base install carries Pydantic for the typed configuration
+and Pillow for the image decoder, and nothing else, so it never pulls a
+PyTorch or a Transformers download, and every heavy stack lives behind the
+extra that needs it.
 
 | Extra | Installs | Status |
 |---|---|---|
-| (base) | Pydantic, for the typed configuration and records | shipped |
-| `vision` | torch, transformers, safetensors and pillow: the encoder stack that reads a real checkpoint and the decoder that opens an image | shipped |
+| (base) | Pydantic for the typed configuration and records, Pillow for the image decoder | shipped |
+| `vision` | torch, transformers and safetensors: the encoder stack that reads a real checkpoint | shipped |
 | `training` | the training recipe and experiment tracking stack (empty set today) | name frozen, set empty |
 | `agents` | the agent runtime import boundary (empty set today) | name frozen, set empty |
 | `server` | the HTTP surface stack (empty set today) | name frozen, set empty |

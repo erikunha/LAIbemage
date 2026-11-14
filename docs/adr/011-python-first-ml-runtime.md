@@ -124,19 +124,56 @@ amendment, together with the package tests and the mypy gate; the re-dated licen
 (`python/visionlens/release/license-audit.md`) records the license of every package the base
 install now carries.
 
+## Amendment 2026-11-15: the base install carries the image decoder too
+
+**Deciders**: @erikunha (the maintainer directed shipping the CPU vision adapter on 2026-11-14;
+the call was delegated to the delivery loop and recorded here).
+
+The amendment of 2026-11-14 put Pydantic in the base install and said the base carries
+"nothing else". That was true while the whole runtime was simulated and nothing decoded an
+image. The CPU vision adapter of VLN-005 decodes one, and the decoder is a core operation of
+the distribution, not a capability extra: a caller that installs `visionlens` and asks for an
+embedding must get an image decoder in return.
+
+**What changes.** The base install carries Pillow next to Pydantic:
+`dependencies = ["pydantic>=2.12,<3", "pillow>=11,<13"]`
+(`python/visionlens/pyproject.toml:18`). The `vision` extra keeps the heavy stack and only
+the heavy stack: torch, transformers and safetensors
+(`python/visionlens/pyproject.toml:30-34`).
+
+**Why the pack allows it.** The dependency policy names what the base install should include:
+"Pydantic, limited I/O and lightweight NumPy only if core operations truly need it", and
+forbids "no mandatory GPU/PyTorch/Transformers/MLflow download"
+(`docs/vnext/05-PYTHON-CORE-AND-PYPI.md:34`). Pillow is the limited I/O of the image decoder,
+and no GPU, PyTorch, Transformers or MLflow download enters a consumer install.
+
+**Why Pillow and not a hand-written decoder.** The decoder refuses a truncated file, a pixel
+bomb and a file whose magic bytes contradict its extension, BEFORE the pixel buffer is
+allocated (`docs/vnext/19-SECURITY-PRIVACY-SUPPLY-CHAIN.md:23`). That is a job for a
+battle-tested decoder, and a second decoder written here would be a second thing to keep
+correct. The heavy ML stack stays behind the extra, where it belongs.
+
+**What this amendment does not change.** The wire protocol, the ownership boundary, the
+entity rules, the compatibility rules and the hardware, security and test obligations stand
+as accepted. The frozen worker vocabulary stays exactly the ten codes it had, and the gate
+that proves it (`python/visionlens/tests/test_protocol.py:29`) still passes. The base install
+still installs no GPU or ML framework, and the metadata test that proves it
+(`python/visionlens/tests/test_build_metadata.py:45`) names the two packages the base carries.
+
 ## As built today
 
 | Side | Ships | Evidence |
 |---|---|---|
-| Python | the `visionlens` wheel source: simulated encoder, model registry, five operation handlers, the JSONL worker, the golden transcript and the typed facade; the base install carries Pydantic, Python `>=3.11` | `python/visionlens/pyproject.toml:10-25`, `python/visionlens/src/visionlens/golden/__init__.py:1` |
+| Python | the `visionlens` wheel source: simulated encoder, model registry, five operation handlers, the JSONL worker, the golden transcript and the typed facade; the base install carries Pydantic and Pillow, Python `>=3.11` | `python/visionlens/pyproject.toml:10-25`, `python/visionlens/src/visionlens/golden/__init__.py:1` |
 | Python | three service skeletons as thin adapters (`SERVICE_NAME` only, no dependencies) | `services/vision/src/vision_lens_vision/__init__.py:3`, `services/vision/pyproject.toml:6` |
 | Python | the worker runtime container: the vendored wheel copy, no Node, byte-guarded | `docker/runtime/`, `scripts/check-docker-vendor.mjs:1` |
 | TypeScript | the worker host: spawn, framing, handshake, cancel ladder, deadline, budget | `packages/core/src/worker/client.ts:1` |
 | Shared | the frozen vocabulary, defined once per language and proven identical | `packages/contracts/src/worker/protocol.ts:19`, `python/visionlens/src/visionlens/protocol.py:18` |
 | Cross-language | the real TypeScript host against the real Python worker over the wire | `packages/core/tests/worker/python-integration.test.ts:21-34` |
 
-Not implemented, and not claimed: the heavy ML stacks behind the extras, device planning
-(`DevicePlanner`, MPS and CUDA), the `@vision-lens/sdk/client` entrypoint, and any PyPI or npm
+Not implemented, and not claimed: the heavy ML stacks behind the extras (the `vision` extra
+now carries them, but no consumer install pulls them), the `@vision-lens/sdk/client`
+entrypoint, and any PyPI or npm
 publication. Those remain gated by the acceptance conditions below.
 
 ## Supersession record against ADR-006

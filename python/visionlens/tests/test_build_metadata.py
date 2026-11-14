@@ -8,22 +8,23 @@ from pathlib import Path
 
 FIVE_EXTRAS = {"vision", "training", "agents", "server", "all"}
 
-# The base install carries exactly Pydantic, which the typed configuration of
-# the public facade needs (the base-install policy of the pack,
-# docs/vnext/05-PYTHON-CORE-AND-PYPI.md:34). The packaging amendment of
-# ADR-011 records the decision and replaces the earlier empty-set assertion.
-MANDATORY_DISTRIBUTIONS = ["pydantic"]
+# The base install carries Pydantic, which the typed configuration of the
+# public facade needs, and Pillow, which the image decoder needs (the
+# base-install policy of the pack,
+# docs/vnext/05-PYTHON-CORE-AND-PYPI.md:34). The packaging amendments of
+# ADR-011 record the decision and replace the earlier empty-set assertion.
+MANDATORY_DISTRIBUTIONS = ["pillow", "pydantic"]
 
-# The published range of that base dependency, pinned because the ADR
-# amendment and the license audit both name it.
-MANDATORY_REQUIREMENT = "pydantic<3,>=2.12"
+# The published ranges of those base dependencies, pinned because the ADR
+# amendments and the license audit both name them.
+MANDATORY_REQUIREMENTS = ["pillow<13,>=11", "pydantic<3,>=2.12"]
 
 # The heavy stack the `vision` extra carries: the encoder that reads a real
-# checkpoint (torch, transformers), the format the weights loader publishes
-# (safetensors) and the decoder that opens an image (pillow). The base
-# install carries none of them, so the base never pulls a PyTorch or a
-# Transformers download (docs/vnext/05-PYTHON-CORE-AND-PYPI.md:34, :35).
-VISION_EXTRA_DISTRIBUTIONS = {"torch", "transformers", "safetensors", "pillow"}
+# checkpoint (torch, transformers) and the format the weights loader
+# publishes (safetensors). The base install carries none of them, so the
+# base never pulls a PyTorch or a Transformers download
+# (docs/vnext/05-PYTHON-CORE-AND-PYPI.md:34, :35).
+VISION_EXTRA_DISTRIBUTIONS = {"torch", "transformers", "safetensors"}
 
 
 def _distribution_name(requirement: str) -> str:
@@ -73,7 +74,7 @@ def test_the_base_dependency_pins_its_published_range(built_dist: Path) -> None:
         if line.startswith("Requires-Dist:")
     ]
     mandatory = [r for r in requires if "extra ==" not in r]
-    assert mandatory == [MANDATORY_REQUIREMENT]
+    assert mandatory == MANDATORY_REQUIREMENTS
 
 
 def test_the_vision_extra_carries_the_heavy_stack(built_dist: Path) -> None:

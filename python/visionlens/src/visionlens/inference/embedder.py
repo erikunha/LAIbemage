@@ -24,7 +24,7 @@ from pathlib import Path
 from typing import Any, Dict, Optional, Sequence, Tuple
 
 from ..encoders.base import Encoder, EncoderOutput
-from ..errors import LibraryError
+from ..errors import LibraryError, LibraryErrorCode
 from ..io.decode import DecodeService
 from ..io.preprocess import PreprocessingSpec
 from ..registry.record import ModelRecord
@@ -148,8 +148,7 @@ class VisionEmbedder:
         for asset in request.assets:
             try:
                 decoded = self.decoder.decode(asset.path)
-                digests.append(decoded.sha256)
-                prepared.append((asset, self.spec.apply(decoded.image)))
+                preprocessed = self.spec.apply(decoded.image)
             except LibraryError as exc:
                 errors.append(
                     EmbedError(
@@ -159,6 +158,22 @@ class VisionEmbedder:
                         message=exc.message,
                     )
                 )
+                continue
+            except ValueError as exc:
+                # The preprocessing refused the pixels of this image. The
+                # image is an error sample and the run continues: a broken
+                # file never takes the other images down with it.
+                errors.append(
+                    EmbedError(
+                        asset_id=asset.asset_id,
+                        path=str(asset.path),
+                        code=LibraryErrorCode.IMAGE_METADATA_UNREADABLE.value,
+                        message=str(exc),
+                    )
+                )
+                continue
+            digests.append(decoded.sha256)
+            prepared.append((asset, preprocessed))
 
         vectors: list[Tuple[float, ...]] = []
         if prepared:
@@ -228,6 +243,11 @@ class VisionEmbedder:
                     [image for _, image in prepared[start : start + size]]
                 )
             except Exception as exc:
+                if isinstance(exc, LibraryError):
+                    # A typed failure of the library keeps its own code: a
+                    # missing extra is not a model that refused the batch,
+                    # and the caller acts on the two differently.
+                    raise
                 if not _is_memory_error(exc):
                     raise self._model_error(exc) from exc
                 reduced = self.scheduler.next_batch_size(size, attempts)

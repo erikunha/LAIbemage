@@ -301,7 +301,14 @@ def read_embedding_artifact(directory: Path) -> EmbeddingArtifact:
             + " and the manifest names "
             + manifest.vectors_file_digest
         )
-    if manifest.artifact_digest and manifest.artifact_digest != manifest.digest():
+    if not manifest.artifact_digest:
+        raise ValueError(
+            "the manifest of '"
+            + str(directory)
+            + "' carries no artifact digest, and an artifact without an address "
+            "is not an artifact this package wrote"
+        )
+    if manifest.artifact_digest != manifest.digest():
         raise ValueError(
             "the manifest of '"
             + str(directory)
@@ -344,6 +351,7 @@ def manifest_from_dict(payload: Mapping[str, Any]) -> EmbeddingRunManifest:
         "peakMemoryBytes",
         "license",
         "calibrationStatus",
+        "artifactDigest",
     )
     missing = [field for field in required if field not in payload]
     if missing:
@@ -372,7 +380,7 @@ def manifest_from_dict(payload: Mapping[str, Any]) -> EmbeddingRunManifest:
         peak_memory_bytes=payload["peakMemoryBytes"],
         license=str(payload["license"]),
         calibration_status=str(payload["calibrationStatus"]),
-        artifact_digest=str(payload.get("artifactDigest", "")),
+        artifact_digest=str(payload["artifactDigest"]),
     )
 
 

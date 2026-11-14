@@ -360,3 +360,92 @@ def test_the_decoder_refuses_a_corrupt_image_before_the_run(tmp_path: Path):
 
     with pytest.raises(ImageMetadataUnreadableError):
         service.decode(broken)
+
+
+def test_an_image_the_preprocessing_refuses_is_an_error_sample(tmp_path: Path):
+    # The preprocessing can refuse the pixels of an image that decoded
+    # fine. The image is an error sample and the other images still embed:
+    # a broken file never takes the run down with it.
+    class _BrokenSpec(PreprocessingSpec):
+        def apply(self, image: Any) -> Any:
+            raise ValueError("the normalization of this platform has three channels")
+
+    embedder = VisionEmbedder(
+        record=_record(),
+        encoder=_StubEncoder(),
+        spec=_BrokenSpec(
+            height=8,
+            width=8,
+            interpolation="bilinear",
+            rescale_factor=1.0 / 255.0,
+            mean=(0.5, 0.5, 0.5),
+            std=(0.5, 0.5, 0.5),
+        ),
+        decoder=DecodeService(FIXTURES_DIR),
+        device=DevicePlanner({"cpu": True}).plan("cpu"),
+        artifact_root=tmp_path / "artifacts-root",
+        snapshot_id="snapshot-test",
+    )
+
+    result = embedder.embed(EmbedRequest(snapshot_id="snapshot-test", assets=_assets()))
+
+    assert len(result.errors) == len(_assets())
+    assert result.count == 0
+    assert result.errors[0].code == "IMAGE_METADATA_UNREADABLE"
+    assert "three channels" in result.errors[0].message
+
+
+def test_a_typed_failure_of_the_library_keeps_its_own_code(tmp_path: Path):
+    # A missing extra is not a model that refused the batch: the code the
+    # caller acts on is the code the failure carries.
+    from visionlens.errors import MissingExtraError
+
+    class _MissingEncoder:
+        model_id = "stub"
+        revision = "stub-revision"
+        dimension = 4
+        dtype = "float32"
+
+        def embed(self, images: Sequence[Any]) -> EncoderOutput:
+            raise MissingExtraError("the 'vision' extra is not installed")
+
+    embedder = _embedder(tmp_path, encoder=_MissingEncoder())
+
+    with pytest.raises(MissingExtraError) as excinfo:
+        embedder.embed(EmbedRequest(snapshot_id="snapshot-test", assets=_assets()))
+
+    assert excinfo.value.code.value == "EXTRA_NOT_INSTALLED"
+
+
+def test_the_reader_refuses_a_manifest_without_an_artifact_digest(tmp_path: Path):
+    # The digest is what makes the artifact addressable, so a manifest
+    # without one is not an artifact this package wrote.
+    embedder = _embedder(tmp_path)
+
+    result = embedder.embed(EmbedRequest(snapshot_id="snapshot-test", assets=_assets()))
+
+    manifest_path = result.artifact_path / "manifest.json"
+    payload = json.loads(manifest_path.read_text(encoding="utf8"))
+    del payload["artifactDigest"]
+    manifest_path.write_text(json.dumps(payload), encoding="utf8")
+
+    with pytest.raises(ValueError) as excinfo:
+        read_embedding_artifact(result.artifact_path)
+
+    assert "artifactDigest" in str(excinfo.value)
+
+
+def test_the_reader_refuses_a_manifest_with_an_empty_artifact_digest(tmp_path: Path):
+    embedder = _embedder(tmp_path)
+
+    result = embedder.embed(EmbedRequest(snapshot_id="snapshot-test", assets=_assets()))
+
+    manifest_path = result.artifact_path / "manifest.json"
+    payload = json.loads(manifest_path.read_text(encoding="utf8"))
+    payload["artifactDigest"] = ""
+    manifest_path.write_text(json.dumps(payload), encoding="utf8")
+
+    with pytest.raises(ValueError) as excinfo:
+        read_embedding_artifact(result.artifact_path)
+
+    assert "artifact digest" in str(excinfo.value)

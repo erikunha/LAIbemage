@@ -1,5 +1,5 @@
 {
-  "schemaVersion": 1,
+  "schemaVersion": 2,
   "datasets": [
     {
       "id": "visa-subset",
@@ -49,6 +49,42 @@
       "attribution": "Bergmann, Paul, Michael Batzner, David Fauser, Christoph Steger, and the MVTec Software GmbH. \"The MVTec Anomaly Detection Dataset: A Comprehensive Real-World Dataset for Unsupervised Anomaly Detection.\" 2019. MVTec AD is released under the Creative Commons Attribution-NonCommercial-ShareAlike 4.0 International License (CC BY-NC-SA 4.0).",
       "fetchedAt": null,
       "notes": "DOCUMENTED, NOT AVAILABLE. The download requires a form on the vendor's site, there is no anonymous object URL, so no resource, checksum or fetch timestamp can be recorded. Nothing in this repository fetches or scores against MVTec AD. Adding it as a benchmark source is an explicit later task that must carry its own license review (ADR-008, constitution: Data & Model Governance)."
+    }
+  ],
+  "models": [
+    {
+      "modelId": "siglip2-base",
+      "revision": "75de2d55ec2d0b4efc50b3e9ad70dba96a7b2fa2",
+      "sourceUri": "https://huggingface.co/google/siglip2-base-patch16-224/resolve/75de2d55ec2d0b4efc50b3e9ad70dba96a7b2fa2/model.safetensors",
+      "sourceDigest": "612923381c76ec5a9bed335d1c48827e3f2e506ac31b044b63b2031fadee6a0b",
+      "license": "apache-2.0",
+      "licenseUrl": "https://www.apache.org/licenses/LICENSE-2.0",
+      "commercialUse": true,
+      "usageRestrictions": "Apache-2.0 permits commercial use; the attribution below and the licence notice must travel with any redistribution of the weights.",
+      "requiredExtras": [
+        "vision"
+      ],
+      "tasks": [
+        "image-embedding",
+        "zero-shot-image-classification"
+      ],
+      "preprocessingFingerprint": "fp2:83adc4ef99979644",
+      "deviceSupport": [
+        "cpu"
+      ],
+      "inputImageSize": {
+        "width": 224,
+        "height": 224
+      },
+      "featureExtractor": "siglip_vision_model",
+      "outputShape": {
+        "dimension": 768
+      },
+      "latencyCostProfile": "unknown",
+      "calibrationStatus": "uncalibrated",
+      "trustPolicy": "allowlisted-pinned-safetensors-only",
+      "attribution": "Tschannen, Michael, Gritsenko, Alexey, Wang, Xiao, Naeem, Muhammad Ferjad, Alabdulmohsin, Ibrahim, Parthasarathy, Nikhil, Evans, Talfan, Beyer, Lucas, Xia, Ye, Mustafa, Basil, Hénaff, Olivier, Harmsen, Jeremiah, Steiner, Andreas, Zhai, Xiaohua. \"SigLIP 2: Multilingual Vision-Language Encoders with Improved Semantic Understanding, Localization, and Dense Features.\" arXiv:2502.14786 (2025). The model is pre-trained on the WebLI dataset (Chen et al., arXiv:2209.06794).",
+      "notes": "PINNED FROM THE REAL BYTES. The revision is the exact commit of google/siglip2-base-patch16-224 and the digest above was computed from the 1,500,800,904 bytes of model.safetensors fetched from that revision on 2026-11-14. The 768-dimension output and the 16-pixel patch were read from the safetensors header. The 224x224 input and the preprocessing fingerprint come from the processor config of that revision (sha256 9b36b57ebaf20f09bf4c22100ccc21877ea6bfe5aead0c00c59f8af8ccefacfc), and the fingerprint is recomputed by the repository's own algorithm from that config, so anyone can reproduce it. The device list names the CPU path this platform implements: the model card declares no device support, so no other device is claimed. The record states what the model IS, not a measurement: this platform has not run the model yet (the CPU adapter is a later task of this ticket), so the latency and cost profile is unknown and the outputs are not calibrated. The simulated registry (visionlens.registry.DEFAULT_MODELS) carries a placeholder entry with the same model id and a placeholder revision (r2026-03-01); it describes the simulated runtime that runs today, not this checkpoint. The 'vision' extra named above carries no dependency yet."
     }
   ]
 }

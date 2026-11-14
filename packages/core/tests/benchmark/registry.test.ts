@@ -3,6 +3,7 @@ import { tmpdir } from 'node:os';
 import path from 'node:path';
 import { describe, expect, it } from 'vitest';
 import {
+  DATASET_REGISTRY_SCHEMA_VERSION,
   DatasetRegistryError,
   assertDatasetLicensed,
   findDataset,
@@ -132,7 +133,10 @@ describe('dataset registry schema', () => {
 describe('the tracked registry', () => {
   it('is valid against the schema', async () => {
     const registry = await loadDatasetRegistry(REGISTRY_PATH);
-    expect(registry.schemaVersion).toBe(1);
+    // The format version follows the constant: the file grew the models
+    // array in version 2, and a test that pinned the number would break on
+    // every format change without saying what changed.
+    expect(registry.schemaVersion).toBe(DATASET_REGISTRY_SCHEMA_VERSION);
     expect(registry.datasets.length).toBeGreaterThanOrEqual(2);
   });
 
@@ -166,9 +170,7 @@ describe('the tracked registry', () => {
     // The exact digest of the dated release archive, reproducible with
     // `pnpm exec tsx scripts/datasets/fetch-visa.ts --check`. A well-formed
     // but wrong digest would still be a fabricated checksum.
-    expect(entry.sha256).toBe(
-      '2eb8690c803ab37de0324772964100169ec8ba1fa3f7e94291c9ca673f40f362',
-    );
+    expect(entry.sha256).toBe('2eb8690c803ab37de0324772964100169ec8ba1fa3f7e94291c9ca673f40f362');
     expect(entry.sha256PinnedAt).not.toBeNull();
     expect(entry.fetchedAt).not.toBeNull();
     expect(isPinned(entry)).toBe(true);

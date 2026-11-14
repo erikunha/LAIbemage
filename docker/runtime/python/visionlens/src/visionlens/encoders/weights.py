@@ -39,7 +39,7 @@ import time
 from dataclasses import dataclass
 from http.client import HTTPMessage
 from pathlib import Path
-from typing import IO, Callable, Iterable, Iterator, Tuple
+from typing import IO, Callable, Iterable, Iterator, Mapping, Optional, Tuple
 from urllib.parse import urlparse
 from urllib.request import HTTPRedirectHandler, Request, build_opener
 
@@ -318,25 +318,26 @@ def check_trust_policy(record: ModelRecord) -> None:
         )
 
 
-def check_source(record: ModelRecord) -> None:
-    """Refuse a source that is not an allowlisted repository.
+def check_pinned_url(url: str, revision: str) -> str:
+    """Refuse a URL that is not an allowlisted location at a pinned revision.
 
-    The source is the promise the digest hangs on, so its host has to be
-    one the platform trusts, the revision has to be the pinned one, and the
-    file has to be safetensors.
+    The host has to be one the platform trusts, the scheme has to be
+    https, the revision has to be the revision of the file, and the file
+    has to be safetensors.
 
-    The revision is checked as a SEGMENT of the path, not as a substring of
-    the whole URL: a URL that carries the revision in a query or in the
-    name of a directory is not pinned to it.
+    The revision is checked as a SEGMENT of the path, not as a substring
+    of the whole URL: a URL that carries the revision in a query or in
+    the name of a directory is not pinned to it.
 
-    @raises DownloadRefusedError when the source may not be fetched.
+    @raises DownloadRefusedError when the URL may not be fetched.
+    @returns the MIME-ish suffix of the file, for the caller.
     """
-    parsed = urlparse(record.source_uri)
+    parsed = urlparse(url)
     if parsed.scheme != "https":
         raise _refuse(
             SOURCE_NOT_ALLOWED,
             "the source '"
-            + record.source_uri
+            + url
             + "' is not an https location; the weights travel over TLS or not at all",
         )
     host = parsed.netloc.lower()
@@ -344,33 +345,42 @@ def check_source(record: ModelRecord) -> None:
         raise _refuse(
             SOURCE_NOT_ALLOWED,
             "the source '"
-            + record.source_uri
+            + url
             + "' is not an allowlisted repository ("
             + ", ".join(ALLOWED_SOURCES)
             + ")",
         )
     segments = [segment for segment in parsed.path.split("/") if segment]
-    if (
-        len(segments) < 5
-        or segments[-3] != RESOLVE_SEGMENT
-        or segments[-2] != record.revision
-    ):
+    if len(segments) < 5 or segments[-3] != RESOLVE_SEGMENT or segments[-2] != revision:
         raise _refuse(
             REVISION_NOT_PINNED,
             "the source '"
-            + record.source_uri
+            + url
             + "' does not carry the pinned revision '"
-            + record.revision
+            + revision
             + "' as the revision of the file",
         )
-    if not REVISION_PATTERN.match(record.revision):
+    if not REVISION_PATTERN.match(revision):
         raise _refuse(
             REVISION_NOT_PINNED,
             "the revision '"
-            + record.revision
+            + revision
             + "' is not an exact commit; a tag, a branch and a floating name are not a pin",
         )
-    if not segments[-1].endswith(SAFE_WEIGHTS_SUFFIX):
+    return segments[-1]
+
+
+def check_source(record: ModelRecord) -> None:
+    """Refuse a source that is not an allowlisted repository.
+
+    The source is the promise the digest hangs on, so its host has to be
+    one the platform trusts, the revision has to be the pinned one, and the
+    file has to be safetensors.
+
+    @raises DownloadRefusedError when the source may not be fetched.
+    """
+    name = check_pinned_url(record.source_uri, record.revision)
+    if not name.endswith(SAFE_WEIGHTS_SUFFIX):
         raise _refuse(
             UNSAFE_FORMAT,
             "the source '"
@@ -898,3 +908,88 @@ def load_weights(
             size_bytes=written,
             from_cache=False,
         )
+
+
+#: The files a model directory carries besides the weights: the model
+#: configuration and the processor configuration of the pinned revision.
+MODEL_CONFIG_FILES: Tuple[str, ...] = ("config.json", "preprocessor_config.json")
+
+#: The name the weights take inside a model directory.
+MODEL_WEIGHTS_NAME = "model.safetensors"
+
+
+@dataclass(frozen=True)
+class LoadedModelFiles:
+    """The model directory of one model, and what was proven about it.
+
+    `config_digests` names the digest of every configuration file, so a
+    run can record which bytes it used and not only which revision it
+    claims.
+    """
+
+    model_id: str
+    revision: str
+    directory: Path
+    weights: LoadedWeights
+    config_digests: Mapping[str, str]
+
+
+def model_directory(cache_dir: Path, model_id: str, revision: str) -> Path:
+    """The directory a model is assembled in."""
+    return Path(cache_dir) / model_id / revision
+
+
+def _write_bytes(path: Path, payload: bytes) -> str:
+    """Write the bytes into the file, atomically, and return their digest."""
+    temporary = path.with_name(path.name + ".tmp")
+    temporary.write_bytes(payload)
+    os.replace(str(temporary), str(path))
+    return sha256_of_bytes(payload)
+
+
+def load_model_files(
+    request: WeightsRequest,
+    cache_dir: Path,
+    opener: Optional[Callable[[str], Iterable[bytes]]] = None,
+) -> LoadedModelFiles:
+    """Assemble the model directory of one recorded model.
+
+    The weights are the ones the loader verified: the file inside the
+    directory is that verified file and not a copy of it, so the bytes
+    the model reads are the bytes the digest was checked against.
+
+    The two configuration files come from the same repository at the
+    same pinned revision, and their digests are recorded so a run can
+    say which bytes it used. A configuration is not executable code, and
+    the architecture it describes is checked against the weights when the
+    model is built: a configuration that does not describe the weights
+    does not load them.
+
+    @raises DownloadRefusedError when a file may not be fetched.
+    """
+    weights = load_weights(request, cache_dir, opener=opener)
+    record = request.record
+    directory = model_directory(Path(cache_dir), record.model_id, record.revision)
+    directory.mkdir(parents=True, exist_ok=True)
+    base = record.source_uri.rsplit("/", 1)[0]
+    digests: dict[str, str] = {}
+    for name in MODEL_CONFIG_FILES:
+        url = base + "/" + name
+        check_pinned_url(url, record.revision)
+        payload = b"".join((opener or fetch_chunks)(url))
+        digests[name] = _write_bytes(directory / name, payload)
+    link = directory / MODEL_WEIGHTS_NAME
+    if not link.exists():
+        try:
+            os.link(str(weights.path), str(link))
+        except OSError:
+            # A cache on two file systems cannot be linked: the bytes are
+            # copied instead, and the copy is verified by its digest.
+            digests[MODEL_WEIGHTS_NAME] = _write_bytes(link, weights.path.read_bytes())
+    return LoadedModelFiles(
+        model_id=record.model_id,
+        revision=record.revision,
+        directory=directory,
+        weights=weights,
+        config_digests=digests,
+    )

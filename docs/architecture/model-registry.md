@@ -222,9 +222,13 @@ simulated encoder is not this model.
 
 ## What comes next
 
-The CPU adapter, still open in
-`docs/vnext/specs/VLN-005-python-cpu-vision-adapter.md`: the encoder that
-reads the checkpoint the loader put in the cache, on the CPU, with the
-canonical preprocessing and the content-addressed artifact the golden parity
-gate compares on both sides. The loader is the half that lands the bytes;
-the adapter is the half that turns them into vectors.
+The CPU adapter landed: the decoder, the canonical preprocessing, the
+device planner, the SigLIP2 adapter, the content-addressed artifact with
+its manifest and the golden parity gate over one file both languages read.
+`docs/architecture/vision-adapter.md` describes it, and it names what the
+run does not prove.
+
+What is still open in
+`docs/vnext/specs/VLN-005-python-cpu-vision-adapter.md` is the worker
+operation that runs this pipeline over the wire, the failure paths of
+that operation, and the single-writer commit of the derived artifact.

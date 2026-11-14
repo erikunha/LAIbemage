@@ -142,6 +142,55 @@ Without the permission nothing is fetched and the cache directory stays
 empty. The cached file is named after the digest of its bytes, so it can be
 verified again without the network.
 
+### The CPU embedding run
+
+The adapter decodes an image, preprocesses it with the canonical spec,
+embeds it on the CPU and writes the vectors into a content-addressed
+artifact: a binary vectors file beside a manifest that carries every
+field of FR-011. The vectors never travel inside a JSON line.
+
+```python
+from visionlens import (
+    DecodeService, DevicePlanner, EmbedAsset, EmbedRequest, VisionEmbedder,
+)
+
+plan = DevicePlanner().plan("cpu")
+embedder = VisionEmbedder(
+    record=record,
+    encoder=encoder,          # the SigLIP2 adapter
+    spec=spec,                # the canonical preprocessing
+    decoder=DecodeService("datasets/images"),
+    device=plan,
+    artifact_root=Path("~/.cache/visionlens/artifacts").expanduser(),
+)
+result = embedder.embed(
+    EmbedRequest(snapshot_id="snapshot-1", assets=(EmbedAsset(asset_id="a.jpg", path=Path("datasets/images/a.jpg")),))
+)
+print(result.run_id, result.dimension, result.dtype, result.count)
+print(result.artifact_sha256)   # the vectors are on disk, not in the frame
+```
+
+An image that cannot be decoded is an error sample and not a failed run:
+the error names the file and the other images still embed. A batch that
+exhausts the memory budget is retried with fewer images a bounded
+number of times, and the back off is an event that names the old and
+the new batch size.
+
+### The golden parity gate
+
+One golden file, read by both languages, and a gate that compares the
+config fingerprint computed by the live TypeScript implementation, the
+manifest validated against the ratified schema, and every golden vector
+against the artifact inside the documented tolerance.
+
+```bash
+pnpm exec tsx scripts/benchmarks/vision-parity.ts
+```
+
+The gate never writes the golden file, and a golden file whose vectors
+were edited is detected. `docs/architecture/vision-adapter.md` describes
+the pipeline, the refusals and the recorded run.
+
 ### The typed facade
 
 ```python

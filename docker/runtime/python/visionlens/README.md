@@ -39,17 +39,18 @@ claim is made today.
 ## Extras
 
 One distribution, heavy capabilities only through extras. The extra names
-are frozen; the dependency sets stay empty while the whole runtime is
-simulated, so every extra installs the same light base today.
+are frozen. The base install carries Pydantic and nothing else, so it
+never pulls a PyTorch or a Transformers download, and every heavy stack
+lives behind the extra that needs it.
 
 | Extra | Installs | Status |
 |---|---|---|
 | (base) | Pydantic, for the typed configuration and records | shipped |
-| `vision` | the encoder and model adapter stack (empty set today) | name frozen, set empty |
+| `vision` | torch, transformers, safetensors and pillow: the encoder stack that reads a real checkpoint and the decoder that opens an image | shipped |
 | `training` | the training recipe and experiment tracking stack (empty set today) | name frozen, set empty |
 | `agents` | the agent runtime import boundary (empty set today) | name frozen, set empty |
 | `server` | the HTTP surface stack (empty set today) | name frozen, set empty |
-| `all` | the aggregate of the above (empty set today) | name frozen, set empty |
+| `all` | the aggregate: it pulls `vision` | shipped |
 
 The canonical spelling is `training`; `train` is treated as an abbreviation,
 not a second extra. A registry model that requires an extra (today

@@ -213,7 +213,10 @@ simulated encoder is not this model.
   policy names.
 - The `featureExtractor` is the tower's configuration type
   (`siglip_vision_model`), not a HuggingFace feature-extractor class.
-- The `vision` extra the record names carries no dependency yet.
+- The `vision` extra the record names is the one this ticket filled: it
+  carries torch, transformers, safetensors and pillow, and the base
+  install stays free of all four. The loader does not need them: it moves
+  bytes and verifies a digest. The encoder that READS the checkpoint does.
 - The loader downloads bytes; it does not yet run the model. The CPU
   adapter that consumes the checkpoint is a later task of this ticket.
 

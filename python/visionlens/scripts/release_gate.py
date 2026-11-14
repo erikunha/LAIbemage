@@ -13,16 +13,21 @@ silent pass). The steps:
    and load none of the heavy optional modules.
 3. artifact scan: neither artifact may contain a model checkpoint, a dataset
    file, a .env file, a credential, or an absolute build-machine path.
-4. extras: each of the five extras resolves alone from the wheel, and
-   visionlens[all] resolves into one coherent environment.
+4. extras: each of the five extras resolves alone from the wheel, and the
+   four capability extras resolve together into one coherent environment (the
+   `all` extra resolves alone, like each of the others).
 5. records: release/registry-availability.json and release/license-audit.md
    exist and carry a date; the gate fails naming any missing record.
 6. lock compatibility: uv lock --check proves the uv.lock pins still satisfy
    the published pyproject ranges, and the lock records its exclude-newer
    cutoff.
 7. dependency scan: pip-audit runs over the exported development
-   requirements; a high-severity (or unsized, unreviewed) finding fails the
-   gate. Reviewed findings are listed in release/dependency-scan-reviewed.json.
+   requirements and every finding is recorded with its severity; a
+   high-severity (or unsized, unreviewed) finding fails the gate. The
+   severity is read from OSV, the advisory database the identifiers pip-audit
+   reports come from, because pip-audit reports the finding without one.
+   Reviewed findings are listed in release/dependency-scan-reviewed.json, a
+   JSON array of objects whose `id` is the identifier pip-audit reports.
 
 Run: python3 python/visionlens/scripts/release_gate.py
 """
@@ -32,6 +37,7 @@ from __future__ import annotations
 import dataclasses
 import datetime as dt
 import json
+import math
 import os
 import platform
 import re
@@ -40,6 +46,9 @@ import subprocess
 import sys
 import tarfile
 import tempfile
+import urllib.error
+import urllib.parse
+import urllib.request
 import zipfile
 from pathlib import Path
 from typing import Any, Callable, Sequence
@@ -451,6 +460,211 @@ def step_lock_compatibility(gate: Gate) -> None:
 
 # ---------------------------------------------------------------- step 7
 
+OSV_API = "https://api.osv.dev/v1/vulns/"
+
+# The qualitative severities OSV and the advisory databases use, mapped to the
+# bands the gate reasons about.
+SEVERITY_LABELS = {
+    "LOW": "low",
+    "MODERATE": "medium",
+    "MEDIUM": "medium",
+    "HIGH": "high",
+    "CRITICAL": "critical",
+}
+
+# The CVSS v3.1 base score weights (FIRST, section 8.1 and 8.2).
+CVSS_AV = {"N": 0.85, "A": 0.62, "L": 0.55, "P": 0.20}
+CVSS_AC = {"L": 0.77, "H": 0.44}
+CVSS_UI = {"N": 0.85, "R": 0.62}
+CVSS_IMPACT = {"H": 0.56, "L": 0.22, "N": 0.00}
+CVSS_PR = {"N": 0.85, "L": 0.62, "H": 0.27}
+CVSS_PR_CHANGED = {"N": 0.85, "L": 0.68, "H": 0.50}
+
+# The severity a finding carries when no authority could size it. It blocks
+# the gate, because an unsized finding is an unreviewed one.
+UNSPECIFIED_SEVERITY = "unspecified"
+
+
+def cvss_base_score(vector: str) -> float | None:
+    """The CVSS v3.1 base score of a vector string, or None when unreadable."""
+    if not vector.startswith("CVSS:3."):
+        return None
+    metrics: dict[str, str] = {}
+    for part in vector.split("/")[1:]:
+        key, _, value = part.partition(":")
+        metrics[key] = value
+    try:
+        scope_changed = metrics["S"] == "C"
+        privileges = (CVSS_PR_CHANGED if scope_changed else CVSS_PR)[metrics["PR"]]
+        confidentiality = CVSS_IMPACT[metrics["C"]]
+        integrity = CVSS_IMPACT[metrics["I"]]
+        availability = CVSS_IMPACT[metrics["A"]]
+        attack_vector = CVSS_AV[metrics["AV"]]
+        attack_complexity = CVSS_AC[metrics["AC"]]
+        user_interaction = CVSS_UI[metrics["UI"]]
+    except KeyError:
+        return None
+    subscore = 1 - ((1 - confidentiality) * (1 - integrity) * (1 - availability))
+    if scope_changed:
+        impact = 7.52 * (subscore - 0.029) - 3.25 * (subscore - 0.02) ** 15
+    else:
+        impact = 6.42 * subscore
+    if impact <= 0:
+        return 0.0
+    exploitability = 8.22 * attack_vector * attack_complexity * privileges * user_interaction
+    if scope_changed:
+        return cvss_roundup(min(1.08 * (impact + exploitability), 10))
+    return cvss_roundup(min(impact + exploitability, 10))
+
+
+def cvss_roundup(value: float) -> float:
+    """The CVSS 3.1 Roundup: the smallest one-decimal number not below the input."""
+    scaled = int(round(value * 100000))
+    if scaled % 10000 == 0:
+        return scaled / 100000.0
+    return (math.floor(scaled / 10000) + 1) / 10.0
+
+
+def severity_band(score: float | None) -> str | None:
+    """The qualitative band of a CVSS base score, or None when there is no score."""
+    if score is None:
+        return None
+    if score == 0.0:
+        return "none"
+    if score < 4.0:
+        return "low"
+    if score < 7.0:
+        return "medium"
+    if score < 9.0:
+        return "high"
+    return "critical"
+
+
+def severity_from_osv(payload: dict[str, Any]) -> str | None:
+    """The severity of an OSV advisory, or None when the advisory carries none.
+
+    The advisory's own qualitative severity wins. A CVSS vector is scored only
+    when the advisory carries no label.
+    """
+    label = (payload.get("database_specific") or {}).get("severity")
+    if isinstance(label, str):
+        mapped = SEVERITY_LABELS.get(label.strip().upper())
+        if mapped:
+            return mapped
+    for affected in payload.get("affected") or []:
+        label = (affected.get("ecosystem_specific") or {}).get("severity")
+        if isinstance(label, str):
+            mapped = SEVERITY_LABELS.get(label.strip().upper())
+            if mapped:
+                return mapped
+    for entry in payload.get("severity") or []:
+        band = severity_band(cvss_base_score(str(entry.get("score", ""))))
+        if band and band != "none":
+            return band
+    return None
+
+
+def osv_severity(identifier: str) -> str | None:
+    """The severity OSV holds for an advisory identifier, or None."""
+    url = OSV_API + urllib.parse.quote(identifier)
+    try:
+        with urllib.request.urlopen(url, timeout=30) as response:
+            payload = json.loads(response.read().decode("utf-8"))
+    except (urllib.error.URLError, TimeoutError, ValueError, OSError):
+        return None
+    if not isinstance(payload, dict):
+        return None
+    return severity_from_osv(payload)
+
+
+def finding_severity(
+    vulnerability: dict[str, Any], cache: dict[str, str | None]
+) -> str:
+    """The severity of one finding, read from OSV.
+
+    pip-audit reports what is affected and how to fix it, but never a
+    severity, so the severity is read from OSV, the advisory database the
+    identifiers pip-audit reports come from. The finding's own identifier is
+    tried first, then its aliases, which is where the GitHub advisory and the
+    CVE identifier live.
+    """
+    identifiers = [str(vulnerability.get("id", ""))]
+    identifiers.extend(str(alias) for alias in vulnerability.get("aliases", []))
+    for identifier in identifiers:
+        if not identifier:
+            continue
+        if identifier not in cache:
+            cache[identifier] = osv_severity(identifier)
+        severity = cache[identifier]
+        if severity:
+            return severity
+    return UNSPECIFIED_SEVERITY
+
+
+def collect_findings(
+    findings: dict[str, Any], severity_of: Callable[[dict[str, Any]], str]
+) -> list[dict[str, Any]]:
+    """Every finding of a pip-audit report, with its severity.
+
+    pip-audit names the list of findings `vulns`; the report is read with
+    that name, and `vulnerabilities` is accepted as well so a report from
+    another producer is still read rather than silently reported as empty.
+
+    A finding is recorded once. pip-audit lists a vulnerability once per
+    affected range, so the same identifier comes back more than once.
+    """
+    collected: list[dict[str, Any]] = []
+    seen: dict[tuple[str, str, str], dict[str, Any]] = {}
+    for dependency in findings.get("dependencies", []):
+        vulnerabilities = dependency.get("vulns")
+        if vulnerabilities is None:
+            vulnerabilities = dependency.get("vulnerabilities") or []
+        for vulnerability in vulnerabilities:
+            package = str(dependency.get("name", "unknown"))
+            version = str(dependency.get("version", "unknown"))
+            identifier = str(vulnerability.get("id", "unknown"))
+            key = (package, version, identifier)
+            aliases = [str(alias) for alias in vulnerability.get("aliases", [])]
+            fix_versions = [str(fix) for fix in vulnerability.get("fix_versions", [])]
+            if key in seen:
+                recorded = seen[key]
+                recorded["aliases"] = list(dict.fromkeys(recorded["aliases"] + aliases))
+                recorded["fixVersions"] = list(dict.fromkeys(recorded["fixVersions"] + fix_versions))
+                continue
+            finding = {
+                "package": package,
+                "version": version,
+                "id": identifier,
+                "severity": severity_of(vulnerability),
+                "aliases": aliases,
+                "fixVersions": fix_versions,
+            }
+            seen[key] = finding
+            collected.append(finding)
+    return collected
+
+
+def blocking_findings(
+    collected: list[dict[str, Any]], reviewed: dict[str, dict[str, Any]]
+) -> list[str]:
+    """The findings that block the gate: an unreviewed high or unsized one.
+
+    A reviewed finding is recorded in release/dependency-scan-reviewed.json
+    and no longer blocks, whatever its severity.
+    """
+    blocking: list[str] = []
+    for finding in collected:
+        if finding["id"] in reviewed:
+            continue
+        severity = finding["severity"]
+        entry = f"{finding['package']} {finding['version']}: {finding['id']} severity={severity}"
+        if severity in ("high", "critical"):
+            blocking.append(entry + " (unreviewed)")
+        elif severity == UNSPECIFIED_SEVERITY:
+            blocking.append(entry + " (no severity reported; review or record it to proceed)")
+    return blocking
+
+
 def step_dependency_scan(gate: Gate, tmp: Path) -> None:
     if shutil.which("uv") is None:
         gate.record(Step("dependency-scan", NOT_RUN, detail="uv is not installed"))
@@ -460,6 +674,10 @@ def step_dependency_scan(gate: Gate, tmp: Path) -> None:
     exported = run(
         [
             "uv", "export", "--group", "dev", "--no-hashes", "--no-emit-project",
+            # `--locked` keeps the export faithful to the COMMITTED lock: without
+            # it, uv re-resolves and can rewrite `uv.lock`, and the scan would
+            # audit a set that is not the lock the repository ships.
+            "--locked",
             "--format", "requirements.txt", "-o", str(requirements),
         ],
         cwd=PKG_ROOT,
@@ -493,20 +711,12 @@ def step_dependency_scan(gate: Gate, tmp: Path) -> None:
             return
         findings = json.loads(findings_json.read_text(encoding="utf-8"))
         reviewed = _reviewed_findings()
-        blocking: list[str] = []
-        recorded = 0
-        for dependency in findings.get("dependencies", []):
-            for vulnerability in dependency.get("vulnerabilities", []):
-                vuln_id = str(vulnerability.get("id", "unknown"))
-                severity = str(vulnerability.get("severity") or "unspecified")
-                entry = f"{dependency.get('name')} {dependency.get('version')}: {vuln_id} severity={severity}"
-                recorded += 1
-                reviewed_entry = reviewed.get(vuln_id)
-                if severity in ("high", "critical") and reviewed_entry is None:
-                    blocking.append(entry + " (unreviewed)")
-                elif severity == "unspecified" and reviewed_entry is None:
-                    blocking.append(entry + " (no severity reported; review or record it to proceed)")
-        detail = f"{recorded} finding(s) recorded with severity"
+        severity_cache: dict[str, str | None] = {}
+        collected = collect_findings(
+            findings, lambda vulnerability: finding_severity(vulnerability, severity_cache)
+        )
+        blocking = blocking_findings(collected, reviewed)
+        detail = f"{len(collected)} finding(s) recorded with severity"
         status = FAIL if blocking else PASS
         gate.record(
             Step(
@@ -515,7 +725,7 @@ def step_dependency_scan(gate: Gate, tmp: Path) -> None:
                 f"pip-audit -r {requirements.name} (exported from uv.lock)",
                 audited.returncode,
                 detail + ("; blocking: " + "; ".join(blocking[:10]) if blocking else "; none blocking"),
-                json.dumps(findings.get("dependencies", []), indent=2)[-3000:],
+                json.dumps(collected, indent=2),
             )
         )
     except Exception as error:

@@ -155,6 +155,14 @@ vision-lens benchmark gate  --suite <name> --model-id <name>
                       [--update-baseline] [--force] [--partial]
 
 vision-lens benchmark report --run <runId> [--dir <dir>]
+
+vision-lens benchmark scorecard --suite <name> --model-id <name>
+                      --config-fingerprint <hash>
+                      --model-version <version>
+                      [--split <file>] [--predictions <file>]
+                      [--calibration-partition <name>] [--device <name>]
+                      [--min-support <n>] [--out <dir>] [--pointer-dir <dir>]
+                      [--snapshot-id <id>] [--split-fingerprint <hash>] [--partial]
 ```
 
 `--metrics` has no fixed default path: `run` writes to
@@ -457,13 +465,13 @@ may sit in `train` and in `test`. The manifest states that in `groupBasis` and i
 **What it gives.** A held-out set with every class and both anomaly labels in the
 expected proportion.
 
-**What it does not give.** A held-out *number*. The scorer still scores the whole
-700-item set (§9.3), so the partition is **locked for future selection and
-evaluation**, not applied as a filter to today's metric. The held-out scorecard
-that consumes the locked `test` partition is a separate piece of work, owned by
-the `VLN-008` ticket of the vNext design baseline. Until that exists, a number
-measured over the whole set is a **benchmark figure** and must not be published as
-model performance.
+**What it does not give.** A held-out *number* from the **whole-set** runner. The
+scorer still scores the whole 700-item set (§9.3), so that metric is **locked for
+future selection and evaluation**, not applied as a filter to today's metric. The
+held-out number is the **scorecard** (§10), which consumes the locked `test`
+partition; the whole-set figure stays the **regression reference** and the two are
+never quoted interchangeably. A whole-set number is a **benchmark figure** and must
+not be published as model performance.
 
 **What the gate now decides.** The gate is told which split is currently tracked
 (`currentSplitPath`, plus the directory of the tracked splits) and refuses to
@@ -494,3 +502,130 @@ baseline as committed skips, because its entry is retired with the reason record
 in the file. The predictions have not been re-run against the v2 split yet (a
 provider key and a paid run are needed), so the suite `visa-subset.v2` has no
 baseline yet and the gate skips instead of blessing the old number.
+
+## 10. The scorecard (the held-out figure)
+
+The scorecard is the **held-out** number: it measures the `test` partition of a
+tracked split and nothing else. The whole-set figure of §9 stays the
+**regression reference**, and the two are never quoted interchangeably.
+
+### 10.1 The command
+
+```sh
+vision-lens benchmark scorecard \
+  --suite visa-subset.v2 --model-id gpt-4o \
+  --config-fingerprint <hash> --model-version <version> \
+  --predictions benchmarks/predictions/visa-subset.v2.gpt-4o.json \
+  [--split <file>] [--calibration-partition <name>] [--device <name>] \
+  [--min-support <n>] [--out <dir>] [--pointer-dir <dir>] [--partial]
+```
+
+`--model-version` and `--config-fingerprint` are **required**, exactly as in
+`run`: a scorecard without them is not attributed, so it is refused rather
+than emitted with an empty field.
+
+When the tracked split is absent the command prints `dataset=absent` and exits
+`0`: a missing dataset is a skip, not a failure. When the scorecard is
+**refused** it prints its typed error code, exits non-zero and writes
+**nothing**: a refusal is not a zero-valued scorecard.
+
+### 10.2 The artifact
+
+`packages/core/src/benchmark/scorecard.ts` owns one implementation; the CLI and
+any future surface share it. The SDK does not export the benchmark surface
+today, so it is not named here.
+
+| what | the rule |
+|---|---|
+| the protocol version | `protocolVersion` and `schemaVersion`, bumped on any breaking change; the scorecard is a **new** artifact beside `report.json`, never a re-stamping of it |
+| the metric regime | `regime`, the vocabulary the gate compares (§10.6) |
+| every metric | an object carrying `value`, `n` (the sample count) and `partition`. The schema offers **no** bare numeric accuracy field, so a percentage without a count and a subset is not representable |
+| the support rule | explicit and recorded; a class below it is excluded from the per-class rows and from the macro F1, and is named with its support in the limitations |
+| the limitations | what the number does not say: a missing prediction counted as a failure, a class with no support, an item-level partition, a self-declared confidence |
+| the reproduction tuple | the snapshot, the split digests, the model version, the config fingerprint and the environment; no secret ever reaches the artifact |
+| the id | derived from the **content** (protocol version, split digests, model version, config fingerprint, prediction digest, calibration partition, bootstrap parameters), never from the clock. The clock value lives in its own field, so a byte-stability comparison can exclude it |
+
+### 10.3 The partition selection
+
+The evaluated partition is **not a choice**: it is the `test` partition of the
+split the command is given, and no `train` or `val` item enters the metric
+computation. An empty selection is the typed refusal `test-partition-empty`;
+a missing partition is `test-partition-missing`. Neither writes a file and
+neither returns a zero-valued metric.
+
+### 10.4 The calibration rule
+
+The ECE is computed on a partition that is **not** the evaluated one. Naming
+the `test` partition as the calibration source is refused with
+`calibration-partition-is-test`: an ECE computed on the partition the score is
+measured on is not a calibration number. The calibration block records the
+ECE, the reliability bins, the calibration partition's name, its item count and
+its digest, and the probability source (`raw_declared` or `calibrated`).
+
+### 10.5 The interval and its method
+
+The confidence intervals come from a **bootstrap** whose method, resample
+count, unit and seed derivation are recorded in every interval:
+
+| method | when | what it resamples |
+|---|---|---|
+| `group-aware-bootstrap` | the split enforces capture groups | the capture groups, and the number of groups is recorded |
+| `stratified-item-bootstrap` | otherwise (the tracked split) | the items, stratified by class |
+
+The bootstrap uses the repository's own deterministic PRNG, never
+`Math.random`, so two scorecards over the same inputs are byte-identical
+apart from their own clock field.
+
+### 10.6 The regime rule
+
+A scorecard is a **test-partition** number; a baseline recorded by the
+whole-set runner is a **whole-set** number. The two can share a split
+fingerprint, so the split-identity checks alone cannot tell them apart. When a
+run carries a scorecard, the gate routes the comparison through the scorecard's
+own guard **before** any number is compared:
+
+| the gate run | verdict |
+|---|---|
+| a test-partition scorecard against a whole-set baseline | **FAILS** and names both regimes: `baseline-regime-mismatch` |
+| a whole-set run against a scorecard baseline | **not refused**: the regime guard only runs when the run itself carries a scorecard (`GateOptions.scorecard`), so a whole-set run is compared numerically, exactly as before |
+| a partial scorecard against any baseline | **FAILS**: the comparison would measure the outage, not the model |
+| a retired baseline entry | **FAILS** with its recorded reason: a retired entry is evidence, never a comparison |
+| a baseline of another split | **FAILS** and names both digests: `manifest-digest-mismatch` |
+
+### 10.7 The pointer contract
+
+The per-sample artifact and the scorecard are written under the **gitignored**
+`benchmarks/results/<scorecardId>/`. What is tracked is the **pointer**, at
+`benchmarks/scorecards/<suite>.<model>.json`: it records, for each artifact,
+its relative path, its sha256, its byte count and its row count, plus the
+scorecard digest, the split digests, the regime and the command that
+reproduces the artifacts. The pointer directory is **not** gitignored (only
+`benchmarks/results/` is).
+
+The pointer is the published claim over artifacts that are not in the
+repository. A digest that does not match is a **failure**, never a warning,
+and the verification is out of band: the artifacts are recomputed from the
+committed fixture and re-hashed from disk
+(`scripts/benchmarks/verify-scorecard-pointer.ts`).
+
+The full contract, what it proves and what it does not, are in
+`benchmarks/scorecards/README.md`.
+
+### 10.8 The pointers published today
+
+Two pointers are committed:
+
+| pointer | what it is |
+|---|---|
+| `benchmarks/scorecards/scorecard-oracle.oracle-model.json` | the **oracle** pointer: a synthetic fixture of the **mechanism**, built from the committed oracle fixture, not a measurement of a model. Its numbers are the oracle's own, computed by an enumeration that shares no code with the metric modules and recomputed by brute force in the oracle suite, so a reader can check them (`packages/core/tests/benchmark/scorecard-oracle.test.ts`). Its clock and its snapshot are pinned, so its digests are recomputable and the out-of-band verification runs over it |
+| `benchmarks/scorecards/visa-subset.v2.gpt-4o.json` | the **held-out figure** of the VisA suite: the 140 `test` items of the tracked v2 split, measured from the tracked prediction set. Its artifacts are gitignored, so the pointer carries the digests and the attribution, and the numbers live in the artifact (`docs/datasets/visa.md` §9.3) |
+
+The oracle pointer is the one CI can verify on every run: it is rebuilt from
+the committed fixture and its digests are asserted against the committed
+pointer. The committed VisA pointer is never asserted against its artifacts:
+the real-data step writes a fresh pointer under `/tmp` with its own config
+fingerprint and checks its shape, not the committed digests. The reason is
+the clock: `generatedAt` sits inside the hashed bytes, so the scorecard
+artifact of a re-run never has the digest the committed pointer records. The
+per-sample artifact and the scorecard id ARE stable, and the oracle pointer
+proves that.

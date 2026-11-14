@@ -1,11 +1,13 @@
 /**
  * The oracle suite of the evaluation scorecard (spec 022, SC-002).
  *
- * The committed fixture's expected values were computed by an INDEPENDENT
- * Python enumeration that shares no code with the TypeScript metric
- * modules. This test recomputes the macro F1, the per-class F1 and the ECE
- * by brute force AGAIN, over the fixture's own lists, and then requires the
- * scorecard to agree with both computations to 1e-9.
+ * The committed fixture's expected values were computed by an enumeration
+ * that shares no code with the TypeScript metric modules. This test
+ * recomputes the macro F1, the per-class F1 and the ECE by brute force
+ * AGAIN, over the fixture's own lists, and then requires the scorecard to
+ * agree with both computations to 1e-9. That recomputation is the check a
+ * reader can run: it is committed here, and it needs nothing but the
+ * fixture.
  */
 
 import { readFileSync } from 'node:fs';

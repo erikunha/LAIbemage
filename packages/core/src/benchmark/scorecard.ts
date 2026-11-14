@@ -86,7 +86,7 @@
  * constitutional refusal behind a wrong label.
  */
 
-import { mkdir, readFile, writeFile } from 'node:fs/promises';
+import { access, mkdir, readFile, rename, rm, writeFile } from 'node:fs/promises';
 import path from 'node:path';
 import { computeCalibration, type CalibrationBin } from './calibration.js';
 import type { BaselineEntry, BaselineFile } from './gate.js';
@@ -1785,6 +1785,32 @@ export function defaultScorecardPointerPath(suite: string, model: string): strin
   return path.join(SCORECARD_DEFAULT_POINTER_DIR, `${suite}.${model}.json`);
 }
 
+/** Whether a path already exists on disk. */
+async function pathExists(target: string): Promise<boolean> {
+  try {
+    await access(target);
+    return true;
+  } catch {
+    return false;
+  }
+}
+
+/** The bytes of a file, or null when it does not exist. */
+async function readIfExists(target: string): Promise<Buffer | null> {
+  try {
+    return await readFile(target);
+  } catch {
+    return null;
+  }
+}
+
+/** Put a file back to the bytes a published pointer names. */
+async function restoreArtifact(target: string, body: Buffer): Promise<void> {
+  const temp = `${target}.tmp`;
+  await writeFile(temp, body);
+  await rename(temp, target);
+}
+
 /**
  * Write the per-sample artifact, the scorecard artifact and the committed
  * pointer, in one operation (FR-015).
@@ -1795,6 +1821,14 @@ export function defaultScorecardPointerPath(suite: string, model: string): strin
  * each artifact, its relative path, its sha256, its byte count and its row
  * count, plus the scorecard digest. A mismatch found later by
  * {@link verifyScorecardArtifacts} is a failure, never a warning.
+ *
+ * Every file is staged in a sibling temp file and renamed into place, so a
+ * failed write never leaves a half-written artifact nor a half-written tracked
+ * pointer behind. When the write fails, the staging files and the run
+ * directory this run created are removed, so nothing that could be mistaken
+ * for a published claim survives; a run directory that already existed is
+ * kept, and the scorecard bytes it held are put back, because a published
+ * pointer may still name them.
  */
 export async function writeScorecardArtifacts(
   options: WriteScorecardArtifactsOptions,
@@ -1872,18 +1906,72 @@ export async function writeScorecardArtifacts(
     },
   };
 
+  const pointerTempPath = `${pointerPath}.tmp`;
+  const perSampleTempPath = `${perSamplePath}.tmp`;
+  const scorecardTempPath = `${scorecardPath}.tmp`;
+  // A run directory this run did not create may still hold the artifacts a
+  // previously published pointer names; a failed run must not delete them.
+  const runDirExisted = await pathExists(runDir);
+  // The scorecard artifact carries the clock, so a rerun produces different
+  // bytes for it, while a published pointer names the bytes it published. The
+  // published bytes are captured before this run replaces them, so a failed
+  // run can put them back and the pointer keeps describing what is on disk.
+  // The per-sample artifact carries no clock and is byte-stable, so replacing
+  // it never invalidates a digest.
+  const publishedScorecardBody = runDirExisted ? await readIfExists(scorecardPath) : null;
+  let scorecardReplaced = false;
+  let restoreFailure: string | undefined;
+
   try {
     await mkdir(runDir, { recursive: true });
     await mkdir(path.dirname(pointerPath), { recursive: true });
-    await writeFile(perSamplePath, perSampleBody, 'utf8');
-    await writeFile(scorecardPath, scorecardBody, 'utf8');
-    await writeFile(pointerPath, `${JSON.stringify(pointer, null, 2)}\n`, 'utf8');
+    // Every file is staged in a sibling temp file and renamed, the same rule
+    // the rest of the repo follows for JSON artifacts: a failure never leaves
+    // a half-written artifact, and never a half-written tracked pointer.
+    //
+    // The pointer is staged BEFORE the artifacts are renamed into place, so
+    // the failure that matters most (the pointer cannot be written) is
+    // reached while the artifacts a published pointer names are still
+    // untouched.
+    await writeFile(pointerTempPath, `${JSON.stringify(pointer, null, 2)}\n`, 'utf8');
+    await writeFile(perSampleTempPath, perSampleBody, 'utf8');
+    await writeFile(scorecardTempPath, scorecardBody, 'utf8');
+    await rename(perSampleTempPath, perSamplePath);
+    await rename(scorecardTempPath, scorecardPath);
+    scorecardReplaced = true;
+    await rename(pointerTempPath, pointerPath);
   } catch (error) {
+    // A failed run leaves nothing behind that could be mistaken for a claim:
+    // the staging files go, and the run directory goes when this run created
+    // it. A run directory that already existed is kept, because a published
+    // pointer may still name the artifacts it holds.
+    await Promise.all([
+      rm(perSampleTempPath, { force: true }),
+      rm(scorecardTempPath, { force: true }),
+      rm(pointerTempPath, { force: true }),
+    ]).catch(() => undefined);
+    if (!runDirExisted) {
+      await rm(runDir, { recursive: true, force: true }).catch(() => undefined);
+    } else if (scorecardReplaced && publishedScorecardBody !== null) {
+      // The pointer was not renamed, so it still names the published bytes:
+      // they go back, and the claim stays true of what is on disk. A restore
+      // that fails is named in the message: a swallowed failure would leave a
+      // pointer naming bytes that are no longer there, silently.
+      try {
+        await restoreArtifact(scorecardPath, publishedScorecardBody);
+      } catch (restoreError) {
+        restoreFailure = `the published scorecard artifact could not be restored: ${
+          restoreError instanceof Error ? restoreError.message : String(restoreError)
+        }`;
+      }
+    }
     return {
       ok: false,
       error: {
         code: 'artifact-write-failed',
-        message: `writing the scorecard artifacts failed: ${error instanceof Error ? error.message : String(error)}`,
+        message:
+          `writing the scorecard artifacts failed: ${error instanceof Error ? error.message : String(error)}` +
+          (restoreFailure === undefined ? '' : `; ${restoreFailure}`),
       },
     };
   }

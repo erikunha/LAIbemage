@@ -18,7 +18,7 @@ vision-lens/                # pnpm + turbo monorepo root (private tooling shell)
 │   ├── vision/               # vision-lens-vision — embeddings + visual search (spec 005)
 │   ├── training/             # vision-lens-training — training engine (spec 007)
 │   └── agents/               # vision-lens-agents — agent runtime (spec 012)
-├── python/                   # public visionlens distribution (spec 017): stdlib-only base, optional extras
+├── python/                   # public visionlens distribution (spec 017): Pydantic base, optional extras
 │   └── visionlens/           # wheel source (src/, tests/, pyproject.toml; hatchling, >=3.11); services stay thin entrypoints
 └── docker/                   # container images: the mock provider and the Python worker runtime (visionlens wheel, stdio JSONL, no Node)
     └── mock-provider/        # deterministic OpenAI-compatible mock provider, the OPENAI_BASE_URL seam (server.py + Dockerfile + tests)
@@ -49,7 +49,7 @@ flowchart TD
     end
 
     subgraph PYPKG["python/ - public distribution"]
-        VISIONLENS["visionlens<br/>stdlib-only base, optional extras<br/>spec 017 (VLN-003)"]
+        VISIONLENS["visionlens<br/>Pydantic base, optional extras<br/>spec 017 (VLN-003)"]
     end
 
     subgraph DOCKERDIR["docker/ - container images"]

@@ -31,7 +31,7 @@ worker protocol is the only runtime boundary between them.**
    (`python/visionlens/pyproject.toml:6`). It owns the encoder, the preprocessing fingerprint,
    the model registry, the operation handlers and the worker process
    (`python/visionlens/src/visionlens/encoder.py:56`, `registry/simulated.py:109`, `operations.py:278`,
-   `worker.py:182`). Its API works from a Python process without Node, Fastify or the npm SDK
+   `worker.py:183`). Its API works from a Python process without Node, Fastify or the npm SDK
    (`docs/vnext/02-ARCHITECTURE-DECISION.md:5`). As built the runtime is deterministic and
    carries two direct third-party dependencies, Pydantic and Pillow, with the four transitive
    packages Pydantic brings; the typed facade needs Pydantic and the image decoder needs Pillow
@@ -55,7 +55,7 @@ worker protocol is the only runtime boundary between them.**
 4. `@vision-lens/contracts` stays canonical for external domain entities, public operation
    payloads and OpenAPI (`docs/vnext/02-ARCHITECTURE-DECISION.md:7`). Python carries no entity
    schemas: its only shared vocabulary is the frozen worker protocol
-   (`python/visionlens/src/visionlens/__init__.py:53-95`). When Python later needs entity
+   (`python/visionlens/src/visionlens/__init__.py:60-102`). When Python later needs entity
    validation, the validators are generated from versioned JSON Schema, never hand-copied
    (`docs/vnext/07-CONTRACTS-PROTOCOL.md:5`).
 5. Versioning: contracts are `1.0.0` with a breaking change requiring a major bump, decided by
@@ -84,11 +84,11 @@ change that ships the facade.
 
 **What changes.** The base install is no longer standard-library only. It carries Pydantic,
 with the four transitive packages Pydantic brings, and nothing else:
-`dependencies = ["pydantic>=2.12,<3"]` (`python/visionlens/pyproject.toml:16`).
+`dependencies = ["pydantic>=2.12,<3"]` (`python/visionlens/pyproject.toml:18`).
 The runtime keeps every other property the acceptance recorded: the heavy stacks (PyTorch,
 scikit-learn, Transformers, MLflow, LangGraph, FastAPI, Uvicorn) stay out of the base install,
 the extra names and their (empty) sets are unchanged
-(`python/visionlens/pyproject.toml:21-25`), the import isolation contract still holds, and no
+(`python/visionlens/pyproject.toml:30-38`), the import isolation contract still holds, and no
 GPU or ML framework enters a consumer install.
 
 **Why Pydantic and not an extras-gated config.** The facade's configuration is a typed,
@@ -183,9 +183,9 @@ not, and the answer must be the same in the capability report and in the run.
   holds the CPU only;
 - `REQUESTABLE_DEVICES` is what a request may name (`auto` plus the admitted devices), and
   the configuration reads it instead of carrying a second list
-  (`python/visionlens/src/visionlens/config.py:33`);
+  (`python/visionlens/src/visionlens/config.py:34`);
 - the capability report asks the planner and reads its answer, instead of resolving the
-  device on its own (`python/visionlens/src/visionlens/capabilities.py:85`).
+  device on its own (`python/visionlens/src/visionlens/capabilities.py:87`).
 
 `auto` resolves to an admitted device and records why it fell back. The reason names the
 accelerators the platform knows and what the machine has of them, so a run on a Mac with MPS
@@ -310,7 +310,7 @@ Migration proof, per `docs/vnext/02-ARCHITECTURE-DECISION.md:37`:
 |---|---|
 | Dual-runtime parity on one golden inference path | partially proven: the cross-language suite runs the real TS host against the real Python worker (`packages/core/tests/worker/python-integration.test.ts:21-34`), the pack's frame examples validate in both languages (`packages/contracts/tests/worker/pack-examples.test.ts`, `python/visionlens/tests/test_pack_examples.py`), and the Python golden transcript pins one scripted session byte for byte (`python/visionlens/src/visionlens/golden/__init__.py:1`); a real-model golden path lands with the CPU vision adapter (spec 019) |
 | The old Node CLI suite stays green | unchanged by this ADR; the CLI bins and exports are untouched |
-| Python works standalone and packages into a wheel | the package builds its wheel from `src/visionlens` (`python/visionlens/pyproject.toml:27-28`); the container image consumes it (`docker/runtime/`) |
+| Python works standalone and packages into a wheel | the package builds its wheel from `src/visionlens` (`python/visionlens/pyproject.toml:40-41`); the container image consumes it (`docker/runtime/`) |
 | `@vision-lens/sdk/client` calls the application API with no Python in the JS consumer environment | not yet built; the entrypoint does not exist (`packages/sdk/package.json:7-9`) |
 
 Rollback: revert the commit that carries this ADR, the owner map and the static check. This

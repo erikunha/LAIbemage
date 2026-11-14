@@ -38,6 +38,13 @@ from .encoders import (
     authorize_weights_download,
     load_weights,
 )
+from .inference.embedder import (
+    EmbedAsset,
+    EmbedError,
+    EmbedRequest,
+    EmbedResult,
+    VisionEmbedder,
+)
 from .io import DecodedImage, DecodeService
 from .errors import (
     ClientClosedError,
@@ -92,6 +99,10 @@ __all__ = [
     "DecodeService",
     "DecodedImage",
     "DevicePlan",
+    "EmbedAsset",
+    "EmbedError",
+    "EmbedRequest",
+    "EmbedResult",
     "DevicePlanner",
     "DownloadPermission",
     "DownloadProvenance",
@@ -116,6 +127,7 @@ __all__ = [
     "UnknownModelError",
     "UnsupportedDeviceError",
     "UnsupportedFileTypeError",
+    "VisionEmbedder",
     "VisionLens",
     "WeightsRequest",
     "Worker",

@@ -1,10 +1,16 @@
 # visionlens
 
-A local-first visual AI runtime for Python, fully simulated in this release.
-It ships the deterministic simulated encoder, the model registries, a JSONL
-worker speaking the frozen `visionlens.worker.v1` protocol and the typed public
-facade. Pydantic is the only third-party runtime dependency: no numpy, no
-torch, no network, and no Node.js anywhere.
+A local-first visual AI runtime for Python. It ships the deterministic
+simulated encoder, the model registries, the CPU vision adapter (the decoder,
+the canonical preprocessing, the SigLIP2 encoder and the content-addressed
+artifact), a JSONL worker speaking the frozen `visionlens.worker.v1` protocol
+and the typed public facade.
+
+The base install carries Pydantic for the typed configuration and Pillow for
+the image decoder, and nothing else: no numpy, no torch, no network, and no
+Node.js anywhere. The encoder stack that reads a real checkpoint lives behind
+the `vision` extra, so the base install never pulls a PyTorch or a
+Transformers download.
 
 > **Proposed API.** The operation names and object types on this package's
 > public surface are proposed, not frozen: ADR-011 is accepted as built

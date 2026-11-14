@@ -128,7 +128,7 @@ socket module before resolving.
 
 Fetching the bytes the record names is the loader's job, and the loader is
 the only place in the runtime where a model artifact can be fetched
-(`python/visionlens/src/visionlens/encoders/weights.py:643`). Six gates
+(`python/visionlens/src/visionlens/encoders/weights.py:719`, `:832`). Six gates
 stand between a request and a byte, and every one of them runs before the
 fetch:
 
@@ -200,9 +200,12 @@ simulated encoder is not this model.
 
 ## What this record does NOT prove
 
-- The platform has **not run this model**. The CPU adapter is a later task
-  of this ticket. The record states what the model IS, not a measurement.
-- The `latencyCostProfile` is `unknown`, because nothing was measured yet.
+- The `latencyCostProfile` is `unknown`, because the record was not
+  rewritten with the measurement of the recorded run. The platform HAS run
+  this model: the CPU adapter embedded the committed fixtures with this
+  exact revision and these exact weights, and the recorded run is in
+  `docs/architecture/vision-adapter.md`. The record still states what the
+  model IS, and the measurement lives in the run, not in the record.
 - The `deviceSupport` list names the CPU path, the one this platform
   implements. The model card declares no device support, so the record
   claims no other device: an inference dressed as a fact is not a fact.

@@ -280,3 +280,17 @@ def test_the_allowlist_is_the_one_the_typescript_side_validates():
         "image/avif",
     )
     assert set(EXTENSION_MIME.values()) <= set(ALLOWED_MIME_TYPES)
+
+
+def test_a_truncated_png_is_refused(tmp_path: Path):
+    # The PNG carries no IEND, so the file is incomplete: the decoder
+    # refuses it before it spends its budget on the pixels.
+    service = DecodeService(tmp_path)
+    path = tmp_path / "broken.png"
+    payload = _png_bytes(8, 8, b"\x00" * 16)
+    path.write_bytes(payload[: -len(b"IEND") - 4])
+
+    with pytest.raises(ImageMetadataUnreadableError) as excinfo:
+        service.decode(path)
+
+    assert "truncated" in str(excinfo.value)

@@ -16,11 +16,11 @@ The static proof of the rules in this map is `pnpm run check:owner-boundaries`
 | Reserved entity names (`track`, `frame`, `calibration`, `synchronized-sequence`) | `@vision-lens/contracts` | TypeScript owns | `packages/contracts/src/entities/reserved.ts:15` | `docs/vnext/02-ARCHITECTURE-DECISION.md:7` |
 | Worker protocol vocabulary (protocol id, five operations, ten error codes, retryable flags) | one frozen vocabulary, two mirrored definitions | shared surface, kept identical by the static check | `packages/contracts/src/worker/protocol.ts:19`, `python/visionlens/src/visionlens/protocol.py:18`, `python/visionlens/src/visionlens/errors.py:39` | `docs/vnext/02-ARCHITECTURE-DECISION.md:8` |
 | Worker host (spawn, framing, handshake, cancel, deadline) | `packages/core/src/worker/` | stays in TypeScript | `packages/core/src/worker/client.ts:1` | `docs/vnext/05-PYTHON-CORE-AND-PYPI.md:26` (the `bridge` role, host side) |
-| Worker process (frames on stdout, logs on stderr) | `visionlens` | Python | `python/visionlens/src/visionlens/worker.py:182` | `docs/vnext/05-PYTHON-CORE-AND-PYPI.md:26` |
+| Worker process (frames on stdout, logs on stderr) | `visionlens` | Python | `python/visionlens/src/visionlens/worker.py:183` | `docs/vnext/05-PYTHON-CORE-AND-PYPI.md:26` |
 | Encoder and preprocessing fingerprint | `visionlens` | Python | `python/visionlens/src/visionlens/encoder.py:56`, `:82` | `docs/vnext/05-PYTHON-CORE-AND-PYPI.md:17`, `:19` (simulated as-built) |
 | Model registry (the simulated runtime's placeholder list) | `visionlens` | Python | `python/visionlens/src/visionlens/registry/simulated.py:109` | `docs/vnext/11-VISION-MODEL-REGISTRY-INFERENCE.md:5` (the record shape), `docs/architecture/model-registry.md` (the two registries) |
 | Model capability registry (the pinned records of the models the platform may run) | one record set, two readers | the data is shared and the refusals are the same, measured by `scripts/registry/parity-check.ts` | `datasets/registry.json` (the records), `packages/core/src/benchmark/registry.ts:410` (the TypeScript accessor), `python/visionlens/src/visionlens/registry/loader.py:334` (the Python loader) | `docs/vnext/11-VISION-MODEL-REGISTRY-INFERENCE.md:5`, `docs/architecture/model-registry.md` |
-| Model weights (the fetch, the gates and the local cache) | `visionlens` | Python | `python/visionlens/src/visionlens/encoders/weights.py:643` (the loader), `:205` (the license gate), `python/visionlens/src/visionlens/hashing.py:22` (the one way to digest) | `docs/vnext/19-SECURITY-PRIVACY-SUPPLY-CHAIN.md:10`, `:15`, `docs/architecture/model-registry.md` (the loader) |
+| Model weights (the fetch, the gates and the local cache) | `visionlens` | Python | `python/visionlens/src/visionlens/encoders/weights.py:811` (the loader), `:241` (the license gate), `python/visionlens/src/visionlens/hashing.py:22` (the one way to digest) | `docs/vnext/19-SECURITY-PRIVACY-SUPPLY-CHAIN.md:10`, `:15`, `docs/architecture/model-registry.md` (the loader) |
 | Image decoding (the refusals and the pixels) | `visionlens` | Python | `python/visionlens/src/visionlens/io/decode.py:1` (the decoder), `python/visionlens/src/visionlens/io/preprocess.py:1` (the canonical preprocessing) | `docs/vnext/19-SECURITY-PRIVACY-SUPPLY-CHAIN.md:23`, `docs/vnext/08-DOMAIN-STORE-AND-PROVENANCE.md:42`, `docs/architecture/vision-adapter.md` |
 | The visual encoder (the one adapter of the ticket) | `visionlens` | Python | `python/visionlens/src/visionlens/encoders/siglip2.py:1` (the adapter), `python/visionlens/src/visionlens/encoders/base.py:1` (the protocol) | `docs/vnext/11-VISION-MODEL-REGISTRY-INFERENCE.md:23`, `docs/architecture/vision-adapter.md` |
 | The embedding artifact and its manifest | one manifest, two validators | the Python side writes it, the TypeScript side validates and commits it | `python/visionlens/src/visionlens/inference/artifact.py:1` (the writer), `packages/core/src/adapter/embedding-manifest.ts:1` (the schema), `benchmarks/parity/vision-embed.golden.json:1` (the golden set) | `docs/vnext/08-DOMAIN-STORE-AND-PROVENANCE.md:24`, `:33`, `:46`, `docs/architecture/vision-adapter.md` |
@@ -35,7 +35,7 @@ The static proof of the rules in this map is `pnpm run check:owner-boundaries`
 | Application API and Studio apps | `apps/` | stays in TypeScript | `docs/architecture/monorepo-map.md` (layout) | `docs/vnext/04-ARCHITECTURE-C4.md:12` |
 | Python services (`vision`, `training`, `agents`) | `services/` | thin adapters, stdlib-only skeletons | `services/vision/src/vision_lens_vision/__init__.py:3` | `docs/vnext/02-ARCHITECTURE-DECISION.md:33`, `docs/vnext/05-PYTHON-CORE-AND-PYPI.md:5` |
 | Worker runtime container | `docker/runtime/` | Python only, no Node | vendored wheel copy, guarded by `pnpm run docker:vendor:check` (`scripts/check-docker-vendor.mjs:1`) | `docs/architecture/monorepo-map.md` (layout) |
-| Python packaging | `python/visionlens/` | one distribution, extras frozen, the base install carries Pydantic and the extra sets stay empty | `python/visionlens/pyproject.toml:6`, `:16`, `:21-25` | `docs/vnext/05-PYTHON-CORE-AND-PYPI.md:34-35` |
+| Python packaging | `python/visionlens/` | one distribution, extras frozen, the base install carries Pydantic and Pillow and the `vision` extra carries the encoder stack | `python/visionlens/pyproject.toml:6`, `:18`, `:30-38` | `docs/vnext/05-PYTHON-CORE-AND-PYPI.md:34-35` |
 
 ## Import boundary table
 
@@ -72,7 +72,7 @@ What must never happen, stated from the Python side:
   (`python/visionlens/src/visionlens/__init__.py:53-95`).
 - A declared Python dependency is not a license to reach into TypeScript: `PY-NO-TS` holds for
   the declared-dependency future exactly as it holds for the present, where the base install
-  declares Pydantic and nothing else (`AGENTS.md:105`,
+  declares Pydantic and Pillow and nothing else (`AGENTS.md:105`,
   `docs/vnext/05-PYTHON-CORE-AND-PYPI.md:5`).
 
 ## Side-effect permission table

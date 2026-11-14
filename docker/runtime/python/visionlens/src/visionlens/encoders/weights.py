@@ -73,7 +73,7 @@ RESOLVE_SEGMENT = "resolve"
 
 #: The revision of an allowlisted source is a commit: 40 lowercase hex
 #: characters. A tag, a branch and a floating name are not a pin.
-REVISION_PATTERN = re.compile(r"^[0-9a-f]{40}$")
+REVISION_PATTERN = re.compile(r"\A[0-9a-f]{40}\Z")
 
 #: The model id names a directory in the cache, so it may not carry a
 #: separator, a traversal or anything a file system would read as a path.
@@ -377,9 +377,22 @@ def check_source(record: ModelRecord) -> None:
     one the platform trusts, the revision has to be the pinned one, and the
     file has to be safetensors.
 
+    The source is a plain location: no query and no fragment. The URL
+    that is validated is the URL that is fetched, so nothing can ride in
+    the query of a source nobody looked at.
+
     @raises DownloadRefusedError when the source may not be fetched.
     """
     name = check_pinned_url(record.source_uri, record.revision)
+    parsed = urlparse(record.source_uri)
+    if parsed.query or parsed.fragment:
+        raise _refuse(
+            SOURCE_NOT_ALLOWED,
+            "the source '"
+            + record.source_uri
+            + "' carries a query or a fragment; a pinned source is a plain "
+            "location, so the URL that is validated is the URL that is fetched",
+        )
     if not name.endswith(SAFE_WEIGHTS_SUFFIX):
         raise _refuse(
             UNSAFE_FORMAT,
@@ -681,6 +694,28 @@ def _check_host(url: str, hosts: Tuple[str, ...]) -> None:
     )
 
 
+class CheckedRedirects(HTTPRedirectHandler):
+    """The redirect handler that checks every hop before it is followed.
+
+    The allowlisted repository serves the pinned file from its own CDN, so
+    a hop may land there and nowhere else. The host of the hop is checked
+    BEFORE the request to it is made, so a hop to a host outside the
+    allowlist never leaves the machine.
+    """
+
+    def redirect_request(
+        self,
+        req: Request,
+        fp: IO[bytes],
+        code: int,
+        msg: str,
+        headers: HTTPMessage,
+        newurl: str,
+    ) -> Request | None:
+        _check_host(newurl, ALLOWED_REDIRECT_HOSTS)
+        return super().redirect_request(req, fp, code, msg, headers, newurl)
+
+
 def fetch_chunks(url: str, timeout: float = FETCH_TIMEOUT_SECONDS) -> Iterator[bytes]:
     """Fetch the bytes of an allowlisted URL, in bounded blocks.
 
@@ -688,22 +723,8 @@ def fetch_chunks(url: str, timeout: float = FETCH_TIMEOUT_SECONDS) -> Iterator[b
     place in this module that touches the network, and it never follows a
     redirect to a host outside the trusted ones.
     """
-
-    class _CheckedRedirects(HTTPRedirectHandler):
-        def redirect_request(
-            self,
-            req: Request,
-            fp: IO[bytes],
-            code: int,
-            msg: str,
-            headers: HTTPMessage,
-            newurl: str,
-        ) -> Request | None:
-            _check_host(newurl, ALLOWED_REDIRECT_HOSTS)
-            return super().redirect_request(req, fp, code, msg, headers, newurl)
-
     _check_host(url, ALLOWED_SOURCES)
-    opener = build_opener(_CheckedRedirects)
+    opener = build_opener(CheckedRedirects)
     # The host was allowlisted above, and every redirect is checked too.
     with opener.open(url, timeout=timeout) as response:
         while True:
@@ -940,10 +961,40 @@ def model_directory(cache_dir: Path, model_id: str, revision: str) -> Path:
 
 
 def _write_bytes(path: Path, payload: bytes) -> str:
-    """Write the bytes into the file, atomically, and return their digest."""
-    temporary = path.with_name(path.name + ".tmp")
-    temporary.write_bytes(payload)
-    os.replace(str(temporary), str(path))
+    """Write the bytes into the file, atomically, and return their digest.
+
+    The temporary file is unique and lives in the target directory, so two
+    writers never share one, and the publish is a rename: a reader sees the
+    old file or the new one, never a half-written file. A file that
+    cannot be published is a typed refusal and not a raw OSError.
+
+    @raises DownloadRefusedError when the file cannot be published.
+    """
+    directory = path.parent
+    directory.mkdir(parents=True, exist_ok=True)
+    handle, temporary_name = tempfile.mkstemp(
+        prefix=_temporary_prefix(), suffix=".tmp", dir=str(directory)
+    )
+    temporary = Path(temporary_name)
+    try:
+        with os.fdopen(handle, "wb") as stream:
+            stream.write(payload)
+            stream.flush()
+            os.fsync(stream.fileno())
+        os.replace(str(temporary), str(path))
+    except OSError as exc:
+        try:
+            if temporary.exists():
+                temporary.unlink()
+        except OSError:
+            pass
+        raise _refuse(
+            CACHE_CORRUPT,
+            "the file '"
+            + str(path)
+            + "' could not be published: "
+            + (exc.strerror or exc.__class__.__name__),
+        ) from exc
     return sha256_of_bytes(payload)
 
 
@@ -958,34 +1009,43 @@ def load_model_files(
     directory is that verified file and not a copy of it, so the bytes
     the model reads are the bytes the digest was checked against.
 
-    The two configuration files come from the same repository at the
-    same pinned revision, and their digests are recorded so a run can
-    say which bytes it used. A configuration is not executable code, and
-    the architecture it describes is checked against the weights when the
-    model is built: a configuration that does not describe the weights
-    does not load them.
+    The two configuration files come from the same repository at the same
+    pinned revision, and the pinned revision is what pins them: a
+    configuration is not executable code, and the architecture it
+    describes is checked against the weights when the model is built, so
+    a configuration that does not describe the weights does not load
+    them. Their digests are the RECORD of the bytes this run used, not a
+    second upstream pin: a later run that assembles the same directory
+    proves it read the same bytes.
+
+    The directory is assembled under the lock of that directory, so two
+    runs that assemble it at the same time do not publish halves of two
+    different assemblies.
 
     @raises DownloadRefusedError when a file may not be fetched.
     """
     weights = load_weights(request, cache_dir, opener=opener)
     record = request.record
     directory = model_directory(Path(cache_dir), record.model_id, record.revision)
-    directory.mkdir(parents=True, exist_ok=True)
-    base = record.source_uri.rsplit("/", 1)[0]
-    digests: dict[str, str] = {}
-    for name in MODEL_CONFIG_FILES:
-        url = base + "/" + name
-        check_pinned_url(url, record.revision)
-        payload = b"".join((opener or fetch_chunks)(url))
-        digests[name] = _write_bytes(directory / name, payload)
-    link = directory / MODEL_WEIGHTS_NAME
-    if not link.exists():
-        try:
-            os.link(str(weights.path), str(link))
-        except OSError:
-            # A cache on two file systems cannot be linked: the bytes are
-            # copied instead, and the copy is verified by its digest.
-            digests[MODEL_WEIGHTS_NAME] = _write_bytes(link, weights.path.read_bytes())
+    with _lock_for(directory):
+        directory.mkdir(parents=True, exist_ok=True)
+        base = record.source_uri.rsplit("/", 1)[0]
+        digests: dict[str, str] = {}
+        for name in MODEL_CONFIG_FILES:
+            url = base + "/" + name
+            check_pinned_url(url, record.revision)
+            payload = b"".join((opener or fetch_chunks)(url))
+            digests[name] = _write_bytes(directory / name, payload)
+        link = directory / MODEL_WEIGHTS_NAME
+        if not link.exists():
+            try:
+                os.link(str(weights.path), str(link))
+            except OSError:
+                # A cache on two file systems cannot be linked: the bytes are
+                # copied instead, and the copy is verified by its digest.
+                digests[MODEL_WEIGHTS_NAME] = _write_bytes(
+                    link, weights.path.read_bytes()
+                )
     return LoadedModelFiles(
         model_id=record.model_id,
         revision=record.revision,

@@ -4,7 +4,9 @@ The adapter builds the model from a LOCAL directory: the weights the
 loader verified and the configuration of the pinned revision. Nothing is
 fetched here, and no remote code is ever executed: `trust_remote_code`
 is False, so a repository that ships custom code is refused by the
-library instead of being run.
+library instead of being run. The weights are hashed and compared with
+the digest of the record before the model is built, so a directory that
+carries other bytes is refused instead of loaded.
 
 The pixels are the ones the canonical preprocessing produced, so the
 fingerprint of the run describes the work that was really done.
@@ -26,6 +28,10 @@ REQUIRED_EXTRA = "vision"
 
 #: The install command that provides the extra.
 INSTALL_COMMAND = "pip install visionlens[vision]"
+
+#: The name of the weights file inside the model directory. It is the
+#: only format the platform loads.
+MODEL_WEIGHTS_NAME = "model.safetensors"
 
 
 class Siglip2Encoder:
@@ -62,9 +68,15 @@ class Siglip2Encoder:
         """Build the model from the local directory.
 
         @raises MissingExtraError when the heavy stack is not installed.
+        @raises ModelRunFailedError when the bytes of the directory are not
+            the bytes the record names.
         """
         if self._model is not None:
             return self._model
+        # The bytes are checked before the heavy stack is imported: a
+        # refusal does not need torch, and a directory that carries other
+        # bytes never reaches the model.
+        self._verify_weights()
         try:
             import torch
             from transformers import AutoModel
@@ -85,6 +97,43 @@ class Siglip2Encoder:
         self._model = model
         self._torch = torch
         return model
+
+    def _verify_weights(self) -> None:
+        """Refuse to build a model from bytes nobody checked.
+
+        The directory carries the weights of the pinned revision and the
+        record names their digest. The bytes are hashed in bounded blocks
+        and a file that does not carry the recorded digest is refused: an
+        adapter that loads whatever it finds is an adapter that runs
+        bytes nobody verified.
+
+        @raises ModelRunFailedError when the file is missing or carries
+            another digest.
+        """
+        from ..errors import ModelRunFailedError
+        from ..hashing import sha256_of_file
+
+        path = self._model_dir / MODEL_WEIGHTS_NAME
+        if not path.is_file():
+            raise ModelRunFailedError(
+                "the model directory '"
+                + str(self._model_dir)
+                + "' carries no "
+                + MODEL_WEIGHTS_NAME
+                + ", so there are no weights to build the model from"
+            )
+        digest = sha256_of_file(path)
+        if digest != self._record.source_digest:
+            raise ModelRunFailedError(
+                "the weights of '"
+                + str(path)
+                + "' carry the digest "
+                + digest
+                + " and the record names "
+                + self._record.source_digest
+                + "; a model built from other bytes is not the model the "
+                "record pins"
+            )
 
     def embed(self, images: Sequence[PreprocessedImage]) -> EncoderOutput:
         """Embed the preprocessed images, in the order they were given.

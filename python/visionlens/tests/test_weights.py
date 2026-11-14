@@ -10,13 +10,14 @@ opener is a spy that fails the test if it is ever called.
 from __future__ import annotations
 
 import dataclasses
+import io
 import json
 import os
 import struct
 import threading
 import time
 from pathlib import Path
-from typing import Any, Iterable, Iterator
+from typing import Any, Iterable, Iterator, cast
 
 import pytest
 
@@ -25,6 +26,7 @@ from helpers import SRC  # noqa: F401  (path setup)
 from visionlens.downloads import DownloadRefusedError
 from visionlens.encoders.weights import (
     AuthorizedWeights,
+    CheckedRedirects,
     DownloadPermission,
     LoadedWeights,
     WeightsRequest,
@@ -33,6 +35,7 @@ from visionlens.encoders.weights import (
     check_model_id,
     check_safetensors,
     check_source,
+    load_model_files,
     load_weights,
 )
 from visionlens.registry.loader import record_from_mapping
@@ -743,3 +746,126 @@ def test_the_loader_asks_only_for_the_allowlisted_url(tmp_path: Path):
     load_weights(_request(_record()), tmp_path / "cache", opener=opener)
 
     assert asked == [SOURCE]
+
+
+def test_a_redirect_to_a_host_outside_the_allowlist_is_refused():
+    # The hop is checked BEFORE the request to it is made, so a hop to a
+    # host outside the allowlist never leaves the machine.
+    from urllib.request import Request
+
+    handler = CheckedRedirects()
+    request = Request(SOURCE)
+
+    with pytest.raises(DownloadRefusedError) as excinfo:
+        handler.redirect_request(
+            request,
+            io.BytesIO(b""),
+            302,
+            "Found",
+            cast(Any, {}),
+            "https://weights.example.test/model.safetensors",
+        )
+
+    assert excinfo.value.reason == "SOURCE_NOT_ALLOWED"
+    assert "weights.example.test" in str(excinfo.value)
+
+
+def test_a_redirect_to_the_cdn_of_the_allowlisted_repository_is_followed():
+    # The allowlisted repository serves the pinned file from its own CDN,
+    # so the hop to it is the real one and it is allowed.
+    from urllib.request import Request
+
+    handler = CheckedRedirects()
+    request = Request(SOURCE)
+
+    followed = handler.redirect_request(
+        request,
+        io.BytesIO(b""),
+        302,
+        "Found",
+        cast(Any, {"location": "https://cdn-lfs.huggingface.co/revision/x"}),
+        "https://cdn-lfs.huggingface.co/revision/x",
+    )
+
+    assert followed is not None
+    assert followed.full_url == "https://cdn-lfs.huggingface.co/revision/x"
+
+
+def test_a_source_that_carries_a_query_is_refused(tmp_path: Path):
+    # The URL that is validated is the URL that is fetched, so a pinned
+    # source is a plain location.
+    opener, calls = _spy_opener()
+    record = _record(source_uri=SOURCE + "?token=secret")
+
+    with pytest.raises(DownloadRefusedError) as excinfo:
+        load_weights(_request(record), tmp_path / "cache", opener=opener)
+
+    assert excinfo.value.reason == "SOURCE_NOT_ALLOWED"
+    assert calls == []
+
+
+def test_a_revision_with_a_trailing_newline_is_refused():
+    # The revision is a path segment, so the newline that ends a line is
+    # not part of the commit it names.
+    record = _record(revision=REVISION + "\n")
+
+    with pytest.raises(DownloadRefusedError) as excinfo:
+        check_model_id(record)
+        check_source(record)
+
+    assert excinfo.value.reason == "REVISION_NOT_PINNED"
+
+
+def test_the_model_directory_is_assembled_from_the_pinned_revision(tmp_path: Path):
+    # The weights of the directory are the verified file and not a copy of
+    # it, and the configuration files come from the same pinned revision.
+    asked: list[str] = []
+
+    def opener(url: str) -> Iterable[bytes]:
+        asked.append(url)
+        yield PAYLOAD
+
+    files = load_model_files(_request(_record()), tmp_path / "cache", opener=opener)
+
+    assert files.directory == tmp_path / "cache" / "siglip2-base" / REVISION
+    assert (files.directory / "config.json").is_file()
+    assert (files.directory / "preprocessor_config.json").is_file()
+    assert (files.directory / "model.safetensors").is_file()
+    assert files.weights.path.is_file()
+    assert asked == [
+        SOURCE,
+        "https://huggingface.co/google/siglip2-base-patch16-224/resolve/"
+        + REVISION
+        + "/config.json",
+        "https://huggingface.co/google/siglip2-base-patch16-224/resolve/"
+        + REVISION
+        + "/preprocessor_config.json",
+    ]
+
+
+def test_the_configuration_digests_are_the_digests_of_the_bytes_used(tmp_path: Path):
+    # The digests of the configuration files are the record of the bytes
+    # this run used, so a later run that assembles the same directory
+    # proves it read the same bytes.
+    def opener(url: str) -> Iterable[bytes]:
+        yield PAYLOAD
+
+    files = load_model_files(_request(_record()), tmp_path / "cache", opener=opener)
+
+    assert files.config_digests["config.json"] == _digest_of(PAYLOAD)
+    assert files.config_digests["preprocessor_config.json"] == _digest_of(PAYLOAD)
+
+
+def test_two_assemblies_of_the_same_model_directory_do_not_interleave(
+    tmp_path: Path,
+):
+    # The directory is assembled under its lock, so a reader never sees
+    # half of one assembly and half of another.
+    def opener(url: str) -> Iterable[bytes]:
+        yield PAYLOAD
+
+    first = load_model_files(_request(_record()), tmp_path / "cache", opener=opener)
+    second = load_model_files(_request(_record()), tmp_path / "cache", opener=opener)
+
+    assert first.directory == second.directory
+    assert first.config_digests == second.config_digests

@@ -2,43 +2,81 @@
 /**
  * Boundary-rule proof (spec 001, task 2.3 — implemented via this script).
  *
- * Spawns eslint on two throwaway fixture files placed under
- * `packages/core/tests/` (a path matched by eslint.config.js `files` globs but
- * outside the `packages/core/src/analyzer/providers/**` carve-out):
+ * Lints four throwaway fixtures with eslint and proves what each one does.
+ * The fixtures are NEVER written to disk: eslint reads them from stdin and
+ * resolves the configuration by a VIRTUAL filename, so the path that decides
+ * which rule applies is real while the file is not.
  *
- *   - violating.ts imports the `openai` SDK  → eslint MUST fail (exit 1)
- *   - clean.ts       imports only node:path  → eslint MUST pass (exit 0)
+ *   - packages/core/tests/…/violating.ts imports the `openai` SDK
+ *     → eslint MUST fail (exit 1): the path matches the eslint.config.js
+ *       `files` globs and stays outside the `packages/core/src/analyzer/providers/**`
+ *       carve-out
+ *   - packages/core/tests/…/clean.ts imports only node:path
+ *     → eslint MUST pass (exit 0)
+ *   - packages/core/src/worker/…/worker-violating.ts imports `sharp`
+ *     → eslint MUST fail (exit 1): the path matches the worker-scoped
+ *       boundary rule of the boundary-table row in AGENTS.md
+ *   - packages/core/src/worker/…/worker-clean.ts stdlib + contracts
+ *     → eslint MUST pass (exit 0)
  *
- * A second proof pair covers the worker boundary rule scoped to
- * `packages/core/src/worker/` (the boundary-table row in AGENTS.md), so its
- * fixtures live under that directory where the scoped rule matches:
- *
- *   - worker-violating.ts imports `sharp`      → eslint MUST fail (exit 1)
- *   - worker-clean.ts     stdlib + contracts   → eslint MUST pass (exit 0)
+ * Why stdin and not a file: a planted violation is a violation. While it sat
+ * in the tree, every other tool that walks the tree read it as source: the
+ * owner boundary checker reported `HOST-IMPORTS` on a tree that was clean,
+ * and the suite failed intermittently, under load, with a message that named
+ * a directory no one had written on purpose. A fixture that never touches
+ * the disk cannot be read by anything, and the race disappears with it.
  *
  * Any other outcome (config errors = exit 2, crashes) fails the check.
  * Run: `pnpm run check:boundaries` (repo root). Wired into CI later.
  */
 import { spawnSync } from 'node:child_process';
-import { mkdirSync, rmSync, writeFileSync } from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 
 const repoRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 const eslintBin = path.join(repoRoot, 'node_modules', 'eslint', 'bin', 'eslint.js');
 
+// The virtual fixture paths. The directory name says what they are: scratch
+// space that never exists on disk.
+const FIXTURE_DIR = `boundary-check-tmp-${process.pid}`;
+
 // Under packages/core/tests/ so the eslint.config.js `files` globs match;
 // NOT under packages/core/src/analyzer/providers/ (the SDK carve-out).
-const tmpDir = path.join(repoRoot, 'packages', 'core', 'tests', `boundary-check-tmp-${process.pid}`);
+const TESTS_VIOLATING_PATH = path.join(
+  repoRoot,
+  'packages',
+  'core',
+  'tests',
+  FIXTURE_DIR,
+  'violating.ts',
+);
+const TESTS_CLEAN_PATH = path.join(
+  repoRoot,
+  'packages',
+  'core',
+  'tests',
+  FIXTURE_DIR,
+  'clean.ts',
+);
 
 // Under packages/core/src/worker/ so the worker-scoped boundary rule matches.
-const workerTmpDir = path.join(
+const WORKER_VIOLATING_PATH = path.join(
   repoRoot,
   'packages',
   'core',
   'src',
   'worker',
-  `boundary-check-tmp-${process.pid}`,
+  FIXTURE_DIR,
+  'worker-violating.ts',
+);
+const WORKER_CLEAN_PATH = path.join(
+  repoRoot,
+  'packages',
+  'core',
+  'src',
+  'worker',
+  FIXTURE_DIR,
+  'worker-clean.ts',
 );
 
 const VIOLATING = `import OpenAI from 'openai';
@@ -64,22 +102,27 @@ export const protocol = WORKER_PROTOCOL_ID;
 export const spawnWorker = spawn;
 `;
 
-function runEslint(file) {
-  return spawnSync(process.execPath, [eslintBin, '--no-color', file], {
-    cwd: repoRoot,
-    encoding: 'utf8',
-  });
+/**
+ * Lint one fixture from stdin, under a virtual filename.
+ *
+ * eslint resolves the configuration by the filename, so the rule that applies
+ * is the one the path selects, exactly as it would be for a real file.
+ */
+function runEslint(content, virtualPath) {
+  return spawnSync(
+    process.execPath,
+    [eslintBin, '--no-color', '--stdin', '--stdin-filename', virtualPath],
+    {
+      cwd: repoRoot,
+      encoding: 'utf8',
+      input: content,
+    },
+  );
 }
 
 let failed = false;
 try {
-  mkdirSync(tmpDir);
-  const violatingFile = path.join(tmpDir, 'violating.ts');
-  const cleanFile = path.join(tmpDir, 'clean.ts');
-  writeFileSync(violatingFile, VIOLATING);
-  writeFileSync(cleanFile, CLEAN);
-
-  const violating = runEslint(violatingFile);
+  const violating = runEslint(VIOLATING, TESTS_VIOLATING_PATH);
   if (violating.status !== 1) {
     failed = true;
     console.error(
@@ -97,7 +140,7 @@ try {
     console.log('ok: LLM SDK import outside providers/ is rejected (no-restricted-imports)');
   }
 
-  const clean = runEslint(cleanFile);
+  const clean = runEslint(CLEAN, TESTS_CLEAN_PATH);
   if (clean.status !== 0) {
     failed = true;
     console.error(`FAIL: clean fixture should exit 0, got ${clean.status}\n${clean.stdout}${clean.stderr}`);
@@ -105,13 +148,7 @@ try {
     console.log('ok: clean fixture (node:path only) lints green');
   }
 
-  mkdirSync(workerTmpDir);
-  const workerViolatingFile = path.join(workerTmpDir, 'worker-violating.ts');
-  const workerCleanFile = path.join(workerTmpDir, 'worker-clean.ts');
-  writeFileSync(workerViolatingFile, WORKER_VIOLATING);
-  writeFileSync(workerCleanFile, WORKER_CLEAN);
-
-  const workerViolating = runEslint(workerViolatingFile);
+  const workerViolating = runEslint(WORKER_VIOLATING, WORKER_VIOLATING_PATH);
   if (workerViolating.status !== 1) {
     failed = true;
     console.error(
@@ -129,7 +166,7 @@ try {
     console.log('ok: Sharp import inside worker/ is rejected (no-restricted-imports)');
   }
 
-  const workerClean = runEslint(workerCleanFile);
+  const workerClean = runEslint(WORKER_CLEAN, WORKER_CLEAN_PATH);
   if (workerClean.status !== 0) {
     failed = true;
     console.error(
@@ -141,9 +178,6 @@ try {
 } catch (error) {
   failed = true;
   console.error(`FAIL: unexpected error: ${String(error)}`);
-} finally {
-  rmSync(tmpDir, { recursive: true, force: true });
-  rmSync(workerTmpDir, { recursive: true, force: true });
 }
 
 if (failed) {

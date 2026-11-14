@@ -17,7 +17,7 @@ MANDATORY_DISTRIBUTIONS = ["pillow", "pydantic"]
 
 # The published ranges of those base dependencies, pinned because the ADR
 # amendments and the license audit both name them.
-MANDATORY_REQUIREMENTS = ["pillow<13,>=11", "pydantic<3,>=2.12"]
+MANDATORY_REQUIREMENTS = ["pillow<14,>=13", "pydantic<3,>=2.12"]
 
 # The heavy stack the `vision` extra carries: the encoder that reads a real
 # checkpoint (torch, transformers) and the format the weights loader

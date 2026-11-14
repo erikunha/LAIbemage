@@ -15,12 +15,12 @@ license = "MIT"
 # needs it, and forbids a mandatory GPU, PyTorch, Transformers or MLflow
 # download (docs/vnext/05-PYTHON-CORE-AND-PYPI.md:34). The decision is
 # recorded in the packaging amendments of ADR-011.
-dependencies = ["pydantic>=2.12,<3", "pillow>=11,<13"]
+dependencies = ["pydantic>=2.12,<3", "pillow>=13,<14"]
 
 [project.optional-dependencies]
-# The extra names are frozen. The base install carries Pydantic and nothing
-# else, and every heavy stack lives behind its extra, so the base install
-# never pulls a PyTorch or a Transformers download
+# The extra names are frozen. The base install carries Pydantic and Pillow
+# and nothing else, and every heavy stack lives behind its extra, so the
+# base install never pulls a PyTorch or a Transformers download
 # (docs/vnext/05-PYTHON-CORE-AND-PYPI.md:34, :35).
 #
 # The `vision` extra is the one this ticket fills: the encoder stack that

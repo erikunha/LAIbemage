@@ -77,6 +77,16 @@ export function encodeFrame(frame: object): Buffer {
 export const REDACTED = '[redacted]';
 
 /**
+ * The literal every redacted local path becomes.
+ *
+ * The pack asks the logs and traces to redact the local paths of the user
+ * and to record hashes and ids instead
+ * (`docs/vnext/19-SECURITY-PRIVACY-SUPPLY-CHAIN.md:16`), so a captured
+ * stderr line never carries the directory a file lives in.
+ */
+export const REDACTED_PATH = '[redacted-path]';
+
+/**
  * Secret-bearing names whose VALUE must never reach a log or an error
  * message. Matched case-insensitively in `key=value`, `key: value`,
  * `key="value"`, `key='value'`, `{"key":"value"}` and `{'key': 'value'}`
@@ -126,12 +136,24 @@ const BEARER_PATTERN = /\b(bearer)\s+[A-Za-z0-9._~+/=-]+/gi;
 const PROVIDER_KEY_PATTERN = /\bsk-[A-Za-z0-9_-]{8,}\b/g;
 
 /**
- * Redacts secrets from one stderr line (FR-001: "logs on stderr with secret
- * redaction").
+ * An absolute local path, at the start of the line or after a separator.
  *
- * Every occurrence is replaced; text that names no secret is returned
- * unchanged, so legitimate content (a sha256 digest, a model id, a device
- * name) survives.
+ * The roots are the ones a user path starts with on the platforms this
+ * platform runs on. The path has to begin at a boundary, so the path of a
+ * URL (`https://host/path`) and the path of a message that names a file
+ * inside a word are not touched: the URL is not a local path, and a path
+ * that starts mid-word is not a path a user supplied.
+ */
+const LOCAL_PATH_PATTERN =
+  /(^|[\s"'([=])(?:\/(?:Users|home|Volumes|private|tmp|var|mnt|media|opt)\/[^\s"'<>)\]]*)/g;
+
+/**
+ * Redacts secrets and local paths from one stderr line (FR-001: "logs on
+ * stderr with secret redaction").
+ *
+ * Every occurrence is replaced; text that names no secret and no local
+ * path is returned unchanged, so legitimate content (a sha256 digest, a
+ * model id, a device name) survives.
  */
 export function redactSecrets(text: string): string {
   return text
@@ -141,7 +163,8 @@ export function redactSecrets(text: string): string {
         NON_SECRET_NAMES.has(name.toLowerCase()) ? match : `${leadIn}${REDACTED}`,
     )
     .replace(BEARER_PATTERN, `$1 ${REDACTED}`)
-    .replace(PROVIDER_KEY_PATTERN, REDACTED);
+    .replace(PROVIDER_KEY_PATTERN, REDACTED)
+    .replace(LOCAL_PATH_PATTERN, `$1${REDACTED_PATH}`);
 }
 
 /** One structured stderr record: when it was captured and what it said. */

@@ -468,8 +468,17 @@ class Worker:
             result = handler(frame.params, context)
         except WorkerError as exc:
             self._emit_terminal(state, error=exc)
-        except Exception:
-            self._logger.exception("request %s failed unexpectedly", state.request_id)
+        except Exception as exc:
+            # The log carries the request id and the class of the failure,
+            # never the message and never the traceback: a message may
+            # carry a local path, and the logs of this platform record
+            # hashes and ids instead of local paths
+            # (docs/vnext/19-SECURITY-PRIVACY-SUPPLY-CHAIN.md:16).
+            self._logger.error(
+                "request %s failed unexpectedly (%s)",
+                state.request_id,
+                exc.__class__.__name__,
+            )
             self._emit_terminal(
                 state,
                 error=WorkerError(

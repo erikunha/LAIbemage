@@ -1,18 +1,35 @@
 """The device planner: which device a run uses, and why.
 
+One vocabulary, one resolver. The names live here, the configuration
+reads them, and the capability report asks this planner, so the three
+cannot drift apart and the platform cannot answer a question about the
+device in two different ways.
+
 The CPU is the reference path of this platform
 (docs/vnext/adrs/ADR-017-local-first-hardware.md:9). An accelerator is
 optional, and it is used only when the machine proves it is there: the
 planner asks the environment, not the request.
 
+Three vocabularies, and they are not the same vocabulary:
+
+  - `KNOWN_DEVICES` is every device the platform knows by name. The
+    names come from the device support the registry record carries
+    (docs/vnext/11-VISION-MODEL-REGISTRY-INFERENCE.md:35).
+  - `ADMITTED_DEVICES` is the devices a run may actually use, in the
+    order `auto` prefers them. An accelerator joins this set only when
+    the memory admission and the operator compatibility check the pack
+    asks for are implemented (docs/vnext/05-PYTHON-CORE-AND-PYPI.md:61).
+  - `REQUESTABLE_DEVICES` is what a request may name. `auto` is a
+    request, not a device: it resolves to one of the admitted devices.
+
 Two rules, and they are not the same rule:
 
-  - `auto` FALLS BACK. It resolves to the CPU reference path and records
-    the reason it fell back, because a run that quietly ran somewhere
-    else is a run nobody can reproduce.
-  - an EXPLICIT device is REFUSED when the machine does not have it. A
-    request for an accelerator that is not there fails with its reason
-    instead of running elsewhere.
+  - `auto` FALLS BACK. It resolves to an admitted device and records the
+    reason it fell back, because a run that quietly ran somewhere else
+    is a run nobody can reproduce.
+  - an EXPLICIT device is REFUSED when this build does not admit it. A
+    request for an accelerator this build does not run fails with its
+    reason instead of running somewhere else.
 
 The environment is asked once, and the answer is injectable, so the
 fallback is a property of the planner and not of the machine the tests
@@ -30,13 +47,18 @@ from ..errors import UnsupportedDeviceError
 #: The device the platform references. Every run may use it.
 CPU_DEVICE = "cpu"
 
-#: The devices this platform knows by name. `auto` is a request, not a
-#: device: it resolves to one of the others.
-DEVICE_NAMES: tuple[str, ...] = ("auto", "cpu", "mps", "cuda")
+#: Every device the platform knows by name, admitted or not.
+KNOWN_DEVICES: tuple[str, ...] = ("cpu", "mps", "cuda")
 
-#: The accelerator `auto` prefers. CUDA is a separate runner in this
-#: platform, never the local fallback.
-PREFERRED_ACCELERATOR = "mps"
+#: The devices a run may use, in the order `auto` prefers them. The CPU
+#: is the reference path, and it is the only device this build admits:
+#: admitting an accelerator without the memory admission and the
+#: operator compatibility check would claim a capability the platform
+#: does not have.
+ADMITTED_DEVICES: tuple[str, ...] = (CPU_DEVICE,)
+
+#: What a request may name. `auto` is a request, not a device.
+REQUESTABLE_DEVICES: tuple[str, ...] = ("auto",) + ADMITTED_DEVICES
 
 
 @dataclass(frozen=True)
@@ -45,8 +67,7 @@ class DevicePlan:
 
     `fallback_reason` is set when a request for `auto` did not get the
     device it asked for. It is `None` when there was no fallback: an
-    explicit request that was satisfied, or an `auto` that found the
-    accelerator.
+    explicit request that was satisfied.
     """
 
     device: str
@@ -58,7 +79,8 @@ def probe_available_devices() -> dict[str, bool]:
     """Ask the machine which of the optional devices it has.
 
     The probe never imports torch when torch is not installed, and it
-    never raises: a machine that cannot answer has no accelerator.
+    never raises: a machine that cannot answer has the CPU and nothing
+    else.
     """
     available: dict[str, bool] = {CPU_DEVICE: True}
     try:
@@ -110,59 +132,65 @@ class DevicePlanner:
     @property
     def available(self) -> tuple[str, ...]:
         """The names of the devices this machine has, in a stable order."""
-        return tuple(name for name in DEVICE_NAMES if self._available.get(name, False))
+        return tuple(name for name in KNOWN_DEVICES if self._available.get(name, False))
+
+    @property
+    def admitted(self) -> tuple[str, ...]:
+        """The admitted devices this machine has, in the order of preference."""
+        return tuple(name for name in ADMITTED_DEVICES if self._available.get(name, False))
 
     def plan(self, requested: str) -> DevicePlan:
         """Resolve a requested device, or refuse it with its reason.
 
         @raises UnsupportedDeviceError when the device may not be used.
         """
-        if requested not in DEVICE_NAMES:
+        if requested not in REQUESTABLE_DEVICES:
             raise UnsupportedDeviceError(
                 "the device "
                 + repr(requested)
-                + " is not a device this platform knows ("
-                + ", ".join(DEVICE_NAMES)
-                + ")"
+                + " is not a device this build may run on ("
+                + ", ".join(REQUESTABLE_DEVICES)
+                + "); the devices this platform knows are "
+                + ", ".join(KNOWN_DEVICES)
             )
         if requested == CPU_DEVICE:
             return DevicePlan(
                 device=CPU_DEVICE,
                 reason="the requested device is the CPU reference path",
             )
-        if requested == "auto":
-            return self._plan_auto()
-        if not self._available.get(requested, False):
-            raise UnsupportedDeviceError(
-                "the device "
-                + repr(requested)
-                + " is not available on this machine; the available devices are "
-                + (", ".join(self.available) or "none")
-            )
-        return DevicePlan(
-            device=requested,
-            reason=(
-                "the requested device is "
-                + requested
-                + ", which this machine provides"
-            ),
-        )
+        return self._plan_auto()
 
     def _plan_auto(self) -> DevicePlan:
-        """Resolve `auto`: the accelerator when the machine has one."""
-        if self._available.get(PREFERRED_ACCELERATOR, False):
-            return DevicePlan(
-                device=PREFERRED_ACCELERATOR,
-                reason=(
-                    "auto resolved to "
-                    + PREFERRED_ACCELERATOR
-                    + ", which this machine provides"
-                ),
+        """Resolve `auto`: the best admitted device the machine has.
+
+        The reason of a fallback names the accelerators the platform knows
+        and what the machine has of them, so a reader of the run knows
+        whether the run was a choice the machine made for it.
+        """
+        for name in ADMITTED_DEVICES:
+            if name != CPU_DEVICE and self._available.get(name, False):
+                return DevicePlan(
+                    device=name,
+                    reason="auto resolved to " + name + ", which this machine provides",
+                )
+        accelerators = tuple(name for name in KNOWN_DEVICES if name != CPU_DEVICE)
+        present = tuple(
+            name for name in accelerators if self._available.get(name, False)
+        )
+        if present:
+            detail = (
+                "the machine provides "
+                + ", ".join(present)
+                + ", which this build does not admit"
+            )
+        else:
+            detail = (
+                "the machine provides none of the accelerators this platform knows ("
+                + ", ".join(accelerators)
+                + ")"
             )
         return DevicePlan(
             device=CPU_DEVICE,
             reason="auto resolved to the CPU reference path",
-            fallback_reason=(
-                PREFERRED_ACCELERATOR + " is not available on this machine"
-            ),
+            fallback_reason="this build admits only the CPU reference path; " + detail,
         )

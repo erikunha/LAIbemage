@@ -216,6 +216,13 @@ device and the reason for it, the state of every declared extra (available,
 or which modules are missing), and the package version. The record is
 serializable, so it can be stored next to a result.
 
+The device comes from the device planner, and the planner holds the only
+vocabulary of the platform: `auto` resolves to an admitted device and
+records why it fell back, and an explicit device this build does not
+admit is refused with its reason. This build admits the CPU only, so a
+request for an accelerator fails instead of running somewhere else, and
+the reason of the fallback names the accelerators the machine has.
+
 `datasets.inspect(path)` reads the metadata of one image: width, height, MIME
 type and the sha256 of its bytes. It needs no Node, no server and no network,
 and it reads only the header: the pixels are never decoded and no image

@@ -10,11 +10,22 @@ the machine: which device a run may use, and how it is reached.
 
 from __future__ import annotations
 
-from .device import CPU_DEVICE, DEVICE_NAMES, DevicePlan, DevicePlanner
+from .device import (
+    ADMITTED_DEVICES,
+    CPU_DEVICE,
+    KNOWN_DEVICES,
+    REQUESTABLE_DEVICES,
+    DevicePlan,
+    DevicePlanner,
+    probe_available_devices,
+)
 
 __all__ = [
+    "ADMITTED_DEVICES",
     "CPU_DEVICE",
-    "DEVICE_NAMES",
+    "KNOWN_DEVICES",
+    "REQUESTABLE_DEVICES",
     "DevicePlan",
     "DevicePlanner",
+    "probe_available_devices",
 ]

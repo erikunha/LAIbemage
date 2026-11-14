@@ -142,8 +142,8 @@ one-image-at-a-time run of the same images.
 ## What this does NOT prove
 
 - The platform has run the model on a **GPU**: this ticket is the CPU
-  reference path, and the device planner knows MPS and CUDA but the run
-  above is the CPU.
+  reference path, the device planner admits the CPU only and refuses an
+  accelerator this build does not run, and the run above is the CPU.
 - The embeddings are **calibrated**: the record says `uncalibrated`,
   and no calibrator was fitted. The similarities of the model are not
   probabilities.

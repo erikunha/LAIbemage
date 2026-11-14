@@ -7,7 +7,9 @@ caller can record it next to a result.
 
 Nothing here is claimed beyond what the environment proves: an extra is
 available only when the modules its capability needs are importable, and the
-reason field says why it is not.
+reason field says why it is not. The device is resolved by the device
+planner, the only resolver of the platform, so the report and the run
+cannot disagree about where a run happens.
 """
 
 from __future__ import annotations
@@ -18,6 +20,7 @@ from typing import Mapping
 from pydantic import BaseModel, ConfigDict
 
 from .config import LocalConfig
+from .runtime.device import DevicePlanner
 
 CAPABILITIES_SCHEMA_VERSION = 1
 
@@ -33,15 +36,6 @@ EXTRA_CAPABILITY_MODULES: Mapping[str, tuple[str, ...]] = {
 
 #: Every declared extra, in the order the distribution declares them.
 EXTRA_NAMES: tuple[str, ...] = ("vision", "training", "agents", "server", "all")
-
-#: The CPU reference path every device resolves to in this build.
-CPU_DEVICE = "cpu"
-
-_AUTO_DEVICE_REASON = (
-    "auto resolved to the CPU reference path: this build registers no "
-    "accelerator backend"
-)
-_CPU_DEVICE_REASON = "the requested device is the CPU reference path"
 
 
 class ExtraCapability(BaseModel):
@@ -82,10 +76,19 @@ class Capabilities(BaseModel):
 
 
 def resolve_device(device: str) -> tuple[str, str]:
-    """Resolve a requested device into the device and the reason for it."""
-    if device == "auto":
-        return CPU_DEVICE, _AUTO_DEVICE_REASON
-    return CPU_DEVICE, _CPU_DEVICE_REASON
+    """Resolve a requested device into the device and the reason for it.
+
+    The device planner is the only resolver of the platform: the report
+    and the run ask the same question, so they cannot answer it in two
+    different ways. The planner asks the environment, so a machine with
+    the `vision` extra installed answers with the accelerator it has and
+    the reason the build did not admit it.
+    """
+    plan = DevicePlanner().plan(device)
+    reason = plan.reason
+    if plan.fallback_reason:
+        reason = reason + ": " + plan.fallback_reason
+    return plan.device, reason
 
 
 def _modules_for(extra: str) -> tuple[str, ...]:

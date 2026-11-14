@@ -160,6 +160,56 @@ that proves it (`python/visionlens/tests/test_protocol.py:29`) still passes. The
 still installs no GPU or ML framework, and the metadata test that proves it
 (`python/visionlens/tests/test_build_metadata.py:45`) names the two packages the base carries.
 
+## Amendment 2026-11-14: the device planner admits the CPU only
+
+**Deciders**: @erikunha (the maintainer directed shipping the CPU vision adapter on 2026-11-14;
+the call was delegated to the delivery loop and recorded here).
+
+The CPU vision adapter of VLN-005 asks the machine where a run happens. The pack asks the
+`DevicePlanner` to check MPS availability, available memory and operator compatibility, and
+to accept a CPU fallback with a status
+(`docs/vnext/05-PYTHON-CORE-AND-PYPI.md:61`), and it asks the CPU to be the reference path
+(`docs/vnext/adrs/ADR-017-local-first-hardware.md:9`). The adapter of this ticket runs on the
+CPU, so the planner has to answer for a machine that has an accelerator and for one that has
+not, and the answer must be the same in the capability report and in the run.
+
+**What changes.** There is one device vocabulary and one resolver, in
+`python/visionlens/src/visionlens/runtime/device.py`:
+
+- `KNOWN_DEVICES` is every device the platform knows by name (`cpu`, `mps`, `cuda`), the
+  device support a registry record carries
+  (`docs/vnext/11-VISION-MODEL-REGISTRY-INFERENCE.md:35`);
+- `ADMITTED_DEVICES` is the devices a run may use, in the order `auto` prefers them, and it
+  holds the CPU only;
+- `REQUESTABLE_DEVICES` is what a request may name (`auto` plus the admitted devices), and
+  the configuration reads it instead of carrying a second list
+  (`python/visionlens/src/visionlens/config.py:33`);
+- the capability report asks the planner and reads its answer, instead of resolving the
+  device on its own (`python/visionlens/src/visionlens/capabilities.py:85`).
+
+`auto` resolves to an admitted device and records why it fell back. The reason names the
+accelerators the platform knows and what the machine has of them, so a run on a Mac with MPS
+says that the machine provides MPS and that this build does not admit it. An explicit
+accelerator is refused with its reason: a request for a device this build does not run fails
+instead of running somewhere else.
+
+**What is deferred, and why.** The memory admission and the operator compatibility check the
+pack names for MPS are NOT implemented
+(`docs/vnext/05-PYTHON-CORE-AND-PYPI.md:61`). Admitting MPS without them would claim a
+capability the platform does not have, so MPS is not admitted, and the pack's own rule
+applies: an unsupported device falls back or fails with a reason, never silently
+(`docs/vnext/05-PYTHON-CORE-AND-PYPI.md:56`). The admission is a one-line change: when the
+memory admission and the operator check land, `ADMITTED_DEVICES` grows, `auto` prefers the
+accelerator, and the refusal disappears with it. The device names in the registry record are
+the vocabulary of the models, not a claim that this build runs them.
+
+**What this amendment does not change.** The wire protocol, the ownership boundary, the
+entity rules, the compatibility rules and the security and test obligations stand as
+accepted. The frozen worker vocabulary stays exactly the ten codes it had, and the gate that
+proves it (`python/visionlens/tests/test_protocol.py:29`) still passes. The CPU remains the
+reference path, and the recorded run of the adapter is a CPU run
+(`docs/architecture/vision-adapter.md`).
+
 ## As built today
 
 | Side | Ships | Evidence |
@@ -241,7 +291,7 @@ These gate the first real (non-simulated) ML work; none is claimed as done.
 
 | Area | Acceptance condition | Source |
 |---|---|---|
-| Device planning | `DevicePlanner` checks MPS availability, memory and operator compatibility, accepts a CPU fallback with a status; CUDA optional, isolated in GPU workers | `docs/vnext/05-PYTHON-CORE-AND-PYPI.md:61` |
+| Device planning | `DevicePlanner` checks MPS availability, memory and operator compatibility, accepts a CPU fallback with a status; CUDA optional, isolated in GPU workers; as built the planner admits the CPU only, refuses an accelerator this build does not run and names the accelerators the machine has, and the memory admission and the operator check are deferred (the amendment of 2026-11-14) | `docs/vnext/05-PYTHON-CORE-AND-PYPI.md:61` |
 | Operation fallback | an unsupported operation falls back or fails with a reason, never silently changes method; hashes, split, model revision and device metadata enter every run manifest | `docs/vnext/05-PYTHON-CORE-AND-PYPI.md:56` |
 | Scheduling | `BatchScheduler` reduces batch size on transient exhaustion with bounded attempts and explicit `resource_fallback` events | `docs/vnext/05-PYTHON-CORE-AND-PYPI.md:63` |
 | Training | the `Trainer` checkpoints, reduces batch size or fails explicitly on MPS OOM, and never claims equivalence after a hyperparameter change; a missing calibration is `null`, never 1.0 | `docs/vnext/05-PYTHON-CORE-AND-PYPI.md:64-66` |

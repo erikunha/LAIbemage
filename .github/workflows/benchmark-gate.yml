@@ -72,6 +72,7 @@ jobs:
       - name: Real-data gate (skipped without the dataset)
         env:
           VISION_LENS_DATASETS_DIR: ${{ vars.VISION_LENS_DATASETS_DIR }}
+          VISION_LENS_BENCHMARK_MODEL: ${{ vars.VISION_LENS_BENCHMARK_MODEL }}
         run: |
           set -euo pipefail
           SUITE=visa-subset.v2
@@ -250,6 +251,127 @@ jobs:
           fi
           echo "the planted regression was caught by the gate, with the regressed classes named"
 
+      # ---------------------------------------------------------------------
+      # 3. The scorecard pointer (spec 022, task 7.5).
+      #
+      # The pointer is the PUBLISHED CLAIM over artifacts that are gitignored.
+      # The oracle pointer is rebuilt from the committed fixture and its
+      # digests are asserted against the committed pointer: a pointer that no
+      # longer matches the artifacts it names is a FAILURE, never a warning.
+      # The oracle needs no dataset, so this step always runs.
+      #
+      # The real-data scorecard does NOT need the dataset: the tracked split
+      # and the tracked prediction set are enough, and the image bytes are
+      # never read. The step therefore RUNS on every push, and it prints the
+      # `dataset=absent` marker when no dataset is configured, so the log
+      # records that the image bytes were not verified. CI never downloads
+      # one.
+      # ---------------------------------------------------------------------
+      - name: Scorecard pointer (the oracle is always available)
+        run: |
+          set -euo pipefail
+          pnpm exec tsx scripts/benchmarks/verify-scorecard-pointer.ts
+
+      - name: Real-data scorecard (skipped without the dataset)
+        env:
+          VISION_LENS_DATASETS_DIR: ${{ vars.VISION_LENS_DATASETS_DIR }}
+          VISION_LENS_BENCHMARK_MODEL: ${{ vars.VISION_LENS_BENCHMARK_MODEL }}
+        run: |
+          set -euo pipefail
+          SUITE=visa-subset.v2
+          MODEL="${VISION_LENS_BENCHMARK_MODEL:-gpt-4o}"
+          SPLIT=benchmarks/splits/visa-subset.v2.gold.json
+          BASELINE=benchmarks/baselines/visa-subset.v2.json
+          PREDICTIONS="benchmarks/predictions/${SUITE}.${MODEL}.json"
+          POINTER_DIR=/tmp/scorecard-pointers
+          if [ -z "${VISION_LENS_DATASETS_DIR}" ] || [ ! -d "${VISION_LENS_DATASETS_DIR}" ]; then
+            echo "dataset=absent: the image bytes of the scored items are NOT verified."
+            echo "The scorecard records that as a limitation. No dataset is downloaded by CI (never auto-download)."
+          else
+            echo "dataset=present at ${VISION_LENS_DATASETS_DIR}"
+          fi
+          if [ ! -f "${PREDICTIONS}" ]; then
+            echo "predictions=absent: no prediction set is tracked for ${SUITE}/${MODEL}."
+            echo "There is no scorecard to build, so it is skipped (never a fabricated score)."
+            echo "- Real-data scorecard: SKIPPED, no prediction set is tracked for ${SUITE}/${MODEL}." >> "$GITHUB_STEP_SUMMARY"
+            exit 0
+          fi
+          # The model VERSION is read from the tracked baseline, exactly as the
+          # gate reads it: a version typed here would be a guess, and a
+          # scorecard whose version is a guess is not attributable.
+          # The helper exits 3 when there is NO ACTIVE BASELINE ENTRY (a skip)
+          # and something else when it could not read the file at all (a
+          # failure). A crash must never read as a clean skip, so the two
+          # statuses are told apart: this is the pattern the sibling gate
+          # step uses.
+          set +e
+          MODEL_VERSION="$(node -e '
+            const fs = require("node:fs");
+            const [baselinePath, suite, model] = process.argv.slice(1);
+            const entries = (JSON.parse(fs.readFileSync(baselinePath, "utf8")).entries ?? [])
+              .filter((entry) => entry.status !== "retired"
+                && entry.suite === suite
+                && entry.model === model
+                && typeof entry.modelVersion === "string"
+                && entry.modelVersion !== "");
+            if (entries.length === 0) process.exit(3);
+            entries.sort((a, b) => String(b.generatedAt).localeCompare(String(a.generatedAt)));
+            process.stdout.write(entries[0].modelVersion);
+          ' "${BASELINE}" "${SUITE}" "${MODEL}")"
+          MODEL_VERSION_STATUS=$?
+          set -e
+          if [ "${MODEL_VERSION_STATUS}" -eq 3 ]; then
+            echo "baseline=absent: no active baseline entry for ${SUITE}/${MODEL} in ${BASELINE}."
+            echo "The scorecard would be unattributed, so it is skipped."
+            echo "- Real-data scorecard: SKIPPED, no active baseline entry to attribute it to." >> "$GITHUB_STEP_SUMMARY"
+            exit 0
+          fi
+          if [ "${MODEL_VERSION_STATUS}" -ne 0 ]; then
+            echo "::error::the baseline file ${BASELINE} could not be read"
+            exit 1
+          fi
+          rm -rf "${POINTER_DIR}" /tmp/scorecard-results
+          node packages/cli/dist/index.js benchmark scorecard \
+            --suite "${SUITE}" \
+            --model-id "${MODEL}" \
+            --split "${SPLIT}" \
+            --predictions "${PREDICTIONS}" \
+            --out /tmp/scorecard-results \
+            --pointer-dir "${POINTER_DIR}" \
+            --config-fingerprint ci-real-data \
+            --model-version "${MODEL_VERSION}"
+          POINTER="${POINTER_DIR}/${SUITE}.${MODEL}.json"
+          if [ ! -f "${POINTER}" ]; then
+            echo "::error::the scorecard wrote no pointer at ${POINTER}"
+            exit 1
+          fi
+          # The pointer must name BOTH artifacts with their digests: a pointer
+          # that names one artifact is a pointer that does not prove anything.
+          node -e '
+            const fs = require("node:fs");
+            const pointer = JSON.parse(fs.readFileSync(process.argv[1], "utf8"));
+            const roles = (pointer.artifactRefs ?? []).map((ref) => ref.role).sort();
+            if (roles.join(",") !== "per-sample,scorecard") {
+              console.error("::error::the pointer names " + roles.join(",") + ", expected per-sample,scorecard");
+              process.exit(1);
+            }
+            for (const ref of pointer.artifactRefs) {
+              if (!/^[0-9a-f]{64}$/.test(ref.sha256 ?? "")) {
+                console.error("::error::the pointer carries no digest for " + ref.role);
+                process.exit(1);
+              }
+            }
+            if (!/^[0-9a-f]{64}$/.test(pointer.scorecardSha256 ?? "")) {
+              console.error("::error::the pointer carries no scorecard digest");
+              process.exit(1);
+            }
+            console.log("scorecard pointer: " + pointer.scorecardId);
+          ' "${POINTER}"
+          # The summary states the outcome only after the assertion passed: a
+          # summary that says BUILT after a failed check is a false claim in
+          # the one place a reader trusts without reading the log.
+          echo "- Real-data scorecard: BUILT and ASSERTED over the held-out partition of ${SUITE}." >> "$GITHUB_STEP_SUMMARY"
+
       - name: Job summary
         if: always()
         env:
@@ -265,4 +387,8 @@ jobs:
             fi
             echo "- Fixture-scale end-to-end: split → score → artifact → gate."
             echo "- Planted regression: the step above asserts that the gate failed AND named the regressed classes."
+            echo "- Scorecard pointer: the oracle pointer was rebuilt from the committed fixture and its digests asserted."
+            if [ -z "${VISION_LENS_DATASETS_DIR}" ] || [ ! -d "${VISION_LENS_DATASETS_DIR}" ]; then
+              echo "- The image bytes of the scored items were NOT verified, no dataset is present."
+            fi
           } >> "$GITHUB_STEP_SUMMARY"

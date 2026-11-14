@@ -666,7 +666,172 @@ predictions are re-run against it.
 
 ---
 
-## 9. What is verified, and what is not
+## 9. The scorecard over the held-out partition
+
+The **held-out figure** of this suite is the **scorecard**: it measures the 140
+`test` items of the tracked v2 split and nothing else. The whole-set figure of
+§8 is the **regression reference**. The two are never quoted
+interchangeably, and the gate refuses to compare them (§9.4).
+
+### 9.1 The command
+
+```sh
+vision-lens benchmark scorecard \
+  --suite visa-subset.v2 --model-id gpt-4o \
+  --model-version model:gpt-4o@2024-11-20 \
+  --config-fingerprint <hash> \
+  --predictions benchmarks/predictions/visa-subset.v2.gpt-4o.json
+```
+
+`--model-version` and `--config-fingerprint` are required: a scorecard without
+them is not attributed, so the command refuses it rather than emitting an
+empty field. The dataset is never downloaded by the command; when the tracked
+split is absent it prints `dataset=absent` and exits cleanly.
+
+### 9.2 The published pointer
+
+The pointer of the suite is `benchmarks/scorecards/visa-subset.v2.gpt-4o.json`.
+It records, for each artifact, the relative path, the sha256, the byte count
+and the row count, plus the scorecard digest, the split digests, the regime
+and the command that reproduces the artifacts.
+
+The artifacts themselves (`benchmarks/results/<scorecardId>/`) are
+**gitignored**: the pointer is the published claim over artifacts that are not
+in the repository, and the numbers live in the artifact, not in the pointer.
+The pointer directory is **not** gitignored; only `benchmarks/results/` is.
+
+The out-of-band verification runs over the **oracle** pointer
+(`benchmarks/scorecards/scorecard-oracle.oracle-model.json`), whose clock and
+snapshot are pinned, so its digests can be recomputed from the committed
+fixture and re-hashed from disk
+(`scripts/benchmarks/verify-scorecard-pointer.ts`).
+
+### 9.3 The held-out figure
+
+**MEASURED 2026-11-14** over the **140 `test` items** of the tracked v2
+split, from the tracked prediction set:
+
+| metric | value | n | partition |
+|---|---|---|---|
+| macro F1 | **0.9862** | 140 | `test` |
+| balanced accuracy | **0.9800** | 140 | `test` |
+| accuracy | **0.9857** | 140 | `test` |
+| coverage | **1.0000** | 140 | `test` |
+| ECE | **0.0360** | 140 | `val` (the calibration partition) |
+| macro F1 interval | **[0.9634, 1.0000]** | 140 | `test` |
+
+The per-class rows, each with its support and its own interval:
+
+| class | support | F1 |
+|---|---|---|
+| `normal` | 60 | 0.9836 |
+| `defect:candle` | 20 | 0.9474 |
+| `defect:capsules` | 20 | 1.0000 |
+| `defect:fryum` | 20 | 1.0000 |
+| `defect:pcb1` | 20 | 1.0000 |
+
+The attribution, which is what makes the number a measurement and not a
+hypothesis (ADR-008):
+
+| | |
+|---|---|
+| scorecard id | `visa-subset.v2-gpt-4o-sc-a23c900c504a` |
+| regime | `test-partition` |
+| model | `gpt-4o`, model version `model:gpt-4o@2024-11-20` |
+| config fingerprint | `fp2:3883e2f9a01107f8` |
+| snapshot | `fb15fb9f8863b1c22c1b80e29b6e9b3635553275` |
+| manifest hash | `503c568463739a1522d675a474a219aecc918553315e0ec4e2800c2b10b21bb5` |
+| test split fingerprint | `9e829f6eef009160d4a5b830131702cea4871a2eeac948d070cb265f355a5550` |
+| calibration partition digest | `7007c4e43533707c691efe221c50c9b34fd51e748fd4fba2ec0c6fa23fae9637` |
+| support rule | 10 |
+| interval method | `stratified-item-bootstrap`, 1000 resamples, seed `750367788` |
+| pointer | `benchmarks/scorecards/visa-subset.v2.gpt-4o.json` |
+
+The **limitations** are part of the number, not a footnote to it:
+
+* the partition is **item-level**: the same capture group (the object class)
+  sits in `train` and in `test`, because the upstream release has no session
+  column and a class of 175 images cannot be kept whole in three partitions.
+  The partition therefore cannot prove acquisition-level independence;
+* the interval is the **item-level** bootstrap, so it describes item-level
+  sampling noise only;
+* the probability source is `raw_declared`: the tracked prediction set carries
+  the provider's self-declared confidence, not a calibrated probability
+  (ADR-008). The ECE describes the declared confidence;
+* the **class-level results are exploratory**: the support of each defect
+  class (20) is below the whole-set runner's default of 30, so the per-class
+  intervals are wide and the rows carry the `insufficientSupport` flag;
+* the prediction set is a **single run**: a stochastic model needs several
+  runs over the same partition, each with its own interval, before its
+  numbers are quoted;
+* the image bytes of the 700 manifest items were **not verified** (the
+  dataset is not in the repository); the manifest hash itself was verified;
+* the **device** and the **model size** are recorded as `unknown` rather than
+  estimated;
+* the business loss is `not_estimated`: there is no loss matrix.
+
+The scorecard is over the **140 `test` items** of the v2 split and over
+nothing else. It is **item-level**: the same capture group (the object class)
+sits in `train` and in `test`, because the upstream release has no session
+column and a class of 175 images cannot be kept whole in three partitions. The
+partition therefore cannot prove acquisition-level independence, and the
+scorecard says so in its limitations.
+
+| what the scorecard records | |
+|---|---|
+| the partition | `test`, with its item count and its digest (`testSplitFingerprint`) |
+| the calibration partition | `val` (never `test`: an ECE computed on the measured partition is not a calibration number) |
+| the interval method | `stratified-item-bootstrap`, because the tracked split does not enforce capture groups |
+| the probability source | `raw_declared`: the tracked prediction set carries the provider's self-declared confidence, not a calibrated probability (ADR-008) |
+| the support rule | explicit and recorded; a class below it is excluded from the per-class rows and from the macro F1, and is named with its support |
+| the cost | the measured cost of the predictions, with its rate as-of date |
+| the limitations | the item-level partition, the self-declared confidence, the missing predictions counted as failures, the classes with no support |
+
+The scorecard is a **new artifact**, not a re-stamping of `report.json`: it
+carries its own `protocolVersion` and `schemaVersion`, and the two are never
+read interchangeably.
+
+### 9.4 The two figures, and the gate between them
+
+| figure | what it is | where it lives |
+|---|---|---|
+| the **held-out figure** | the scorecard: the 140 `test` items of the v2 split | `benchmarks/scorecards/visa-subset.v2.gpt-4o.json` (pointer) and the gitignored artifact it names |
+| the **regression reference** | the whole-set measurement of the v2 split: the 700 items, macro F1 0.9734 (§8 and §10) | `benchmarks/baselines/visa-subset.v2.json` |
+
+The gate refuses the comparison between them: a scorecard is a
+**test-partition** number and the baseline is a **whole-set** number, and the
+two can share a split fingerprint, so the split-identity checks alone cannot
+tell them apart. The refusal names both regimes and fails with the code
+`baseline-regime-mismatch`.
+
+The refusal runs when the run under evaluation CARRIES a scorecard, because
+the scorecard owns the regime vocabulary the gate consults
+(`GateOptions.scorecard`). A suite that migrates from the whole-set regime to
+the scorecard regime therefore needs a baseline that carries the scorecard's
+own `regime`: the core gate writes that field only when the run carries a
+scorecard, and the CLI `benchmark gate` command does not carry one yet, so
+the migration is **not available from the command line today**. Until it is,
+a scorecard of this suite is refused against the tracked whole-set baseline,
+and that refusal is the correct outcome: the two numbers are in different
+regimes and must not be compared.
+
+### 9.5 The record the pack asks for
+
+The pack's ticket requires the implementation to identify the schema source,
+the ownership, the effect tier, the idempotency rule and the version of the
+scorecard (`docs/vnext/specs/VLN-008-evaluation-scorecard-v2.md:19`).
+
+| | |
+|---|---|
+| **schema source** | `packages/core/src/benchmark/scorecard.ts` is the single source: the scorecard type, the protocol and schema versions, the error vocabulary and the artifact writer all live there, and the CLI and any future surface share that one implementation (`packages/core/src/benchmark/index.ts:29`) |
+| **ownership** | `@vision-lens/core` owns the scorecard; `packages/cli` owns only the command surface; the artifacts are written by `packages/core` and the pointer by the same writer |
+| **effect tier** | `bounded compute`, side effect `metrics/report` (`docs/vnext/07-CONTRACTS-PROTOCOL.md:39`) |
+| **idempotency** | the scorecard id is derived from the **content** (protocol version, split digests, model version, config fingerprint, prediction digest, calibration partition, bootstrap parameters) and never from the clock, so the same inputs produce the same id. Re-running the command over the same inputs rewrites the same artifacts; the clock value lives in its own field, so a byte-stability comparison can exclude it |
+| **version** | `protocolVersion` `scorecard-v1` and `schemaVersion`, bumped on any breaking change of the scorecard schema. The scorecard is a new artifact beside `report.json`: the existing report stays readable and unchanged |
+
+---
+
+## 10. What is verified, and what is not
 
 | Item | State |
 |---|---|
@@ -679,7 +844,8 @@ predictions are re-run against it.
 | The gold manifest | **COMMITTED**: 700 assignments, `manifestHash 76dee597ea8d42bdba657f37c357cdfc4afc3d3e1de617d90ced7b77e485a0b2`. **Frozen**: it is the v1 split, and all 700 of its assignments are `train`. The generator now emits the v2 schema, so this artifact is reproducible only at the commit that created it (`64a72d1`); its `manifestHash` is still validated on every read. |
 | The v2 split | **COMMITTED**: `benchmarks/splits/visa-subset.v2.gold.json`, strategy `stratified`, 420 train / 140 val / 140 test, `partitionFingerprint 4ac0940380d0283a4ac52bda0884449bc8778ea2605b27c7ef2f26f666b9c963`, regeneration byte-identical, verified against the image bytes on disk |
 | The first real measurement | **MEASURED, THEN RETIRED**: macro F1 0.9795 / balanced accuracy 0.9700 over the 700 items of the **v1** split, which has no held-out set. It is **not** publishable as model performance; the baseline entry carries `status: "retired"` and the reason |
-| The first measurement on the v2 split | **MEASURED 2026-11-12**: macro F1 **0.9734** / balanced accuracy **0.9620** / ECE **0.0362** over the 700 items of the v2 split (gpt-4o, 35 calls, **0.543793 USD** total, 0.000777 USD per image, run capped at 0.80 USD by `--max-usd-micro`; per-batch latency p50 9424.91 ms, p95 12875.46 ms). First baseline recorded: `benchmarks/baselines/visa-subset.v2.json` (gate passed; snapshot `352d250`). It is still a **whole-set** figure over the same 700 items: the v2 partition is locked for future selection, not applied as a filter (the held-out scorecard is `VLN-008`), so it is **not** publishable as model performance either |
+| The first measurement on the v2 split | **MEASURED 2026-11-12**: macro F1 **0.9734** / balanced accuracy **0.9620** / ECE **0.0362** over the 700 items of the v2 split (gpt-4o, 35 calls, **0.543793 USD** total, 0.000777 USD per image, run capped at 0.80 USD by `--max-usd-micro`; per-batch latency p50 9424.91 ms, p95 12875.46 ms). First baseline recorded: `benchmarks/baselines/visa-subset.v2.json` (gate passed; snapshot `352d250`). It is a **whole-set** figure over the same 700 items, and it is the **regression reference** (§9.4), never the held-out figure: the held-out figure is the scorecard, which measures the 140 `test` items alone (§9) |
+| The held-out figure of the v2 split | the **scorecard** over the 140 `test` items (§9). The pointer is committed at `benchmarks/scorecards/visa-subset.v2.gpt-4o.json`; the artifacts it names are gitignored, so the pointer carries the digests and the numbers live in the artifact |
 
 ## References
 

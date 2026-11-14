@@ -7,7 +7,7 @@
  * artifact must FAIL the digest check, never warn.
  */
 
-import { existsSync, mkdtempSync, readFileSync, rmSync, writeFileSync } from 'node:fs';
+import { existsSync, mkdirSync, mkdtempSync, readFileSync, rmSync, writeFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { fileURLToPath } from 'node:url';
 import path from 'node:path';
@@ -259,6 +259,74 @@ describe('the committed pointer (SC-006, FR-015)', () => {
     expect(verification.ok).toBe(false);
     if (verification.ok) return;
     expect(verification.error.message).toContain('rows');
+  });
+});
+
+describe('a failed write leaves no claim behind (FR-015)', () => {
+  /** A pointer path that cannot be written: a directory stands where the file goes. */
+  function blockedPointerPath(): string {
+    const pointerPath = path.join(workDir, 'scorecards', 'scorecard-oracle.oracle-model.json');
+    rmSync(pointerPath, { force: true });
+    mkdirSync(pointerPath, { recursive: true });
+    return pointerPath;
+  }
+
+  it('a failed pointer write leaves neither artifacts nor staging files behind', async () => {
+    const scorecard = buildOracleScorecard();
+    const pointerPath = blockedPointerPath();
+    const outputDir = path.join(workDir, 'results');
+
+    const written = await writeScorecardArtifacts({
+      scorecard,
+      splitManifest: MANIFEST,
+      predictions: fixture.predictions,
+      outputDir,
+      pointerPath,
+      pathBase: workDir,
+      reproduce: { command: 'vision-lens benchmark scorecard (see the suite docs)' },
+    });
+
+    expect(written.ok).toBe(false);
+    if (written.ok) return;
+    expect(written.error.code).toBe('artifact-write-failed');
+    // The artifacts of a run that never published a pointer are orphans: gone.
+    expect(existsSync(path.join(outputDir, scorecard.scorecardId))).toBe(false);
+    // The staging file of the failed pointer is gone too.
+    expect(existsSync(`${pointerPath}.tmp`)).toBe(false);
+  });
+
+  it('a failed rerun keeps the artifacts a published pointer names', async () => {
+    const first = await writeAll();
+    const publishedScorecard = readFileSync(first.scorecardPath, 'utf8');
+    const pointerPath = blockedPointerPath();
+    const scorecard = buildOracleScorecard();
+
+    const written = await writeScorecardArtifacts({
+      scorecard: {
+        ...scorecard,
+        generatedAt: new Date('2026-11-12T00:00:00.000Z').toISOString(),
+      },
+      splitManifest: MANIFEST,
+      predictions: fixture.predictions,
+      outputDir: path.join(workDir, 'results'),
+      pointerPath,
+      pathBase: workDir,
+      reproduce: { command: 'vision-lens benchmark scorecard (see the suite docs)' },
+    });
+
+    expect(written.ok).toBe(false);
+    if (written.ok) return;
+    expect(written.error.code).toBe('artifact-write-failed');
+    // The artifacts of the published run survive a later failed run: a failed
+    // run never deletes what a published pointer still names.
+    expect(existsSync(first.perSamplePath)).toBe(true);
+    expect(existsSync(first.scorecardPath)).toBe(true);
+    // And the scorecard artifact is the PUBLISHED one, byte for byte: the
+    // pointer was not renamed, so it still names the bytes it named, and the
+    // run that failed must not have replaced them. The scorecard artifact
+    // carries the clock, so a rerun would otherwise write different bytes and
+    // leave the published pointer naming a digest that is no longer on disk.
+    expect(readFileSync(first.scorecardPath, 'utf8')).toBe(publishedScorecard);
   });
 });
 

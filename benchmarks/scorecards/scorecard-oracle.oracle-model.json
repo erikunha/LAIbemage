@@ -1,0 +1,36 @@
+{
+  "protocolVersion": "scorecard-v1",
+  "scorecardId": "scorecard-oracle-oracle-model-sc-7acf72ed6c62",
+  "suite": "scorecard-oracle",
+  "model": "oracle-model",
+  "modelVersion": "model:oracle@1.0.0",
+  "configFingerprint": "fp2:oracle00000001",
+  "snapshotId": "oracle-snapshot-0001",
+  "regime": "test-partition",
+  "manifestSha256": "980fcfb5121e3b7a79193a1cc462d7b245ea8487ca2bfcab6515b1430ca8df13",
+  "testSplitFingerprint": "6f59c5ec93d87bb4ce62734dfbeeed9353c6db926ac30f3b3c3d3a6ce64911a2",
+  "pathBase": ".",
+  "artifactRefs": [
+    {
+      "role": "per-sample",
+      "path": "benchmarks/results/scorecard-oracle-oracle-model-sc-7acf72ed6c62/per-sample.jsonl",
+      "sha256": "40d0a707040928b434aad65ae6884f4fc74d68efa55169d964943f3174724066",
+      "bytes": 6240,
+      "rows": 36,
+      "tracked": false
+    },
+    {
+      "role": "scorecard",
+      "path": "benchmarks/results/scorecard-oracle-oracle-model-sc-7acf72ed6c62/scorecard.json",
+      "sha256": "f283f0cf596239cad7fc35be1a35c14be3588c7e8c502a84403151da23e07c2a",
+      "bytes": 10385,
+      "rows": 1,
+      "tracked": false
+    }
+  ],
+  "scorecardSha256": "f283f0cf596239cad7fc35be1a35c14be3588c7e8c502a84403151da23e07c2a",
+  "reproduce": {
+    "command": "pnpm exec tsx scripts/benchmarks/verify-scorecard-pointer.ts --write",
+    "note": "the oracle pointer is rebuilt from the committed fixture; the artifacts are gitignored and the digests above are the published claim"
+  }
+}

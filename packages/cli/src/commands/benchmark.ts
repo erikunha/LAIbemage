@@ -1,13 +1,16 @@
 /**
- * `vision-lens benchmark run|gate|report` — the spec-003 benchmark surface (US3, US4).
+ * `vision-lens benchmark run|gate|report|scorecard`: the spec-003 benchmark
+ * surface (US3, US4) and the spec-022 scorecard surface.
  *
- * ## The three commands
+ * ## The four commands
  *
- *  - `run`   — score a prediction set against a gold split and emit the
- *              attributed artifacts under `benchmarks/results/<runId>/`.
- *  - `gate`  — compare a run against the stored baseline and fail the build
- *              when the macro F1 regressed beyond the tolerance.
- *  - `report`— print a stored artifact as a compact summary.
+ *  - `run`      : score a prediction set against a gold split and emit the
+ *                 attributed artifacts under `benchmarks/results/<runId>/`.
+ *  - `gate`     : compare a run against the stored baseline and fail the build
+ *                 when the macro F1 regressed beyond the tolerance.
+ *  - `report`   : print a stored artifact as a compact summary.
+ *  - `scorecard`: measure the held-out `test` partition and publish the
+ *                 per-sample artifact, the scorecard and the committed pointer.
  *
  * ## What this command refuses to do
  *
@@ -16,6 +19,9 @@
  * absent it prints an explicit `dataset=absent` marker and exits cleanly —
  * a missing dataset is a skip, not a failure, and it is certainly not a
  * reason to fabricate a score.
+ *
+ * The scorecard command adds one more refusal: a typed failure never writes
+ * a scorecard. A refused scorecard is a refusal, not a zero.
  */
 
 import { execFileSync } from 'node:child_process';
@@ -24,17 +30,25 @@ import { existsSync, readdirSync, readFileSync, statSync } from 'node:fs';
 import path from 'node:path';
 import type {
   BenchmarkReport,
+  DatasetRegistry,
   GateResult,
   GoldItem,
   MetricsResult,
   PredictionItem,
+  ScorecardDeviceInput,
   SplitAssignment,
   SplitManifest,
 } from '@vision-lens/core/benchmark';
 import {
+  buildScorecard,
   captureEnv,
+  defaultScorecardPointerPath,
   evaluateGate,
+  findDataset,
+  loadDatasetRegistry,
   runBenchmark,
+  writeScorecardArtifacts,
+  assertDatasetUsable,
   DEFAULT_GATE_TOLERANCE,
 } from '@vision-lens/core/benchmark';
 import { logger } from '@vision-lens/core/utils/logger';
@@ -65,6 +79,51 @@ export interface BenchmarkRunOptions {
   /** The config fingerprint the run used. */
   readonly configFingerprint?: string;
   /** Mark the run as partial (e.g. a provider outage). */
+  readonly partial?: boolean;
+  /** Extra non-secret environment facts to record in the artifact. */
+  readonly env?: Readonly<Record<string, string>>;
+}
+
+/**
+ * Options of the `vision-lens benchmark scorecard` command.
+ *
+ * The scorecard measures ONE partition: the held-out `test` partition of the
+ * split it is given. The partition under evaluation is not a choice (FR-002),
+ * so what the caller selects here is the SPLIT (the partition set), the
+ * partition the ECE is computed on, the device, the support rule and where
+ * the committed pointer lands.
+ */
+export interface BenchmarkScorecardOptions {
+  readonly suite: string;
+  readonly model: string;
+  /** Path of the split manifest (gold split). */
+  readonly splitPath?: string;
+  /**
+   * The partition the ECE is computed on. Defaults to `val`.
+   *
+   * The `test` partition is refused by the scorecard itself: an ECE computed
+   * on the partition the score is measured on is not a calibration number.
+   */
+  readonly calibrationPartition?: string;
+  /** Path of the predictions file (JSON array of `PredictionItem`). */
+  readonly predictionsPath?: string;
+  /** The device the predictions were produced on (e.g. `cpu`, `mps`). */
+  readonly device?: string;
+  /** The explicit support rule: a class below it is excluded from the rows. */
+  readonly minSupport?: number;
+  /** Where the artifacts are written. Defaults to the gitignored results dir. */
+  readonly outputDir?: string;
+  /** Where the committed pointer lands. Defaults to `benchmarks/scorecards/`. */
+  readonly pointerDir?: string;
+  /** The code snapshot the scorecard belongs to. Defaults to the git HEAD. */
+  readonly snapshotId?: string;
+  /** The manifest hash of the split the scorecard is measured against. */
+  readonly splitFingerprint?: string;
+  /** The model identity AND version. */
+  readonly modelVersion?: string;
+  /** The config fingerprint the scorecard used. */
+  readonly configFingerprint?: string;
+  /** Mark the scorecard as partial (e.g. a provider outage). */
   readonly partial?: boolean;
   /** Extra non-secret environment facts to record in the artifact. */
   readonly env?: Readonly<Record<string, string>>;
@@ -296,6 +355,273 @@ export async function runBenchmarkCommand(options: BenchmarkRunOptions): Promise
     logger.warn(caveat);
   }
   return true;
+}
+
+/**
+ * The outcome of the `vision-lens benchmark scorecard` command.
+ *
+ * The three outcomes are three different things, and the caller must not
+ * confuse them: a written scorecard, a clean skip (the dataset is absent) and
+ * a refusal (the scorecard was asked for and could not be produced).
+ *
+ * The refusal code is the scorecard's own code (`ScorecardErrorCode`), except
+ * for `dataset-not-usable`: the constitutional dataset gate raises that one
+ * before the scorecard is even built, and its message carries the gate's own
+ * wording.
+ */
+export type ScorecardCommandOutcome =
+  | {
+      readonly status: 'written';
+      readonly scorecardId: string;
+      readonly pointerPath: string;
+    }
+  | { readonly status: 'skipped' }
+  | { readonly status: 'refused'; readonly code: string; readonly message: string };
+
+/**
+ * The device facts of the scorecard.
+ *
+ * The caller has a string (a backend name, a machine name), so the kind is
+ * recognised when it is one of the three backends the scorecard knows and
+ * the string itself is recorded as the name. Anything else is recorded as
+ * `unknown` with a limitation: the scorecard never guesses a device.
+ */
+function scorecardDeviceInput(device: string | undefined): ScorecardDeviceInput | undefined {
+  if (device === undefined) return undefined;
+  const trimmed = device.trim();
+  if (trimmed === '') return undefined;
+  if (trimmed === 'cpu' || trimmed === 'mps' || trimmed === 'cuda') {
+    return { kind: trimmed };
+  }
+  return { kind: 'unknown', name: trimmed };
+}
+
+/**
+ * The command that reproduces the artifacts of a scorecard.
+ *
+ * It carries every option the scorecard depends on, so running it as it
+ * stands rebuilds the same measurement: the required attribution options
+ * (`--model-version`, `--config-fingerprint`) and the inputs (the split, the
+ * predictions) are part of it, and the optional ones are recorded only when
+ * they were used.
+ *
+ * The snapshot is ALWAYS recorded, even when the caller defaulted it: the
+ * default is the current HEAD, which moves, so a command that left it out
+ * would reproduce the measurement against another code state and name
+ * another snapshot than the pointer it ships with.
+ */
+function scorecardReproduceCommand(
+  options: BenchmarkScorecardOptions,
+  splitPath: string,
+  snapshotId: string,
+): string {
+  const parts = [
+    'vision-lens benchmark scorecard',
+    `--suite ${options.suite}`,
+    `--model-id ${options.model}`,
+    `--split ${splitPath}`,
+    `--snapshot-id ${snapshotId}`,
+  ];
+  if (options.predictionsPath !== undefined) {
+    parts.push(`--predictions ${options.predictionsPath}`);
+  }
+  if (options.modelVersion !== undefined) {
+    parts.push(`--model-version ${options.modelVersion}`);
+  }
+  if (options.configFingerprint !== undefined) {
+    parts.push(`--config-fingerprint ${options.configFingerprint}`);
+  }
+  if (options.calibrationPartition !== undefined) {
+    parts.push(`--calibration-partition ${options.calibrationPartition}`);
+  }
+  if (options.device !== undefined) {
+    parts.push(`--device ${options.device}`);
+  }
+  if (options.minSupport !== undefined) {
+    parts.push(`--min-support ${options.minSupport}`);
+  }
+  if (options.splitFingerprint !== undefined) {
+    parts.push(`--split-fingerprint ${options.splitFingerprint}`);
+  }
+  if (options.partial === true) {
+    parts.push('--partial');
+  }
+  return parts.join(' ');
+}
+
+/**
+ * `vision-lens benchmark scorecard`: measure the held-out partition and
+ * publish the per-sample artifact, the scorecard and the committed pointer.
+ *
+ * The scorecard is the held-out figure: it measures the `test` partition of
+ * the split it is given, the ECE comes from another partition, and the
+ * pointer records the digest of every artifact it wrote.
+ */
+export async function runScorecardCommand(
+  options: BenchmarkScorecardOptions,
+): Promise<ScorecardCommandOutcome> {
+  const splitPath = trackedSplitPath(options.suite, options.splitPath);
+
+  if (!existsSync(splitPath)) {
+    logger.warn(`${DATASET_ABSENT_MARKER}: no split manifest at ${splitPath}.`);
+    logger.warn(
+      'benchmark scorecard skipped: fetch the dataset and generate the gold split first.',
+    );
+    return { status: 'skipped' };
+  }
+
+  const manifest = readJsonFile<SplitManifest>(splitPath);
+
+  // The split fingerprint IS the manifest hash: a scorecard measured against
+  // a split it does not name would be attributed to a partition it was never
+  // measured on.
+  if (
+    options.splitFingerprint !== undefined &&
+    options.splitFingerprint !== manifest.manifestHash
+  ) {
+    throw new Error(
+      `the split fingerprint '${options.splitFingerprint}' does not match the manifest ` +
+        `'${manifest.id}', whose hash is '${manifest.manifestHash}'. Refusing to attribute a ` +
+        'scorecard to a split it was not measured against.',
+    );
+  }
+
+  if (options.predictionsPath === undefined) {
+    throw new Error(
+      'no predictions: pass --predictions <file> (a JSON array of predictions). ' +
+        'The scorecard never invents predictions.',
+    );
+  }
+  if (!existsSync(options.predictionsPath)) {
+    throw new Error(`predictions file not found: ${options.predictionsPath}`);
+  }
+  const predictions = readJsonFile<PredictionItem[]>(options.predictionsPath);
+
+  // The dataset registry is the constitutional gate: the scorecard only
+  // exists for a dataset the platform is allowed to use.
+  let registry: DatasetRegistry;
+  try {
+    registry = await loadDatasetRegistry(path.join('datasets', 'registry.json'));
+  } catch (error) {
+    // The registry is read by its repository-relative path, so the command
+    // runs FROM the repository root. A gate that cannot read its input
+    // refuses: it never scores without it.
+    throw new Error(
+      `the dataset registry could not be read at 'datasets/registry.json': ` +
+        `${error instanceof Error ? error.message : String(error)}. The command reads the ` +
+        'repository files by their repository-relative paths, so it runs FROM the repository ' +
+        'root.',
+      { cause: error },
+    );
+  }
+  const datasetEntry = findDataset(registry, manifest.datasetId);
+
+  // The constitutional gate itself, the same one the fetch and the normalise
+  // paths apply: a dataset recorded as research-only, or one whose license
+  // forbids commercial use, may be documented but never scored. The refusal
+  // keeps the gate's own wording, so a constitutional refusal is never
+  // hidden behind a wrong label.
+  try {
+    assertDatasetUsable(datasetEntry);
+  } catch (error) {
+    const message = error instanceof Error ? error.message : String(error);
+    logger.error('scorecard refused: dataset-not-usable');
+    logger.error(message);
+    return { status: 'refused', code: 'dataset-not-usable', message };
+  }
+
+  const device = scorecardDeviceInput(options.device);
+
+  // The snapshot is resolved BEFORE the scorecard is built, so the scorecard
+  // and the recorded command name the SAME snapshot. The default is the
+  // current HEAD, which moves: a command that left the default out would
+  // reproduce the measurement against another code state.
+  const snapshotId = options.snapshotId ?? currentSnapshotId();
+
+  const result = buildScorecard({
+    suite: options.suite,
+    model: options.model,
+    tuple: {
+      snapshotId,
+      splitFingerprint: options.splitFingerprint ?? manifest.manifestHash,
+      modelVersion: options.modelVersion ?? '',
+      configFingerprint: options.configFingerprint ?? '',
+      // The environment capture is part of the attribution (ADR-008): a
+      // scorecard with an EMPTY environment field is not attributed. Only
+      // non-secret facts are recorded.
+      env: captureEnv(options.env),
+    },
+    splitManifest: manifest,
+    predictions,
+    datasetEntry,
+    ...(options.calibrationPartition === undefined
+      ? {}
+      : { calibrationPartition: options.calibrationPartition }),
+    ...(device === undefined ? {} : { device }),
+    ...(options.minSupport === undefined ? {} : { minSupport: options.minSupport }),
+    ...(options.partial === undefined ? {} : { partial: options.partial }),
+    assetHashes: computeAssetHashes(manifest, manifest.datasetId),
+  });
+
+  if (!result.ok) {
+    // A typed failure is a refusal: the scorecard is NOT written and the
+    // code is printed, so the caller can act on it.
+    logger.error(`scorecard refused: ${result.error.code}`);
+    logger.error(result.error.message);
+    if (result.error.detail !== undefined) {
+      logger.error(result.error.detail);
+    }
+    return { status: 'refused', code: result.error.code, message: result.error.message };
+  }
+
+  const pointerPath =
+    options.pointerDir === undefined
+      ? defaultScorecardPointerPath(options.suite, options.model)
+      : path.join(
+          options.pointerDir,
+          path.basename(defaultScorecardPointerPath(options.suite, options.model)),
+        );
+
+  const written = await writeScorecardArtifacts({
+    scorecard: result.scorecard,
+    splitManifest: manifest,
+    predictions,
+    pointerPath,
+    ...(options.outputDir === undefined ? {} : { outputDir: options.outputDir }),
+    reproduce: {
+      // The recorded command must be RUNNABLE: it carries every option the
+      // scorecard depends on, including the required attribution ones, or it
+      // reproduces nothing.
+      command: scorecardReproduceCommand(options, splitPath, snapshotId),
+    },
+  });
+
+  if (!written.ok) {
+    logger.error(`scorecard refused: ${written.error.code}`);
+    logger.error(written.error.message);
+    return { status: 'refused', code: written.error.code, message: written.error.message };
+  }
+
+  const scorecard = written.scorecardWithRefs;
+  logger.success(`scorecard ${scorecard.scorecardId}`);
+  logger.info(`partition: ${scorecard.split.evaluatedPartition}`);
+  logger.info(`items scored: ${scorecard.coverage.scored}`);
+  for (const metric of scorecard.metrics) {
+    logger.info(
+      `${metric.name}: ${formatNumber(metric.value)} (n=${metric.n}, ${metric.partition})`,
+    );
+  }
+  logger.info(`per-sample: ${written.perSamplePath}`);
+  logger.info(`scorecard: ${written.scorecardPath}`);
+  logger.info(`pointer: ${written.pointerPath}`);
+  for (const limitation of scorecard.limitations) {
+    logger.warn(limitation);
+  }
+  return {
+    status: 'written',
+    scorecardId: scorecard.scorecardId,
+    pointerPath: written.pointerPath,
+  };
 }
 
 /**

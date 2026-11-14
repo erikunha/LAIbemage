@@ -624,6 +624,78 @@ benchmark
     }
   });
 
+benchmark
+  .command('scorecard')
+  .description(
+    'Measure the held-out test partition and publish the scorecard artifacts and the pointer',
+  )
+  .helpOption(true)
+  .requiredOption('--suite <name>', 'The benchmark suite (e.g. visa-subset.v2)')
+  .requiredOption('--model-id <name>', 'The model that produced the predictions')
+  .option('--split <file>', 'Path of the gold split manifest')
+  .option(
+    '--calibration-partition <name>',
+    'Partition the ECE is computed on (never the test partition)',
+    'val',
+  )
+  .option('--predictions <file>', 'Path of the predictions file (JSON array of predictions)')
+  .option('--device <name>', 'The device the predictions were produced on (e.g. cpu, mps)')
+  .option('--min-support <n>', 'Explicit support rule: a class below it is excluded')
+  .option('--out <dir>', 'Directory the artifacts are written to')
+  .option('--pointer-dir <dir>', 'Directory the committed pointer is written to')
+  .option('--snapshot-id <id>', 'Code snapshot the scorecard belongs to (defaults to the git HEAD)')
+  .option('--split-fingerprint <hash>', 'Split fingerprint (defaults to the manifest hash)')
+  .requiredOption(
+    '--model-version <version>',
+    'Model identity AND version (mandatory: a scorecard without the version is not attributable)',
+  )
+  .requiredOption(
+    '--config-fingerprint <hash>',
+    'Config fingerprint the scorecard used (mandatory: a scorecard without it is not attributed)',
+  )
+  .option('--partial', 'Mark the scorecard as partial (e.g. a provider outage)', false)
+  .action(async (opts: Record<string, string | boolean>) => {
+    try {
+      const { runScorecardCommand } = await import('./commands/benchmark.js');
+      const outcome = await runScorecardCommand({
+        suite: opts['suite'] as string,
+        model: opts['modelId'] as string,
+        ...(opts['split'] === undefined ? {} : { splitPath: opts['split'] as string }),
+        ...(opts['calibrationPartition'] === undefined
+          ? {}
+          : { calibrationPartition: opts['calibrationPartition'] as string }),
+        ...(opts['predictions'] === undefined
+          ? {}
+          : { predictionsPath: opts['predictions'] as string }),
+        ...(opts['device'] === undefined ? {} : { device: opts['device'] as string }),
+        ...(opts['minSupport'] === undefined
+          ? {}
+          : { minSupport: parseInt(opts['minSupport'] as string, 10) }),
+        ...(opts['out'] === undefined ? {} : { outputDir: opts['out'] as string }),
+        ...(opts['pointerDir'] === undefined ? {} : { pointerDir: opts['pointerDir'] as string }),
+        ...(opts['snapshotId'] === undefined ? {} : { snapshotId: opts['snapshotId'] as string }),
+        ...(opts['splitFingerprint'] === undefined
+          ? {}
+          : { splitFingerprint: opts['splitFingerprint'] as string }),
+        ...(opts['modelVersion'] === undefined
+          ? {}
+          : { modelVersion: opts['modelVersion'] as string }),
+        ...(opts['configFingerprint'] === undefined
+          ? {}
+          : { configFingerprint: opts['configFingerprint'] as string }),
+        partial: Boolean(opts['partial']),
+      });
+      // A refusal is a failure: the scorecard was asked for and could not be
+      // produced. A skip (the dataset is absent) is not.
+      if (outcome.status === 'refused') {
+        process.exit(1);
+      }
+    } catch (error) {
+      logger.error(String((error as Error).message));
+      process.exit(1);
+    }
+  });
+
 program.parseAsync(process.argv);
 
 // Exported for the `@vision-lens/sdk/cli` re-export shim (library consumers

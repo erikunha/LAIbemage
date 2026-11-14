@@ -24,6 +24,10 @@ output/
 datasets/*/
 benchmarks/results/
 
+# Scorecard pointer staging files: the writer stages each file next to its
+# final name and renames it into place, so a crash can leave a `.tmp` sibling.
+benchmarks/scorecards/*.tmp
+
 
 # OS / editor
 .DS_Store

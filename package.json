@@ -36,6 +36,8 @@
     "benchmark:fixture-dataset": "tsx scripts/benchmarks/make-fixture-dataset.ts",
     "benchmark:run": "pnpm --filter @vision-lens/core --filter @vision-lens/cli run build && node packages/cli/dist/index.js benchmark run",
     "benchmark:gate": "pnpm --filter @vision-lens/core --filter @vision-lens/cli run build && node packages/cli/dist/index.js benchmark gate",
+    "benchmark:scorecard": "pnpm --filter @vision-lens/core --filter @vision-lens/cli run build && node packages/cli/dist/index.js benchmark scorecard",
+    "benchmark:scorecard:verify": "tsx scripts/benchmarks/verify-scorecard-pointer.ts",
     "datasets:fetch-visa": "tsx scripts/datasets/fetch-visa.ts",
     "datasets:normalize-visa": "tsx scripts/datasets/normalize-visa.ts",
     "docs:generate": "typedoc",

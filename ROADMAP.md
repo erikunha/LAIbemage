@@ -177,7 +177,7 @@ train definition (R0 to R9) is `docs/vnext/23-RELEASE-ROADMAP.md`.
 
 ```mermaid
 flowchart LR
-  R2[["R2 Data Foundation<br/>partially shipped<br/>021 done · 022 partially shipped"]] --> R3["R3 Visual Embeddings<br/>open · no ticket yet"]
+  R2[["R2 Data Foundation<br/>shipped<br/>021 done · 022 shipped"]] --> R3["R3 Visual Embeddings<br/>open · no ticket yet"]
   R3 --> R4["R4 Model Arena<br/>open · no ticket yet"]
   R4 --> R5["R5 Training Flywheel<br/>open · 023 not started"]
   R2 --> R4
@@ -193,7 +193,7 @@ milestone: the leakage-resistant split and the scorecard gate what R3 through R7
 |---|---|---|---|
 | R0 Reconcile | reconciliation record, baseline, the Python-first decision (015, 016) | zero lost work; green baseline; signed reconciliation | 015 done · 016 divergence recorded, maintainer decision pending |
 | R1 Python Library | public `visionlens` wheel (017), JSONL worker protocol (018), CPU vision adapter (019), TS facade (020) | the wheel works without Node; TS and Python reach golden parity | 017 and 018 partially shipped · 019 not started · 020 divergence recorded, maintainer decision pending |
-| R2 Data Foundation | leakage-resistant split (021), evaluation scorecard v2 (022) | nonempty train/val/test; source, license and hash gating | 021 done · 022 partially shipped |
+| R2 Data Foundation | leakage-resistant split (021), evaluation scorecard v2 (022) | nonempty train/val/test; source, license and hash gating | 021 done · 022 shipped |
 | R3 Visual Embeddings | no ticket in this series yet | Recall@k test; hardware profiling; index mismatch tests | not started |
 | R4 Model Arena | no ticket in this series yet | identical locked test set; per-class plus cost and latency reports | not started |
 | R5 Training Flywheel | encoder plus linear probe baseline (023) | active learning vs random; independent holdout delta | not started |
@@ -212,7 +212,7 @@ Spec-level statuses (post-audit, 2026-11-12):
 | 019 | VLN-005 | R1 | one CPU vision adapter with golden predictions and fingerprints | not started |
 | 020 | VLN-006 | R1 | TypeScript facade over the Python worker, old CLI path preserved | divergence recorded, maintainer decision pending: the facade module it names (`packages/core/src/facade/`) never landed; the TS host client shipped inside the worker module as-built |
 | 021 | VLN-007 | R2 | leakage-resistant train/val/test partition and the gate that protects it | done |
-| 022 | VLN-008 | R2 | evaluation scorecard: held-out metrics, calibration, per-sample artifacts | partially shipped: the scorecard module, the regime gate and five suites landed; the CLI surface, the committed pointer directory and the docs still open |
+| 022 | VLN-008 | R2 | evaluation scorecard: held-out metrics, calibration, per-sample artifacts | shipped: the scorecard module, the regime gate and five suites, the `benchmark scorecard` CLI command with its typed refusals, the committed pointer directory and the documentation of the held-out figure landed. The CLI `benchmark gate` carries no scorecard yet, so a suite cannot migrate from the whole-set regime to the scorecard regime from the command line yet |
 | 023 | VLN-009 | R5 | local encoder plus linear probe baseline, recorded on CPU and MPS | not started |
 | 024 | VLN-010 | R6 | thin npm remote client with no heavy transitives | not started |
 | 025 | VLN-011 | R6 | read-only Studio Arena slice over the controlled API | not started |

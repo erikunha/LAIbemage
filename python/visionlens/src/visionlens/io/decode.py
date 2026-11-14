@@ -241,7 +241,21 @@ class DecodeService:
 
         @raises ImageMetadataUnreadableError when the file is incomplete.
         """
+        try:
+            size_bytes = path.stat().st_size
+        except OSError as exc:
+            raise ImageMetadataUnreadableError(
+                "the file '" + str(path) + "' could not be read: " + str(exc)
+            ) from exc
         if mime_type == "image/jpeg":
+            if size_bytes < 4:
+                raise ImageMetadataUnreadableError(
+                    "the file '"
+                    + str(path)
+                    + "' is too short to be a JPEG: it carries "
+                    + str(size_bytes)
+                    + " bytes"
+                )
             with path.open("rb") as handle:
                 handle.seek(-2, 2)
                 tail = handle.read(2)
@@ -254,6 +268,14 @@ class DecodeService:
                 )
             return
         if mime_type == "image/png":
+            if size_bytes < 12:
+                raise ImageMetadataUnreadableError(
+                    "the file '"
+                    + str(path)
+                    + "' is too short to be a PNG: it carries "
+                    + str(size_bytes)
+                    + " bytes"
+                )
             with path.open("rb") as handle:
                 handle.seek(-12, 2)
                 tail = handle.read(12)
@@ -271,6 +293,11 @@ class DecodeService:
         @raises ImageMetadataUnreadableError when the file cannot be read.
         """
         from PIL import Image, UnidentifiedImageError
+
+        # The cap of the platform is the cap of the decoder: Pillow's own
+        # guard is raised to it, so the number the documentation names is
+        # the number that is enforced.
+        Image.MAX_IMAGE_PIXELS = MAX_IMAGE_PIXELS
 
         try:
             picture = Image.open(path)

@@ -1,5 +1,5 @@
 {
-  "artifactDigest": "acf7cc13d734890166fa262eb446a0c0a01e5e8c4b6be32d6930a21911c6efb0",
+  "artifactDigest": "4f706336517e10f7194963241c623af1d5039f4fc74fb3bc9c7479bfeaaf586a",
   "assetSha256": [
     "1801222d565af4d4f8b2e8e1a437d2d8c020c0362002420c61ae499a0dd4bada",
     "1cc9c87ccfdccf160cce189077c9e96ae86f5d554070bd61d9ce0168440a7c10",
@@ -10,20 +10,20 @@
   ],
   "calibrationStatus": "uncalibrated",
   "count": 6,
-  "createdAt": "2026-11-14T18:03:44.236Z",
+  "createdAt": "2026-11-14T18:34:41.080Z",
   "device": "cpu",
   "dimension": 768,
   "dtype": "float32",
-  "embeddingRunId": "embed-5d2de89cc5b0412aaca9a1a5f6180613",
+  "embeddingRunId": "embed-01eb91fb331b4d57964bdb8686d7aeff",
   "latency": {
     "count": 6,
-    "p50Ms": 2460.457,
-    "p95Ms": 2460.457,
-    "totalMs": 14762.744
+    "p50Ms": 650.56,
+    "p95Ms": 650.56,
+    "totalMs": 3903.361
   },
   "license": "apache-2.0",
   "modelId": "siglip2-base",
-  "peakMemoryBytes": 748814336,
+  "peakMemoryBytes": 863649792,
   "preprocessingComponents": {
     "interpolation": "bilinear",
     "normalize": {
@@ -49,14 +49,14 @@
   "preprocessingFingerprint": "fp2:83adc4ef99979644",
   "revision": "75de2d55ec2d0b4efc50b3e9ad70dba96a7b2fa2",
   "runtimeVersions": {
-    "pillow": "12.3.0",
+    "pillow": "13.0.0",
     "safetensors": "0.8.0",
     "torch": "2.15.0",
     "transformers": "4.57.6"
   },
   "schemaVersion": 1,
-  "snapshotId": "fixtures-2026-11-15",
+  "snapshotId": "fixtures-2026-11-14",
   "sourceUri": "https://huggingface.co/google/siglip2-base-patch16-224/resolve/75de2d55ec2d0b4efc50b3e9ad70dba96a7b2fa2/model.safetensors",
-  "vectorsFileDigest": "1d51e510d7562555748522ffd911ced381bc48704538bfdd7cda2c3c31f27129",
+  "vectorsFileDigest": "0859460709829bae5db526776df2dbfcc96492055b3134a2da4f2793aa8445a8",
   "weightsDigest": "612923381c76ec5a9bed335d1c48827e3f2e506ac31b044b63b2031fadee6a0b"
 }

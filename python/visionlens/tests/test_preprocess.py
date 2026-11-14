@@ -127,6 +127,54 @@ def test_the_specification_produces_the_pixels_it_describes():
     assert result.values[2] == pytest.approx(1.0)
 
 
+def test_the_values_are_channel_first():
+    # The layout is part of the contract of the model: the whole red
+    # plane, then the whole green plane, then the whole blue plane. The
+    # shape of the record says so, and the values have to agree with it.
+    from PIL import Image
+
+    spec = PreprocessingSpec.from_preprocessor_config(_config())
+    image = Image.new("RGB", (4, 2), (255, 0, 0))
+
+    result = spec.apply(image)
+    plane = 224 * 224
+
+    assert result.layout == "CHW"
+    # A red pixel: the red plane is 1.0 and the other two planes are -1.0.
+    assert result.values[0] == pytest.approx(1.0)
+    assert result.values[plane] == pytest.approx(-1.0)
+    assert result.values[2 * plane] == pytest.approx(-1.0)
+
+
+def test_the_values_agree_with_the_reference_implementation():
+    # The reference implementation of the preprocessing of this model is
+    # the processor of its own repository. The values have to agree with
+    # it, or the model is fed something the model was not measured with.
+    pytest.importorskip("transformers")
+    from PIL import Image
+    from transformers import SiglipImageProcessor
+
+    spec = PreprocessingSpec.from_preprocessor_config(_config())
+    image = Image.new("RGB", (37, 19), (12, 200, 90))
+
+    ours = spec.apply(image)
+    reference = SiglipImageProcessor(
+        size={"height": 224, "width": 224},
+        image_mean=[0.5, 0.5, 0.5],
+        image_std=[0.5, 0.5, 0.5],
+        rescale_factor=1.0 / 255.0,
+        resample=2,
+        do_normalize=True,
+        do_rescale=True,
+        do_resize=True,
+    )(images=[image], return_tensors="np")["pixel_values"][0]
+
+    assert reference.shape == (3, 224, 224)
+    assert len(ours.values) == reference.size
+    for index, value in enumerate(ours.values):
+        assert value == pytest.approx(float(reference.reshape(-1)[index]), abs=1e-5)
+
+
 def test_the_specification_normalizes_a_black_pixel_to_minus_one():
     from PIL import Image
 

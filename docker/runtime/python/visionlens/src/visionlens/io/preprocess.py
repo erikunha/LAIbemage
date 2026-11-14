@@ -52,6 +52,11 @@ class PreprocessedImage:
         """The shape of the values: channels first, then height, then width."""
         return (self.channels, self.height, self.width)
 
+    @property
+    def layout(self) -> str:
+        """The layout of the values: the channels come first."""
+        return "CHW"
+
     def digest(self) -> str:
         """The sha256 of the values as float32 bytes.
 
@@ -176,12 +181,17 @@ class PreprocessingSpec:
         )
         pixels = resized.tobytes()
         channels = 3
+        plane = self.width * self.height
+        # The values are CHANNEL FIRST: the whole red plane, then the whole
+        # green plane, then the whole blue plane. The layout is part of the
+        # contract of the model, and the shape of the record says so.
         values: list[float] = []
-        for index in range(0, len(pixels), 3):
-            for channel in range(3):
-                value = pixels[index + channel] * self.rescale_factor
-                value = (value - self.mean[channel]) / self.std[channel]
-                values.append(value)
+        for channel in range(channels):
+            offset = self.mean[channel]
+            scale = self.std[channel]
+            for index in range(plane):
+                value = pixels[index * 3 + channel] * self.rescale_factor
+                values.append((value - offset) / scale)
         return PreprocessedImage(
             spec=self,
             width=self.width,

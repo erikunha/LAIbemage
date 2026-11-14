@@ -55,8 +55,9 @@ from visionlens.runtime.fingerprint import fingerprint_v2  # noqa: E402
 #: The fixtures of the golden set: the committed 100x100 images.
 FIXTURES_DIR = REPO_ROOT / "packages" / "core" / "tests" / "fixtures" / "images"
 
-#: The snapshot the golden set belongs to.
-SNAPSHOT_ID = "fixtures-2026-11-15"
+#: The snapshot the golden set belongs to. The date is the day the set was
+#: recorded, so it never names a day that has not happened.
+SNAPSHOT_ID = "fixtures-2026-11-14"
 
 #: Where the golden file and the golden artifact live.
 PARITY_DIR = REPO_ROOT / "benchmarks" / "parity"

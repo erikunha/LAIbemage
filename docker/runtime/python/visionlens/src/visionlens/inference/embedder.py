@@ -144,9 +144,11 @@ class VisionEmbedder:
         latencies: list[float] = []
         prepared: list[Tuple[EmbedAsset, Any]] = []
 
+        digests: list[str] = []
         for asset in request.assets:
             try:
                 decoded = self.decoder.decode(asset.path)
+                digests.append(decoded.sha256)
                 prepared.append((asset, self.spec.apply(decoded.image)))
             except LibraryError as exc:
                 errors.append(
@@ -162,7 +164,7 @@ class VisionEmbedder:
         if prepared:
             output = self._embed_in_batches(prepared, latencies, fallbacks)
             vectors = list(output.vectors)
-        asset_digests = [self._digest_of(asset) for asset, _ in prepared]
+        asset_digests = tuple(digests)
 
         manifest = EmbeddingRunManifest(
             embedding_run_id=run_id,
@@ -201,12 +203,6 @@ class VisionEmbedder:
             fallbacks=tuple(fallbacks),
         )
 
-    def _digest_of(self, asset: EmbedAsset) -> str:
-        """The digest of the bytes of an asset."""
-        from ..hashing import sha256_of_file
-
-        return sha256_of_file(asset.path)
-
     def _embed_in_batches(
         self,
         prepared: Sequence[Tuple[EmbedAsset, Any]],
@@ -219,10 +215,12 @@ class VisionEmbedder:
         """
         count = len(prepared)
         batch_size = self.scheduler.batch_size_for()
-        attempts = 0
         vectors: list[Tuple[float, ...]] = []
         start = 0
         while start < count:
+            # The budget of the back off is per batch: a batch that fits
+            # does not spend the attempts of the one before it.
+            attempts = 0
             size = min(batch_size, count - start)
             started = time.perf_counter()
             try:
@@ -277,7 +275,7 @@ def _is_memory_error(exc: Exception) -> bool:
     failure is a failure, and retrying it would hide it.
     """
     name = exc.__class__.__name__
-    if "OutOfMemory" in name:
+    if "OutOfMemory" in name or name == "MemoryError":
         return True
     message = str(exc).lower()
     return "out of memory" in message or "not enough memory" in message

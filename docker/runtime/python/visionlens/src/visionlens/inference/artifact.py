@@ -45,6 +45,26 @@ VECTORS_FILE_NAME = "vectors.f32"
 #: The name of the manifest inside the artifact directory.
 MANIFEST_FILE_NAME = "manifest.json"
 
+#: The fields the artifact digest covers: the CONTENT of the artifact.
+#: The run id, the timestamp, the latency, the peak memory, the runtime
+#: versions and the device describe the RUN, not the content, and two
+#: runs of the same content share the address.
+CONTENT_FIELDS: Tuple[str, ...] = (
+    "schemaVersion",
+    "modelId",
+    "revision",
+    "sourceUri",
+    "weightsDigest",
+    "preprocessingFingerprint",
+    "preprocessingComponents",
+    "snapshotId",
+    "assetSha256",
+    "count",
+    "dimension",
+    "dtype",
+    "vectorsFileDigest",
+)
+
 
 def latency_percentiles(latencies_ms: Sequence[float]) -> Dict[str, Any]:
     """The latency percentiles of the run.
@@ -138,8 +158,18 @@ class EmbeddingRunManifest:
         return payload
 
     def digest(self) -> str:
-        """The digest of the manifest, computed over every other field."""
-        canonical = canonical_json(self.to_dict(include_digest=False))
+        """The content address of the artifact.
+
+        The address covers the CONTENT of the artifact: the model, the
+        revision, the preprocessing, the snapshot, the assets, the shape
+        and the digest of the vectors. The run id, the timestamp, the
+        latency, the peak memory, the runtime versions and the device
+        describe the run and not the content, so two runs of the same
+        content share the address.
+        """
+        payload = self.to_dict(include_digest=False)
+        content = {field: payload[field] for field in CONTENT_FIELDS}
+        canonical = canonical_json(content)
         return hashlib.sha256(canonical.encode("utf8")).hexdigest()
 
     def with_digest(self) -> "EmbeddingRunManifest":
@@ -261,6 +291,25 @@ def read_embedding_artifact(directory: Path) -> EmbeddingArtifact:
         )
     payload = json.loads(manifest_path.read_text(encoding="utf8"))
     manifest = manifest_from_dict(payload)
+    actual = hashlib.sha256(vectors_path.read_bytes()).hexdigest()
+    if actual != manifest.vectors_file_digest:
+        raise ValueError(
+            "the vectors file of '"
+            + str(directory)
+            + "' carries the digest "
+            + actual
+            + " and the manifest names "
+            + manifest.vectors_file_digest
+        )
+    if manifest.artifact_digest and manifest.artifact_digest != manifest.digest():
+        raise ValueError(
+            "the manifest of '"
+            + str(directory)
+            + "' carries the artifact digest "
+            + manifest.artifact_digest
+            + " and its own content digests to "
+            + manifest.digest()
+        )
     return EmbeddingArtifact(
         directory=Path(directory),
         manifest_path=manifest_path,

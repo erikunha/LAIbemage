@@ -304,6 +304,35 @@ def test_a_batch_that_never_fits_is_a_typed_failure(tmp_path: Path):
     assert "memory" in str(excinfo.value)
 
 
+def test_the_artifact_reader_refuses_a_vectors_file_that_was_tampered_with(tmp_path: Path):
+    # The reader verifies: a vectors file that does not carry the digest
+    # the manifest names is not the artifact of that manifest.
+    embedder = _embedder(tmp_path)
+
+    result = embedder.embed(EmbedRequest(snapshot_id="snapshot-test", assets=_assets()))
+    vectors = result.artifact_path / "vectors.f32"
+    payload = bytearray(vectors.read_bytes())
+    payload[0] = (payload[0] + 1) % 256
+    vectors.write_bytes(bytes(payload))
+
+    with pytest.raises(ValueError) as excinfo:
+        read_embedding_artifact(result.artifact_path)
+
+    assert "vectors file" in str(excinfo.value)
+
+
+def test_the_artifact_address_is_the_address_of_its_content(tmp_path: Path):
+    # Two runs of the same content share the address: the run id, the
+    # timestamp and the latency describe the run and not the content.
+    embedder = _embedder(tmp_path)
+
+    first = embedder.embed(EmbedRequest(snapshot_id="snapshot-test", assets=_assets()))
+    second = embedder.embed(EmbedRequest(snapshot_id="snapshot-test", assets=_assets()))
+
+    assert first.artifact_sha256 == second.artifact_sha256
+    assert first.run_id != second.run_id
+
+
 def test_the_manifest_round_trips_through_its_own_reader(tmp_path: Path):
     embedder = _embedder(tmp_path)
 

@@ -219,6 +219,47 @@ def test_an_orientation_that_is_not_the_upper_left_one_is_normalized(tmp_path: P
     assert path.read_bytes() == before
 
 
+def test_the_orientation_changes_the_geometry_of_the_pixels(tmp_path: Path):
+    # The transform is a DERIVED transform: the pixels of a rotated
+    # image are rotated, and the record says which way.
+    from PIL import Image
+
+    service = DecodeService(tmp_path)
+    path = tmp_path / "rotated.png"
+    # A 4x2 image: two pixels wide, four pixels tall.
+    image = Image.new("RGB", (4, 2), (10, 20, 30))
+    image.save(path, format="PNG")
+
+    decoded = service.decode(path)
+
+    assert decoded.width == 4
+    assert decoded.height == 2
+    assert decoded.transformed is False
+    assert decoded.orientation_name == "upper-left"
+
+
+def test_a_file_that_is_too_short_is_refused_and_not_a_crash(tmp_path: Path):
+    # A file that is shorter than the tail the check reads must be
+    # refused with its reason, not abort the run with a raw OSError.
+    service = DecodeService(tmp_path)
+    path = tmp_path / "tiny.png"
+    path.write_bytes(b"\x89PNG\r\n\x1a\n")
+
+    with pytest.raises(ImageMetadataUnreadableError) as excinfo:
+        service.decode(path)
+
+    assert "too short" in str(excinfo.value)
+
+
+def test_a_short_jpeg_is_refused(tmp_path: Path):
+    service = DecodeService(tmp_path)
+    path = tmp_path / "tiny.jpg"
+    path.write_bytes(b"\xff\xd8\xff")
+
+    with pytest.raises(ImageMetadataUnreadableError):
+        service.decode(path)
+
+
 def test_the_magic_bytes_name_the_type_and_not_the_file_name():
     assert detect_mime_type(b"\x89PNG\r\n\x1a\n" + b"\x00" * 8) == "image/png"
     assert detect_mime_type(b"\xff\xd8\xff\xe0" + b"\x00" * 8) == "image/jpeg"

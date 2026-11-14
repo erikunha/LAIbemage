@@ -343,7 +343,7 @@ def test_the_dimension_cap_runs_before_the_file_is_digested(monkeypatch, tmp_pat
     def fail(*args, **kwargs):
         raise AssertionError("the digest must not run before the dimension cap")
 
-    monkeypatch.setattr(inspect_module, "_sha256", fail)
+    monkeypatch.setattr(inspect_module, "sha256_of_file", fail)
 
     with VisionLens.local() as client:
         with pytest.raises(ImageDimensionsExceededError):
@@ -357,7 +357,7 @@ def test_the_mime_check_runs_before_the_file_is_digested(monkeypatch, tmp_path: 
     def fail(*args, **kwargs):
         raise AssertionError("the digest must not run before the MIME check")
 
-    monkeypatch.setattr(inspect_module, "_sha256", fail)
+    monkeypatch.setattr(inspect_module, "sha256_of_file", fail)
 
     with VisionLens.local() as client:
         with pytest.raises(MimeMismatchError):

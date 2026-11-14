@@ -18,7 +18,6 @@ end.
 
 from __future__ import annotations
 
-import hashlib
 import os
 import struct
 from pathlib import Path
@@ -33,6 +32,7 @@ from ..errors import (
     PathNotFoundError,
     UnsupportedFileTypeError,
 )
+from ..hashing import sha256_of_file
 
 INSPECTION_SCHEMA_VERSION = 1
 
@@ -46,8 +46,6 @@ MAX_IMAGE_PIXELS = 100_000_000
 #: itself, because a JPEG may carry more than this much metadata before its
 #: frame header.
 _HEADER_BYTES = 4096
-#: The block size of the digest computation.
-_CHUNK_BYTES = 1024 * 1024
 
 #: The MIME type each known extension claims.
 EXTENSION_MIME: Mapping[str, str] = {
@@ -130,7 +128,7 @@ def inspect_image(path: str | Path) -> DatasetInspection:
     _check_dimensions(width, height)
 
     try:
-        digest = _sha256(target)
+        digest = sha256_of_file(target)
     except OSError as exc:
         raise PathNotFoundError(
             "the file could not be read: " + (exc.strerror or exc.__class__.__name__)
@@ -164,15 +162,6 @@ def _check_dimensions(width: int, height: int) -> None:
             + str(MAX_IMAGE_PIXELS)
             + " pixels"
         )
-
-
-def _sha256(target: Path) -> str:
-    """The sha256 of the bytes of the file, read in bounded blocks."""
-    digest = hashlib.sha256()
-    with target.open("rb") as handle:
-        for block in iter(lambda: handle.read(_CHUNK_BYTES), b""):
-            digest.update(block)
-    return digest.hexdigest()
 
 
 def _detect_type(header: bytes) -> str | None:

@@ -2,7 +2,7 @@ import { createHash } from 'node:crypto';
 import { readFileSync } from 'node:fs';
 import { join } from 'node:path';
 
-import { fingerprintV2, type FingerprintInput } from '@vision-lens/contracts';
+import { canonicalJson, fingerprintV2, type FingerprintInput } from '@vision-lens/contracts';
 
 import { validateEmbeddingManifest, type EmbeddingRunManifest } from './embedding-manifest.js';
 
@@ -83,6 +83,11 @@ export interface ParityReport {
  * recomputes it and compares it with the one the file carries.
  */
 export function goldenVectorsDigest(images: readonly GoldenImage[]): string {
+  return createHash('sha256').update(goldenVectorsBytes(images)).digest('hex');
+}
+
+/** The bytes the digest of the golden set covers. */
+function goldenVectorsBytes(images: readonly GoldenImage[]): Buffer {
   const parts: Buffer[] = [];
   for (const image of images) {
     parts.push(Buffer.from(`${image.name}\u0000${image.sha256}\u0000`, 'utf8'));
@@ -94,8 +99,50 @@ export function goldenVectorsDigest(images: readonly GoldenImage[]): string {
     }
     parts.push(bytes);
   }
+  return Buffer.concat(parts);
+}
+
+/**
+ * The digest of the CONTENT of the golden file.
+ *
+ * It covers everything the file asserts, except the moment it was
+ * generated: the schema version, the model, the preprocessing, the
+ * configuration, the config fingerprint, the tolerance and the images
+ * with their vectors.
+ *
+ * The tolerance is inside the digest on purpose. A tolerance that lives
+ * only in the file is a tolerance anybody can widen by editing the file,
+ * and a gate that reads its own strength from the file it guards is a
+ * gate that guards nothing.
+ */
+export function goldenContentDigest(golden: VisionGolden): string {
+  const content = {
+    schemaVersion: golden.schemaVersion,
+    model: golden.model,
+    preprocessing: golden.preprocessing,
+    config: golden.config,
+    configFingerprint: golden.configFingerprint,
+    tolerance: golden.tolerance,
+    images: golden.images.map((image) => ({ name: image.name, sha256: image.sha256 })),
+  };
+  const parts = [Buffer.from(canonicalJson(content), 'utf8'), goldenVectorsBytes(golden.images)];
   return createHash('sha256').update(Buffer.concat(parts)).digest('hex');
 }
+
+/**
+ * The digest of the committed golden file, pinned in the code.
+ *
+ * The pin lives OUTSIDE the golden file on purpose: a digest that travels
+ * with the file it protects proves nothing, because whoever edits the
+ * file edits the digest too. A change to the golden set is therefore a
+ * change to this constant, and that change is a visible diff in the
+ * code.
+ *
+ * The pin is over the CONTENT of the file, so the timestamp of the run
+ * does not change it.
+ */
+export const GOLDEN_CONTENT_DIGEST =
+  'f18d9e002614f1a1f3d58aabc178acf7ccc2a06df6100e2ca252b3cf05b53dec';
 
 /**
  * Read the golden file and check its own integrity.
@@ -114,6 +161,12 @@ export function readGolden(path: string): VisionGolden {
   if (expected !== payload.vectorsDigest) {
     throw new Error(
       `the golden file at ${path} carries the digest ${payload.vectorsDigest} and its vectors digest to ${expected}: the file was edited`,
+    );
+  }
+  const content = goldenContentDigest(payload);
+  if (content !== GOLDEN_CONTENT_DIGEST) {
+    throw new Error(
+      `the golden file at ${path} digests to ${content} and the code pins ${GOLDEN_CONTENT_DIGEST}: the file was edited, and a change to the golden set is a change to the pin in the code`,
     );
   }
   return payload;
@@ -181,6 +234,51 @@ export function compareVector(
 }
 
 /**
+ * Compare the IDENTITY of the manifest with the identity of the golden file.
+ *
+ * Every field that says WHICH run this is, and not only how it went, is
+ * compared: the model, the revision, the source, the digest of the
+ * weights, the preprocessing and its fingerprint, the snapshot, the
+ * count, the dimension and the digests of the assets, in order. A
+ * manifest that describes another model, another preprocessing or another
+ * set of images is not the manifest of this golden set, even when it
+ * validates against the schema.
+ */
+export function compareIdentity(
+  golden: VisionGolden,
+  manifest: EmbeddingRunManifest,
+): string[] {
+  const issues: string[] = [];
+  const compare = (field: string, expected: string | number, observed: string | number): void => {
+    if (expected !== observed) {
+      issues.push(`${field}: the golden file names ${String(expected)} and the manifest carries ${String(observed)}`);
+    }
+  };
+  compare('modelId', golden.model.modelId, manifest.modelId);
+  compare('revision', golden.model.revision, manifest.revision);
+  compare('sourceUri', golden.model.sourceUri, manifest.sourceUri);
+  compare('weightsDigest', golden.model.weightsDigest, manifest.weightsDigest);
+  compare('preprocessingFingerprint', golden.preprocessing.fingerprint, manifest.preprocessingFingerprint);
+  compare('snapshotId', golden.config.dataVersion, manifest.snapshotId);
+  compare('count', golden.images.length, manifest.count);
+  compare('dimension', golden.images[0]?.vector.length ?? 0, manifest.dimension);
+  const goldenAssets = golden.images.map((image) => image.sha256);
+  if (goldenAssets.join(',') !== manifest.assetSha256.join(',')) {
+    issues.push(
+      `assetSha256: the golden file names ${goldenAssets.join(',')} and the manifest carries ${manifest.assetSha256.join(',')}`,
+    );
+  }
+  const goldenComponents = canonicalJson(golden.preprocessing.components);
+  const manifestComponents = canonicalJson(manifest.preprocessingComponents);
+  if (goldenComponents !== manifestComponents) {
+    issues.push(
+      `preprocessingComponents: the golden file names ${goldenComponents} and the manifest carries ${manifestComponents}`,
+    );
+  }
+  return issues;
+}
+
+/**
  * Run the three parity tiers over one artifact.
  *
  * The artifact is the directory the Python side wrote: the manifest and
@@ -216,21 +314,7 @@ export function runParity(golden: VisionGolden, artifactDirectory: string): Pari
       manifestIssues.push(...validation.issues);
     } else {
       manifest = validation.manifest;
-      if (manifest.preprocessingFingerprint !== golden.preprocessing.fingerprint) {
-        manifestIssues.push(
-          `preprocessingFingerprint: the golden file names ${golden.preprocessing.fingerprint} and the manifest carries ${manifest.preprocessingFingerprint}`,
-        );
-      }
-      if (manifest.revision !== golden.model.revision) {
-        manifestIssues.push(
-          `revision: the golden file names ${golden.model.revision} and the manifest carries ${manifest.revision}`,
-        );
-      }
-      if (manifest.weightsDigest !== golden.model.weightsDigest) {
-        manifestIssues.push(
-          `weightsDigest: the golden file names ${golden.model.weightsDigest} and the manifest carries ${manifest.weightsDigest}`,
-        );
-      }
+      manifestIssues.push(...compareIdentity(golden, manifest));
     }
   }
   tiers.push({ name: 'manifest', ok: manifestIssues.length === 0, issues: manifestIssues });

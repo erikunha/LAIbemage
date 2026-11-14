@@ -96,20 +96,32 @@ pnpm exec tsx scripts/benchmarks/vision-parity.ts
 | tier | what it compares |
 |---|---|
 | the config fingerprint | the live TypeScript `fingerprintV2` and the one the golden file names |
-| the manifest | the manifest of the committed artifact against the ratified schema |
+| the manifest | the manifest of the committed artifact against the ratified schema, and its IDENTITY against the golden set: the model, the revision, the source, the digest of the weights, the preprocessing and its fingerprint, the snapshot, the count, the dimension and the digests of the assets, in order |
 | the vectors | every golden vector against the artifact, inside the documented tolerance |
 
 The golden file is committed, and so is the artifact of the run that
 produced it, so the gate runs on a machine that cannot run the model.
-The gate never writes the golden file, and a golden file whose vectors
-were edited is detected: the digest of the set covers the float32 bytes
-of the vectors, and the bytes of a float32 are the same in both
-languages.
+The gate never writes the golden file.
+
+Two digests guard the golden file, and they guard different things. The
+digest of the set covers the name, the file digest and the float32 bytes
+of every vector, and the bytes of a float32 are the same in both
+languages. The digest of the CONTENT covers everything the file asserts,
+the tolerance included, and it is PINNED IN THE CODE: a digest that
+travels with the file it protects proves nothing, because whoever edits
+the file edits the digest too. A change to the golden set is therefore a
+change to the pin, and that change is a visible diff in the code.
 
 The tolerance is measured, not guessed. The same images embedded in one
 batch and one image at a time differ by at most 1.383e-05 with a cosine
 similarity of 1.000000000, and the golden file carries that measurement
-and the reason. Widening it is a visible diff.
+and the reason. It is inside the digest of the content, so widening it is
+a visible diff and not an edit nobody sees.
+
+The two validators refuse the same payloads: the schema is strict on both
+sides, a pattern is matched against the whole value, an integer is a
+number with no fractional part, and a source is a URL with a scheme and a
+host. The parity tests on both sides prove it field by field.
 
 The fingerprint of the configuration is byte-identical on both sides:
 the TypeScript side sorts the object keys by their UTF-16 code units
@@ -125,8 +137,8 @@ torch 2.15.0, transformers 4.57.6):
 
 ```text
 count 6, dimension 768, dtype float32, device cpu, no errors, no fallbacks
-p50 651 ms per image, 3.9 s for the six
-peak resident memory 824 MiB
+p50 543 ms per image, 3.3 s for the six
+peak resident memory 822 MiB
 vectors file 18432 bytes
 vectors file digest 0859460709829bae5db526776df2dbfcc96492055b3134a2da4f2793aa8445a8
 artifact digest 4f706336517e10f7194963241c623af1d5039f4fc74fb3bc9c7479bfeaaf586a
@@ -134,10 +146,13 @@ config fingerprint fp2:a81b8074dbee1eb8
 ```
 
 The vectors file digest is the same in every run: the vectors are
-reproducible. The command that produced it is
-`python/visionlens/scripts/generate_golden.py`, and the tolerance of the
-golden file comes from the difference between the batched run and the
-one-image-at-a-time run of the same images.
+reproducible. The artifact digest is the same too, and that is the point
+of a content address: two runs of the same images carry a different run
+id, a different timestamp, a different latency and a different peak
+memory, and they still share the address of their content. The command
+that produced it is `python/visionlens/scripts/generate_golden.py`, and
+the tolerance of the golden file comes from the difference between the
+batched run and the one-image-at-a-time run of the same images.
 
 ## What this does NOT prove
 

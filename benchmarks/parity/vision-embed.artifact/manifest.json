@@ -10,20 +10,20 @@
   ],
   "calibrationStatus": "uncalibrated",
   "count": 6,
-  "createdAt": "2026-11-14T18:34:41.080Z",
+  "createdAt": "2026-11-14T19:02:06.256Z",
   "device": "cpu",
   "dimension": 768,
   "dtype": "float32",
-  "embeddingRunId": "embed-01eb91fb331b4d57964bdb8686d7aeff",
+  "embeddingRunId": "embed-23961656d069411baecac8e1d638b47f",
   "latency": {
     "count": 6,
-    "p50Ms": 650.56,
-    "p95Ms": 650.56,
-    "totalMs": 3903.361
+    "p50Ms": 543.308,
+    "p95Ms": 543.308,
+    "totalMs": 3259.848
   },
   "license": "apache-2.0",
   "modelId": "siglip2-base",
-  "peakMemoryBytes": 863649792,
+  "peakMemoryBytes": 861552640,
   "preprocessingComponents": {
     "interpolation": "bilinear",
     "normalize": {

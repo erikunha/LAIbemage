@@ -33,15 +33,17 @@ const MeasuredSchema = z.union([z.number(), z.literal(UNKNOWN)]);
 /**
  * The latency block of a run: the count of the images that were
  * embedded, the percentiles per image and the total.
+ *
+ * The object is STRICT, like the manifest itself: a latency that carries
+ * a field nobody knows is a latency the two validators would judge
+ * differently, and the two languages have to refuse the same payloads.
  */
-export const EmbeddingLatencySchema = z
-  .object({
-    count: z.number().int().nonnegative(),
-    p50Ms: MeasuredSchema,
-    p95Ms: MeasuredSchema,
-    totalMs: MeasuredSchema,
-  })
-  .describe('The latency of a run: the percentiles per image and the total.');
+export const EmbeddingLatencySchema = z.strictObject({
+  count: z.number().int().nonnegative(),
+  p50Ms: MeasuredSchema,
+  p95Ms: MeasuredSchema,
+  totalMs: MeasuredSchema,
+}).describe('The latency of a run: the percentiles per image and the total.');
 
 /**
  * The manifest of one embedding run.

@@ -12,6 +12,13 @@ uses: objects, arrays, strings, numbers, integers, booleans, the
 required list, the property names, the patterns, the bounds and the
 `anyOf` union. It is not a general JSON Schema implementation, and it
 says so when it meets a keyword it does not know.
+
+Two rules are the rules of the other side and not of this document: a
+pattern is matched against the WHOLE value (the patterns of this schema
+are anchored, and the JavaScript validator matches the whole value too),
+and an integer is a number with no fractional part, so `6.0` is an
+integer and `6.5` is not. The two validators therefore refuse the same
+payloads, which is the property the parity gate proves.
 """
 
 from __future__ import annotations
@@ -20,6 +27,7 @@ import json
 import re
 from pathlib import Path
 from typing import Any, Dict, List, Mapping, Optional, Sequence
+from urllib.parse import urlparse
 
 #: The keywords this validator understands. A schema that uses another
 #: one is a schema this validator refuses, never a schema it ignores.
@@ -97,13 +105,13 @@ def validate_against_schema(
 
     if isinstance(payload, str):
         pattern = schema.get("pattern")
-        if isinstance(pattern, str) and re.search(pattern, payload) is None:
+        if isinstance(pattern, str) and re.fullmatch(pattern, payload) is None:
             issues.append(f"{where}: the value does not match the pattern {pattern}")
         minimum_length = schema.get("minLength")
         if isinstance(minimum_length, int) and len(payload) < minimum_length:
             issues.append(f"{where}: the value is shorter than {minimum_length}")
         fmt = schema.get("format")
-        if fmt == "uri" and "://" not in payload:
+        if fmt == "uri" and not _is_absolute_url(payload):
             issues.append(f"{where}: the value is not an absolute URL")
         return issues
 
@@ -169,13 +177,34 @@ def _matches_type(payload: Any, expected: Any) -> bool:
             return True
         if name == "boolean" and isinstance(payload, bool):
             return True
-        if name == "integer" and isinstance(payload, int) and not isinstance(payload, bool):
+        if (
+            name == "integer"
+            and isinstance(payload, (int, float))
+            and not isinstance(payload, bool)
+            and float(payload).is_integer()
+        ):
+            # An integer is a NUMBER with no fractional part, the way the
+            # JSON Schema defines it: `6.0` is an integer and `6.5` is
+            # not. The JavaScript side has one number type, so it agrees.
             return True
         if name == "number" and isinstance(payload, (int, float)) and not isinstance(payload, bool):
             return True
         if name == "null" and payload is None:
             return True
     return False
+
+
+def _is_absolute_url(value: str) -> bool:
+    """Whether a value is an absolute URL.
+
+    A scheme and a host, the way the URL of the other side is checked: a
+    value that carries no host, or a scheme that is not one of the
+    network ones, is not a URL.
+    """
+    parsed = urlparse(value)
+    if parsed.scheme not in ("http", "https"):
+        return False
+    return bool(parsed.netloc)
 
 
 def manifest_schema_path(repo_root: Path) -> Path:

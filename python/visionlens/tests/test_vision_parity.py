@@ -99,8 +99,14 @@ def test_the_golden_file_carries_the_digest_of_its_vectors():
         payload += image["name"].encode("utf-8") + b"\x00"
         payload += image["sha256"].encode("utf-8") + b"\x00"
         import array
+        import sys
 
         packed = array.array("f", (float(value) for value in image["vector"]))
+        # The bytes are the LITTLE endian ones, the way the TypeScript
+        # side writes them: a big endian host has to swap them, or the
+        # two sides would digest different bytes for the same vector.
+        if sys.byteorder != "little":
+            packed.byteswap()
         payload += packed.tobytes()
 
     assert hashlib.sha256(bytes(payload)).hexdigest() == golden["vectorsDigest"]
@@ -169,3 +175,54 @@ def test_the_golden_file_carries_the_model_and_the_preprocessing_of_the_record()
     assert golden["model"]["revision"] == record["revision"]
     assert golden["model"]["weightsDigest"] == record["sourceDigest"]
     assert golden["preprocessing"]["fingerprint"] == record["preprocessingFingerprint"]
+
+
+def _manifest() -> Dict[str, Any]:
+    """The manifest of the committed artifact."""
+    return json.loads((ARTIFACT_DIR / "manifest.json").read_text(encoding="utf8"))
+
+
+def test_the_python_validator_refuses_an_unknown_field_of_the_latency():
+    # The two validators have to refuse the same payloads: the schema is
+    # strict on both sides, so an unknown field is an unknown field.
+    schema = load_manifest_schema(SCHEMA_PATH)
+    manifest = _manifest()
+    manifest["latency"] = {**manifest["latency"], "extra": 1}
+
+    issues = validate_against_schema(manifest, schema)
+
+    assert any("latency.extra" in issue for issue in issues)
+
+
+def test_the_python_validator_accepts_an_integer_that_is_written_as_a_float():
+    # JSON Schema calls 6.0 an integer, and the JavaScript side has one
+    # number type, so both sides accept it.
+    schema = load_manifest_schema(SCHEMA_PATH)
+    manifest = _manifest()
+    manifest["count"] = 6.0
+
+    issues = validate_against_schema(manifest, schema)
+
+    assert issues == []
+
+
+def test_the_python_validator_refuses_a_source_that_is_not_a_url():
+    schema = load_manifest_schema(SCHEMA_PATH)
+    manifest = _manifest()
+    manifest["sourceUri"] = "://"
+
+    issues = validate_against_schema(manifest, schema)
+
+    assert any("sourceUri" in issue for issue in issues)
+
+
+def test_the_python_validator_refuses_a_digest_with_a_trailing_newline():
+    # The pattern is matched against the whole value, the way the other
+    # side matches it, so a trailing newline is not a digest.
+    schema = load_manifest_schema(SCHEMA_PATH)
+    manifest = _manifest()
+    manifest["weightsDigest"] = manifest["weightsDigest"] + "\n"
+
+    issues = validate_against_schema(manifest, schema)
+
+    assert any("weightsDigest" in issue for issue in issues)

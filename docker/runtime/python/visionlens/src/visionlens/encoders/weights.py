@@ -77,7 +77,7 @@ REVISION_PATTERN = re.compile(r"^[0-9a-f]{40}$")
 
 #: The model id names a directory in the cache, so it may not carry a
 #: separator, a traversal or anything a file system would read as a path.
-MODEL_ID_PATTERN = re.compile(r"^[A-Za-z0-9][A-Za-z0-9._-]*$")
+MODEL_ID_PATTERN = re.compile(r"\A[A-Za-z0-9][A-Za-z0-9._-]*\Z")
 
 #: The block size every digest and every fetch reads in.
 BLOCK_BYTES = 1024 * 1024
@@ -103,15 +103,41 @@ SUPPORTED_TRUST_POLICIES: Tuple[str, ...] = ("allowlisted-pinned-safetensors-onl
 #: these phrases only catch a record that CONTRADICTS its own structured
 #: fact, so a record cannot permit commercial use and forbid it at the
 #: same time.
-RESTRICTIVE_PHRASES: Tuple[str, ...] = (
-    "non-commercial",
-    "noncommercial",
-    "not for commercial",
-    "no commercial",
-    "research use only",
-    "research-only",
-    "academic use only",
-    "personal use only",
+#:
+#: The text is normalized before the match (every run of non-alphanumeric
+#: characters becomes one space) and the phrases are matched on word
+#: boundaries, so "research-use-only" and "research  use  only" are the
+#: same phrase. A phrase that PERMITS commercial use cancels a phrase that
+#: forbids it, because a record that says both is not contradicting
+#: itself: it says the weights are for research and the outputs may be
+#: used commercially.
+RESTRICTIVE_PATTERN = re.compile(
+    r"\b(?:"
+    r"non[- ]commercial|"
+    r"research[- ]use[- ]only|"
+    r"academic[- ]use[- ]only|"
+    r"personal[- ]use[- ]only|"
+    r"not for commercial|"
+    r"no commercial use|"
+    r"not permitted for commercial|"
+    r"not allowed for commercial|"
+    r"commercial use is not permitted|"
+    r"commercial use is prohibited|"
+    r"commercial use is forbidden"
+    r")\b"
+)
+
+#: The phrases a recorded restriction uses when it PERMITS commercial use.
+#: One of them cancels a restrictive phrase: a record that names both is
+#: not a record that contradicts itself.
+PERMISSIVE_PATTERN = re.compile(
+    r"\b(?:"
+    r"permits commercial use|"
+    r"commercial use is permitted|"
+    r"commercial use is allowed|"
+    r"may be used commercially|"
+    r"commercial purposes are permitted"
+    r")\b"
 )
 
 #: The reason codes of the refusals this module adds. The permission and the
@@ -202,6 +228,16 @@ def _refuse(reason: str, message: str) -> DownloadRefusedError:
     return DownloadRefusedError(reason, message)
 
 
+def _normalized_text(text: str) -> str:
+    """The text with every run of non-alphanumerics as one space.
+
+    The phrases of the license gate are matched on this form, so
+    "research-use-only", "research use only" and "research  use  only"
+    are the same phrase.
+    """
+    return re.sub(r"[^a-z0-9]+", " ", text.lower()).strip()
+
+
 def check_license(record: ModelRecord, use: str) -> None:
     """Refuse a use the recorded license does not permit.
 
@@ -239,16 +275,14 @@ def check_license(record: ModelRecord, use: str) -> None:
             + "' is refused",
         )
     if use == "commercial":
-        lowered = record.usage_restrictions.lower()
-        contradicting = [phrase for phrase in RESTRICTIVE_PHRASES if phrase in lowered]
-        if contradicting:
+        lowered = _normalized_text(record.usage_restrictions)
+        if RESTRICTIVE_PATTERN.search(lowered) and not PERMISSIVE_PATTERN.search(lowered):
             raise _refuse(
                 LICENSE_FORBIDDEN,
                 "the license recorded for '"
                 + record.model_id
-                + "' permits commercial use, but its recorded restrictions forbid it ('"
-                + ", ".join(contradicting)
-                + "'); a record that contradicts itself is refused",
+                + "' permits commercial use, but its recorded restrictions forbid it; "
+                "a record that contradicts itself is refused",
             )
     if use == "redistribution":
         raise _refuse(
@@ -425,19 +459,47 @@ def _lock_for(target: Path) -> threading.Lock:
         return lock
 
 
+def _temporary_prefix() -> str:
+    """The prefix of a temporary file, carrying the pid of its writer.
+
+    The pid lets the sweep tell a leftover of a crashed run from the file
+    of a writer that is still running.
+    """
+    return ".weights-" + str(os.getpid()) + "-"
+
+
+def _pid_is_alive(pid: int) -> bool:
+    """Whether a process is still running."""
+    try:
+        os.kill(pid, 0)
+    except ProcessLookupError:
+        return False
+    except PermissionError:
+        return True
+    except OSError:
+        return True
+    return True
+
+
 def _sweep_stale_temporaries(directory: Path) -> None:
     """Remove the temporary files a crashed run left behind.
 
-    Only a file older than the age limit is swept, so the temporary file of
-    a loader that is running right now is never touched.
+    A file is swept only when it is older than the age limit AND the
+    process that wrote it is gone, so the temporary file of a loader that
+    is running right now is never touched.
     """
     if not directory.is_dir():
         return
     now = time.time()
     for entry in directory.glob(".weights-*.tmp"):
         try:
-            if now - entry.stat().st_mtime > TEMP_FILE_MAX_AGE_SECONDS:
-                entry.unlink()
+            if now - entry.stat().st_mtime <= TEMP_FILE_MAX_AGE_SECONDS:
+                continue
+            parts = entry.name.split("-")
+            if len(parts) > 2 and parts[1].isdigit():
+                if _pid_is_alive(int(parts[1])):
+                    continue
+            entry.unlink()
         except OSError:
             continue
 
@@ -502,6 +564,86 @@ def check_safetensors(path: Path) -> None:
             + str(path)
             + "' carries an empty safetensors header; it holds no tensor",
         )
+    _check_tensors(path, parsed, length)
+
+
+def _check_tensors(path: Path, header: object, header_length: int) -> None:
+    """Refuse a header that does not describe a tensor inside the file.
+
+    A safetensors header names the tensors of the file, each one with its
+    dtype, its shape and the byte range it occupies. A header that names
+    no tensor, or a tensor whose bytes lie outside the file, is not a
+    header of a safetensors file: the name of the file would claim a
+    format the bytes do not carry.
+
+    @raises DownloadRefusedError when the header is not one.
+    """
+    if not isinstance(header, dict):
+        raise _refuse(
+            UNSAFE_FORMAT,
+            "the file '" + str(path) + "' carries a header that is not an object",
+        )
+    entries = {key: value for key, value in header.items() if key != "__metadata__"}
+    if not entries:
+        raise _refuse(
+            UNSAFE_FORMAT,
+            "the file '"
+            + str(path)
+            + "' carries a header without a tensor; it holds no weight",
+        )
+    try:
+        size_bytes = path.stat().st_size
+    except OSError as exc:
+        raise _refuse(
+            CACHE_CORRUPT,
+            "the file '" + str(path) + "' could not be read: " + str(exc),
+        ) from exc
+    for name, entry in entries.items():
+        if not isinstance(entry, dict):
+            raise _refuse(
+                UNSAFE_FORMAT,
+                "the tensor '" + name + "' of '" + str(path) + "' is not an entry",
+            )
+        dtype = entry.get("dtype")
+        shape = entry.get("shape")
+        offsets = entry.get("data_offsets")
+        if not isinstance(dtype, str) or not dtype:
+            raise _refuse(
+                UNSAFE_FORMAT,
+                "the tensor '" + name + "' of '" + str(path) + "' carries no dtype",
+            )
+        if not isinstance(shape, list) or not all(
+            isinstance(item, int) and not isinstance(item, bool) for item in shape
+        ):
+            raise _refuse(
+                UNSAFE_FORMAT,
+                "the tensor '" + name + "' of '" + str(path) + "' carries no shape",
+            )
+        if (
+            not isinstance(offsets, list)
+            or len(offsets) != 2
+            or not all(isinstance(item, int) and not isinstance(item, bool) for item in offsets)
+            or offsets[0] < 0
+            or offsets[1] < offsets[0]
+        ):
+            raise _refuse(
+                UNSAFE_FORMAT,
+                "the tensor '"
+                + name
+                + "' of '"
+                + str(path)
+                + "' carries no byte range",
+            )
+        data_bytes = size_bytes - 8 - header_length
+        if offsets[1] > data_bytes:
+            raise _refuse(
+                UNSAFE_FORMAT,
+                "the tensor '"
+                + name
+                + "' of '"
+                + str(path)
+                + "' claims bytes that lie outside the file",
+            )
 
 
 def _check_host(url: str, hosts: Tuple[str, ...]) -> None:
@@ -573,10 +715,17 @@ def _write_stream(target: Path, blocks: Iterable[bytes]) -> Tuple[str, int, Path
     digest = hashlib.sha256()
     written = 0
     handle, temporary = tempfile.mkstemp(
-        dir=str(target.parent), prefix=".weights-", suffix=".tmp"
+        dir=str(target.parent), prefix=_temporary_prefix(), suffix=".tmp"
     )
     try:
         stream = os.fdopen(handle, "wb")
+    except OSError as exc:
+        os.close(handle)
+        raise _refuse(
+            CACHE_CORRUPT,
+            "the weights could not be opened for writing: "
+            + (exc.strerror or exc.__class__.__name__),
+        ) from exc
     except BaseException:
         os.close(handle)
         raise
@@ -619,7 +768,16 @@ def _reuse_cached(target: Path, authorized: AuthorizedWeights) -> LoadedWeights:
     if actual != authorized.digest:
         # A cached file that does not match its own name is not trusted: it
         # is removed, and the caller is told the cache was corrupt.
-        target.unlink()
+        try:
+            target.unlink()
+        except OSError as exc:
+            raise _refuse(
+                CACHE_CORRUPT,
+                "the cached file '"
+                + str(target)
+                + "' does not carry the digest its name claims, and it could not be "
+                "removed: " + (exc.strerror or exc.__class__.__name__),
+            ) from exc
         try:
             target.parent.rmdir()
         except OSError:
@@ -689,10 +847,20 @@ def load_weights(
                     + authorized.digest,
                 )
             check_safetensors(temporary)
-            os.replace(str(temporary), str(target))
+            try:
+                os.replace(str(temporary), str(target))
+            except OSError as exc:
+                raise _refuse(
+                    CACHE_CORRUPT,
+                    "the weights could not be published into the cache: "
+                    + (exc.strerror or exc.__class__.__name__),
+                ) from exc
         except BaseException:
-            if temporary.exists():
-                temporary.unlink()
+            try:
+                if temporary.exists():
+                    temporary.unlink()
+            except OSError:
+                pass
             raise
         try:
             published = sha256_of_file(target)
@@ -705,7 +873,17 @@ def load_weights(
                 + (exc.strerror or exc.__class__.__name__),
             ) from exc
         if published != authorized.digest:
-            target.unlink()
+            try:
+                target.unlink()
+            except OSError as exc:
+                raise _refuse(
+                    CACHE_CORRUPT,
+                    "the published file '"
+                    + str(target)
+                    + "' does not carry the digest it was verified with, and it "
+                    "could not be removed: "
+                    + (exc.strerror or exc.__class__.__name__),
+                ) from exc
             raise _refuse(
                 CACHE_CORRUPT,
                 "the published file '"

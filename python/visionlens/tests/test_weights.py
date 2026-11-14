@@ -529,6 +529,126 @@ def test_a_cached_file_that_does_not_match_its_name_is_removed(tmp_path: Path):
     assert not loaded.path.exists()
 
 
+def test_a_corrupt_cache_that_cannot_be_removed_is_still_a_typed_refusal(tmp_path: Path):
+    # The refusal is typed even when the file cannot be removed: a raw
+    # PermissionError would break the contract every caller relies on.
+    opener, calls = _spy_opener()
+    cache = tmp_path / "cache"
+    request = _request(_record())
+    loaded = load_weights(request, cache, opener=opener)
+    loaded.path.write_bytes(b"tampered")
+    model_dir = loaded.path.parent
+    model_dir.chmod(0o500)
+    try:
+        with pytest.raises(DownloadRefusedError) as excinfo:
+            load_weights(request, cache, opener=opener)
+    finally:
+        model_dir.chmod(0o700)
+
+    assert excinfo.value.reason == "CACHE_CORRUPT"
+
+
+def test_a_write_that_cannot_be_opened_is_a_typed_refusal(tmp_path: Path, monkeypatch):
+    import visionlens.encoders.weights as weights_module
+
+    def fail(*args: Any, **kwargs: Any) -> Any:
+        raise OSError("fdopen failed")
+
+    monkeypatch.setattr(weights_module.os, "fdopen", fail)
+
+    opener, calls = _spy_opener()
+    with pytest.raises(DownloadRefusedError) as excinfo:
+        load_weights(_request(_record()), tmp_path / "cache", opener=opener)
+
+    assert excinfo.value.reason == "CACHE_CORRUPT"
+
+
+def test_a_model_id_with_a_trailing_newline_is_refused():
+    # The pattern anchors at the end of the string, not at the end of a
+    # line: a name that ends with a newline is not a directory name.
+    with pytest.raises(DownloadRefusedError) as excinfo:
+        check_model_id(_record(model_id="siglip2-base\n"))
+
+    assert excinfo.value.reason == "MODEL_ID_UNSAFE"
+
+
+def test_a_record_that_permits_commercial_use_after_restricting_it_is_not_refused():
+    # A record that says the weights are for research and the OUTPUTS may
+    # be used commercially does not contradict itself.
+    check_license(
+        _record(
+            usage_restrictions=(
+                "the weights are for research use only, but the outputs may be used "
+                "commercially"
+            )
+        ),
+        "commercial",
+    )
+
+
+def test_the_restrictive_phrases_are_matched_on_the_normalized_text():
+    # "research-use-only" and "research  use  only" are the same phrase.
+    for restrictions in (
+        "RESEARCH-USE-ONLY",
+        "research  use  only",
+        "not permitted for commercial use",
+        "not allowed for commercial purposes",
+        "academic-use-only",
+    ):
+        with pytest.raises(DownloadRefusedError) as excinfo:
+            check_license(_record(usage_restrictions=restrictions), "commercial")
+        assert excinfo.value.reason == "LICENSE_FORBIDDEN", restrictions
+
+
+def test_a_header_without_a_tensor_is_refused(tmp_path: Path):
+    # The name of the file claims a format: a header that names no tensor
+    # is not a header of a safetensors file.
+    header = json.dumps({"__metadata__": {"format": "pt"}}).encode("utf8")
+    path = tmp_path / "model.safetensors"
+    path.write_bytes(struct.pack("<Q", len(header)) + header)
+
+    with pytest.raises(DownloadRefusedError) as excinfo:
+        check_safetensors(path)
+
+    assert excinfo.value.reason == "UNSAFE_FORMAT"
+
+
+def test_a_tensor_that_claims_bytes_outside_the_file_is_refused(tmp_path: Path):
+    header = json.dumps(
+        {"weight": {"dtype": "F32", "shape": [64], "data_offsets": [0, 256]}}
+    ).encode("utf8")
+    path = tmp_path / "model.safetensors"
+    path.write_bytes(struct.pack("<Q", len(header)) + header + b"\x00\x00\x00\x00")
+
+    with pytest.raises(DownloadRefusedError) as excinfo:
+        check_safetensors(path)
+
+    assert excinfo.value.reason == "UNSAFE_FORMAT"
+
+
+def test_a_temporary_file_of_a_running_loader_is_swept_only_when_its_writer_is_gone(
+    tmp_path: Path,
+):
+    # The sweep never touches the file of a writer that is still running,
+    # not even when the file is old.
+    cache = tmp_path / "cache"
+    model_dir = cache / "siglip2-base"
+    model_dir.mkdir(parents=True)
+    alive = model_dir / (".weights-" + str(os.getpid()) + "-live.tmp")
+    alive.write_bytes(b"a file being written right now")
+    dead = model_dir / ".weights-999999-dead.tmp"
+    dead.write_bytes(b"a file of a process that is gone")
+    old = time.time() - 7200
+    os.utime(alive, (old, old))
+    os.utime(dead, (old, old))
+
+    opener, calls = _spy_opener()
+    load_weights(_request(_record()), cache, opener=opener)
+
+    assert alive.exists()
+    assert not dead.exists()
+
+
 def test_a_temporary_file_of_a_crashed_run_is_swept(tmp_path: Path):
     # A crash leaves a temporary file behind; the next load sweeps it.
     cache = tmp_path / "cache"

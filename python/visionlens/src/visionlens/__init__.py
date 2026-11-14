@@ -38,6 +38,7 @@ from .encoders import (
     authorize_weights_download,
     load_weights,
 )
+from .io import DecodedImage, DecodeService
 from .errors import (
     ClientClosedError,
     ConfigInvalidError,
@@ -48,6 +49,7 @@ from .errors import (
     LibraryErrorCode,
     MimeMismatchError,
     PathNotFoundError,
+    PathOutsideRootError,
     UnsupportedDeviceError,
     UnsupportedFileTypeError,
     WorkerError,
@@ -66,6 +68,7 @@ from .registry import (
     load_model_registry,
     resolve_model,
 )
+from .runtime import DevicePlan, DevicePlanner
 from .worker import Worker
 
 __version__ = "0.1.0"
@@ -86,6 +89,10 @@ __all__ = [
     "ConfigVersionUnsupportedError",
     "DatasetInspection",
     "Datasets",
+    "DecodeService",
+    "DecodedImage",
+    "DevicePlan",
+    "DevicePlanner",
     "DownloadPermission",
     "DownloadProvenance",
     "DownloadRefusedError",
@@ -105,6 +112,7 @@ __all__ = [
     "ModelRegistryError",
     "ModelSpec",
     "PathNotFoundError",
+    "PathOutsideRootError",
     "UnknownModelError",
     "UnsupportedDeviceError",
     "UnsupportedFileTypeError",

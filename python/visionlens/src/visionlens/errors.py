@@ -99,6 +99,7 @@ class LibraryErrorCode(str, enum.Enum):
     IMAGE_METADATA_UNREADABLE = "IMAGE_METADATA_UNREADABLE"
     MIME_MISMATCH = "MIME_MISMATCH"
     PATH_NOT_FOUND = "PATH_NOT_FOUND"
+    PATH_OUTSIDE_ROOT = "PATH_OUTSIDE_ROOT"
     UNSUPPORTED_DEVICE = "UNSUPPORTED_DEVICE"
     UNSUPPORTED_FILE_TYPE = "UNSUPPORTED_FILE_TYPE"
 
@@ -163,6 +164,13 @@ class PathNotFoundError(LibraryError):
 
     def __init__(self, message: str) -> None:
         super().__init__(LibraryErrorCode.PATH_NOT_FOUND, message)
+
+
+class PathOutsideRootError(LibraryError):
+    """The path resolves outside the approved root it may be read from."""
+
+    def __init__(self, message: str) -> None:
+        super().__init__(LibraryErrorCode.PATH_OUTSIDE_ROOT, message)
 
 
 class UnsupportedDeviceError(LibraryError):

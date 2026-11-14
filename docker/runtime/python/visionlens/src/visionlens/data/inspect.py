@@ -177,6 +177,38 @@ def _detect_type(header: bytes) -> str | None:
     return None
 
 
+def read_dimensions(path: Path, mime_type: str) -> tuple[int, int] | None:
+    """The dimensions the header of a file declares, or None.
+
+    The PNG, GIF and WebP headers carry the dimensions in their first
+    bytes. A JPEG carries them in a frame header that may sit behind a
+    large EXIF segment, so the markers are walked with a seek and the
+    memory read stays bounded whatever the file holds.
+
+    The caller that has to refuse a bomb reads the dimensions HERE,
+    before it hands the file to a decoder that would allocate the pixel
+    buffer.
+    """
+    if mime_type == "image/jpeg":
+        try:
+            with path.open("rb") as handle:
+                return _jpeg(handle)
+        except OSError:
+            return None
+    try:
+        with path.open("rb") as handle:
+            header = handle.read(_HEADER_BYTES)
+    except OSError:
+        return None
+    if mime_type == "image/png":
+        return _png(header)
+    if mime_type == "image/gif":
+        return _gif(header)
+    if mime_type == "image/webp":
+        return _webp(header)
+    return None
+
+
 def _read_dimensions(
     mime_type: str, handle: BinaryIO, header: bytes
 ) -> tuple[int, int] | None:

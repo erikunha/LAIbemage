@@ -30,7 +30,7 @@ worker protocol is the only runtime boundary between them.**
 1. The Python side is one public distribution, `visionlens` at `python/visionlens/`
    (`python/visionlens/pyproject.toml:6`). It owns the encoder, the preprocessing fingerprint,
    the model registry, the operation handlers and the worker process
-   (`python/visionlens/src/visionlens/encoder.py:56`, `registry.py:98`, `operations.py:278`,
+   (`python/visionlens/src/visionlens/encoder.py:56`, `registry/simulated.py:109`, `operations.py:278`,
    `worker.py:182`). Its API works from a Python process without Node, Fastify or the npm SDK
    (`docs/vnext/02-ARCHITECTURE-DECISION.md:5`). As built the runtime is deterministic and
    carries one direct third-party dependency, Pydantic, with the four transitive packages it

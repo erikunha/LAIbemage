@@ -1,7 +1,7 @@
 # visionlens
 
 A local-first visual AI runtime for Python, fully simulated in this release.
-It ships the deterministic simulated encoder, the model registry, a JSONL
+It ships the deterministic simulated encoder, the model registries, a JSONL
 worker speaking the frozen `visionlens.worker.v1` protocol and the typed public
 facade. Pydantic is the only third-party runtime dependency: no numpy, no
 torch, no network, and no Node.js anywhere.
@@ -62,7 +62,7 @@ exact install command until the extra is provided to the `Worker`.
 from visionlens import (
     ErrorCode, ModelRegistry, ModelSpec, UnknownModelError,
     Worker, WorkerError, authorize_download, embed_bytes,
-    preprocessing_fingerprint,
+    load_model_registry, preprocessing_fingerprint, resolve_model,
 )
 
 registry = ModelRegistry.default()
@@ -70,6 +70,23 @@ spec = registry.resolve("siglip2-base")   # UnknownModelError for anything else
 vector = embed_bytes(b"image-bytes", spec)  # deterministic, depends on the bytes
 fingerprint = preprocessing_fingerprint(spec)  # fp2: form
 ```
+
+There are TWO registries, and they are not the same thing.
+`ModelRegistry` is the simulated runtime's frozen list of placeholder models,
+with placeholder revisions: it is what `embed_bytes` runs on today.
+`load_model_registry` reads the CAPABILITY registry, the pinned records of the
+models the platform may run, from `datasets/registry.json`:
+
+```python
+# the registry file of the repository; the wheel ships no registry of its own
+records = load_model_registry("datasets/registry.json")
+record = resolve_model(records, "siglip2-base")  # ModelNotFoundError for anything else
+record.revision, record.source_digest, record.license
+```
+
+The capability record names exact bytes, an exact revision and a license, and
+it is refused when it cannot be trusted. Reading it never reaches the network:
+fetching the bytes it names is a separate, explicitly permitted act.
 
 The encoder is deterministic by construction: the same bytes plus the same
 model always give the same vector, the vector depends on the bytes, and the

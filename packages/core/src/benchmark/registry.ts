@@ -37,17 +37,32 @@
  *
  * ```text
  * datasets/registry.json
- * ├── schemaVersion: 1
- * └── datasets[]
- *     ├── id, title, usage ("benchmark" | "research-only")
- *     ├── license, licenseUrl, commercialUse
- *     ├── source (the registry landing page), resource (the exact object URL)
- *     ├── version, archiveBytes, etag
- *     ├── parts { selected[], rationale }
- *     ├── sha256 (null until pinned), sha256PinnedAt (null until pinned)
- *     ├── attribution (the citation the license requires)
- *     └── fetchedAt (null until fetched), notes
+ * ├── schemaVersion: 2
+ * ├── datasets[]
+ * │   ├── id, title, usage ("benchmark" | "research-only")
+ * │   ├── license, licenseUrl, commercialUse
+ * │   ├── source (the registry landing page), resource (the exact object URL)
+ * │   ├── version, archiveBytes, etag
+ * │   ├── parts { selected[], rationale }
+ * │   ├── sha256 (null until pinned), sha256PinnedAt (null until pinned)
+ * │   ├── attribution (the citation the license requires)
+ * │   └── fetchedAt (null until fetched), notes
+ * └── models[] (the model capability registry, added in format version 2)
+ *     ├── modelId, revision (an exact commit, never "latest")
+ *     ├── sourceUri, sourceDigest (the sha256 of the weights)
+ *     ├── license, licenseUrl, commercialUse, usageRestrictions
+ *     ├── requiredExtras[], tasks[]
+ *     ├── preprocessingFingerprint, featureExtractor
+ *     ├── deviceSupport[], inputImageSize, outputShape
+ *     ├── latencyCostProfile, calibrationStatus, trustPolicy
+ *     └── attribution, notes
  * ```
+ *
+ * Format version 2 added the `models` array; the `datasets` array and the
+ * meaning of every field in it did not change, so a version 1 file is still
+ * read exactly as it was. The `models` key is optional in both versions: a
+ * registry that carries no model record is a registry that resolves no
+ * encoder, which is a refusal, never a silent default.
  */
 
 import { z } from 'zod';
@@ -59,7 +74,20 @@ export const DATASET_USAGES = ['benchmark', 'research-only'] as const;
 export type DatasetUsage = (typeof DATASET_USAGES)[number];
 
 /** The registry file format version this module reads and writes. */
-export const DATASET_REGISTRY_SCHEMA_VERSION = 1;
+export const DATASET_REGISTRY_SCHEMA_VERSION = 2;
+
+/**
+ * The registry file format versions this module reads.
+ *
+ * Version 2 added the optional `models` array. The `datasets` array and the
+ * meaning of every field in it did not change, so a version 1 file is still
+ * read exactly as it was: refusing it would break every reader that has
+ * nothing to do with models.
+ */
+export const DATASET_REGISTRY_READABLE_SCHEMA_VERSIONS = [
+  1,
+  DATASET_REGISTRY_SCHEMA_VERSION,
+] as const;
 
 /**
  * A failure of the registry itself: a malformed file, an unknown dataset id,
@@ -149,13 +177,145 @@ export const DatasetRegistryEntrySchema = z
     }
   });
 
+/** The devices a model record may declare support for. */
+export const MODEL_DEVICES = ['cpu', 'mps', 'cuda'] as const;
+
+/** Whether a URL names a host, the rule for the model's own locations. */
+function hasHost(value: string): boolean {
+  try {
+    return new URL(value).host.length > 0;
+  } catch {
+    return false;
+  }
+}
+
+/**
+ * One model capability record.
+ *
+ * The record is the platform's knowledge of a model BEFORE it is used: what
+ * it is, exactly which bytes it is, what it may be used for and under which
+ * license. Every field the pack names is here, and the refusals are the
+ * point:
+ *
+ *  - `revision` is an exact commit; the floating tag `latest` can never back
+ *    a saved run, so it is refused;
+ *  - `sourceDigest` is the sha256 of the weights, so a record that names
+ *    bytes it cannot identify is refused;
+ *  - `license` is never empty, because a model recorded without terms is a
+ *    model nobody may run;
+ *  - `deviceSupport` is never empty, because a model that runs nowhere is a
+ *    record of nothing.
+ */
+export const ModelRegistryEntrySchema = z
+  .strictObject({
+    /** Stable identifier, e.g. `siglip2-base`. */
+    modelId: z.string().min(1),
+    /** The exact revision of the model: a commit, never a floating tag. */
+    revision: z.string().min(1),
+    /** Where the weights live. */
+    sourceUri: z.url(),
+    /** The sha256 of the weights, computed from the bytes themselves. */
+    sourceDigest: z
+      .string()
+      .regex(/^[0-9a-f]{64}$/, 'expected a 64-character lowercase sha256 digest'),
+    /** SPDX-style license identifier or name, e.g. `apache-2.0`. Never empty. */
+    license: z.string().min(1, 'a model must record its license before use'),
+    /** Where the license text lives. */
+    licenseUrl: z.url(),
+    /** Whether the license permits commercial use. */
+    commercialUse: z.boolean(),
+    /** What the license forbids, in words. Empty when it forbids nothing. */
+    usageRestrictions: z.string(),
+    /** The extras the model needs, e.g. `vision`. */
+    requiredExtras: z.array(z.string().min(1)),
+    /** What the model does, e.g. `image-embedding`. */
+    tasks: z.array(z.string().min(1)).min(1),
+    /** The fingerprint of the preprocessing the model was measured with. */
+    preprocessingFingerprint: z.string().min(1),
+    /** The devices the model runs on. */
+    deviceSupport: z.array(z.enum(MODEL_DEVICES)).min(1),
+    /** The image size the model expects. */
+    inputImageSize: z.strictObject({
+      width: z.number().int().positive(),
+      height: z.number().int().positive(),
+    }),
+    /** The feature extractor the model was built with. */
+    featureExtractor: z.string().min(1),
+    /** The shape of the vector the model produces. */
+    outputShape: z.strictObject({
+      dimension: z.number().int().positive(),
+    }),
+    /** The measured latency and cost, or `unknown` when it was not measured. */
+    latencyCostProfile: z.string().min(1),
+    /** Whether the outputs are calibrated. */
+    calibrationStatus: z.string().min(1),
+    /** The platform's trust rule for this model. */
+    trustPolicy: z.string().min(1),
+    /** The citation the license requires when the model is used. */
+    attribution: z.string().min(1),
+    /** Free-form notes: caveats, provenance details. */
+    notes: z.string(),
+  })
+  .superRefine((entry, ctx) => {
+    if (entry.revision === 'latest') {
+      ctx.addIssue({
+        code: 'custom',
+        path: ['revision'],
+        message: "the floating revision 'latest' can never back a saved run; pin an exact revision",
+      });
+    }
+    // The weights location is the promise the digest hangs on, so it must
+    // name a host: `z.url()` alone accepts `mailto:` and `urn:`, which are
+    // not places bytes live.
+    for (const field of ['sourceUri', 'licenseUrl'] as const) {
+      if (!hasHost(entry[field])) {
+        ctx.addIssue({
+          code: 'custom',
+          path: [field],
+          message: 'expected an absolute URL with a host',
+        });
+      }
+    }
+  });
+
+/** One model capability record. */
+export type ModelRegistryEntry = z.infer<typeof ModelRegistryEntrySchema>;
+
 /** The whole registry file. */
-export const DatasetRegistrySchema = z.strictObject({
-  /** The format version of this file. */
-  schemaVersion: z.literal(DATASET_REGISTRY_SCHEMA_VERSION),
-  /** Every dataset the platform may use. */
-  datasets: z.array(DatasetRegistryEntrySchema).min(1),
-});
+export const DatasetRegistrySchema = z
+  .strictObject({
+    /** The format version of this file. */
+    schemaVersion: z.union(
+      DATASET_REGISTRY_READABLE_SCHEMA_VERSIONS.map((version) => z.literal(version)),
+    ),
+    /** Every dataset the platform may use. */
+    datasets: z.array(DatasetRegistryEntrySchema).min(1),
+    /**
+     * Every model the platform may run.
+     *
+     * Optional in every readable version: a registry without model records
+     * resolves no encoder, which is a refusal and never a silent default.
+     */
+    models: z.array(ModelRegistryEntrySchema).optional(),
+  })
+  .superRefine((registry, ctx) => {
+    // Version 1 is the format before the models array existed. A file that
+    // claims version 1 and carries model records anyway is inconsistent, and
+    // an inconsistent version number is how a reader ends up disagreeing
+    // with another reader about the same file.
+    if (
+      registry.schemaVersion === 1 &&
+      registry.models !== undefined &&
+      registry.models.length > 0
+    ) {
+      ctx.addIssue({
+        code: 'custom',
+        path: ['models'],
+        message:
+          'a version 1 registry carries no model records; the models array belongs to format version 2',
+      });
+    }
+  });
 
 /** One dataset entry. */
 export type DatasetRegistryEntry = z.infer<typeof DatasetRegistryEntrySchema>;
@@ -238,6 +398,29 @@ export function findDataset(registry: DatasetRegistry, id: string): DatasetRegis
 }
 
 /**
+ * Finds one model entry by id.
+ *
+ * The registry is the only source of a model's capability record, so a model
+ * that is not in it is a refusal, never a default. The refusal names the
+ * model and the ids the registry does carry: a caller that asks for an
+ * encoder nobody recorded learns which encoders exist.
+ *
+ * @throws {DatasetRegistryError} when no model record carries that id.
+ */
+export function findModel(registry: DatasetRegistry, modelId: string): ModelRegistryEntry {
+  const models = registry.models ?? [];
+  const entry = models.find((candidate) => candidate.modelId === modelId);
+  if (!entry) {
+    const known = models.map((candidate) => candidate.modelId).join(', ') || '(none)';
+    throw new DatasetRegistryError(`No model '${modelId}' in the registry`, [
+      `known ids: ${known}`,
+      'a model that is not recorded is never run',
+    ]);
+  }
+  return entry;
+}
+
+/**
  * The constitutional gate: a dataset may only be used with a recorded,
  * non-empty license.
  *
@@ -246,10 +429,9 @@ export function findDataset(registry: DatasetRegistry, id: string): DatasetRegis
 export function assertDatasetLicensed(entry: DatasetRegistryEntry): void {
   const license = entry.license?.trim() ?? '';
   if (license.length === 0) {
-    throw new DatasetRegistryError(
-      `Dataset '${entry.id}' records no license and may not be used`,
-      ['every dataset and model records license and terms before use'],
-    );
+    throw new DatasetRegistryError(`Dataset '${entry.id}' records no license and may not be used`, [
+      'every dataset and model records license and terms before use',
+    ]);
   }
 }
 

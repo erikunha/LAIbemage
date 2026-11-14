@@ -45,7 +45,19 @@ from .errors import (
     WorkerError,
     is_retryable,
 )
-from .registry import DEFAULT_MODELS, ModelRegistry, ModelSpec, UnknownModelError
+from .registry import (
+    DEFAULT_MODELS,
+    ModelCapabilityRegistry,
+    ModelNotFoundError,
+    ModelRecord,
+    ModelRecordError,
+    ModelRegistry,
+    ModelRegistryError,
+    ModelSpec,
+    UnknownModelError,
+    load_model_registry,
+    resolve_model,
+)
 from .worker import Worker
 
 __version__ = "0.1.0"
@@ -74,7 +86,12 @@ __all__ = [
     "LibraryErrorCode",
     "LocalConfig",
     "MimeMismatchError",
+    "ModelCapabilityRegistry",
+    "ModelNotFoundError",
+    "ModelRecord",
+    "ModelRecordError",
     "ModelRegistry",
+    "ModelRegistryError",
     "ModelSpec",
     "PathNotFoundError",
     "UnknownModelError",
@@ -90,6 +107,8 @@ __all__ = [
     "embed_bytes",
     "inspect_image",
     "is_retryable",
+    "load_model_registry",
     "preprocessing_fingerprint",
+    "resolve_model",
     "resolve_capabilities",
 ]

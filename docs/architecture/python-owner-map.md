@@ -18,7 +18,8 @@ The static proof of the rules in this map is `pnpm run check:owner-boundaries`
 | Worker host (spawn, framing, handshake, cancel, deadline) | `packages/core/src/worker/` | stays in TypeScript | `packages/core/src/worker/client.ts:1` | `docs/vnext/05-PYTHON-CORE-AND-PYPI.md:26` (the `bridge` role, host side) |
 | Worker process (frames on stdout, logs on stderr) | `visionlens` | Python | `python/visionlens/src/visionlens/worker.py:182` | `docs/vnext/05-PYTHON-CORE-AND-PYPI.md:26` |
 | Encoder and preprocessing fingerprint | `visionlens` | Python | `python/visionlens/src/visionlens/encoder.py:56`, `:82` | `docs/vnext/05-PYTHON-CORE-AND-PYPI.md:17`, `:19` (simulated as-built) |
-| Model registry | `visionlens` | Python | `python/visionlens/src/visionlens/registry.py:98` | `docs/vnext/05-PYTHON-CORE-AND-PYPI.md:20` |
+| Model registry (the simulated runtime's placeholder list) | `visionlens` | Python | `python/visionlens/src/visionlens/registry/simulated.py:109` | `docs/vnext/11-VISION-MODEL-REGISTRY-INFERENCE.md:5` (the record shape), `docs/architecture/model-registry.md` (the two registries) |
+| Model capability registry (the pinned records of the models the platform may run) | one record set, two readers | the data is shared and the refusals are the same, measured by `scripts/registry/parity-check.ts` | `datasets/registry.json` (the records), `packages/core/src/benchmark/registry.ts:410` (the TypeScript accessor), `python/visionlens/src/visionlens/registry/loader.py:334` (the Python loader) | `docs/vnext/11-VISION-MODEL-REGISTRY-INFERENCE.md:5`, `docs/architecture/model-registry.md` |
 | Operation handlers (embed, predict, audit, eval, train) | `visionlens` | Python | `python/visionlens/src/visionlens/operations.py:278` | `docs/vnext/05-PYTHON-CORE-AND-PYPI.md:21-23` |
 | Golden worker transcript | `visionlens` | Python | `python/visionlens/src/visionlens/golden/__init__.py:1` | `docs/vnext/adrs/ADR-011-python-first-ml-runtime.md:18` (golden path) |
 | Store, lineage, migrations | `packages/core/src/store/` | stays in TypeScript, sole domain writer | `packages/core/src/store/db.ts:1`, `lineage.ts`, `migrations/` | `docs/vnext/08-DOMAIN-STORE-AND-PROVENANCE.md:46` |
@@ -57,7 +58,7 @@ What must never happen, stated from the Python side:
   (`python/visionlens/src/visionlens/worker.py:1-9`).
 - TypeScript never reimplements ML numerical code (`docs/vnext/04-ARCHITECTURE-C4.md:13`): the
   encoder, its preprocessing fingerprint and the model registry exist only in Python
-  (`python/visionlens/src/visionlens/encoder.py:56`, `registry.py:98`). The TypeScript Sharp
+  (`python/visionlens/src/visionlens/encoder.py:56`, `registry/simulated.py:109`). The TypeScript Sharp
   pipeline is image preparation, not ML, and stays until parity and profiling justify moving it
   (`docs/vnext/02-ARCHITECTURE-DECISION.md:9`).
 - Neither side invents a competing entity variant (`docs/vnext/07-CONTRACTS-PROTOCOL.md:5`):

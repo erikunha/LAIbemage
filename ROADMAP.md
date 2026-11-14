@@ -192,7 +192,7 @@ milestone: the leakage-resistant split and the scorecard gate what R3 through R7
 | Release | Focus (specs in this series) | Exit gate | Status |
 |---|---|---|---|
 | R0 Reconcile | reconciliation record, baseline, the Python-first decision (015, 016) | zero lost work; green baseline; signed reconciliation | 015 done · 016 divergence recorded, maintainer decision pending |
-| R1 Python Library | public `visionlens` wheel (017), JSONL worker protocol (018), CPU vision adapter (019), TS facade (020) | the wheel works without Node; TS and Python reach golden parity | 017 and 018 partially shipped · 019 not started · 020 divergence recorded, maintainer decision pending |
+| R1 Python Library | public `visionlens` wheel (017), JSONL worker protocol (018), CPU vision adapter (019), TS facade (020) | the wheel works without Node; TS and Python reach golden parity | 017 and 018 partially shipped · 019 partially shipped · 020 divergence recorded, maintainer decision pending |
 | R2 Data Foundation | leakage-resistant split (021), evaluation scorecard v2 (022) | nonempty train/val/test; source, license and hash gating | 021 done · 022 shipped |
 | R3 Visual Embeddings | no ticket in this series yet | Recall@k test; hardware profiling; index mismatch tests | not started |
 | R4 Model Arena | no ticket in this series yet | identical locked test set; per-class plus cost and latency reports | not started |
@@ -201,7 +201,7 @@ milestone: the leakage-resistant split and the scorecard gate what R3 through R7
 | R7 SDK, MCP and Agent | MCP dataset investigator (026) | same operation parity; injection and budget approval gates | divergence recorded, maintainer decision pending |
 | Process | ADR-020 repository separation (027) | knowledge kept under `docs/procedures/`; the tracked-file guard stays green | done |
 
-Spec-level statuses (post-audit, 2026-11-12):
+Spec-level statuses (post-audit, 2026-11-12; row 019 updated 2026-11-14):
 
 | Spec | Pack id | Release | Scope | Status |
 |---|---|---|---|---|
@@ -209,7 +209,7 @@ Spec-level statuses (post-audit, 2026-11-12):
 | 016 | VLN-002 | R0 | Python-first ML runtime ADR and the owner map of what moves to Python | divergence recorded, maintainer decision pending: the spec's python-ownership artifacts (its numbered ADR, the owner map, the boundary checker) never landed; `python/visionlens` exists and supersedes the spec's "no python yet" premise |
 | 017 | VLN-003 | R1 | public `visionlens` distribution: packaging, extras, wheel, publishing gates | partially shipped: the wheel is built, `uv.lock` and the release gate landed with PR #42, the typed facade for capabilities and image metadata shipped with the dated packaging amendment of ADR-011, and the verification workflow that runs the gate in CI landed with no registry credential and no publish step |
 | 018 | VLN-004 | R1 | cross-language JSONL worker protocol: handshake, events, errors, cancellation | partially shipped: the protocol landed across contracts, core and Python (both hosts and the suites); golden fixtures, secret redaction, retry backoff, the `CANCEL_REQUESTED` job transition, the schema generator and the ADR still open |
-| 019 | VLN-005 | R1 | one CPU vision adapter with golden predictions and fingerprints | not started |
+| 019 | VLN-005 | R1 | one CPU vision adapter with golden predictions and fingerprints | partially shipped: the model capability registry landed, with the pinned siglip2-base record (the exact revision, the sha256 of the real weights and the license, refused unless all three are present) and the two readers that resolve it, refusing the same records field by field; the CPU adapter, the golden parity gate and the inference-time failure paths (missing weights, corrupt image, license gate) are still open |
 | 020 | VLN-006 | R1 | TypeScript facade over the Python worker, old CLI path preserved | divergence recorded, maintainer decision pending: the facade module it names (`packages/core/src/facade/`) never landed; the TS host client shipped inside the worker module as-built |
 | 021 | VLN-007 | R2 | leakage-resistant train/val/test partition and the gate that protects it | done |
 | 022 | VLN-008 | R2 | evaluation scorecard: held-out metrics, calibration, per-sample artifacts | shipped: the scorecard module, the regime gate and five suites, the `benchmark scorecard` CLI command with its typed refusals, the committed pointer directory and the documentation of the held-out figure landed. The CLI `benchmark gate` carries no scorecard yet, so a suite cannot migrate from the whole-set regime to the scorecard regime from the command line yet |

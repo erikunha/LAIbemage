@@ -112,6 +112,34 @@ authorized = authorize_download(
 )
 ```
 
+### The weights loader
+
+The loader is the only place where the bytes of a model are fetched, and it
+fetches them only when every gate says yes: the use the recorded license
+permits, an explicit permission, a trust policy the loader implements, an
+allowlisted source at the pinned revision, a safetensors file, and a digest
+that matches the record. The bytes are streamed to the cache in bounded
+blocks and never held in memory.
+
+```python
+from visionlens import (
+    DownloadPermission, WeightsRequest, authorize_weights_download, load_weights,
+)
+
+request = WeightsRequest(
+    record=record,
+    use="inference",
+    permission=DownloadPermission.grant("the operator"),
+)
+authorized = authorize_weights_download(request)  # DownloadRefusedError, or the proof
+loaded = load_weights(request, Path("~/.cache/visionlens/weights").expanduser())
+print(loaded.path, loaded.digest == record.source_digest)
+```
+
+Without the permission nothing is fetched and the cache directory stays
+empty. The cached file is named after the digest of its bytes, so it can be
+verified again without the network.
+
 ### The typed facade
 
 ```python

@@ -1,0 +1,188 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "type": "object",
+  "properties": {
+    "schemaVersion": {
+      "type": "number",
+      "const": 1
+    },
+    "embeddingRunId": {
+      "type": "string",
+      "minLength": 1
+    },
+    "modelId": {
+      "type": "string",
+      "minLength": 1
+    },
+    "revision": {
+      "type": "string",
+      "minLength": 1
+    },
+    "sourceUri": {
+      "type": "string",
+      "format": "uri"
+    },
+    "weightsDigest": {
+      "type": "string",
+      "pattern": "^[0-9a-f]{64}$"
+    },
+    "preprocessingFingerprint": {
+      "type": "string",
+      "pattern": "^fp2:[0-9a-f]{16}$"
+    },
+    "preprocessingComponents": {
+      "type": "object",
+      "propertyNames": {
+        "type": "string"
+      },
+      "additionalProperties": {}
+    },
+    "snapshotId": {
+      "type": "string",
+      "minLength": 1
+    },
+    "assetSha256": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "pattern": "^[0-9a-f]{64}$"
+      }
+    },
+    "count": {
+      "type": "integer",
+      "minimum": 0,
+      "maximum": 9007199254740991
+    },
+    "dimension": {
+      "type": "integer",
+      "exclusiveMinimum": 0,
+      "maximum": 9007199254740991
+    },
+    "dtype": {
+      "type": "string",
+      "const": "float32"
+    },
+    "vectorsFileDigest": {
+      "type": "string",
+      "pattern": "^[0-9a-f]{64}$"
+    },
+    "artifactDigest": {
+      "type": "string",
+      "pattern": "^[0-9a-f]{64}$"
+    },
+    "device": {
+      "type": "string",
+      "minLength": 1
+    },
+    "runtimeVersions": {
+      "type": "object",
+      "propertyNames": {
+        "type": "string"
+      },
+      "additionalProperties": {
+        "type": "string"
+      }
+    },
+    "createdAt": {
+      "type": "string",
+      "minLength": 1
+    },
+    "latency": {
+      "type": "object",
+      "properties": {
+        "count": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "p50Ms": {
+          "anyOf": [
+            {
+              "type": "number"
+            },
+            {
+              "type": "string",
+              "const": "unknown"
+            }
+          ]
+        },
+        "p95Ms": {
+          "anyOf": [
+            {
+              "type": "number"
+            },
+            {
+              "type": "string",
+              "const": "unknown"
+            }
+          ]
+        },
+        "totalMs": {
+          "anyOf": [
+            {
+              "type": "number"
+            },
+            {
+              "type": "string",
+              "const": "unknown"
+            }
+          ]
+        }
+      },
+      "required": [
+        "count",
+        "p50Ms",
+        "p95Ms",
+        "totalMs"
+      ],
+      "additionalProperties": false,
+      "description": "The latency of a run: the percentiles per image and the total."
+    },
+    "peakMemoryBytes": {
+      "anyOf": [
+        {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        {
+          "type": "string",
+          "const": "unknown"
+        }
+      ]
+    },
+    "license": {
+      "type": "string",
+      "minLength": 1
+    },
+    "calibrationStatus": {
+      "type": "string",
+      "minLength": 1
+    }
+  },
+  "required": [
+    "schemaVersion",
+    "embeddingRunId",
+    "modelId",
+    "revision",
+    "sourceUri",
+    "weightsDigest",
+    "preprocessingFingerprint",
+    "preprocessingComponents",
+    "snapshotId",
+    "assetSha256",
+    "count",
+    "dimension",
+    "dtype",
+    "vectorsFileDigest",
+    "artifactDigest",
+    "device",
+    "runtimeVersions",
+    "createdAt",
+    "latency",
+    "peakMemoryBytes",
+    "license",
+    "calibrationStatus"
+  ],
+  "additionalProperties": false
+}

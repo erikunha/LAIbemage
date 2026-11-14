@@ -11,7 +11,6 @@ Pure standard library: no numpy, no torch, no network.
 from __future__ import annotations
 
 import hashlib
-import json
 from typing import Any, Mapping
 
 from .registry import ModelSpec
@@ -70,8 +69,15 @@ def embed_bytes(image: bytes, model: ModelSpec) -> list[float]:
 
 
 def canonical_json(payload: Mapping[str, object]) -> str:
-    """Serialize with recursively sorted keys, the canonical form for digests."""
-    return json.dumps(payload, sort_keys=True, separators=(",", ":"), ensure_ascii=True)
+    """Serialize with recursively sorted keys, the canonical form for digests.
+
+    The form is the one the live TypeScript implementation writes, so the
+    two languages agree byte for byte
+    (`packages/contracts/src/fingerprint.ts:33`).
+    """
+    from .runtime.fingerprint import canonical_json as _canonical_json
+
+    return _canonical_json(payload)
 
 
 def digest_of(payload: Mapping[str, object]) -> str:

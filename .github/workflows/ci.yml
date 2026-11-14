@@ -81,6 +81,20 @@ jobs:
       - name: Docker vendor copy matches python/visionlens
         run: pnpm docker:vendor:check
 
+      # The golden parity gate of the vision adapter: the config fingerprint
+      # computed by the live TypeScript implementation, the manifest of the
+      # committed artifact validated against the ratified schema, and every
+      # golden vector compared with the artifact inside the documented
+      # tolerance. It reads the committed artifact, so it runs without the
+      # heavy stack and without a model.
+      - name: Vision golden parity gate
+        run: pnpm exec tsx scripts/benchmarks/vision-parity.ts
+
+      # The manifest schema the Python side validates against is generated
+      # from the Zod schema, and the committed file may not drift from it.
+      - name: Embedding manifest schema is in sync
+        run: pnpm exec tsx scripts/benchmarks/generate-manifest-schema.ts --check
+
       - name: Build (required by the golden bin tests)
         run: pnpm build
 

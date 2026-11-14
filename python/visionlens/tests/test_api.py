@@ -199,14 +199,27 @@ def test_capabilities_are_serializable_and_name_the_device_extras_and_version():
     }
 
 
-def test_capabilities_report_the_heavy_extras_as_unavailable_in_a_base_install():
+def test_capabilities_report_the_extra_as_available_when_its_stack_is_there():
+    # The capability says what the environment can do, and never claims
+    # more: the extra is available exactly when its modules are there.
+    # The base install carries none of them, and the clean-venv test of
+    # the wheel proves that.
+    import importlib.util
+
     with VisionLens.local() as client:
         capabilities = client.capabilities()
 
     vision = next(extra for extra in capabilities.extras if extra.name == "vision")
-    assert vision.available is False
-    assert vision.missing_modules
-    assert capabilities.installed_extras == ()
+    importable = all(
+        importlib.util.find_spec(name) is not None for name in ("torch", "transformers")
+    )
+    assert vision.available is importable
+    if importable:
+        assert vision.missing_modules == ()
+        assert "vision" in capabilities.installed_extras
+    else:
+        assert vision.missing_modules
+        assert capabilities.installed_extras == ()
 
 
 # --- the image metadata operation ---------------------------------------------

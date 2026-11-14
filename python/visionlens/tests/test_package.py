@@ -4,6 +4,8 @@ from __future__ import annotations
 
 import subprocess
 import sys
+import tomllib
+from pathlib import Path
 
 from helpers import SRC  # noqa: F401  (path setup)
 
@@ -29,6 +31,16 @@ def test_public_surface_exports():
     assert ModelRegistry.default().resolve("siglip2-base").dimension == 768
     assert len(embed_bytes(b"x", ModelSpec(model_id="m", revision="r1", dimension=4))) == 4
     assert ErrorCode.CANCELLED.value == "CANCELLED"
+
+
+def test_the_exported_version_matches_the_declared_version():
+    """The version the package reports is the version it declares."""
+    import visionlens
+
+    pyproject = Path(__file__).resolve().parents[1] / "pyproject.toml"
+    declared = tomllib.loads(pyproject.read_text(encoding="utf-8"))["project"]["version"]
+
+    assert visionlens.__version__ == declared
 
 
 def test_base_import_loads_no_heavy_dependency():

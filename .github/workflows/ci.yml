@@ -49,11 +49,15 @@ jobs:
         run: pnpm audit --audit-level=high
         continue-on-error: true
 
-      # All Python suites (services smoke, visionlens worker, mock provider)
-      # are stdlib-only; only pytest itself is needed (no uv sync).
+      # All Python suites (services smoke, visionlens worker and facade, mock
+      # provider) need pytest, and the visionlens suites need the base
+      # dependency the distribution declares (Pydantic, per the ADR-011
+      # packaging amendment of 2026-11-14). Installing the distribution
+      # itself keeps the runner aligned with the declared metadata instead of
+      # a hand-copied requirement range.
       # --break-system-packages is required on PEP 668-managed runner images.
-      - name: Set up Python (pytest for the Python suites)
-        run: python3 -m pip install --user --break-system-packages pytest
+      - name: Set up Python (pytest and the visionlens base dependency)
+        run: python3 -m pip install --user --break-system-packages pytest ./python/visionlens
 
       - name: Lint
         run: pnpm lint

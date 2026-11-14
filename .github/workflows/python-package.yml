@@ -1,0 +1,111 @@
+name: Python package
+
+# The public `visionlens` distribution (spec 017, VLN-003): the acceptance
+# criteria of docs/vnext/specs/VLN-003-python-public-wheel.md.
+#
+# This workflow proves the package, it publishes nothing:
+#
+#   1. It NEVER publishes. There is no registry credential, no `twine upload`,
+#      no `uv publish` and no package write scope. The job's permissions are
+#      `contents: read` and nothing else.
+#   2. It NEVER invents a green. The release gate fails when a step fails or
+#      cannot run, and the gate's evidence artifact is uploaded after a failed
+#      gate, so a red run can be read. A job that dies before the gate step
+#      produces no artifact, and the upload is a no-op there.
+#   3. The distribution NEVER needs Node. The clean installs happen with every
+#      directory holding a node binary dropped from PATH, which is the
+#      acceptance condition of the distribution: the wheel works without Node.
+#
+# What the job proves, on every push to main, develop or a feat/** branch and
+# on every pull request to main, on the Python floor and on the next supported
+# version: the artifacts build, the package tests pass, the type checker
+# reports zero errors, and the release gate is green, which covers the
+# metadata validation, the artifact scan, the clean installs of the wheel and
+# the sdist, the resolution of every extra, the lock compatibility and the
+# dependency scan. Every finding of the dependency scan is recorded with the
+# severity read from OSV, and an unreviewed high severity finding, or one no
+# authority could size, fails the scan and therefore the gate.
+
+on:
+  push:
+    branches: [main, develop, 'feat/**']
+  pull_request:
+    branches: [main]
+
+permissions:
+  contents: read
+
+jobs:
+  package:
+    name: Python package (build, test, type check, scan, gate)
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    strategy:
+      # Every leg runs the whole gate: a failure on one Python version is a
+      # failure of the package, not of that leg.
+      fail-fast: false
+      matrix:
+        # 3.11 is the floor the distribution declares; 3.12 is the version the
+        # main CI job exercises through the runner's default python3, because
+        # the main CI pins no version of its own. The wheel installs on both,
+        # with Node absent.
+        python-version: ['3.11', '3.12']
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Python ${{ matrix.python-version }}
+        uses: actions/setup-python@v7
+        with:
+          python-version: ${{ matrix.python-version }}
+
+      # uv is pinned to the version that resolved the lock, so a tool upgrade
+      # cannot change what the lock check means. The action is pinned to an
+      # exact tag: the repository publishes no floating `v10` tag, and a
+      # floating major would fail to resolve on the runner.
+      - name: Install uv
+        uses: astral-sh/setup-uv@v10.3.3
+        with:
+          version: "0.11.21"
+
+      # The locked environment: the lock is the source of truth, and a lock
+      # that no longer satisfies the published ranges fails here. The
+      # interpreter is named explicitly, because uv prefers an interpreter it
+      # manages over the one on PATH: without it, both legs of the matrix
+      # would build the same environment and the matrix would prove nothing.
+      - name: Resolve the locked development environment
+        run: uv sync --group dev --locked --python ${{ matrix.python-version }}
+        working-directory: python/visionlens
+
+      - name: Build the artifacts
+        run: uv build --out-dir dist
+        working-directory: python/visionlens
+
+      - name: Package tests
+        run: |
+          uv run --group dev python --version
+          uv run --group dev pytest tests -q
+        working-directory: python/visionlens
+
+      - name: Type checker
+        run: uv run --group dev mypy src/visionlens
+        working-directory: python/visionlens
+
+      # The gate owns the build, the artifact scan, the clean installs with
+      # Node absent, the extras, the records, the lock compatibility and the
+      # dependency scan. It exits non-zero when any step fails or cannot run.
+      - name: Release gate
+        run: python3 scripts/release_gate.py
+        working-directory: python/visionlens
+
+      # The evidence lands after a failed gate too, so a red run can be read.
+      # A job that died before the gate step has no artifact to upload, and
+      # the upload is a no-op there.
+      - name: Upload the gate evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: release-gate-python-${{ matrix.python-version }}
+          path: python/visionlens/release/gate/
+          if-no-files-found: ignore
+          retention-days: 7

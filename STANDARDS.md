@@ -219,10 +219,12 @@ not comparable to a metric measured against another. Pinning the package manager
 the same reason one step earlier. The dataset rule exists because a license and a checksum are
 the only parts of a dataset that can be reviewed before the gigabytes arrive.
 
-**How it is held.** Held by a gate, and honestly labelled: the dependency audit in CI is
+**How it is held.** Held by a gate, and honestly labelled: the pnpm dependency audit in CI is
 currently **advisory**. The workflow records exactly why, with the count and the affected chains,
 and states the condition for making it a hard gate. That is the honest state of the gate, and a
-reviewer who wants the audit to be blocking says so as a decision rather than a diff.
+reviewer who wants the audit to be blocking says so as a decision rather than a diff. The Python
+distribution's own audit is already a hard gate: the release gate's `dependency-scan` step
+records every finding with its severity and fails on an unreviewed high severity finding.
 
 The install surface is bounded by the workspace configuration, which lists the packages allowed
 to run install scripts, so a new transitive build script is a visible change. The dataset

@@ -214,11 +214,32 @@ the dated records under `python/visionlens/release/`. Its evidence lands in
 `release/gate/run-*.json`. The gate must be green before any document says
 the package is publicly installable.
 
+The dependency scan runs pip-audit over the requirements exported from the
+committed lock, and records every finding with its severity. pip-audit reports
+the finding without one, so the severity is read from OSV, the advisory
+database the identifiers pip-audit reports come from: the advisory's own label
+when it carries one, and its CVSS vector scored when it does not. An
+unreviewed high severity finding blocks the gate, and so does a finding no
+authority could size, because an unsized finding is an unreviewed one. A
+finding reviewed on purpose is listed in
+`release/dependency-scan-reviewed.json`, a JSON array of objects whose `id` is
+the identifier pip-audit reports for it (an alias does not match), and it no
+longer blocks. A file that cannot be read blocks every finding rather than
+passing any of them.
+
 Publication, when it is approved, will run only from a signed and tagged
 release, with CI trusted identity and tag confirmation, with build
 provenance recorded, and with manual approval for the first public release
 (`docs/vnext/22-PUBLISHING-DEVELOPER-EXPERIENCE.md:19-20`). This is policy
 only: no workflow, credential or publish step for it exists.
+
+The gate runs in CI, in `.github/workflows/python-package.yml` (added
+2026-11-14; the first CI run lands with this change): the job builds the
+artifacts, runs the package tests, runs the type checker and runs the release
+gate on the Python floor and the next supported version, and it uploads the
+gate's evidence after a failed gate too. That workflow holds no registry
+credential and has no publish step, so it proves the package and publishes
+nothing.
 
 ## Development
 

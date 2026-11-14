@@ -14,9 +14,9 @@ handled here and not left to chance:
   - the KEYS are sorted by their UTF-16 code units, the way the
     TypeScript `Array.prototype.sort` orders them, and not by their code
     points;
-  - the NUMBERS are written the way JavaScript writes them: an integral
-    float is written without its fraction, and an exponent carries no
-    padding.
+  - the NUMBERS are written the way JavaScript writes them: the shortest
+    digits that read back as the same value, the exponential form below
+    1e-6 and from 1e21, and an exponent that always carries its sign.
 
 A fingerprint nobody can recompute is a decoration, and the test that
 compares this module with the live TypeScript one is the guard.
@@ -82,20 +82,68 @@ def _utf16_order(key: str) -> bytes:
 def _number(value: float) -> str:
     """The number as JavaScript writes it.
 
-    An integral float is written without its fraction, and an exponent
-    carries no padding: `1.0` is `1` and `1e-07` is `1e-7`.
+    The rule is the one of `Number::toString` in the language
+    specification, and it is not the rule of Python: a value whose
+    decimal exponent is below -6 or at least 21 is written in the
+    exponential form, the exponent always carries its sign, and the
+    digits are the shortest ones that read back as the same value.
+
+    A value that is not a number is the JSON null, the way
+    `JSON.stringify` writes it.
     """
     if value != value or value in (float("inf"), float("-inf")):
-        raise ValueError("a fingerprint cannot carry a number that is not a number")
-    if value == int(value) and abs(value) < 1e21:
-        return str(int(value))
+        return "null"
+    if value == 0:
+        # JavaScript writes the negative zero as a zero.
+        return "0"
+    negative = value < 0
+    digits, exponent = _shortest_digits(abs(value))
+    text = _decimal(digits, exponent)
+    return "-" + text if negative else text
+
+
+def _shortest_digits(value: float) -> tuple[str, int]:
+    """The shortest digits of a positive value and its decimal exponent.
+
+    The result is the digit string without its trailing zeros and the
+    exponent `n` of the specification, so the value is
+    `0.<digits> * 10 ** n`.
+    """
     text = repr(value)
     if "e" in text:
-        mantissa, _, exponent = text.partition("e")
-        sign = "-" if exponent.startswith("-") else ""
-        digits = exponent.lstrip("+-").lstrip("0") or "0"
-        text = mantissa + "e" + sign + digits
-    return text
+        mantissa, _, exponent_text = text.partition("e")
+        exponent = int(exponent_text)
+    else:
+        mantissa = text
+        exponent = 0
+    if "." in mantissa:
+        int_part, _, frac_part = mantissa.partition(".")
+    else:
+        int_part, frac_part = mantissa, ""
+    # The digits of the value, without the leading zeros, which carry no
+    # value, and without the trailing ones, which the exponent carries.
+    plain = str(int(int_part + frac_part))
+    trailing = len(plain) - len(plain.rstrip("0"))
+    digits = plain.rstrip("0")
+    # `value == digits * 10 ** (n - len(digits))`, and the fraction of the
+    # repr carries the exponent of the fraction.
+    n = len(digits) + trailing + exponent - len(frac_part)
+    return digits, n
+
+
+def _decimal(digits: str, n: int) -> str:
+    """The decimal form of the digits, the way the specification writes it."""
+    k = len(digits)
+    if k <= n <= 21:
+        return digits + "0" * (n - k)
+    if 0 < n <= 21:
+        return digits[:n] + "." + digits[n:]
+    if -6 < n <= 0:
+        return "0." + "0" * (-n) + digits
+    exponent = n - 1
+    sign = "+" if exponent >= 0 else "-"
+    head = digits if k == 1 else digits[0] + "." + digits[1:]
+    return head + "e" + sign + str(abs(exponent))
 
 
 def fingerprint_v2(components: Mapping[str, Any]) -> str:

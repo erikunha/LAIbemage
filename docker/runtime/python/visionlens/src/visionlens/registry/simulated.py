@@ -1,10 +1,21 @@
-"""Model registry: model ids resolve to a ModelSpec or an explicit refusal.
+"""The simulated model registry: model ids resolve to a ModelSpec or a refusal.
+
+This registry is the SIMULATED runtime's own list: the frozen models the
+deterministic encoder derives its vectors from. Its revisions are placeholders
+(`r2026-03-01` and its neighbours), so nothing here describes a real
+checkpoint.
 
 The record shape follows the model capability registry design in
 docs/vnext/11-VISION-MODEL-REGISTRY-INFERENCE.md: an exact revision (the
 floating tag "latest" is refused), the output dimension, the supported
 devices, the license and the tasks. The registry never fetches anything;
 resolving a model is a pure lookup.
+
+It is NOT the capability registry (`loader.py`, `record.py`), which reads the
+pinned records of the models the platform may run from
+`datasets/registry.json`. The two carry the same model id, so a reader must
+know which one it wants: this one describes the simulated runtime that runs
+today, the other describes the real checkpoint.
 """
 
 from __future__ import annotations

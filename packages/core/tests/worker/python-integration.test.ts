@@ -40,7 +40,7 @@ const WORKER_RESOLVED = existsSync(WORKER_ENTRY);
 
 /**
  * A model id the Python registry serves: the siglip2-base entry of
- * DEFAULT_MODELS in python/visionlens/src/visionlens/registry.py, revision
+ * DEFAULT_MODELS in python/visionlens/src/visionlens/registry/simulated.py, revision
  * r2026-03-01, dimension 768, cpu only, no required extra.
  */
 const EMBED_MODEL = 'siglip2-base';

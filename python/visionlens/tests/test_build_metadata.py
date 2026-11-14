@@ -18,6 +18,13 @@ MANDATORY_DISTRIBUTIONS = ["pydantic"]
 # amendment and the license audit both name it.
 MANDATORY_REQUIREMENT = "pydantic<3,>=2.12"
 
+# The heavy stack the `vision` extra carries: the encoder that reads a real
+# checkpoint (torch, transformers), the format the weights loader publishes
+# (safetensors) and the decoder that opens an image (pillow). The base
+# install carries none of them, so the base never pulls a PyTorch or a
+# Transformers download (docs/vnext/05-PYTHON-CORE-AND-PYPI.md:34, :35).
+VISION_EXTRA_DISTRIBUTIONS = {"torch", "transformers", "safetensors", "pillow"}
+
 
 def _distribution_name(requirement: str) -> str:
     """The distribution name of a Requires-Dist line, without its specifier."""
@@ -67,6 +74,25 @@ def test_the_base_dependency_pins_its_published_range(built_dist: Path) -> None:
     ]
     mandatory = [r for r in requires if "extra ==" not in r]
     assert mandatory == [MANDATORY_REQUIREMENT]
+
+
+def test_the_vision_extra_carries_the_heavy_stack(built_dist: Path) -> None:
+    metadata = _metadata(built_dist)
+    requires = [
+        line.split(":", 1)[1].strip()
+        for line in metadata.splitlines()
+        if line.startswith("Requires-Dist:")
+    ]
+    vision = {
+        _distribution_name(r) for r in requires if "extra == 'vision'" in r
+    }
+    assert vision == VISION_EXTRA_DISTRIBUTIONS
+    # The aggregate pulls the same stack, so `all` is never a weaker
+    # install than the extra it aggregates.
+    aggregate = {
+        _distribution_name(r) for r in requires if "extra == 'all'" in r
+    }
+    assert aggregate == VISION_EXTRA_DISTRIBUTIONS
 
 
 def test_sdist_metadata_matches_the_wheel(built_dist: Path) -> None:

@@ -1,8 +1,10 @@
 """visionlens: a local-first visual AI runtime, fully simulated.
 
-The package ships the deterministic simulated encoder, the model registry
-and the JSONL worker speaking the frozen visionlens.worker.v1 protocol.
-Everything runs on the standard library: no numpy, no torch, no network.
+The package ships the deterministic simulated encoder, the model registry, the
+JSONL worker speaking the frozen visionlens.worker.v1 protocol and the typed
+public facade. The runtime needs no numpy, no torch and no network; the only
+third-party package in the base install is Pydantic, which carries the
+versioned configuration and the typed records of the facade.
 
 Committed code cites the pack paths under docs/vnext/ for the frozen wire
 statements; this surface re-exports only what callers need.
@@ -10,6 +12,16 @@ statements; this surface re-exports only what callers need.
 
 from __future__ import annotations
 
+from .api import Datasets, VisionLens
+from .capabilities import (
+    CAPABILITIES_SCHEMA_VERSION,
+    EXTRA_NAMES,
+    Capabilities,
+    ExtraCapability,
+    resolve_capabilities,
+)
+from .config import CONFIG_SCHEMA_VERSION, SUPPORTED_DEVICES, LocalConfig
+from .data.inspect import DatasetInspection, inspect_image
 from .downloads import (
     DOWNLOAD_REFUSED,
     AuthorizedDownload,
@@ -18,23 +30,57 @@ from .downloads import (
     authorize_download,
 )
 from .encoder import DTYPE, canonical_json, digest_of, embed_bytes, preprocessing_fingerprint
-from .errors import ErrorCode, WorkerError, is_retryable
+from .errors import (
+    ClientClosedError,
+    ConfigInvalidError,
+    ConfigVersionUnsupportedError,
+    ErrorCode,
+    ImageDimensionsExceededError,
+    LibraryError,
+    LibraryErrorCode,
+    MimeMismatchError,
+    PathNotFoundError,
+    UnsupportedDeviceError,
+    UnsupportedFileTypeError,
+    WorkerError,
+    is_retryable,
+)
 from .registry import DEFAULT_MODELS, ModelRegistry, ModelSpec, UnknownModelError
 from .worker import Worker
 
 __version__ = "0.1.0"
 
 __all__ = [
+    "CAPABILITIES_SCHEMA_VERSION",
+    "CONFIG_SCHEMA_VERSION",
     "DOWNLOAD_REFUSED",
     "DTYPE",
     "DEFAULT_MODELS",
+    "EXTRA_NAMES",
+    "SUPPORTED_DEVICES",
     "AuthorizedDownload",
+    "Capabilities",
+    "ClientClosedError",
+    "ConfigInvalidError",
+    "ConfigVersionUnsupportedError",
+    "DatasetInspection",
+    "Datasets",
     "DownloadProvenance",
     "DownloadRefusedError",
     "ErrorCode",
+    "ExtraCapability",
+    "ImageDimensionsExceededError",
+    "LibraryError",
+    "LibraryErrorCode",
+    "LocalConfig",
+    "MimeMismatchError",
     "ModelRegistry",
     "ModelSpec",
+    "PathNotFoundError",
     "UnknownModelError",
+    "UnsupportedDeviceError",
+    "UnsupportedFileTypeError",
+    "VisionLens",
     "Worker",
     "WorkerError",
     "__version__",
@@ -42,6 +88,8 @@ __all__ = [
     "canonical_json",
     "digest_of",
     "embed_bytes",
+    "inspect_image",
     "is_retryable",
     "preprocessing_fingerprint",
+    "resolve_capabilities",
 ]

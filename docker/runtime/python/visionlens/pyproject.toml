@@ -9,11 +9,15 @@ description = "Local-first visual AI runtime: deterministic simulated encoder, m
 readme = "README.md"
 requires-python = ">=3.11"
 license = "MIT"
-dependencies = []
+# The base install carries Pydantic and nothing else: the typed, versioned
+# configuration of the public facade needs it (the pack's base-install policy,
+# docs/vnext/05-PYTHON-CORE-AND-PYPI.md:34). The decision is recorded in the
+# packaging amendment of ADR-011.
+dependencies = ["pydantic>=2.12,<3"]
 
 [project.optional-dependencies]
-# The extra names are frozen; the dependency sets stay empty while the whole
-# runtime is simulated with the standard library only.
+# The extra names are frozen; the extra dependency sets stay empty while the
+# whole runtime is simulated.
 vision = []
 training = []
 agents = []

@@ -32,10 +32,13 @@ worker protocol is the only runtime boundary between them.**
    the model registry, the operation handlers and the worker process
    (`python/visionlens/src/visionlens/encoder.py:56`, `registry.py:98`, `operations.py:278`,
    `worker.py:182`). Its API works from a Python process without Node, Fastify or the npm SDK
-   (`docs/vnext/02-ARCHITECTURE-DECISION.md:5`). As built the whole runtime is deterministic and
-   standard-library only: `dependencies = []` (`python/visionlens/pyproject.toml:12`); the
-   PyTorch, scikit-learn and Transformers adapters remain optional extras whose sets are frozen
-   but still empty (`python/visionlens/pyproject.toml:14-21`).
+   (`docs/vnext/02-ARCHITECTURE-DECISION.md:5`). As built the runtime is deterministic and
+   carries one direct third-party dependency, Pydantic, with the four transitive packages it
+   brings; the typed facade needs it
+   (`dependencies = ["pydantic>=2.12,<3"]`, `python/visionlens/pyproject.toml:16`; the amendment
+   below records the decision and its date); the PyTorch, scikit-learn and Transformers adapters
+   remain optional extras whose sets are frozen but still empty
+   (`python/visionlens/pyproject.toml:21-25`).
 2. TypeScript keeps the frontend apps, the Node CLI, the npm SDK, the application API and job
    orchestration, the integrations, the local metadata store and the current legacy image
    workflow (`docs/vnext/02-ARCHITECTURE-DECISION.md:6`): `apps/`, `packages/cli/`,
@@ -52,7 +55,7 @@ worker protocol is the only runtime boundary between them.**
 4. `@vision-lens/contracts` stays canonical for external domain entities, public operation
    payloads and OpenAPI (`docs/vnext/02-ARCHITECTURE-DECISION.md:7`). Python carries no entity
    schemas: its only shared vocabulary is the frozen worker protocol
-   (`python/visionlens/src/visionlens/__init__.py:13-16`). When Python later needs entity
+   (`python/visionlens/src/visionlens/__init__.py:53-95`). When Python later needs entity
    validation, the validators are generated from versioned JSON Schema, never hand-copied
    (`docs/vnext/07-CONTRACTS-PROTOCOL.md:5`).
 5. Versioning: contracts are `1.0.0` with a breaking change requiring a major bump, decided by
@@ -66,11 +69,66 @@ worker protocol is the only runtime boundary between them.**
 The per-concern owner table, the import directions and the side-effect permissions live in the
 tracked owner map, `docs/architecture/python-owner-map.md`.
 
+## Amendment 2026-11-14: the base install carries Pydantic, and the lock decision is taken
+
+**Deciders**: @erikunha (the maintainer directed closing the open typed facade of the public
+distribution on 2026-11-14; the call was delegated to the delivery loop and recorded here).
+
+This ADR was accepted as built on 2026-11-12, when the Python runtime carried no third-party
+package at all. The typed facade the pack asks the distribution to ship
+(`docs/vnext/specs/VLN-003-python-public-wheel.md:14`, `:17`) needs a versioned Pydantic model
+for its configuration (`python/visionlens/src/visionlens/config.py:1`), and the pack puts
+Pydantic in the base install (`docs/vnext/05-PYTHON-CORE-AND-PYPI.md:34`). The two
+statements could not both stand, so the packaging section of this ADR is amended, in the same
+change that ships the facade.
+
+**What changes.** The base install is no longer standard-library only. It carries Pydantic,
+with the four transitive packages Pydantic brings, and nothing else:
+`dependencies = ["pydantic>=2.12,<3"]` (`python/visionlens/pyproject.toml:16`).
+The runtime keeps every other property the acceptance recorded: the heavy stacks (PyTorch,
+scikit-learn, Transformers, MLflow, LangGraph, FastAPI, Uvicorn) stay out of the base install,
+the extra names and their (empty) sets are unchanged
+(`python/visionlens/pyproject.toml:21-25`), the import isolation contract still holds, and no
+GPU or ML framework enters a consumer install.
+
+**Why Pydantic and not an extras-gated config.** The facade's configuration is a typed,
+versioned record that round-trips through plain JSON. Gating it behind an extra would put the
+public configuration behind a capability extra, which is the opposite of the intent: the base
+install must be usable on its own. The alternative to the typed config, a hand-written
+dataclass with its own validation, would duplicate a dependency the ecosystem already
+maintains, and the pack's own dependency policy names Pydantic for exactly this role.
+
+**The lock decision, taken.** The acceptance left one workspace lock as a later decision
+"when the dependency sets stop being empty". They are no longer empty, so the decision is
+taken here: **one lock per publishable distribution**. The distribution keeps
+`python/visionlens/uv.lock`, exact pins for its own base requirement and its development
+group, with the `exclude-newer` cutoff that makes the resolution reproducible. The three
+service skeletons keep their per-service locks and their empty dependency sets. A shared
+workspace lock lands when a second publishable distribution exists or when two packages must
+resolve a shared version of the same dependency; until then a workspace lock would couple
+packages that share nothing.
+
+**What this amendment does not change.** The wire protocol, the ownership boundary, the
+entity rules, the compatibility rules and the hardware, security and test obligations stand
+as accepted. The library-level error codes the facade introduces
+(`python/visionlens/src/visionlens/errors.py`) are not wire codes: the frozen worker
+vocabulary stays exactly the ten codes it had, and the gate that proves it
+(`python/visionlens/tests/test_protocol.py:29`) still passes.
+
+**Evidence for this amendment** (macOS 26.6.2, Darwin 25.6.0, arm64, Python 3.15.0,
+uv 0.11.21, repository HEAD `2b38011` plus this change's files): the release gate run of
+2026-11-14 passed 14 steps with 0 failed and 0 not run, and its output artifact is the gate's
+local evidence file `python/visionlens/release/gate/run-20261114T105117Z.json`, which the
+repository keeps out of git, quoted in the change report of the pull request that carries this
+amendment, together with the package tests and the mypy gate; the re-dated license audit
+(`python/visionlens/release/license-audit.md`) records the license of every package the base
+install now carries.
+
 ## As built today
 
 | Side | Ships | Evidence |
 |---|---|---|
-| Python | the `visionlens` wheel source: simulated encoder, model registry, five operation handlers, the JSONL worker, the golden transcript; stdlib only, Python `>=3.11` | `python/visionlens/pyproject.toml:10-21`, `python/visionlens/src/visionlens/golden/__init__.py:1` |
+| Python | the `visionlens` wheel source: simulated encoder, model registry, five operation handlers, the JSONL worker, the golden transcript and the typed facade; the base install carries Pydantic, Python `>=3.11` | `python/visionlens/pyproject.toml:10-25`, `python/visionlens/src/visionlens/golden/__init__.py:1` |
 | Python | three service skeletons as thin adapters (`SERVICE_NAME` only, no dependencies) | `services/vision/src/vision_lens_vision/__init__.py:3`, `services/vision/pyproject.toml:6` |
 | Python | the worker runtime container: the vendored wheel copy, no Node, byte-guarded | `docker/runtime/`, `scripts/check-docker-vendor.mjs:1` |
 | TypeScript | the worker host: spawn, framing, handshake, cancel ladder, deadline, budget | `packages/core/src/worker/client.ts:1` |
@@ -115,25 +173,25 @@ ADR-006 stays byte-unchanged; this ADR supersedes part of it by addition
   [all]` (`docs/vnext/02-ARCHITECTURE-DECISION.md:32`) against `vision train agents server all`
   (`docs/vnext/05-PYTHON-CORE-AND-PYPI.md:35`). As built the distribution freezes the first set,
   full words matching the service names, and rejects the `train` spelling
-  (`python/visionlens/pyproject.toml:14-21`).
+  (`python/visionlens/pyproject.toml:21-25`).
 - Python minimum 3.11, justified by the service skeletons that already declare `>=3.11`
   (`python/visionlens/pyproject.toml:10`, `services/vision/pyproject.toml:5`); 3.12 and 3.13
   enter the matrix only after the dependencies prove compatible
   (`docs/vnext/05-PYTHON-CORE-AND-PYPI.md:33`).
 - The base install carries no mandatory GPU, PyTorch, Transformers or MLflow download
-  (`docs/vnext/05-PYTHON-CORE-AND-PYPI.md:34`): today it carries nothing at all
-  (`python/visionlens/pyproject.toml:12`).
+  (`docs/vnext/05-PYTHON-CORE-AND-PYPI.md:34`): it carries Pydantic and nothing else
+  (`python/visionlens/pyproject.toml:16`), as the amendment of 2026-11-14 records.
 - Heavy imports stay lazy and raise an actionable `MissingExtraError` naming the exact install
   command (`docs/vnext/05-PYTHON-CORE-AND-PYPI.md:35`); as built the `MISSING_EXTRA` error code
   is already frozen in the wire vocabulary (`packages/contracts/src/worker/protocol.ts:86`) and
   the worker self-reports it for a registry model whose extra is absent
-  (`python/visionlens/src/visionlens/errors.py:18`).
-- `uv` management continues; the services keep per-service locks today, and one workspace lock
-  is a later decision taken when the dependency sets stop being empty
-  (`docs/vnext/05-PYTHON-CORE-AND-PYPI.md:36`).
+  (`python/visionlens/src/visionlens/errors.py:24`).
+- `uv` management continues; the lock decision is taken in the amendment of 2026-11-14: one lock per
+  publishable distribution, the shared workspace lock deferred to the point where a second
+  distribution exists.
 - Pure-Python universal wheel, no bundled model checkpoints, opt-in Hugging Face downloads with
   license and SHA provenance (`docs/vnext/05-PYTHON-CORE-AND-PYPI.md:37`); the wheel target
-  ships `src/visionlens` only (`python/visionlens/pyproject.toml:23-24`).
+  ships `src/visionlens` only (`python/visionlens/pyproject.toml:27-28`).
 - Publication block: nothing is published until the registry check, the license audit, the
   README and local wheel plus sdist tests in a clean consumer install pass, and no availability
   or unclaimed-name claim is made from this repository today
@@ -165,7 +223,7 @@ Migration proof, per `docs/vnext/02-ARCHITECTURE-DECISION.md:37`:
 |---|---|
 | Dual-runtime parity on one golden inference path | partially proven: the cross-language suite runs the real TS host against the real Python worker (`packages/core/tests/worker/python-integration.test.ts:21-34`), the pack's frame examples validate in both languages (`packages/contracts/tests/worker/pack-examples.test.ts`, `python/visionlens/tests/test_pack_examples.py`), and the Python golden transcript pins one scripted session byte for byte (`python/visionlens/src/visionlens/golden/__init__.py:1`); a real-model golden path lands with the CPU vision adapter (spec 019) |
 | The old Node CLI suite stays green | unchanged by this ADR; the CLI bins and exports are untouched |
-| Python works standalone and packages into a wheel | the package builds its wheel from `src/visionlens` (`python/visionlens/pyproject.toml:23-27`); the container image consumes it (`docker/runtime/`) |
+| Python works standalone and packages into a wheel | the package builds its wheel from `src/visionlens` (`python/visionlens/pyproject.toml:27-28`); the container image consumes it (`docker/runtime/`) |
 | `@vision-lens/sdk/client` calls the application API with no Python in the JS consumer environment | not yet built; the entrypoint does not exist (`packages/sdk/package.json:7-9`) |
 
 Rollback: revert the commit that carries this ADR, the owner map and the static check. This
@@ -204,6 +262,7 @@ each rule reddens on a violating scratch tree and the clean tree stays green.
 |---|---|
 | Registry names `visionlens` and `@vision-lens` | unverified against their registries; no availability claim made (`docs/migration/vision-lens-vnext-reconciliation.md:345-346`) |
 | Extras naming | resolved as built (full-word set); the maintainer may reopen it before the first publication |
+| The Python lock layout | decided 2026-11-14 by the amendment of 2026-11-14: one lock per publishable distribution, the shared workspace lock deferred to the point where a second distribution exists |
 | ADR-007 MPS-first versus the pack's ADR-017 CPU-reference | an ordering conflict, not a contradiction; recorded for the ADR-017 acceptance text, ADR-007 left unedited (`docs/migration/vision-lens-vnext-reconciliation.md:216`) |
 | Acceptance of this ADR and the later pack ADRs | decided 2026-11-12: this ADR is ACCEPTED (the maintainer delegated the call; the decision records as-built reality, byte-unchanged ADR-006 supersession included); the seven later pack ADRs stay design targets whose acceptance is milestone-gated by the vNext release train as their specs land, so no unbuilt surface is claimed (`docs/migration/vision-lens-vnext-reconciliation.md:347-348`) |
 | Agent tier vocabulary, cancel spelling, approval contract, worker identity space | belong to their own ADRs (`docs/migration/vision-lens-vnext-reconciliation.md:335-344`) |

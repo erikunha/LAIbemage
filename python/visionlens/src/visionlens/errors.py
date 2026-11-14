@@ -1,9 +1,15 @@
-"""Typed error codes for the frozen worker wire protocol.
+"""Typed error codes: the frozen wire vocabulary and the library-level one.
 
-The vocabulary, with the retryable flag of every code, is frozen in the wire
-contract; the tracked statements live in
+The wire vocabulary, with the retryable flag of every code, is frozen in the
+wire contract; the tracked statements live in
 docs/vnext/contracts/proposed/worker-event.v1.schema.json. This module never
-invents a code and never flips a retryable flag.
+invents a wire code and never flips a retryable flag.
+
+The library-level vocabulary below is a SEPARATE set: it belongs to the public
+Python surface (the facade of spec 017, US3) and never crosses the wire. A
+library code is not a wire code and is never added to the frozen vocabulary,
+exactly as the download boundary keeps its own code out of it
+(`downloads.py`).
 
 Worker-side mapping decisions (the frozen table names the cause, the worker
 picks the code):
@@ -76,3 +82,98 @@ class WorkerError(Exception):
     def retryable(self) -> bool:
         """Return the frozen retryable flag of this error's code."""
         return is_retryable(self.code)
+
+
+class LibraryErrorCode(str, enum.Enum):
+    """The library-level error vocabulary of the public Python surface.
+
+    These codes never appear on the wire: the frozen worker vocabulary stays
+    exactly as it is, and every code here names a condition a Python caller
+    can act on.
+    """
+
+    CLIENT_CLOSED = "CLIENT_CLOSED"
+    CONFIG_INVALID = "CONFIG_INVALID"
+    CONFIG_VERSION_UNSUPPORTED = "CONFIG_VERSION_UNSUPPORTED"
+    IMAGE_DIMENSIONS_EXCEEDED = "IMAGE_DIMENSIONS_EXCEEDED"
+    IMAGE_METADATA_UNREADABLE = "IMAGE_METADATA_UNREADABLE"
+    MIME_MISMATCH = "MIME_MISMATCH"
+    PATH_NOT_FOUND = "PATH_NOT_FOUND"
+    UNSUPPORTED_DEVICE = "UNSUPPORTED_DEVICE"
+    UNSUPPORTED_FILE_TYPE = "UNSUPPORTED_FILE_TYPE"
+
+
+class LibraryError(Exception):
+    """A typed failure of the public Python surface.
+
+    The message is written for a caller: it names the condition and never
+    carries a raw traceback.
+    """
+
+    def __init__(self, code: LibraryErrorCode, message: str) -> None:
+        super().__init__(message)
+        self.code = code
+        self.message = message
+
+
+class ClientClosedError(LibraryError):
+    """The client was closed and no longer serves work."""
+
+    def __init__(self, message: str) -> None:
+        super().__init__(LibraryErrorCode.CLIENT_CLOSED, message)
+
+
+class ConfigInvalidError(LibraryError):
+    """The configuration payload is not a valid configuration."""
+
+    def __init__(self, message: str) -> None:
+        super().__init__(LibraryErrorCode.CONFIG_INVALID, message)
+
+
+class ConfigVersionUnsupportedError(LibraryError):
+    """The configuration carries a schema version this build does not speak."""
+
+    def __init__(self, message: str) -> None:
+        super().__init__(LibraryErrorCode.CONFIG_VERSION_UNSUPPORTED, message)
+
+
+class ImageDimensionsExceededError(LibraryError):
+    """The declared image dimensions exceed the cap."""
+
+    def __init__(self, message: str) -> None:
+        super().__init__(LibraryErrorCode.IMAGE_DIMENSIONS_EXCEEDED, message)
+
+
+class ImageMetadataUnreadableError(LibraryError):
+    """The file is an image, but its metadata could not be read."""
+
+    def __init__(self, message: str) -> None:
+        super().__init__(LibraryErrorCode.IMAGE_METADATA_UNREADABLE, message)
+
+
+class MimeMismatchError(LibraryError):
+    """The file extension contradicts the magic bytes of the file."""
+
+    def __init__(self, message: str) -> None:
+        super().__init__(LibraryErrorCode.MIME_MISMATCH, message)
+
+
+class PathNotFoundError(LibraryError):
+    """The path does not name a readable file."""
+
+    def __init__(self, message: str) -> None:
+        super().__init__(LibraryErrorCode.PATH_NOT_FOUND, message)
+
+
+class UnsupportedDeviceError(LibraryError):
+    """The requested device is not provided by this build."""
+
+    def __init__(self, message: str) -> None:
+        super().__init__(LibraryErrorCode.UNSUPPORTED_DEVICE, message)
+
+
+class UnsupportedFileTypeError(LibraryError):
+    """The file is not one of the supported image types."""
+
+    def __init__(self, message: str) -> None:
+        super().__init__(LibraryErrorCode.UNSUPPORTED_FILE_TYPE, message)

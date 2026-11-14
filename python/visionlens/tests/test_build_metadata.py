@@ -2,10 +2,27 @@
 
 from __future__ import annotations
 
+import re
 import zipfile
 from pathlib import Path
 
 FIVE_EXTRAS = {"vision", "training", "agents", "server", "all"}
+
+# The base install carries exactly Pydantic, which the typed configuration of
+# the public facade needs (the base-install policy of the pack,
+# docs/vnext/05-PYTHON-CORE-AND-PYPI.md:34). The packaging amendment of
+# ADR-011 records the decision and replaces the earlier empty-set assertion.
+MANDATORY_DISTRIBUTIONS = ["pydantic"]
+
+# The published range of that base dependency, pinned because the ADR
+# amendment and the license audit both name it.
+MANDATORY_REQUIREMENT = "pydantic<3,>=2.12"
+
+
+def _distribution_name(requirement: str) -> str:
+    """The distribution name of a Requires-Dist line, without its specifier."""
+    head = requirement.split(" ")[0].split("[")[0].split(";")[0]
+    return re.split(r"[<>=!~]", head)[0].strip()
 
 
 def _metadata(built_dist: Path) -> str:
@@ -35,9 +52,21 @@ def test_no_extra_name_appears_in_the_mandatory_dependency_list(built_dist: Path
     # A mandatory requirement is one without an `extra ==` environment marker.
     mandatory = [r for r in requires if "extra ==" not in r]
     for extra in FIVE_EXTRAS:
-        assert extra not in [r.split(" ")[0].split("[")[0] for r in mandatory]
-    # As built the runtime is standard-library only: nothing is mandatory.
-    assert mandatory == []
+        assert extra not in [_distribution_name(r) for r in mandatory]
+    # The base install carries exactly Pydantic and nothing else: the heavy
+    # stacks stay behind the extras.
+    assert [_distribution_name(r) for r in mandatory] == MANDATORY_DISTRIBUTIONS
+
+
+def test_the_base_dependency_pins_its_published_range(built_dist: Path) -> None:
+    metadata = _metadata(built_dist)
+    requires = [
+        line.split(":", 1)[1].strip()
+        for line in metadata.splitlines()
+        if line.startswith("Requires-Dist:")
+    ]
+    mandatory = [r for r in requires if "extra ==" not in r]
+    assert mandatory == [MANDATORY_REQUIREMENT]
 
 
 def test_sdist_metadata_matches_the_wheel(built_dist: Path) -> None:

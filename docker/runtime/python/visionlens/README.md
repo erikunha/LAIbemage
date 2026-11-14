@@ -1,14 +1,15 @@
 # visionlens
 
 A local-first visual AI runtime for Python, fully simulated in this release.
-It ships the deterministic simulated encoder, the model registry and a JSONL
-worker speaking the frozen `visionlens.worker.v1` protocol. The standard
-library is the only runtime dependency: no numpy, no torch, no network, and
-no Node.js anywhere.
+It ships the deterministic simulated encoder, the model registry, a JSONL
+worker speaking the frozen `visionlens.worker.v1` protocol and the typed public
+facade. Pydantic is the only third-party runtime dependency: no numpy, no
+torch, no network, and no Node.js anywhere.
 
 > **Proposed API.** The operation names and object types on this package's
 > public surface are proposed, not frozen: ADR-011 is accepted as built
-> (`docs/adr/011-python-first-ml-runtime.md`), and the pack keeps the names
+> (`docs/adr/011-python-first-ml-runtime.md`), with a dated amendment to its
+> packaging rules for the base install, and the pack keeps the names
 > tentative until the remaining acceptance conditions land
 > (`docs/vnext/05-PYTHON-CORE-AND-PYPI.md:56`). Names may change before 1.0.
 > The frozen exception is the `visionlens.worker.v1` wire vocabulary, which
@@ -43,7 +44,7 @@ simulated, so every extra installs the same light base today.
 
 | Extra | Installs | Status |
 |---|---|---|
-| (base) | nothing beyond the standard library | shipped |
+| (base) | Pydantic, for the typed configuration and records | shipped |
 | `vision` | the encoder and model adapter stack (empty set today) | name frozen, set empty |
 | `training` | the training recipe and experiment tracking stack (empty set today) | name frozen, set empty |
 | `agents` | the agent runtime import boundary (empty set today) | name frozen, set empty |
@@ -94,13 +95,43 @@ authorized = authorize_download(
 )
 ```
 
-### Proposed facade (not shipped)
+### The typed facade
 
-The typed facade `VisionLens.local(LocalConfig(...))` with
-`.capabilities()`, `.datasets.inspect(path)` and `close()` is **proposed and
-not implemented** in this release. It is tracked as spec 017 user story 3;
-landing it involves a base-install dependency decision that is recorded in
-ADR-011's packaging rules, so it ships only together with that decision.
+```python
+from visionlens import LocalConfig, VisionLens
+
+with VisionLens.local(LocalConfig(device="auto")) as client:
+    capabilities = client.capabilities()
+    print(capabilities.device)             # "cpu"
+    print(capabilities.installed_extras)   # the extras available on this machine
+    print(capabilities.version)            # "0.1.0"
+
+    inspection = client.datasets.inspect("example.png")
+    print(inspection.width, inspection.height, inspection.mime_type)
+    print(inspection.sha256)
+```
+
+`LocalConfig` is a versioned Pydantic model: it serializes to plain JSON
+(`config.to_json()`) and round-trips (`LocalConfig.from_json(raw)`), and a
+payload carrying another schema version is refused rather than interpreted.
+
+`capabilities()` reports what this machine can actually do: the resolved
+device and the reason for it, the state of every declared extra (available,
+or which modules are missing), and the package version. The record is
+serializable, so it can be stored next to a result.
+
+`datasets.inspect(path)` reads the metadata of one image: width, height, MIME
+type and the sha256 of its bytes. It needs no Node, no server and no network,
+and it reads only the header: the pixels are never decoded and no image
+library is required. The MIME type comes from the magic bytes, never from the
+file name, and an extension that contradicts them is refused.
+
+Every failure is typed and carries a stable code from `visionlens.errors`:
+`PATH_NOT_FOUND`, `UNSUPPORTED_FILE_TYPE`, `MIME_MISMATCH`,
+`IMAGE_DIMENSIONS_EXCEEDED`, `IMAGE_METADATA_UNREADABLE`, `UNSUPPORTED_DEVICE`,
+`CONFIG_INVALID`, `CONFIG_VERSION_UNSUPPORTED` and `CLIENT_CLOSED`. These are
+library-level codes: they never enter the frozen wire vocabulary, and their
+messages carry no traceback.
 
 ## The worker
 

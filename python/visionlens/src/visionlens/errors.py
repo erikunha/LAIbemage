@@ -96,9 +96,13 @@ class LibraryErrorCode(str, enum.Enum):
     CONFIG_INVALID = "CONFIG_INVALID"
     CONFIG_VERSION_UNSUPPORTED = "CONFIG_VERSION_UNSUPPORTED"
     IMAGE_DIMENSIONS_EXCEEDED = "IMAGE_DIMENSIONS_EXCEEDED"
+    EXTRA_NOT_INSTALLED = "EXTRA_NOT_INSTALLED"
     IMAGE_METADATA_UNREADABLE = "IMAGE_METADATA_UNREADABLE"
     MIME_MISMATCH = "MIME_MISMATCH"
+    MODEL_RUN_FAILED = "MODEL_RUN_FAILED"
     PATH_NOT_FOUND = "PATH_NOT_FOUND"
+    PATH_OUTSIDE_ROOT = "PATH_OUTSIDE_ROOT"
+    RESOURCE_EXHAUSTED = "RESOURCE_EXHAUSTED"
     UNSUPPORTED_DEVICE = "UNSUPPORTED_DEVICE"
     UNSUPPORTED_FILE_TYPE = "UNSUPPORTED_FILE_TYPE"
 
@@ -158,11 +162,43 @@ class MimeMismatchError(LibraryError):
         super().__init__(LibraryErrorCode.MIME_MISMATCH, message)
 
 
+class MissingExtraError(LibraryError):
+    """The capability an operation needs is not installed in this environment.
+
+    The code is `EXTRA_NOT_INSTALLED` and not the wire code `MISSING_EXTRA`:
+    the library vocabulary never reuses a code of the frozen wire one.
+    """
+
+    def __init__(self, message: str) -> None:
+        super().__init__(LibraryErrorCode.EXTRA_NOT_INSTALLED, message)
+
+
+class ModelRunFailedError(LibraryError):
+    """The model refused the batch it was given."""
+
+    def __init__(self, message: str) -> None:
+        super().__init__(LibraryErrorCode.MODEL_RUN_FAILED, message)
+
+
+class ResourceExhaustedError(LibraryError):
+    """The run exhausted the memory budget, and the attempts are bounded."""
+
+    def __init__(self, message: str) -> None:
+        super().__init__(LibraryErrorCode.RESOURCE_EXHAUSTED, message)
+
+
 class PathNotFoundError(LibraryError):
     """The path does not name a readable file."""
 
     def __init__(self, message: str) -> None:
         super().__init__(LibraryErrorCode.PATH_NOT_FOUND, message)
+
+
+class PathOutsideRootError(LibraryError):
+    """The path resolves outside the approved root it may be read from."""
+
+    def __init__(self, message: str) -> None:
+        super().__init__(LibraryErrorCode.PATH_OUTSIDE_ROOT, message)
 
 
 class UnsupportedDeviceError(LibraryError):

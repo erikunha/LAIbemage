@@ -22,15 +22,18 @@ from .errors import (
     ConfigVersionUnsupportedError,
     UnsupportedDeviceError,
 )
+from .runtime.device import REQUESTABLE_DEVICES
 
 CONFIG_SCHEMA_VERSION = 1
 
 # The devices this build provides. `auto` resolves to the CPU reference path;
 # the accelerator decision stays open in ADR-007 against the pack's ADR-017,
-# so no accelerator device is claimed here.
+# so no accelerator device is claimed here. The list is the vocabulary of
+# the device planner, not a second one: `REQUESTABLE_DEVICES` is what a
+# request may name, and this build admits the CPU only.
 DeviceRequest = Literal["auto", "cpu"]
 
-SUPPORTED_DEVICES: tuple[str, ...] = ("auto", "cpu")
+SUPPORTED_DEVICES: tuple[str, ...] = REQUESTABLE_DEVICES
 
 
 class LocalConfig(BaseModel):

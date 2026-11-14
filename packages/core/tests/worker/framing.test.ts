@@ -51,6 +51,29 @@ describe('redactSecrets', () => {
     );
   });
 
+  it('redacts the local paths of the user', () => {
+    // The pack asks the logs to record hashes and ids instead of the local
+    // paths of the user (docs/vnext/19-SECURITY-PRIVACY-SUPPLY-CHAIN.md:16).
+    expect(redactSecrets('the file /home/example/datasets/a.jpg could not be read')).toBe(
+      'the file [redacted-path] could not be read',
+    );
+    expect(redactSecrets("path='/home/example/datasets/a.jpg'")).toBe(
+      "path='[redacted-path]'",
+    );
+    expect(redactSecrets('/private/tmp/vlgate/x.safetensors is gone')).toBe(
+      '[redacted-path] is gone',
+    );
+  });
+
+  it('keeps a url and a bare word intact while redacting paths', () => {
+    expect(redactSecrets('fetched https://huggingface.co/google/x/resolve/y')).toBe(
+      'fetched https://huggingface.co/google/x/resolve/y',
+    );
+    expect(redactSecrets('model=siglip2-base digest=abc123')).toBe(
+      'model=siglip2-base digest=abc123',
+    );
+  });
+
   it('redacts every occurrence, not only the first', () => {
     expect(redactSecrets('token=a token=b')).toBe('token=[redacted] token=[redacted]');
   });

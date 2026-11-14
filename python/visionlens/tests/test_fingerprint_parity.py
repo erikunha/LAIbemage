@@ -111,6 +111,29 @@ PARITY_TABLE: list[tuple[str, dict[str, Any], str, str]] = [
         "e193cd0eeda37fbdd29755fb293b2c414eb9904d65b0cd48cdfc3addd93b43ee",
         "fp2:e193cd0eeda37fbd",
     ),
+    (
+        {
+            "band": [
+                1e-7,
+                1e-6,
+                1e-5,
+                1e-4,
+                1e20,
+                1e21,
+                1.5e21,
+                2.5e-7,
+                5e-324,
+                1.7976931348623157e308,
+                9.999999999999999e20,
+            ],
+            "single": 0.000001,
+        },
+        '{"band":[1e-7,0.000001,0.00001,0.0001,100000000000000000000,1e+21,1.5e+21,'
+        '2.5e-7,5e-324,1.7976931348623157e+308,999999999999999900000],'
+        '"single":0.000001}',
+        "46fdd141185b4033118f9a02a94e754d8731a6a798f0402463cf5194fe8c4a88",
+        "fp2:46fdd141185b4033",
+    ),
 ]
 
 
@@ -122,7 +145,7 @@ def fp2_of(payload: dict[str, Any]) -> str:
 @pytest.mark.parametrize(
     "payload,canonical,sha256,fp2",
     PARITY_TABLE,
-    ids=["empty", "preprocessing", "nested", "array-order-a", "array-order-b", "full-config"],
+    ids=["empty", "preprocessing", "nested", "array-order-a", "array-order-b", "full-config", "number-band"],
 )
 def test_python_reproduces_the_typescript_digests(
     payload: dict[str, Any], canonical: str, sha256: str, fp2: str

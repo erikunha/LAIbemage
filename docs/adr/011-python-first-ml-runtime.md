@@ -31,14 +31,14 @@ worker protocol is the only runtime boundary between them.**
    (`python/visionlens/pyproject.toml:6`). It owns the encoder, the preprocessing fingerprint,
    the model registry, the operation handlers and the worker process
    (`python/visionlens/src/visionlens/encoder.py:56`, `registry/simulated.py:109`, `operations.py:278`,
-   `worker.py:182`). Its API works from a Python process without Node, Fastify or the npm SDK
+   `worker.py:183`). Its API works from a Python process without Node, Fastify or the npm SDK
    (`docs/vnext/02-ARCHITECTURE-DECISION.md:5`). As built the runtime is deterministic and
-   carries one direct third-party dependency, Pydantic, with the four transitive packages it
-   brings; the typed facade needs it
-   (`dependencies = ["pydantic>=2.12,<3"]`, `python/visionlens/pyproject.toml:16`; the amendment
-   below records the decision and its date); the PyTorch, scikit-learn and Transformers adapters
-   remain optional extras whose sets are frozen but still empty
-   (`python/visionlens/pyproject.toml:21-25`).
+   carries two direct third-party dependencies, Pydantic and Pillow, with the four transitive
+   packages Pydantic brings; the typed facade needs Pydantic and the image decoder needs Pillow
+   (`dependencies = ["pydantic>=2.12,<3", "pillow>=13,<14"]`, `python/visionlens/pyproject.toml:18`;
+   the amendments below record both decisions and their dates); the PyTorch, scikit-learn and
+   Transformers stacks remain optional extras, and only the `vision` extra carries one today
+   (`python/visionlens/pyproject.toml:30-38`).
 2. TypeScript keeps the frontend apps, the Node CLI, the npm SDK, the application API and job
    orchestration, the integrations, the local metadata store and the current legacy image
    workflow (`docs/vnext/02-ARCHITECTURE-DECISION.md:6`): `apps/`, `packages/cli/`,
@@ -55,7 +55,7 @@ worker protocol is the only runtime boundary between them.**
 4. `@vision-lens/contracts` stays canonical for external domain entities, public operation
    payloads and OpenAPI (`docs/vnext/02-ARCHITECTURE-DECISION.md:7`). Python carries no entity
    schemas: its only shared vocabulary is the frozen worker protocol
-   (`python/visionlens/src/visionlens/__init__.py:53-95`). When Python later needs entity
+   (`python/visionlens/src/visionlens/__init__.py:60-102`). When Python later needs entity
    validation, the validators are generated from versioned JSON Schema, never hand-copied
    (`docs/vnext/07-CONTRACTS-PROTOCOL.md:5`).
 5. Versioning: contracts are `1.0.0` with a breaking change requiring a major bump, decided by
@@ -84,11 +84,11 @@ change that ships the facade.
 
 **What changes.** The base install is no longer standard-library only. It carries Pydantic,
 with the four transitive packages Pydantic brings, and nothing else:
-`dependencies = ["pydantic>=2.12,<3"]` (`python/visionlens/pyproject.toml:16`).
+`dependencies = ["pydantic>=2.12,<3"]` (`python/visionlens/pyproject.toml:18`).
 The runtime keeps every other property the acceptance recorded: the heavy stacks (PyTorch,
 scikit-learn, Transformers, MLflow, LangGraph, FastAPI, Uvicorn) stay out of the base install,
 the extra names and their (empty) sets are unchanged
-(`python/visionlens/pyproject.toml:21-25`), the import isolation contract still holds, and no
+(`python/visionlens/pyproject.toml:30-38`), the import isolation contract still holds, and no
 GPU or ML framework enters a consumer install.
 
 **Why Pydantic and not an extras-gated config.** The facade's configuration is a typed,
@@ -124,19 +124,106 @@ amendment, together with the package tests and the mypy gate; the re-dated licen
 (`python/visionlens/release/license-audit.md`) records the license of every package the base
 install now carries.
 
+## Amendment 2026-11-14: the base install carries the image decoder too
+
+**Deciders**: @erikunha (the maintainer directed shipping the CPU vision adapter on 2026-11-14;
+the call was delegated to the delivery loop and recorded here).
+
+The amendment of 2026-11-14 put Pydantic in the base install and said the base carries
+"nothing else". That was true while the whole runtime was simulated and nothing decoded an
+image. The CPU vision adapter of VLN-005 decodes one, and the decoder is a core operation of
+the distribution, not a capability extra: a caller that installs `visionlens` and asks for an
+embedding must get an image decoder in return.
+
+**What changes.** The base install carries Pillow next to Pydantic:
+`dependencies = ["pydantic>=2.12,<3", "pillow>=13,<14"]`
+(`python/visionlens/pyproject.toml:18`). The `vision` extra keeps the heavy stack and only
+the heavy stack: torch, transformers and safetensors
+(`python/visionlens/pyproject.toml:30-34`).
+
+**Why the pack allows it.** The dependency policy names what the base install should include:
+"Pydantic, limited I/O and lightweight NumPy only if core operations truly need it", and
+forbids "no mandatory GPU/PyTorch/Transformers/MLflow download"
+(`docs/vnext/05-PYTHON-CORE-AND-PYPI.md:34`). Pillow is the limited I/O of the image decoder,
+and no GPU, PyTorch, Transformers or MLflow download enters a consumer install.
+
+**Why Pillow and not a hand-written decoder.** The decoder refuses a truncated file, a pixel
+bomb and a file whose magic bytes contradict its extension, BEFORE the pixel buffer is
+allocated (`docs/vnext/19-SECURITY-PRIVACY-SUPPLY-CHAIN.md:23`). That is a job for a
+battle-tested decoder, and a second decoder written here would be a second thing to keep
+correct. The heavy ML stack stays behind the extra, where it belongs.
+
+**What this amendment does not change.** The wire protocol, the ownership boundary, the
+entity rules, the compatibility rules and the hardware, security and test obligations stand
+as accepted. The frozen worker vocabulary stays exactly the ten codes it had, and the gate
+that proves it (`python/visionlens/tests/test_protocol.py:29`) still passes. The base install
+still installs no GPU or ML framework, and the metadata test that proves it
+(`python/visionlens/tests/test_build_metadata.py:16`) names the two packages the base carries.
+
+## Amendment 2026-11-14: the device planner admits the CPU only
+
+**Deciders**: @erikunha (the maintainer directed shipping the CPU vision adapter on 2026-11-14;
+the call was delegated to the delivery loop and recorded here).
+
+The CPU vision adapter of VLN-005 asks the machine where a run happens. The pack asks the
+`DevicePlanner` to check MPS availability, available memory and operator compatibility, and
+to accept a CPU fallback with a status
+(`docs/vnext/05-PYTHON-CORE-AND-PYPI.md:61`), and it asks the CPU to be the reference path
+(`docs/vnext/adrs/ADR-017-local-first-hardware.md:9`). The adapter of this ticket runs on the
+CPU, so the planner has to answer for a machine that has an accelerator and for one that has
+not, and the answer must be the same in the capability report and in the run.
+
+**What changes.** There is one device vocabulary and one resolver, in
+`python/visionlens/src/visionlens/runtime/device.py`:
+
+- `KNOWN_DEVICES` is every device the platform knows by name (`cpu`, `mps`, `cuda`), the
+  device support a registry record carries
+  (`docs/vnext/11-VISION-MODEL-REGISTRY-INFERENCE.md:35`);
+- `ADMITTED_DEVICES` is the devices a run may use, in the order `auto` prefers them, and it
+  holds the CPU only;
+- `REQUESTABLE_DEVICES` is what a request may name (`auto` plus the admitted devices), and
+  the configuration reads it instead of carrying a second list
+  (`python/visionlens/src/visionlens/config.py:34`);
+- the capability report asks the planner and reads its answer, instead of resolving the
+  device on its own (`python/visionlens/src/visionlens/capabilities.py:87`).
+
+`auto` resolves to an admitted device and records why it fell back. The reason names the
+accelerators the platform knows and what the machine has of them, so a run on a Mac with MPS
+says that the machine provides MPS and that this build does not admit it. An explicit
+accelerator is refused with its reason: a request for a device this build does not run fails
+instead of running somewhere else.
+
+**What is deferred, and why.** The memory admission and the operator compatibility check the
+pack names for MPS are NOT implemented
+(`docs/vnext/05-PYTHON-CORE-AND-PYPI.md:61`). Admitting MPS without them would claim a
+capability the platform does not have, so MPS is not admitted, and the pack's own rule
+applies: an unsupported device falls back or fails with a reason, never silently
+(`docs/vnext/05-PYTHON-CORE-AND-PYPI.md:56`). The admission is a one-line change: when the
+memory admission and the operator check land, `ADMITTED_DEVICES` grows, `auto` prefers the
+accelerator, and the refusal disappears with it. The device names in the registry record are
+the vocabulary of the models, not a claim that this build runs them.
+
+**What this amendment does not change.** The wire protocol, the ownership boundary, the
+entity rules, the compatibility rules and the security and test obligations stand as
+accepted. The frozen worker vocabulary stays exactly the ten codes it had, and the gate that
+proves it (`python/visionlens/tests/test_protocol.py:29`) still passes. The CPU remains the
+reference path, and the recorded run of the adapter is a CPU run
+(`docs/architecture/vision-adapter.md`).
+
 ## As built today
 
 | Side | Ships | Evidence |
 |---|---|---|
-| Python | the `visionlens` wheel source: simulated encoder, model registry, five operation handlers, the JSONL worker, the golden transcript and the typed facade; the base install carries Pydantic, Python `>=3.11` | `python/visionlens/pyproject.toml:10-25`, `python/visionlens/src/visionlens/golden/__init__.py:1` |
+| Python | the `visionlens` wheel source: simulated encoder, model registry, five operation handlers, the JSONL worker, the golden transcript and the typed facade; the base install carries Pydantic and Pillow, Python `>=3.11` | `python/visionlens/pyproject.toml:10-38`, `python/visionlens/src/visionlens/golden/__init__.py:1` |
 | Python | three service skeletons as thin adapters (`SERVICE_NAME` only, no dependencies) | `services/vision/src/vision_lens_vision/__init__.py:3`, `services/vision/pyproject.toml:6` |
 | Python | the worker runtime container: the vendored wheel copy, no Node, byte-guarded | `docker/runtime/`, `scripts/check-docker-vendor.mjs:1` |
 | TypeScript | the worker host: spawn, framing, handshake, cancel ladder, deadline, budget | `packages/core/src/worker/client.ts:1` |
 | Shared | the frozen vocabulary, defined once per language and proven identical | `packages/contracts/src/worker/protocol.ts:19`, `python/visionlens/src/visionlens/protocol.py:18` |
 | Cross-language | the real TypeScript host against the real Python worker over the wire | `packages/core/tests/worker/python-integration.test.ts:21-34` |
 
-Not implemented, and not claimed: the heavy ML stacks behind the extras, device planning
-(`DevicePlanner`, MPS and CUDA), the `@vision-lens/sdk/client` entrypoint, and any PyPI or npm
+Not implemented, and not claimed: the heavy ML stacks behind the extras (the `vision` extra
+now carries them, but no consumer install pulls them), the `@vision-lens/sdk/client`
+entrypoint, and any PyPI or npm
 publication. Those remain gated by the acceptance conditions below.
 
 ## Supersession record against ADR-006
@@ -173,14 +260,14 @@ ADR-006 stays byte-unchanged; this ADR supersedes part of it by addition
   [all]` (`docs/vnext/02-ARCHITECTURE-DECISION.md:32`) against `vision train agents server all`
   (`docs/vnext/05-PYTHON-CORE-AND-PYPI.md:35`). As built the distribution freezes the first set,
   full words matching the service names, and rejects the `train` spelling
-  (`python/visionlens/pyproject.toml:21-25`).
+  (`python/visionlens/pyproject.toml:30-38`).
 - Python minimum 3.11, justified by the service skeletons that already declare `>=3.11`
   (`python/visionlens/pyproject.toml:10`, `services/vision/pyproject.toml:5`); 3.12 and 3.13
   enter the matrix only after the dependencies prove compatible
   (`docs/vnext/05-PYTHON-CORE-AND-PYPI.md:33`).
 - The base install carries no mandatory GPU, PyTorch, Transformers or MLflow download
-  (`docs/vnext/05-PYTHON-CORE-AND-PYPI.md:34`): it carries Pydantic and nothing else
-  (`python/visionlens/pyproject.toml:16`), as the amendment of 2026-11-14 records.
+  (`docs/vnext/05-PYTHON-CORE-AND-PYPI.md:34`): it carries Pydantic and Pillow and nothing else
+  (`python/visionlens/pyproject.toml:18`), as the amendments of 2026-11-14 record.
 - Heavy imports stay lazy and raise an actionable `MissingExtraError` naming the exact install
   command (`docs/vnext/05-PYTHON-CORE-AND-PYPI.md:35`); as built the `MISSING_EXTRA` error code
   is already frozen in the wire vocabulary (`packages/contracts/src/worker/protocol.ts:86`) and
@@ -191,7 +278,7 @@ ADR-006 stays byte-unchanged; this ADR supersedes part of it by addition
   distribution exists.
 - Pure-Python universal wheel, no bundled model checkpoints, opt-in Hugging Face downloads with
   license and SHA provenance (`docs/vnext/05-PYTHON-CORE-AND-PYPI.md:37`); the wheel target
-  ships `src/visionlens` only (`python/visionlens/pyproject.toml:27-28`).
+  ships `src/visionlens` only (`python/visionlens/pyproject.toml:40-41`).
 - Publication block: nothing is published until the registry check, the license audit, the
   README and local wheel plus sdist tests in a clean consumer install pass, and no availability
   or unclaimed-name claim is made from this repository today
@@ -204,7 +291,7 @@ These gate the first real (non-simulated) ML work; none is claimed as done.
 
 | Area | Acceptance condition | Source |
 |---|---|---|
-| Device planning | `DevicePlanner` checks MPS availability, memory and operator compatibility, accepts a CPU fallback with a status; CUDA optional, isolated in GPU workers | `docs/vnext/05-PYTHON-CORE-AND-PYPI.md:61` |
+| Device planning | `DevicePlanner` checks MPS availability, memory and operator compatibility, accepts a CPU fallback with a status; CUDA optional, isolated in GPU workers; as built the planner admits the CPU only, refuses an accelerator this build does not run and names the accelerators the machine has, and the memory admission and the operator check are deferred (the amendment of 2026-11-14) | `docs/vnext/05-PYTHON-CORE-AND-PYPI.md:61` |
 | Operation fallback | an unsupported operation falls back or fails with a reason, never silently changes method; hashes, split, model revision and device metadata enter every run manifest | `docs/vnext/05-PYTHON-CORE-AND-PYPI.md:56` |
 | Scheduling | `BatchScheduler` reduces batch size on transient exhaustion with bounded attempts and explicit `resource_fallback` events | `docs/vnext/05-PYTHON-CORE-AND-PYPI.md:63` |
 | Training | the `Trainer` checkpoints, reduces batch size or fails explicitly on MPS OOM, and never claims equivalence after a hyperparameter change; a missing calibration is `null`, never 1.0 | `docs/vnext/05-PYTHON-CORE-AND-PYPI.md:64-66` |
@@ -223,7 +310,7 @@ Migration proof, per `docs/vnext/02-ARCHITECTURE-DECISION.md:37`:
 |---|---|
 | Dual-runtime parity on one golden inference path | partially proven: the cross-language suite runs the real TS host against the real Python worker (`packages/core/tests/worker/python-integration.test.ts:21-34`), the pack's frame examples validate in both languages (`packages/contracts/tests/worker/pack-examples.test.ts`, `python/visionlens/tests/test_pack_examples.py`), and the Python golden transcript pins one scripted session byte for byte (`python/visionlens/src/visionlens/golden/__init__.py:1`); a real-model golden path lands with the CPU vision adapter (spec 019) |
 | The old Node CLI suite stays green | unchanged by this ADR; the CLI bins and exports are untouched |
-| Python works standalone and packages into a wheel | the package builds its wheel from `src/visionlens` (`python/visionlens/pyproject.toml:27-28`); the container image consumes it (`docker/runtime/`) |
+| Python works standalone and packages into a wheel | the package builds its wheel from `src/visionlens` (`python/visionlens/pyproject.toml:40-41`); the container image consumes it (`docker/runtime/`) |
 | `@vision-lens/sdk/client` calls the application API with no Python in the JS consumer environment | not yet built; the entrypoint does not exist (`packages/sdk/package.json:7-9`) |
 
 Rollback: revert the commit that carries this ADR, the owner map and the static check. This

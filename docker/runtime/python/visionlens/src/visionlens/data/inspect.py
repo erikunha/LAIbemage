@@ -18,7 +18,6 @@ end.
 
 from __future__ import annotations
 
-import hashlib
 import os
 import struct
 from pathlib import Path
@@ -33,6 +32,7 @@ from ..errors import (
     PathNotFoundError,
     UnsupportedFileTypeError,
 )
+from ..hashing import sha256_of_file
 
 INSPECTION_SCHEMA_VERSION = 1
 
@@ -46,8 +46,6 @@ MAX_IMAGE_PIXELS = 100_000_000
 #: itself, because a JPEG may carry more than this much metadata before its
 #: frame header.
 _HEADER_BYTES = 4096
-#: The block size of the digest computation.
-_CHUNK_BYTES = 1024 * 1024
 
 #: The MIME type each known extension claims.
 EXTENSION_MIME: Mapping[str, str] = {
@@ -130,7 +128,7 @@ def inspect_image(path: str | Path) -> DatasetInspection:
     _check_dimensions(width, height)
 
     try:
-        digest = _sha256(target)
+        digest = sha256_of_file(target)
     except OSError as exc:
         raise PathNotFoundError(
             "the file could not be read: " + (exc.strerror or exc.__class__.__name__)
@@ -166,15 +164,6 @@ def _check_dimensions(width: int, height: int) -> None:
         )
 
 
-def _sha256(target: Path) -> str:
-    """The sha256 of the bytes of the file, read in bounded blocks."""
-    digest = hashlib.sha256()
-    with target.open("rb") as handle:
-        for block in iter(lambda: handle.read(_CHUNK_BYTES), b""):
-            digest.update(block)
-    return digest.hexdigest()
-
-
 def _detect_type(header: bytes) -> str | None:
     """The MIME type of the file, read from its magic bytes."""
     if header.startswith(_PNG_SIGNATURE):
@@ -185,6 +174,38 @@ def _detect_type(header: bytes) -> str | None:
         return "image/gif"
     if header.startswith(b"RIFF") and header[8:12] == b"WEBP":
         return "image/webp"
+    return None
+
+
+def read_dimensions(path: Path, mime_type: str) -> tuple[int, int] | None:
+    """The dimensions the header of a file declares, or None.
+
+    The PNG, GIF and WebP headers carry the dimensions in their first
+    bytes. A JPEG carries them in a frame header that may sit behind a
+    large EXIF segment, so the markers are walked with a seek and the
+    memory read stays bounded whatever the file holds.
+
+    The caller that has to refuse a bomb reads the dimensions HERE,
+    before it hands the file to a decoder that would allocate the pixel
+    buffer.
+    """
+    if mime_type == "image/jpeg":
+        try:
+            with path.open("rb") as handle:
+                return _jpeg(handle)
+        except OSError:
+            return None
+    try:
+        with path.open("rb") as handle:
+            header = handle.read(_HEADER_BYTES)
+    except OSError:
+        return None
+    if mime_type == "image/png":
+        return _png(header)
+    if mime_type == "image/gif":
+        return _gif(header)
+    if mime_type == "image/webp":
+        return _webp(header)
     return None
 
 

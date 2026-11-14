@@ -9,20 +9,33 @@ description = "Local-first visual AI runtime: deterministic simulated encoder, m
 readme = "README.md"
 requires-python = ">=3.11"
 license = "MIT"
-# The base install carries Pydantic and nothing else: the typed, versioned
-# configuration of the public facade needs it (the pack's base-install policy,
-# docs/vnext/05-PYTHON-CORE-AND-PYPI.md:34). The decision is recorded in the
-# packaging amendment of ADR-011.
-dependencies = ["pydantic>=2.12,<3"]
+# The base install carries the typed, versioned configuration of the public
+# facade (Pydantic) and the image decoder (Pillow), and nothing else: the
+# pack's base-install policy allows "limited I/O" when a core operation
+# needs it, and forbids a mandatory GPU, PyTorch, Transformers or MLflow
+# download (docs/vnext/05-PYTHON-CORE-AND-PYPI.md:34). The decision is
+# recorded in the packaging amendments of ADR-011.
+dependencies = ["pydantic>=2.12,<3", "pillow>=13,<14"]
 
 [project.optional-dependencies]
-# The extra names are frozen; the extra dependency sets stay empty while the
-# whole runtime is simulated.
-vision = []
+# The extra names are frozen. The base install carries Pydantic and Pillow
+# and nothing else, and every heavy stack lives behind its extra, so the
+# base install never pulls a PyTorch or a Transformers download
+# (docs/vnext/05-PYTHON-CORE-AND-PYPI.md:34, :35).
+#
+# The `vision` extra is the one this ticket fills: the encoder stack that
+# reads a real checkpoint on the CPU (torch, transformers) and the format
+# the loader publishes (safetensors). The `all` extra is the aggregate,
+# spelled as a self reference so the pins live in one place.
+vision = [
+    "torch>=2.9,<3",
+    "transformers>=4.57,<5",
+    "safetensors>=0.6,<1",
+]
 training = []
 agents = []
 server = []
-all = []
+all = ["visionlens[vision]"]
 
 [tool.hatch.build.targets.wheel]
 packages = ["src/visionlens"]

@@ -119,10 +119,56 @@ checkpoint.
 
 Resolving a model reads a FILE and nothing else. It never reaches the
 network: the record says which bytes the model is, and fetching those bytes
-is a separate, explicitly permitted act (the weights loader, still open in
-`docs/vnext/specs/VLN-005-python-cpu-vision-adapter.md`). A resolution that quietly downloaded the weights would make the
-digest a decoration instead of a promise. The Python test proves it by
-breaking the socket module before resolving.
+is a separate, explicitly permitted act (the weights loader, below). A
+resolution that quietly downloaded the weights would make the digest a
+decoration instead of a promise. The Python test proves it by breaking the
+socket module before resolving.
+
+## The weights loader
+
+Fetching the bytes the record names is the loader's job, and the loader is
+the only place in the runtime where a model artifact can be fetched
+(`python/visionlens/src/visionlens/encoders/weights.py:719`, `:832`). Six gates
+stand between a request and a byte, and every one of them runs before the
+fetch:
+
+| gate | what it refuses |
+|---|---|
+| the license | a use the recorded license forbids, and a record whose own restrictions contradict its own flag |
+| the opt-in | a request nobody granted: the permission is an object that names who granted it |
+| the provenance | a request without a source, a revision, a license and a digest |
+| the trust policy | a record whose declared policy the loader does not implement |
+| the source | a host outside the allowlist, a scheme that is not https, a revision that is not the pinned one, a file that is not safetensors |
+| the digest | bytes that do not carry the digest the record recorded, and bytes that are not safetensors behind a safetensors name |
+
+The order matters as much as the gates: the license gate runs FIRST, so a
+use the license forbids is refused before the permission is even asked
+about, and a refusal that arrives after the bytes are on the disk is not a
+refusal.
+
+The pinned revision is checked as a SEGMENT of the path, never as a
+substring of the URL: a URL that carries the revision in a query string or
+in the name of a directory is not pinned to it. The model id is checked too,
+because it names a directory in the cache, and the published path is
+verified to be inside the cache directory: weights never land outside it.
+
+The bytes are streamed: the fetch is read in bounded blocks and written
+straight into the cache, so a 1.5 GB checkpoint never sits in memory, and
+every digest of a file is computed block by block
+(`python/visionlens/src/visionlens/hashing.py:22`). The file that lands is
+read back from the disk and verified once more, so the file the caller
+receives is the file that was verified. The cached file is named after the
+digest of its bytes (`<model id>/<digest>.safetensors`), so a cached file
+can be verified again without the network.
+
+A redirect is checked before it is followed. The allowlisted repository
+serves the pinned file from its own CDN, so a hop may land on that CDN and
+nowhere else.
+
+The loader writes into a local cache and never redistributes the weights,
+so a redistribution is refused: it is outside what the loader can decide.
+A person who wants to redistribute reads the license text, which the record
+names in `licenseUrl`.
 
 ## The record published today
 
@@ -154,25 +200,38 @@ simulated encoder is not this model.
 
 ## What this record does NOT prove
 
-- The platform has **not run this model**. The CPU adapter is a later task
-  of this ticket. The record states what the model IS, not a measurement.
-- The `latencyCostProfile` is `unknown`, because nothing was measured yet.
+- The `latencyCostProfile` is `unknown`, because the record was not
+  rewritten with the measurement of the recorded run. The platform HAS run
+  this model: the CPU adapter embedded the committed fixtures with this
+  exact revision and these exact weights, and the recorded run is in
+  `docs/architecture/vision-adapter.md`. The record still states what the
+  model IS, and the measurement lives in the run, not in the record.
 - The `deviceSupport` list names the CPU path, the one this platform
   implements. The model card declares no device support, so the record
   claims no other device: an inference dressed as a fact is not a fact.
 - The `calibrationStatus` is `uncalibrated`: no calibrator was fitted, and
   the model's own similarities are not calibrated probabilities.
-- The `trustPolicy` is a declaration, not an enforcement. Nothing yet
-  refuses a download because of it (the weights loader is still open).
+- The `trustPolicy` is now an enforcement: the loader refuses a record
+  whose declared policy it does not implement, and it applies the gates the
+  policy names.
 - The `featureExtractor` is the tower's configuration type
   (`siglip_vision_model`), not a HuggingFace feature-extractor class.
-- The `vision` extra the record names carries no dependency yet.
+- The `vision` extra the record names is the one this ticket filled: it
+  carries torch, transformers and safetensors, and the base install stays
+  free of all three. The loader does not need them: it moves bytes and
+  verifies a digest. The encoder that READS the checkpoint does.
+- The loader downloads bytes; it does not yet run the model. The CPU
+  adapter that consumes the checkpoint is a later task of this ticket.
 
 ## What comes next
 
-The weights loader, still open in
-`docs/vnext/specs/VLN-005-python-cpu-vision-adapter.md`: a download happens
-only with an explicit permission, only from an allowlisted source at the
-pinned revision, only as safetensors, and only after the digest of the bytes
-matches the record. That loader owns the license gate, and it is the place
-where a forbidden use is refused before a single byte is fetched.
+The CPU adapter landed: the decoder, the canonical preprocessing, the
+device planner, the SigLIP2 adapter, the content-addressed artifact with
+its manifest and the golden parity gate over one file both languages read.
+`docs/architecture/vision-adapter.md` describes it, and it names what the
+run does not prove.
+
+What is still open in
+`docs/vnext/specs/VLN-005-python-cpu-vision-adapter.md` is the worker
+operation that runs this pipeline over the wire, the failure paths of
+that operation, and the single-writer commit of the derived artifact.

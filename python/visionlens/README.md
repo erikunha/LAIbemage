@@ -1,10 +1,16 @@
 # visionlens
 
-A local-first visual AI runtime for Python, fully simulated in this release.
-It ships the deterministic simulated encoder, the model registries, a JSONL
-worker speaking the frozen `visionlens.worker.v1` protocol and the typed public
-facade. Pydantic is the only third-party runtime dependency: no numpy, no
-torch, no network, and no Node.js anywhere.
+A local-first visual AI runtime for Python. It ships the deterministic
+simulated encoder, the model registries, the CPU vision adapter (the decoder,
+the canonical preprocessing, the SigLIP2 encoder and the content-addressed
+artifact), a JSONL worker speaking the frozen `visionlens.worker.v1` protocol
+and the typed public facade.
+
+The base install carries Pydantic for the typed configuration and Pillow for
+the image decoder, and nothing else: no numpy, no torch, no network, and no
+Node.js anywhere. The encoder stack that reads a real checkpoint lives behind
+the `vision` extra, so the base install never pulls a PyTorch or a
+Transformers download.
 
 > **Proposed API.** The operation names and object types on this package's
 > public surface are proposed, not frozen: ADR-011 is accepted as built
@@ -39,17 +45,19 @@ claim is made today.
 ## Extras
 
 One distribution, heavy capabilities only through extras. The extra names
-are frozen; the dependency sets stay empty while the whole runtime is
-simulated, so every extra installs the same light base today.
+are frozen. The base install carries Pydantic for the typed configuration
+and Pillow for the image decoder, and nothing else, so it never pulls a
+PyTorch or a Transformers download, and every heavy stack lives behind the
+extra that needs it.
 
 | Extra | Installs | Status |
 |---|---|---|
-| (base) | Pydantic, for the typed configuration and records | shipped |
-| `vision` | the encoder and model adapter stack (empty set today) | name frozen, set empty |
+| (base) | Pydantic for the typed configuration and records, Pillow for the image decoder | shipped |
+| `vision` | torch, transformers and safetensors: the encoder stack that reads a real checkpoint | shipped |
 | `training` | the training recipe and experiment tracking stack (empty set today) | name frozen, set empty |
 | `agents` | the agent runtime import boundary (empty set today) | name frozen, set empty |
 | `server` | the HTTP surface stack (empty set today) | name frozen, set empty |
-| `all` | the aggregate of the above (empty set today) | name frozen, set empty |
+| `all` | the aggregate: it pulls `vision` | shipped |
 
 The canonical spelling is `training`; `train` is treated as an abbreviation,
 not a second extra. A registry model that requires an extra (today
@@ -112,6 +120,83 @@ authorized = authorize_download(
 )
 ```
 
+### The weights loader
+
+The loader is the only place where the bytes of a model are fetched, and it
+fetches them only when every gate says yes: the use the recorded license
+permits, an explicit permission, a trust policy the loader implements, an
+allowlisted source at the pinned revision, a safetensors file, and a digest
+that matches the record. The bytes are streamed to the cache in bounded
+blocks and never held in memory.
+
+```python
+from visionlens import (
+    DownloadPermission, WeightsRequest, authorize_weights_download, load_weights,
+)
+
+request = WeightsRequest(
+    record=record,
+    use="inference",
+    permission=DownloadPermission.grant("the operator"),
+)
+authorized = authorize_weights_download(request)  # DownloadRefusedError, or the proof
+loaded = load_weights(request, Path("~/.cache/visionlens/weights").expanduser())
+print(loaded.path, loaded.digest == record.source_digest)
+```
+
+Without the permission nothing is fetched and the cache directory stays
+empty. The cached file is named after the digest of its bytes, so it can be
+verified again without the network.
+
+### The CPU embedding run
+
+The adapter decodes an image, preprocesses it with the canonical spec,
+embeds it on the CPU and writes the vectors into a content-addressed
+artifact: a binary vectors file beside a manifest that carries every
+field of FR-011. The vectors never travel inside a JSON line.
+
+```python
+from visionlens import (
+    DecodeService, DevicePlanner, EmbedAsset, EmbedRequest, VisionEmbedder,
+)
+
+plan = DevicePlanner().plan("cpu")
+embedder = VisionEmbedder(
+    record=record,
+    encoder=encoder,          # the SigLIP2 adapter
+    spec=spec,                # the canonical preprocessing
+    decoder=DecodeService("datasets/images"),
+    device=plan,
+    artifact_root=Path("~/.cache/visionlens/artifacts").expanduser(),
+)
+result = embedder.embed(
+    EmbedRequest(snapshot_id="snapshot-1", assets=(EmbedAsset(asset_id="a.jpg", path=Path("datasets/images/a.jpg")),))
+)
+print(result.run_id, result.dimension, result.dtype, result.count)
+print(result.artifact_sha256)   # the vectors are on disk, not in the frame
+```
+
+An image that cannot be decoded is an error sample and not a failed run:
+the error names the file and the other images still embed. A batch that
+exhausts the memory budget is retried with fewer images a bounded
+number of times, and the back off is an event that names the old and
+the new batch size.
+
+### The golden parity gate
+
+One golden file, read by both languages, and a gate that compares the
+config fingerprint computed by the live TypeScript implementation, the
+manifest validated against the ratified schema, and every golden vector
+against the artifact inside the documented tolerance.
+
+```bash
+pnpm exec tsx scripts/benchmarks/vision-parity.ts
+```
+
+The gate never writes the golden file, and a golden file whose vectors
+were edited is detected. `docs/architecture/vision-adapter.md` describes
+the pipeline, the refusals and the recorded run.
+
 ### The typed facade
 
 ```python
@@ -136,6 +221,13 @@ payload carrying another schema version is refused rather than interpreted.
 device and the reason for it, the state of every declared extra (available,
 or which modules are missing), and the package version. The record is
 serializable, so it can be stored next to a result.
+
+The device comes from the device planner, and the planner holds the only
+vocabulary of the platform: `auto` resolves to an admitted device and
+records why it fell back, and an explicit device this build does not
+admit is refused with its reason. This build admits the CPU only, so a
+request for an accelerator fails instead of running somewhere else, and
+the reason of the fallback names the accelerators the machine has.
 
 `datasets.inspect(path)` reads the metadata of one image: width, height, MIME
 type and the sha256 of its bytes. It needs no Node, no server and no network,
